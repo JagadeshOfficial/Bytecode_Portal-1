@@ -278,30 +278,35 @@ export default function Home() {
             <p className={styles.sectionSubtitle}>Specialized programs designed to take you from beginner to industry-ready professional.</p>
           </div>
 
+
           <div className={styles.courseGrid}>
             <CourseCard
               title="Python with Data Analytics"
               desc="Master Python programming and libraries like Pandas, NumPy, and Matplotlib to derive insights from data."
               salary="₹8-12 LPA"
               icon={<Database size={32} />}
+              image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80"
             />
             <CourseCard
               title="Java Full Stack Development"
               desc="Build enterprise-grade applications using Java, Spring Boot, React, and Microservices architecture."
               salary="₹6-14 LPA"
               icon={<Code size={32} />}
+              image="https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&q=80"
             />
             <CourseCard
               title="Python Full Stack Development"
               desc="Become a versatile developer with Python, Django/Flask, and modern frontend frameworks."
               salary="₹6-12 LPA"
               icon={<Layers size={32} />}
+              image="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80"
             />
             <CourseCard
               title="DevOps & Cloud Engineering"
               desc="Master the art of deployment and scaling with AWS, Docker, Kubernetes, and CI/CD pipelines."
               salary="₹8-18 LPA"
               icon={<Globe size={32} />}
+              image="https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80"
             />
           </div>
         </div>
@@ -420,20 +425,29 @@ function ProjectCard({ title, desc, tags, color }: any) {
   )
 }
 
-function CourseCard({ title, desc, salary, icon }: any) {
+function CourseCard({ title, desc, salary, icon, image }: any) {
   return (
     <motion.div
       whileHover={{ y: -10 }}
       className={styles.courseCard}
     >
-      <div className={styles.courseIcon}>
-        {icon}
-      </div>
-      <h3 className={styles.courseTitle}>{title}</h3>
-      <p className={styles.courseDesc}>{desc}</p>
-      <div className={styles.courseMeta}>
-        <span className={styles.salary}><Award size={16} /> Avg: {salary}</span>
-        <span className={styles.learnMore}>View Details <ArrowRight size={16} /></span>
+      {/* Background Image */}
+      <img src={image} alt={title} className={styles.courseBg} />
+
+      {/* Overlay Gradient */}
+      <div className={styles.courseOverlay}></div>
+
+      {/* Content */}
+      <div className={styles.courseContent}>
+        <div className={styles.courseIcon}>
+          {icon}
+        </div>
+        <h3 className={styles.courseTitle}>{title}</h3>
+        <p className={styles.courseDesc}>{desc}</p>
+        <div className={styles.courseMeta}>
+          <span className={styles.salary}><Award size={16} /> Avg: {salary}</span>
+          <span className={styles.learnMore}>View Details <ArrowRight size={16} /></span>
+        </div>
       </div>
     </motion.div>
   )
