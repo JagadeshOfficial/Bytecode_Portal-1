@@ -3,7 +3,7 @@
 import AnimatedHero from '@/components/AnimatedHero';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
-import { Code, Database, Globe, Layers, Award, Users, Repeat, CheckCircle, ArrowRight } from 'lucide-react';
+import { Code, Database, Globe, Layers, Award, Users, Repeat, CheckCircle, ArrowRight, ShieldCheck, BookOpen, CreditCard, Briefcase, FileText, Cpu, Server, Lock, Layout, Video, Target, Rocket, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -37,51 +37,194 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className={styles.featuresSection}>
-        <div className={styles.container}>
+      {/* Featured Courses: Elite Career Tracks */}
+      <section className={styles.coursesSection} id="courses">
+        <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Why Byte Code Trainings?</h2>
-            <p className={styles.sectionSubtitle}>We don't just teach code; we shape careers through a rigorous, industry-vetted curriculum.</p>
+            <h2 className={styles.sectionTitle}>Master The Future of Tech</h2>
+            <p className={styles.sectionSubtitle}>Industry-vetted specialization tracks designed to take you from beginner to top-tier developer.</p>
           </div>
 
-          <div className={styles.grid}>
-            <FeatureCard
-              icon={<Code size={28} className="text-blue-400" />}
-              title="Full Stack Mastery"
-              desc="Deep dive into MERN, Java, and Python ecosystems with hands-on projects."
-              delay={0.1}
+          <div className={styles.courseGrid}>
+            <CourseCard
+              title="Python with Data Analytics"
+              desc="Master Python programming and libraries like Pandas, NumPy, and Matplotlib to derive insights from data."
+              salary="₹8-12 LPA"
+              icon={<Database size={32} />}
             />
-            <FeatureCard
-              icon={<Globe size={28} className="text-cyan-400" />}
-              title="Cloud Computing"
-              desc="Master AWS, Azure, and Google Cloud to build scalable infrastructure."
-              delay={0.2}
+            <CourseCard
+              title="Java Full Stack Development"
+              desc="Build enterprise-grade applications using Java, Spring Boot, React, and Microservices architecture."
+              salary="₹6-14 LPA"
+              icon={<Code size={32} />}
             />
-            <FeatureCard
-              icon={<Database size={28} className="text-purple-400" />}
-              title="Data Science"
-              desc="Unlock insights with Python, R, and Machine Learning algorithms."
-              delay={0.3}
+            <CourseCard
+              title="Python Full Stack Development"
+              desc="Become a versatile developer with Python, Django/Flask, and modern frontend frameworks."
+              salary="₹6-12 LPA"
+              icon={<Layers size={32} />}
             />
-            <FeatureCard
-              icon={<Users size={28} className="text-green-400" />}
-              title="Industry Mentors"
-              desc="Learn directly from developers working at Google, Amazon, and Microsoft."
-              delay={0.4}
+            <CourseCard
+              title="DevOps & Cloud Engineering"
+              desc="Master the art of deployment and scaling with AWS, Docker, Kubernetes, and CI/CD pipelines."
+              salary="₹8-18 LPA"
+              icon={<Globe size={32} />}
             />
-            <FeatureCard
-              icon={<Award size={28} className="text-yellow-400" />}
-              title="Certified Excellence"
-              desc="Globally recognized certifications to boost your resume value."
-              delay={0.5}
+          </div>
+        </div>
+      </section>
+
+      {/* PROGRAM ADVANTAGE (New Advanced Feature) */}
+      <section className={styles.advantageSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>The ByteCode Advantage</h2>
+            <p className={styles.sectionSubtitle}>Why top tech companies prefer our graduates.</p>
+          </div>
+
+          <div className={styles.advantageGrid}>
+            <AdvantageCard
+              icon={<Video />}
+              title="Live Interactive Classes"
+              desc="Join live sessions with industry experts, ask doubts in real-time, and code along with the instructor."
             />
-            <FeatureCard
-              icon={<Layers size={28} className="text-pink-400" />}
-              title="Real-time Projects"
-              desc="Work on live production servers to gain real-world experience."
-              delay={0.6}
+            <AdvantageCard
+              icon={<Target />}
+              title="1:1 Mentorship"
+              desc="Personalized guidance from senior developers at MAANG companies to help you navigate your career path."
             />
+            <AdvantageCard
+              icon={<Rocket />}
+              title="Capstone Projects"
+              desc="Build production-grade applications that solve real-world problems and stand out in your portfolio."
+            />
+            <AdvantageCard
+              icon={<Lightbulb />}
+              title="Mock Interviews"
+              desc="Practice with technical/HR rounds simulated by recruitment managers to boost confidence."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* PLACEMENT STATS (New Advanced Feature) */}
+      <section className={styles.statsSection}>
+        <div className="container">
+          <div className={styles.statsGrid}>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>150%</span>
+              <span className={styles.statLabel}>Avg Salary Hike</span>
+            </div>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>40 LPA</span>
+              <span className={styles.statLabel}>Highest Package</span>
+            </div>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>500+</span>
+              <span className={styles.statLabel}>Hiring Partners</span>
+            </div>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>95%</span>
+              <span className={styles.statLabel}>Placement Rate</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TECH STACK / TOOLS YOU WILL MASTER */}
+      <section className={styles.techSection}>
+        <div className="container">
+          <div className={styles.sectionHeader} style={{ marginBottom: '2rem' }}>
+            <h2 className={styles.sectionTitle} style={{ fontSize: '2rem' }}>Tools You Will Master</h2>
+          </div>
+          <div className={styles.techGrid}>
+            {/* Java/Spring */}
+            <div className={styles.techBadge}><Code /> Java 17</div>
+            <div className={styles.techBadge}><Server /> Spring Boot</div>
+            <div className={styles.techBadge}><Database /> Hibernate</div>
+            {/* Python/Data */}
+            <div className={styles.techBadge}><Code /> Python 3.12</div>
+            <div className={styles.techBadge}><Database /> Pandas & NumPy</div>
+            <div className={styles.techBadge}><Layout /> Tableau</div>
+            {/* DevOps/Cloud */}
+            <div className={styles.techBadge}><Globe /> AWS Cloud</div>
+            <div className={styles.techBadge}><Server /> Docker & K8s</div>
+            <div className={styles.techBadge}><Repeat /> Jenkins CI/CD</div>
+            <div className={styles.techBadge}><ShieldCheck /> Linux</div>
+          </div>
+        </div>
+      </section>
+
+      {/* DETAILED SYLLABUS BREAKDOWN */}
+      <section className={styles.syllabusSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Detailed Curriculum</h2>
+            <p className={styles.sectionSubtitle}>A deep dive into what you will learn in each specialization.</p>
+          </div>
+
+          <div className={styles.syllabusGrid}>
+            {/* Java Full Stack Syllabus */}
+            <SyllabusCard
+              title="Java Full Stack"
+              duration="6 Months"
+              modules={[
+                "Core Java: OOPs, Collections, Streams, Multithreading",
+                "Advanced Java: JDBC, Servlets, JSP",
+                "Spring Ecosystem: Spring Boot, MVC, Security, Data JPA",
+                "Frontend: HTML5, CSS3, JavaScript, React.js",
+                "Database: MySQL, PostgreSQL, MongoDB",
+                "Tools: Git, Maven, Postman, JIRA"
+              ]}
+              tools={['Java', 'Spring', 'React', 'MySQL', 'Git']}
+            />
+
+            {/* Python Full Stack Syllabus */}
+            <SyllabusCard
+              title="Python Tech Stack"
+              duration="5 Months"
+              modules={[
+                "Python Core: Data Types, Functions, OOPs",
+                "Web Frameworks: Django (MVT), Flask (Microservices)",
+                "Data & AI: NumPy, Pandas Basic, Matplotlib",
+                "Frontend: React.js Integration, Redux",
+                "Database: SQLite, PostgreSQL",
+                "Deployment: Nginx, Gunicorn, Heroku"
+              ]}
+              tools={['Python', 'Django', 'Flask', 'React', 'PostgreSQL']}
+            />
+
+            {/* DevOps & Cloud Syllabus */}
+            <SyllabusCard
+              title="AWS DevOps Engineering"
+              duration="4 Months"
+              modules={[
+                "Linux Administration & Shell Scripting",
+                "AWS Cloud: EC2, S3, IAM, VPC, RDS, Lambda",
+                "Containerization: Docker Engine, Compose",
+                "Orchestration: Kubernetes, Helm Charts",
+                "IaC: Terraform, Ansible",
+                "CI/CD: Jenkins Pipelines, GitHub Actions"
+              ]}
+              tools={['AWS', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform']}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* TECH STACK */}
+      <section className={styles.techSection}>
+        <div className="container">
+          <div className={styles.sectionHeader} style={{ marginBottom: '2rem' }}>
+            <h2 className={styles.sectionTitle} style={{ fontSize: '2rem' }}>Built on Modern Cloud Native Stack</h2>
+          </div>
+          <div className={styles.techGrid}>
+            <div className={styles.techBadge}><Code /> Next.js 14</div>
+            <div className={styles.techBadge}><Server /> Spring Boot</div>
+            <div className={styles.techBadge}><Database /> MySQL & Firestore</div>
+            <div className={styles.techBadge}><Lock /> JWT Security</div>
+            <div className={styles.techBadge}><Globe /> AWS Cloud</div>
+            <div className={styles.techBadge}><Cpu /> Microservices</div>
           </div>
         </div>
       </section>
@@ -127,18 +270,70 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Portals Section */}
-      <section className={styles.portalsSection}>
+      {/* Elite Career Tracks */}
+      <section className={styles.coursesSection}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Access Your World</h2>
-            <p className={styles.sectionSubtitle}>Secure portals for every role in the ecosystem.</p>
+            <h2 className={styles.sectionTitle}>Elite Career Tracks</h2>
+            <p className={styles.sectionSubtitle}>Specialized programs designed to take you from beginner to industry-ready professional.</p>
           </div>
 
-          <div className={styles.portalGrid}>
-            <PortalCard title="Student Portal" role="For Learners" href="/student" color="blue" />
-            <PortalCard title="Employee Portal" role="For Faculty" href="/employee" color="cyan" />
-            <PortalCard title="Admin Portal" role="Institute Control" href="/admin" color="purple" />
+          <div className={styles.courseGrid}>
+            <CourseCard
+              title="Python with Data Analytics"
+              desc="Master Python programming and libraries like Pandas, NumPy, and Matplotlib to derive insights from data."
+              salary="₹8-12 LPA"
+              icon={<Database size={32} />}
+            />
+            <CourseCard
+              title="Java Full Stack Development"
+              desc="Build enterprise-grade applications using Java, Spring Boot, React, and Microservices architecture."
+              salary="₹6-14 LPA"
+              icon={<Code size={32} />}
+            />
+            <CourseCard
+              title="Python Full Stack Development"
+              desc="Become a versatile developer with Python, Django/Flask, and modern frontend frameworks."
+              salary="₹6-12 LPA"
+              icon={<Layers size={32} />}
+            />
+            <CourseCard
+              title="DevOps & Cloud Engineering"
+              desc="Master the art of deployment and scaling with AWS, Docker, Kubernetes, and CI/CD pipelines."
+              salary="₹8-18 LPA"
+              icon={<Globe size={32} />}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Projects Showcase */}
+      <section className={styles.projectsSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Build Real-World Applications</h2>
+            <p className={styles.sectionSubtitle}>Don't just watch tutorials. Build production-grade apps that get you hired.</p>
+          </div>
+
+          <div className={styles.projectGrid}>
+            <ProjectCard
+              title="E-Commerce Microservices"
+              desc="A scalable shopping platform built with Spring Boot, Kafka, and React."
+              tags={['Java', 'Spring Boot', 'Microservices', 'React']}
+              color="blue"
+            />
+            <ProjectCard
+              title="AI Resume Analyzer"
+              desc="Automated CV screening tool using Python, NLP, and OpenAI API."
+              tags={['Python', 'FastAPI', 'AI/ML', 'Next.js']}
+              color="purple"
+            />
+            <ProjectCard
+              title="Cloud DevOps Pipeline"
+              desc="Fully automated CI/CD pipeline using Jenkins, Docker, and AWS."
+              tags={['AWS', 'Docker', 'Kubernetes', 'Jenkins']}
+              color="cyan"
+            />
           </div>
         </div>
       </section>
@@ -196,5 +391,96 @@ function PortalCard({ title, role, href, color }: any) {
         </div>
       </div>
     </Link>
+  )
+}
+
+function ProjectCard({ title, desc, tags, color }: any) {
+  return (
+    <motion.div
+      whileHover={{ y: -10 }}
+      className={styles.projectCard}
+    >
+      <div className={styles.projectPreview}>
+        <div className={styles.projectPreviewOverlay}>
+          <button className="px-6 py-2 bg-white text-black font-bold rounded-full transform scale-90 hover:scale-105 transition-transform">
+            View Demo
+          </button>
+        </div>
+      </div>
+      <div className={styles.projectContent}>
+        <h3 className={styles.projectTitle}>{title}</h3>
+        <div className={styles.projectTags}>
+          {tags.map((tag: string) => (
+            <span key={tag} className={styles.tag}>{tag}</span>
+          ))}
+        </div>
+        <p className={styles.projectDesc}>{desc}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+function CourseCard({ title, desc, salary, icon }: any) {
+  return (
+    <motion.div
+      whileHover={{ y: -10 }}
+      className={styles.courseCard}
+    >
+      <div className={styles.courseIcon}>
+        {icon}
+      </div>
+      <h3 className={styles.courseTitle}>{title}</h3>
+      <p className={styles.courseDesc}>{desc}</p>
+      <div className={styles.courseMeta}>
+        <span className={styles.salary}><Award size={16} /> Avg: {salary}</span>
+        <span className={styles.learnMore}>View Details <ArrowRight size={16} /></span>
+      </div>
+    </motion.div>
+  )
+}
+
+function ModuleCard({ icon, title, desc }: any) {
+  return (
+    <div className={styles.moduleCard}>
+      <div className={styles.moduleIcon}>{icon}</div>
+      <div className={styles.moduleTitle}>{title}</div>
+      <div className={styles.moduleDesc}>{desc}</div>
+    </div>
+  )
+}
+
+function SyllabusCard({ title, duration, modules, tools }: any) {
+  return (
+    <div className={styles.syllabusCard}>
+      <div className={styles.syllabusHeader}>
+        <h3 className={styles.trackTitle}>{title}</h3>
+        <span className={styles.trackDuration}>{duration}</span>
+      </div>
+
+      <ul className={styles.moduleList}>
+        {modules.map((mod: string, i: number) => (
+          <li key={i} className={styles.moduleItem}>
+            <CheckCircle size={18} className={styles.moduleCheck} />
+            <span className={styles.moduleText}>{mod}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className={styles.toolGrid}>
+        {tools.map((tool: string) => (
+          <span key={tool} className={styles.toolItem}>{tool}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function AdvantageCard({ icon, title, desc }: any) {
+  return (
+    <div className={styles.advantageCard}>
+      <div className={styles.advIcon}>{icon}</div>
+      <div className={styles.advTitle}>{title}</div>
+      <div className={styles.advDesc}>{desc}</div>
+    </div>
   )
 }
