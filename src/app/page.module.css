@@ -1,113 +1,347 @@
 .main {
   min-height: 100vh;
+  background: var(--bg-void);
+  overflow-x: hidden;
 }
 
-.hero {
+.featuresSection {
   padding: 8rem 0;
-  background: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+  position: relative;
+}
+
+.sectionHeader {
   text-align: center;
-}
-
-.title {
-  font-size: 4rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(to right, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-  font-size: 1.25rem;
-  color: var(--text-secondary);
-  max-width: 600px;
-  margin: 0 auto 3rem;
-}
-
-.ctaGroup {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.features {
-  padding: 6rem 0;
-  background-color: var(--background);
+  margin-bottom: 5rem;
 }
 
 .sectionTitle {
-  text-align: center;
-  margin-bottom: 4rem;
+  font-size: 3rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  background: linear-gradient(to right, white, var(--text-dim));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sectionSubtitle {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 2rem;
 }
 
 .featureCard {
-  background: var(--surface);
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  transition: transform 0.2s;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .featureCard:hover {
   transform: translateY(-5px);
-  border-color: var(--primary);
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 20px 40px -10px rgba(124, 58, 237, 0.1);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: var(--primary);
+.featureCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.1), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.featureCard:hover::before {
+  opacity: 1;
+}
+
+.iconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s;
+}
+
+.featureCard:hover .iconWrapper {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.3);
+  transform: scale(1.1);
 }
 
 .cardTitle {
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: white;
 }
 
-.cardText {
-  color: var(--text-secondary);
+.cardDesc {
+  color: var(--text-dim);
+  line-height: 1.6;
 }
 
-.portals {
-  padding: 6rem 0;
-  background-color: var(--surface);
+.portalsSection {
+  padding: 8rem 0;
+  background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.5));
 }
 
 .portalGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
 }
 
 .portalCard {
-  text-align: center;
-  background: var(--background);
-  padding: 3rem 2rem;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  position: relative;
+  height: 300px;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2.5rem;
   cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .portalCard:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--primary);
+  transform: translateY(-10px);
+}
+
+.portalCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  z-index: 1;
+}
+
+.portalContent {
+  position: relative;
+  z-index: 2;
 }
 
 .portalRole {
-  font-size: 1.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.portalTitle {
+  font-size: 2rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 800;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.arrow {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s;
+}
+
+.portalCard:hover .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Specific glows for portals */
+.portalGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  transition: opacity 0.4s;
+}
+
+.portalCard:hover .portalGlow {
+  opacity: 0.3;
+}
+
+/* Partners Marquee */
+.partnersSection {
+  padding: 4rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 4rem;
+}
+
+.partnersTitle {
+  text-align: center;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+}
+
+.marqueeContainer {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marqueeTrack {
+  display: inline-flex;
+  gap: 6rem;
+  animation: scroll 40s linear infinite;
+  padding-left: 2rem;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.partnerLogo {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-main);
-  margin-top: 1rem;
+  color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.3s;
+}
+
+.partnerLogo:hover {
+  color: white;
+  text-shadow: 0 0 10px white;
+}
+
+/* Roadmap Section */
+.roadmapSection {
+  padding: 8rem 0;
+  position: relative;
+}
+
+.timeline {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+  transform: translateX(-50%);
+}
+
+.timelineNode {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6rem;
+  position: relative;
+}
+
+.timelineNode:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+.nodeDot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background: var(--bg-void);
+  border: 4px solid var(--primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  box-shadow: 0 0 20px var(--primary);
+}
+
+.nodeContent {
+  width: 42%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2.5rem;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+  position: relative;
+}
+
+.nodeContent::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 1px;
+  background: var(--primary);
+  opacity: 0.5;
+}
+
+.timelineNode:nth-child(odd) .nodeContent::before {
+  right: -20px;
+}
+
+.timelineNode:nth-child(even) .nodeContent::before {
+  left: -20px;
+}
+
+.nodeContent:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--primary);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.stepNumber {
+  font-family: 'Rajdhani';
+  font-size: 4rem;
+  font-weight: 800;
+  position: absolute;
+  top: -20px;
+  right: 20px;
+  opacity: 0.1;
+  line-height: 1;
 }
