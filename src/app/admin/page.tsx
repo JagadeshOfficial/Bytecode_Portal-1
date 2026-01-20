@@ -1,39 +1,102 @@
 "use client";
 
 import DashboardLayout from '@/components/DashboardLayout';
-import styles from '../page.module.css'; // Reusing grid styles or create new
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { motion } from 'framer-motion';
+
+const revenueData = [
+    { name: 'Jan', revenue: 4000 },
+    { name: 'Feb', revenue: 3000 },
+    { name: 'Mar', revenue: 2000 },
+    { name: 'Apr', revenue: 2780 },
+    { name: 'May', revenue: 1890 },
+    { name: 'Jun', revenue: 2390 },
+    { name: 'Jul', revenue: 3490 },
+];
+
+const studentData = [
+    { name: 'Java', students: 120 },
+    { name: 'Python', students: 98 },
+    { name: 'React', students: 86 },
+    { name: 'AWS', students: 99 },
+    { name: 'Data Sci', students: 85 },
+];
 
 export default function AdminDashboard() {
     return (
         <DashboardLayout role="admin">
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>Dashboard Overview</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Welcome back, Administrator. Here is what is happening today.</p>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Dashboard Overview</h1>
+                <p style={{ color: 'var(--text-secondary)' }}>Live institute metrics and performance analytics.</p>
             </div>
 
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '1.5rem'
+                gap: '1.5rem',
+                marginBottom: '2rem'
             }}>
-                <StatsCard title="Total Students" value="1,240" trend="+12%" color="blue" />
-                <StatsCard title="Active Courses" value="24" trend="Active" color="green" />
-                <StatsCard title="Total Revenue" value="$450k" trend="+5%" color="purple" />
-                <StatsCard title="Pending Inquiries" value="18" trend="Urgent" color="orange" />
+                <StatsCard title="Total Students" value="1,240" trend="+12.5%" color="blue" />
+                <StatsCard title="Monthly Revenue" value="$45,000" trend="+8.2%" color="green" />
+                <StatsCard title="New Enrollments" value="128" trend="+24%" color="purple" />
+                <StatsCard title="Placement Ratio" value="92%" trend="Top 1%" color="orange" />
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-                <div className="card" style={{ background: 'white', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
-                    <h3 style={{ marginBottom: '1rem' }}>Recent Admissions</h3>
-                    <div style={{ color: 'var(--text-secondary)' }}>No recent data available.</div>
-                </div>
-                <div className="card" style={{ background: 'white', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
-                    <h3 style={{ marginBottom: '1rem' }}>Institute Health</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <ProgressBar label="Server Status" value={98} color="green" />
-                        <ProgressBar label="Disk Usage" value={45} color="blue" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+                {/* Revenue Chart */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="glass-panel"
+                    style={{ padding: '2rem', borderRadius: '1.5rem' }}
+                >
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Revenue Trends</h3>
+                    <div style={{ height: 300, width: '100%' }}>
+                        <ResponsiveContainer>
+                            <AreaChart data={revenueData}>
+                                <defs>
+                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                <XAxis dataKey="name" stroke="#94a3b8" />
+                                <YAxis stroke="#94a3b8" />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px' }}
+                                />
+                                <Area type="monotone" dataKey="revenue" stroke="#2563eb" fillOpacity={1} fill="url(#colorRevenue)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
-                </div>
+                </motion.div>
+
+                {/* Student Distribution */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="glass-panel"
+                    style={{ padding: '2rem', borderRadius: '1.5rem' }}
+                >
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Course Distribution</h3>
+                    <div style={{ height: 300, width: '100%' }}>
+                        <ResponsiveContainer>
+                            <BarChart data={studentData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                <XAxis dataKey="name" stroke="#94a3b8" />
+                                <YAxis stroke="#94a3b8" />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px' }}
+                                />
+                                <Legend />
+                                <Bar dataKey="students" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </motion.div>
             </div>
         </DashboardLayout>
     );
@@ -41,54 +104,31 @@ export default function AdminDashboard() {
 
 function StatsCard({ title, value, trend, color }: any) {
     const colors: any = {
-        blue: '#e0f2fe',
-        green: '#dcfce7',
-        purple: '#f3e8ff',
-        orange: '#ffedd5'
-    };
-    const textColors: any = {
-        blue: '#0369a1',
-        green: '#15803d',
-        purple: '#7e22ce',
-        orange: '#c2410c'
+        blue: { bg: 'rgba(37, 99, 235, 0.1)', text: '#60a5fa' },
+        green: { bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399' },
+        purple: { bg: 'rgba(124, 58, 237, 0.1)', text: '#a78bfa' },
+        orange: { bg: 'rgba(245, 158, 11, 0.1)', text: '#fbbf24' }
     };
 
     return (
-        <div style={{
-            background: 'white',
-            padding: '1.5rem',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border)',
-            boxShadow: 'var(--shadow-sm)'
-        }}>
+        <motion.div
+            whileHover={{ y: -5 }}
+            className="glass-panel"
+            style={{
+                padding: '1.5rem',
+                borderRadius: '1.5rem',
+            }}
+        >
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{title}</div>
-            <div style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '0.5rem' }}>{value}</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'white' }}>{value}</div>
             <span style={{
-                background: colors[color],
-                color: textColors[color],
-                padding: '0.25rem 0.5rem',
-                borderRadius: '1rem',
+                background: colors[color].bg,
+                color: colors[color].text,
+                padding: '0.25rem 0.75rem',
+                borderRadius: '9999px',
                 fontSize: '0.8rem',
                 fontWeight: '600'
             }}>{trend}</span>
-        </div>
-    );
-}
-
-function ProgressBar({ label, value, color }: any) {
-    return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                <span>{label}</span>
-                <span>{value}%</span>
-            </div>
-            <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{
-                    width: `${value}%`,
-                    background: color === 'green' ? 'var(--success)' : 'var(--primary)',
-                    height: '100%'
-                }}></div>
-            </div>
-        </div>
+        </motion.div>
     );
 }

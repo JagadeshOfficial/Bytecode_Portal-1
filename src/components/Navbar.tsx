@@ -1,20 +1,23 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { Search, Bell } from 'lucide-react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.navContainer}>
-        <Link href="/" className={styles.logo}>
-          <Image 
-            src="/logo.png" 
-            alt="Byte Code Trainings" 
-            width={150} 
-            height={40} 
-            priority
-          />
-        </Link>
+        <div className={styles.logoWrapper}>
+          <Link href="/" className={styles.logo}>
+            <Image
+              src="/logo.png"
+              alt="Byte Code Trainings"
+              width={160}
+              height={40}
+              priority
+            />
+          </Link>
+        </div>
 
         <ul className={styles.navLinks}>
           <li><Link href="/" className={styles.navLink}>Home</Link></li>
@@ -24,7 +27,22 @@ export default function Navbar() {
         </ul>
 
         <div className={styles.actions}>
-          <Link href="/admin" className={styles.loginBtn}>Portal Login</Link>
+          <button className={styles.iconBtn} aria-label="Search">
+            <Search size={20} />
+          </button>
+
+          <button className={styles.iconBtn} aria-label="Notifications" style={{ position: 'relative' }}>
+            <Bell size={20} />
+            <span style={{
+              position: 'absolute', top: 5, right: 5,
+              width: 8, height: 8,
+              background: '#ef4444', borderRadius: '50%'
+            }} />
+          </button>
+
+          <Link href="/login">
+            <button className={styles.loginBtn}>Portal Login</button>
+          </Link>
         </div>
       </div>
     </nav>
