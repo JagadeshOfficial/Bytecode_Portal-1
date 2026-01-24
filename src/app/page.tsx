@@ -3,7 +3,7 @@
 import AnimatedHero from '@/components/AnimatedHero';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
-import { Code, Database, Globe, Layers, Award, Users, Repeat, CheckCircle, ArrowRight, ShieldCheck, BookOpen, CreditCard, Briefcase, FileText, Cpu, Server, Lock, Layout, Video, Target, Rocket, Lightbulb } from 'lucide-react';
+import { Code, Database, Globe, Layers, Award, Users, Repeat, CheckCircle, ArrowRight, ShieldCheck, BookOpen, CreditCard, Briefcase, FileText, Cpu, Server, Lock, Layout, Video, Target, Rocket, Lightbulb, Download, TrendingUp, Quote, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -312,6 +312,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PLACEMENT SUCCESS STORIES */}
+      <section className={styles.successSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Hall of Fame</h2>
+            <p className={styles.sectionSubtitle}>Meet our star performers who cracked top product-based companies.</p>
+          </div>
+
+          <div className={styles.scrollWrapper}>
+            <div className={styles.scrollTrack}>
+              {[...SUCCESS_STORIES, ...SUCCESS_STORIES].map((story, i) => (
+                <SuccessStoryCard key={i} {...story} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Projects Showcase */}
       <section className={styles.projectsSection}>
         <div className="container">
@@ -342,8 +360,157 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* STUDENT REVIEWS */}
+      <section className={styles.reviewsSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Student Voices</h2>
+            <p className={styles.sectionSubtitle}>Hear what our students have to say about their learning experience.</p>
+          </div>
+
+          <div className={styles.scrollWrapper}>
+            <div className={styles.scrollTrackSlow}>
+              {[...REVIEWS, ...REVIEWS, ...REVIEWS].map((review, i) => (
+                <ReviewCard key={i} {...review} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
+}
+
+const SUCCESS_STORIES = [
+  {
+    name: "Aditya Verma",
+    role: "SDE-1",
+    company: "Amazon",
+    package: "24 LPA",
+    hike: "150%",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Priya Sharma",
+    role: "Frontend Engineer",
+    company: "Microsoft",
+    package: "18 LPA",
+    hike: "120%",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Rohan Gupta",
+    role: "Data Analyst",
+    company: "Uber",
+    package: "22 LPA",
+    hike: "200%",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Sneha Reddy",
+    role: "Cloud Architect",
+    company: "Google",
+    package: "32 LPA",
+    hike: "180%",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80"
+  }
+];
+
+const REVIEWS = [
+  {
+    name: "Karthik N.",
+    role: "Backend Engineer",
+    course: "Java Full Stack",
+    review: "The live mentorship program is a game changer. The instructors are real industry engineers who know what's current.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Ananya B.",
+    role: "Data Analyst",
+    course: "Data Science",
+    review: "I came from a non-tech background, but the structured curriculum and support helped me crack a Data Analyst role.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Vikram Singh",
+    role: "DevOps Engineer",
+    course: "DevOps Master",
+    review: "The hands-on labs for AWS and deployment pipelines were incredibly detailed. Worth every penny.",
+    rating: 4,
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Meera Patel",
+    role: "Full Stack Dev",
+    course: "Python Full Stack",
+    review: "The capstone project helped me understand how full-stack apps scale. Best investment for my career.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80"
+  }
+];
+
+function SuccessStoryCard({ name, role, company, package: pkg, hike, image }: any) {
+  return (
+    <motion.div
+      whileHover={{ y: -10 }}
+      className={styles.successCard}
+    >
+      <div className={styles.successHeader}>
+        <img src={image} alt={name} className={styles.successImage} />
+        <div className={styles.successBadge}>
+          <TrendingUp size={14} /> {hike} Hike
+        </div>
+      </div>
+      <div className={styles.successContent}>
+        <h3 className={styles.successName}>{name}</h3>
+        <p className={styles.successRole}>{role}</p>
+
+        <div className={styles.successDivider} />
+
+        <div className={styles.successMeta}>
+          <div className={styles.metaItem}>
+            <span className={styles.metaLabel}>Company</span>
+            <span className={styles.metaValue}>{company}</span>
+          </div>
+          <div className={styles.metaItem}>
+            <span className={styles.metaLabel}>Package</span>
+            <span className={styles.metaValue}>{pkg}</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function ReviewCard({ name, role, course, review, rating, image }: any) {
+  return (
+    <div className={styles.reviewCard}>
+      <div className={styles.reviewHeader}>
+        <div className={styles.reviewerImageWrapper}>
+          <img src={image} alt={name} className={styles.reviewerImage} />
+          <div className={styles.quoteBadge}><Quote size={12} fill="white" /></div>
+        </div>
+        <div className={styles.reviewerInfo}>
+          <h4 className={styles.reviewerName}>{name}</h4>
+          <span className={styles.reviewerRole}>{role}</span>
+        </div>
+        <div className={styles.ratingBadge}>
+          <Star size={14} fill="#fbbf24" stroke="none" /> {rating}.0
+        </div>
+      </div>
+
+      <div className={styles.reviewDivider} />
+
+      <p className={styles.reviewText}>"{review}"</p>
+
+      <div className={styles.courseTag}>
+        <CheckCircle size={14} /> {course}
+      </div>
+    </div>
+  )
 }
 
 function FeatureCard({ icon, title, desc, delay }: any) {
@@ -484,6 +651,12 @@ function SyllabusCard({ title, duration, modules, tools }: any) {
         {tools.map((tool: string) => (
           <span key={tool} className={styles.toolItem}>{tool}</span>
         ))}
+      </div>
+
+      <div className={styles.syllabusActions}>
+        <button className={styles.downloadButton}>
+          <Download size={18} /> View Full Curriculum
+        </button>
       </div>
     </div>
   )
