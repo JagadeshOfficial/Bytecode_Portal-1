@@ -3,7 +3,7 @@
 import AnimatedHero from '@/components/AnimatedHero';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
-import { Code, Database, Globe, Layers, Award, Users, Repeat, CheckCircle, ArrowRight, ShieldCheck, BookOpen, CreditCard, Briefcase, FileText, Cpu, Server, Lock, Layout, Video, Target, Rocket, Lightbulb, Download, TrendingUp, Quote, Star } from 'lucide-react';
+import { Code, Database, Globe, Layers, Award, Users, Repeat, CheckCircle, ArrowRight, ShieldCheck, BookOpen, CreditCard, Briefcase, FileText, Cpu, Server, Lock, Layout, Video, Target, Rocket, Lightbulb, Download, TrendingUp, Quote, Star, BadgeCheck, Twitter, Linkedin, Github, Instagram, Mail, Phone, MapPin, Send } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -361,6 +361,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* EXPERIENCE THE CLASSROOM (VIDEO SECTION) */}
+      <section className={styles.videoSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Experience The Classroom</h2>
+            <p className={styles.sectionSubtitle}>Watch snippets from our actual live sessions and see how we teach.</p>
+          </div>
+
+          <div className={styles.videoGrid}>
+            <VideoPreviewCard
+              title="Java Full Stack: Building Microservices"
+              duration="10:45"
+              thumbnail="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80"
+              views="1.2k"
+            />
+            <VideoPreviewCard
+              title="Data Science: Predicting Stock Prices"
+              duration="15:20"
+              thumbnail="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80"
+              views="950"
+            />
+            <VideoPreviewCard
+              title="DevOps: Deploying to Kubernetes"
+              duration="12:10"
+              thumbnail="https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80"
+              views="2.5k"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* STUDENT REVIEWS */}
       <section className={styles.reviewsSection}>
         <div className="container">
@@ -378,8 +409,89 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
+}
+
+// ... existing code ...
+
+function Footer() {
+  return (
+    <footer className={styles.footer}>
+      <div className="container">
+        <div className={styles.footerTop}>
+          {/* Brand Column */}
+          <div className={styles.footerBrand}>
+            <div className={styles.logo}>
+              <span className={styles.logoText}>BYTECODE</span>
+              <span className={styles.logoDot}>.</span>
+            </div>
+            <p className={styles.footerDesc}>
+              Empowering the next generation of tech leaders with industry-aligned curriculum and world-class mentorship.
+            </p>
+            <div className={styles.socialLinks}>
+              <a href="#" className={styles.socialLink}><Linkedin size={20} /></a>
+              <a href="#" className={styles.socialLink}><Twitter size={20} /></a>
+              <a href="#" className={styles.socialLink}><Github size={20} /></a>
+              <a href="#" className={styles.socialLink}><Instagram size={20} /></a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className={styles.footerLinks}>
+            <h4 className={styles.footerHeading}>Platform</h4>
+            <ul className={styles.linkList}>
+              <li><Link href="#courses">Browse Courses</Link></li>
+              <li><Link href="#mentorship">Mentorship</Link></li>
+              <li><Link href="#placements">Success Stories</Link></li>
+              <li><Link href="#community">Community</Link></li>
+            </ul>
+          </div>
+
+          {/* Courses */}
+          <div className={styles.footerLinks}>
+            <h4 className={styles.footerHeading}>Master Tracks</h4>
+            <ul className={styles.linkList}>
+              <li><Link href="#">Java Full Stack</Link></li>
+              <li><Link href="#">Python Data Science</Link></li>
+              <li><Link href="#">AWS DevOps</Link></li>
+              <li><Link href="#">Web Development</Link></li>
+            </ul>
+          </div>
+
+          {/* Contact & Newsletter */}
+          <div className={styles.footerContact}>
+            <h4 className={styles.footerHeading}>Stay Updated</h4>
+            <div className={styles.newsletterBox}>
+              <input type="email" placeholder="Enter your email" className={styles.newsInput} />
+              <button className={styles.newsBtn}><Send size={18} /></button>
+            </div>
+            <div className={styles.contactInfo}>
+              <div className={styles.contactItem}>
+                <Mail size={16} /> <span>hello@bytecode.com</span>
+              </div>
+              <div className={styles.contactItem}>
+                <Phone size={16} /> <span>+91 98765 43210</span>
+              </div>
+              <div className={styles.contactItem}>
+                <MapPin size={16} /> <span>Hitech City, Hyderabad</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <p>© 2024 ByteCode Trainings. All rights reserved.</p>
+          <div className={styles.legalLinks}>
+            <Link href="#">Privacy Policy</Link>
+            <Link href="#">Terms of Service</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
 }
 
 const SUCCESS_STORIES = [
@@ -420,35 +532,27 @@ const SUCCESS_STORIES = [
 const REVIEWS = [
   {
     name: "Karthik N.",
-    role: "Backend Engineer",
     course: "Java Full Stack",
     review: "The live mentorship program is a game changer. The instructors are real industry engineers who know what's current.",
-    rating: 5,
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80"
+    rating: 5
   },
   {
     name: "Ananya B.",
-    role: "Data Analyst",
     course: "Data Science",
     review: "I came from a non-tech background, but the structured curriculum and support helped me crack a Data Analyst role.",
-    rating: 5,
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80"
+    rating: 5
   },
   {
     name: "Vikram Singh",
-    role: "DevOps Engineer",
     course: "DevOps Master",
     review: "The hands-on labs for AWS and deployment pipelines were incredibly detailed. Worth every penny.",
-    rating: 4,
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80"
+    rating: 4
   },
   {
     name: "Meera Patel",
-    role: "Full Stack Dev",
     course: "Python Full Stack",
     review: "The capstone project helped me understand how full-stack apps scale. Best investment for my career.",
-    rating: 5,
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80"
+    rating: 5
   }
 ];
 
@@ -485,29 +589,65 @@ function SuccessStoryCard({ name, role, company, package: pkg, hike, image }: an
   )
 }
 
-function ReviewCard({ name, role, course, review, rating, image }: any) {
+const VIDEO_PREVIEWS = [
+  {
+    title: "Java Full Stack: Building Microservices",
+    duration: "10:45",
+    thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80",
+    views: "1.2k"
+  },
+  {
+    title: "Data Science: Predicting Stock Prices",
+    duration: "15:20",
+    thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
+    views: "950"
+  },
+  {
+    title: "DevOps: Deploying to Kubernetes",
+    duration: "12:10",
+    thumbnail: "https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80",
+    views: "2.5k"
+  }
+];
+
+function VideoPreviewCard({ title, duration, thumbnail, views }: any) {
+  return (
+    <div className={styles.videoCard}>
+      <div className={styles.thumbnailWrapper}>
+        <img src={thumbnail} alt={title} className={styles.videoThumbnail} />
+        <div className={styles.playOverlay}>
+          <div className={styles.playButton}>
+            <div className={styles.playTriangle} />
+          </div>
+        </div>
+        <span className={styles.videoDuration}>{duration}</span>
+      </div>
+      <div className={styles.videoInfo}>
+        <h3 className={styles.videoTitle}>{title}</h3>
+        <span className={styles.videoViews}>{views} watching</span>
+      </div>
+    </div>
+  )
+}
+
+function ReviewCard({ name, course, review, rating, image }: any) {
   return (
     <div className={styles.reviewCard}>
-      <div className={styles.reviewHeader}>
-        <div className={styles.reviewerImageWrapper}>
-          <img src={image} alt={name} className={styles.reviewerImage} />
-          <div className={styles.quoteBadge}><Quote size={12} fill="white" /></div>
-        </div>
-        <div className={styles.reviewerInfo}>
-          <h4 className={styles.reviewerName}>{name}</h4>
-          <span className={styles.reviewerRole}>{role}</span>
-        </div>
-        <div className={styles.ratingBadge}>
-          <Star size={14} fill="#fbbf24" stroke="none" /> {rating}.0
-        </div>
+      <div className={styles.quoteIcon}>
+        <Quote size={32} />
       </div>
-
-      <div className={styles.reviewDivider} />
-
       <p className={styles.reviewText}>"{review}"</p>
 
-      <div className={styles.courseTag}>
-        <CheckCircle size={14} /> {course}
+      <div className={styles.reviewFooter}>
+        <div className={styles.reviewerInfo}>
+          <h4 className={styles.reviewerName}>{name}</h4>
+          <span className={styles.reviewerCourse}>{course}</span>
+        </div>
+        <div className={styles.starRating}>
+          {[...Array(rating)].map((_, i) => (
+            <Star key={i} size={16} fill="#fbbf24" stroke="none" />
+          ))}
+        </div>
       </div>
     </div>
   )

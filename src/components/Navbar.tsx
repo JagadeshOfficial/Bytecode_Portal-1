@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, Bell, Hexagon } from 'lucide-react';
+import { Hexagon, Search, Bell } from 'lucide-react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -27,10 +27,11 @@ export default function Navbar() {
         </div>
 
         <ul className={styles.navLinks}>
-          <li><Link href="/" className={styles.navLink}>BASE</Link></li>
-          <li><Link href="/courses" className={styles.navLink}>MODULES</Link></li>
-          <li><Link href="/placements" className={styles.navLink}>CAREER</Link></li>
-          <li><Link href="/contact" className={styles.navLink}>UPLINK</Link></li>
+          <li><Link href="/" className={styles.navLink}>Home</Link></li>
+          <li><Link href="/about" className={styles.navLink}>About</Link></li>
+          <li><Link href="/courses" className={styles.navLink}>Courses</Link></li>
+          <li><Link href="/placements" className={styles.navLink}>Placements</Link></li>
+          <li><Link href="/contact" className={styles.navLink}>Contact</Link></li>
         </ul>
 
         <div className={styles.actions}>
@@ -44,7 +45,7 @@ export default function Navbar() {
           </button>
 
           <Link href="/login">
-            <button className={styles.loginBtn}>LOGIN_</button>
+            <button className={styles.loginBtn}>Login</button>
           </Link>
         </div>
       </div>

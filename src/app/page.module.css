@@ -1183,65 +1183,504 @@
   color: white;
 }
 
-/* Reviews Section */
+/* Reviews Section - Best of the Best Design */
 .reviewsSection {
   padding: 8rem 0;
   position: relative;
-  background: radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.05), transparent 60%);
+  background: radial-gradient(circle at 80% 80%, rgba(34, 211, 238, 0.05), transparent 60%);
   overflow: hidden;
 }
 
 .reviewCard {
-  background: rgba(23, 23, 23, 0.6);
+  background: rgba(11, 15, 25, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 2.5rem;
-  border-radius: 24px;
+  border-radius: 4px;
+  /* Tech corners */
   position: relative;
-  backdrop-filter: blur(10px);
-  min-width: 400px;
-  /* Fixed width for scrolling */
-  max-width: 400px;
-}
-
-.quoteIcon {
-  color: rgba(255, 255, 255, 0.1);
-  margin-bottom: 1.5rem;
-}
-
-.reviewText {
-  color: #e2e8f0;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  font-style: italic;
-  margin-bottom: 2rem;
-}
-
-.reviewFooter {
+  backdrop-filter: blur(20px);
+  min-width: 420px;
+  max-width: 420px;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 1.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* Tech angled corner */
+  clip-path: polygon(20px 0, 100% 0,
+      100% calc(100% - 20px), calc(100% - 20px) 100%,
+      0 100%, 0 20px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Holographic Border Effect */
+.reviewCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.reviewCard:hover {
+  transform: translateY(-8px);
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 20px 40px -10px rgba(34, 211, 238, 0.15);
+}
+
+.reviewCard:hover::before {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 0 20px var(--accent);
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.reviewAvatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.verifiedBadge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .reviewerInfo {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .reviewerName {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: white;
-}
-
-.reviewerCourse {
-  color: var(--primary);
-  font-size: 0.85rem;
+  letter-spacing: 0.02em;
 }
 
 .starRating {
   display: flex;
-  gap: 0.25rem;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.reviewerCourse {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reviewerCourse::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* Watermark Quote */
+.quoteMark {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  opacity: 0.05;
+  color: white;
+  z-index: 1;
+  transition: all 0.3s;
+}
+
+.reviewCard:hover .quoteMark {
+  opacity: 0.1;
+  transform: scale(1.1) rotate(-10deg);
+  color: var(--accent);
+}
+
+.reviewText {
+  color: var(--text-glow);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  font-weight: 400;
+  position: relative;
+  z-index: 2;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Footer */
+.footer {
+  background: var(--bg-nebula);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6rem 0 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.footerTop {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: 4rem;
+  margin-bottom: 5rem;
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.footerDesc {
+  color: var(--text-dim);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  max-width: 300px;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.socialLink {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.socialLink:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+}
+
+.footerHeading {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+.linkList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.linkList a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.linkList a:hover {
+  color: var(--accent);
+  transform: translateX(5px);
+}
+
+.newsletterBox {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.newsInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.newsInput:focus {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.newsBtn {
+  background: var(--primary);
+  border: none;
+  width: 48px;
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.newsBtn:hover {
+  background: var(--secondary);
+  transform: scale(1.05);
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.contactItem svg {
+  color: var(--primary);
+}
+
+.footerBottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.legalLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.legalLinks a {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.legalLinks a:hover {
+  color: white;
+}
+
+@media (max-width: 1024px) {
+  .footerTop {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .footerTop {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .footerBottom {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .legalLinks {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Video Preview Section */
+.videoSection {
+  padding: 8rem 0;
+  position: relative;
+  background: radial-gradient(circle at center, rgba(124, 58, 237, 0.05), transparent 60%);
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.videoCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.videoCard:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.2);
+}
+
+.thumbnailWrapper {
+  position: relative;
+  height: 200px;
+  background: #000;
+  overflow: hidden;
+}
+
+.videoThumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  transition: transform 0.5s;
+}
+
+.videoCard:hover .videoThumbnail {
+  transform: scale(1.1);
+  opacity: 0.6;
+}
+
+.playOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.videoCard:hover .playOverlay {
+  opacity: 1;
+}
+
+.playButton {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.videoCard:hover .playButton {
+  transform: scale(1.2);
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+}
+
+.playTriangle {
+  width: 0;
+  height: 0;
+  border-left: 18px solid white;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  margin-left: 5px;
+}
+
+.videoDuration {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.videoInfo {
+  padding: 1.5rem;
+}
+
+.videoTitle {
+  font-size: 1.1rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.videoViews {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.videoViews::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ef4444;
 }
