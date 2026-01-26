@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './courses.module.css';
-import { Search, Filter, Clock, Users, Star, BookOpen, ChevronRight, Zap, Code, Database, Cloud, Layers, Terminal, Calendar, AlertCircle, Briefcase, Quote, Video } from 'lucide-react';
+import { Search, Filter, Clock, Users, Star, BookOpen, ChevronRight, Zap, Code, Database, Cloud, Layers, Terminal, Calendar, AlertCircle, Briefcase, Quote, Video, X, Download, ArrowRight, Lock } from 'lucide-react';
 import Image from 'next/image';
 
 const COURSES = [
@@ -22,7 +22,22 @@ const COURSES = [
         featured: true,
         techStack: ["Java", "Spring Boot", "React", "MySQL"],
         startDate: "Feb 12, 2024",
-        seatsLeft: 5
+        seatsLeft: 5,
+        modules: [
+            { title: "Module 1: Java Core & OOPS Mastery", desc: "Master basic Java, OOPS, Collections, and Exception Handling with 50+ coding challenges." },
+            { title: "Module 2: Advanced Java & Design Patterns", desc: "Java 17 features, Multithreading, Lambdas, and Creational/Structural Design Patterns." },
+            { title: "Module 3: Database & ORM (Hibernat/JPA)", desc: "Relational modeling, Advanced SQL queries, and JPA entity management with Hibernate." },
+            { title: "Module 4: Spring Boot 3 Engine", desc: "Building REST APIs, Spring Security, JWT authentication, and Spring Data JPA integration." },
+            { title: "Module 5: Frontend with React & Next.js", desc: "Hooks, Context API, Redux Toolkit, and building responsive dashboards for Java backends." },
+            { title: "Module 6: Supercharge with Microservices", desc: "Spring Cloud, Eureka, API Gateway, Circuit Breaker, and Distributed Tracing." },
+            { title: "Module 7: Industrial DevOps & AWS Deployment", desc: "Docker, Kubernetes, Jenkins CI/CD pipelines, and AWS EC2/RDS deployment." }
+        ],
+        mentors: ["Ex-Google Engineer", "Senior Architect @ Oracle"],
+        placements: [
+            { name: "Rahul S.", company: "Amazon", role: "SDE-1", package: "24 LPA", image: "https://i.pravatar.cc/150?u=rahul" },
+            { name: "Priya D.", company: "Microsoft", role: "Backend Dev", package: "18 LPA", image: "https://i.pravatar.cc/150?u=priya" }
+        ],
+        brochureUrl: "#"
     },
     {
         id: 2,
@@ -37,7 +52,22 @@ const COURSES = [
         featured: true,
         techStack: ["Python", "TensorFlow", "Pandas", "PyTorch"],
         startDate: "Feb 15, 2024",
-        seatsLeft: 12
+        seatsLeft: 12,
+        modules: [
+            { title: "Module 1: Advanced Python for Data Science", desc: "NumPy, Pandas, Matplotlib, and high-performance computing with Python." },
+            { title: "Module 2: Statistical Foundations", desc: "Probability, Hypothesis Testing, Bayesean Stats, and Data Distribution analysis." },
+            { title: "Module 3: Machine Learning Algorithms", desc: "Regression, Classification, Clustering, Random Forests, and GBMs with Scikit-Learn." },
+            { title: "Module 4: Deep Learning Foundations", desc: "Neural Networks, CNNs for Vision, and RNNs for Sequential data using TensorFlow." },
+            { title: "Module 5: Natural Language Processing (NLP)", desc: "Tokenization, Transformers, BERT, and Sentiment analysis." },
+            { title: "Module 6: Generative AI & LLMs", desc: "Fine-tuning GPT models, RAG architecture, and Building AI Agents with LangChain." },
+            { title: "Module 7: Production AI & MLOps", desc: "Deploying models to AWS/Azure, Model monitoring, and scaling AI pipelines." }
+        ],
+        mentors: ["AI Researcher @ Meta", "Data Scientist @ Amazon"],
+        placements: [
+            { name: "Arjun K.", company: "Google", role: "AI Engineer", package: "32 LPA", image: "https://i.pravatar.cc/150?u=arjun" },
+            { name: "Sneha V.", company: "Uber", role: "Data Scientist", package: "22 LPA", image: "https://i.pravatar.cc/150?u=sneha" }
+        ],
+        brochureUrl: "#"
     },
     {
         id: 3,
@@ -52,7 +82,22 @@ const COURSES = [
         featured: false,
         techStack: ["AWS", "Docker", "Kubernetes", "Jenkins"],
         startDate: "Mar 01, 2024",
-        seatsLeft: 20
+        seatsLeft: 20,
+        modules: [
+            { title: "Module 1: Linux & Scripting", desc: "Advanced Linux commands, Shell Scripting, and Cron Jobs for automation." },
+            { title: "Module 2: AWS Infrastructure (IAS)", desc: "EC2, S3, VPC, IAM, and RDS setup with high availability." },
+            { title: "Module 3: Infrastructure as Code (Terraform)", desc: "Provisioning AWS resources with Terraform HCL and State management." },
+            { title: "Module 4: Containerization with Docker", desc: "Writing Dockerfiles, Networking, Volumes, and Docker Compose." },
+            { title: "Module 5: Kubernetes Orchestration", desc: "K8s Architecture, Pods, Deployments, Services, and Helm Charts." },
+            { title: "Module 6: CI/CD Pipelines (Jenkins/Actions)", desc: "Building automated pipelines for test and deployment." },
+            { title: "Module 7: Cloud Monitoring & Logging", desc: "Prometheus, Grafana, ELK Stack, and CloudWatch." }
+        ],
+        mentors: ["Cloud Architect @ AWS", "DevOps Lead @ Netflix"],
+        placements: [
+            { name: "Vikram R.", company: "Oracle", role: "DevOps Engineer", package: "20 LPA", image: "https://i.pravatar.cc/150?u=vikram" },
+            { name: "Nisha P.", company: "Adobe", role: "Cloud Security", package: "26 LPA", image: "https://i.pravatar.cc/150?u=nisha" }
+        ],
+        brochureUrl: "#"
     },
     {
         id: 4,
@@ -67,7 +112,22 @@ const COURSES = [
         featured: false,
         techStack: ["MongoDB", "Express", "React", "Node.js"],
         startDate: "Feb 20, 2024",
-        seatsLeft: 8
+        seatsLeft: 8,
+        modules: [
+            { title: "Module 1: Modern JavaScript & ES6+", desc: "Arrow functions, Destructuring, Promises, and Async/Await mastery." },
+            { title: "Module 2: Frontend with React 18", desc: "Virtual DOM, JSX, Props, State, and High-Performance Components." },
+            { title: "Module 3: State Management (Redux)", desc: "Centralized state management with Redux Toolkit and Thunk middleware." },
+            { title: "Module 4: Backend with Node.js & Express", desc: "Event loop, File System, Middleware, and building scalable API architectures." },
+            { title: "Module 5: Database with MongoDB", desc: "Schema design, Mongoose, Aggregations, and Atlas cloud deployment." },
+            { title: "Module 6: Full Stack Security & Auth", desc: "JWT, OAuth2, Bcrypt, and Session management with Passport.js." },
+            { title: "Module 7: Project Deployment & Optimization", desc: "Vercel, Heroku, Nginx, and performance profiling for full stack apps." }
+        ],
+        mentors: ["Full-Stack Lead @ Netlify", "Senior Dev @ Vercel"],
+        placements: [
+            { name: "Karthik M.", company: "Paytm", role: "Frontend Dev", package: "12 LPA", image: "https://i.pravatar.cc/150?u=karthik" },
+            { name: "Deepa L.", company: "Zomato", role: "Full Stack Dev", package: "15 LPA", image: "https://i.pravatar.cc/150?u=deepa" }
+        ],
+        brochureUrl: "#"
     },
     {
         id: 5,
@@ -82,7 +142,21 @@ const COURSES = [
         featured: true,
         techStack: ["Linux", "Python", "Wireshark", "Metasploit"],
         startDate: "Mar 10, 2024",
-        seatsLeft: 15
+        seatsLeft: 15,
+        modules: [
+            { title: "Module 1: Ethical Hacking Fundamentals", desc: "Understanding networking, TCP/IP, and basic security principles." },
+            { title: "Module 2: Footprinting & Reconnaissance", desc: "Using Nmap, Shodan, and OSINT techniques to gather intelligence." },
+            { title: "Module 3: Vulnerability Analysis", desc: "Scanners, Exploit databases, and identifying system weaknesses." },
+            { title: "Module 4: Network Hacking (Wired & Wireless)", desc: "MITM attacks, Packet sniffing with Wireshark, and WPA/WPA2 cracking." },
+            { title: "Module 5: System Hacking & Malware", desc: "Privilege escalation, Metasploit, Trojans, and Backdoors." },
+            { title: "Module 6: Web App & Cloud Security", desc: "SQL injection, XSS, OWASP Top 10, and AWS S3 bucket security." },
+            { title: "Module 7: Digital Forensics & IR", desc: "Incident Response, Evidence handling, and basic log analysis." }
+        ],
+        mentors: ["Certified Ethical Hacker (CEH)", "Security Lead @ Cisco"],
+        placements: [
+            { name: "Amit T.", company: "PwC", role: "Security Analyst", package: "14 LPA", image: "https://i.pravatar.cc/150?u=amit" }
+        ],
+        brochureUrl: "#"
     },
     {
         id: 6,
@@ -97,7 +171,21 @@ const COURSES = [
         featured: false,
         techStack: ["Figma", "Adobe XD", "Prototyping", "Wireframing"],
         startDate: "Feb 25, 2024",
-        seatsLeft: 2
+        seatsLeft: 2,
+        modules: [
+            { title: "Module 1: Intro to Design Thinking", desc: "Understanding the UX process and user-centric design methodologies." },
+            { title: "Module 2: Wireframing & Information Architecture", desc: "Creating low-fi sketches and planning user flows." },
+            { title: "Module 3: Figma Mastery (UI Design)", desc: "Components, Auto Layout, Variants, and advanced Figma features." },
+            { title: "Module 4: Visual Design Systems", desc: "Color theory, Typography, and building scalable Design Systems." },
+            { title: "Module 5: Interaction Design (Prototyping)", desc: "High-fidelity prototypes, smart animate, and transitions." },
+            { title: "Module 6: Usability Testing", desc: "Gathering user feedback and iterating on design solutions." },
+            { title: "Module 7: Portfolio Build", desc: "Building a world-class portfolio with 3 industrial case studies." }
+        ],
+        mentors: ["Product Designer @ Airbnb", "UX Researcher @ Uber"],
+        placements: [
+            { name: "Rishab J.", company: "Swiggy", role: "UI Designer", package: "11 LPA", image: "https://i.pravatar.cc/150?u=rishab" }
+        ],
+        brochureUrl: "#"
     }
 ];
 
@@ -177,6 +265,7 @@ export default function Courses() {
     const [activeCategory, setActiveCategory] = useState("All");
     const [activeLevel, setActiveLevel] = useState("All Levels");
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
     const filteredCourses = COURSES.filter(course => {
         const matchesCategory = activeCategory === "All" || course.category === activeCategory;
@@ -278,7 +367,11 @@ export default function Courses() {
                                 ))}
                             </div>
 
-                            <button className={styles.enrollBtn} style={{ width: 'fit-content', padding: '1rem 2.5rem', fontSize: '1.1rem' }}>
+                            <button
+                                className={styles.enrollBtn}
+                                style={{ width: 'fit-content', padding: '1rem 2.5rem', fontSize: '1.1rem' }}
+                                onClick={() => setSelectedCourse(COURSES[0])}
+                            >
                                 View Program Details
                             </button>
                         </div>
@@ -373,7 +466,12 @@ export default function Courses() {
 
                     <div className={styles.trackGrid}>
                         {filteredCourses.map((course, index) => (
-                            <CourseCard key={course.id} course={course} delay={index * 0.1} />
+                            <CourseCard
+                                key={course.id}
+                                course={course}
+                                delay={index * 0.1}
+                                onSelect={() => setSelectedCourse(course)}
+                            />
                         ))}
                     </div>
 
@@ -481,12 +579,248 @@ export default function Courses() {
             {/* LIVE NOTIFICATIONS */}
             <LiveEnrolls />
 
+            {/* ADVANCED COURSE DETAIL MODAL */}
+            <AnimatePresence>
+                {selectedCourse && (
+                    <CourseDetailModal
+                        course={selectedCourse}
+                        onClose={() => setSelectedCourse(null)}
+                    />
+                )}
+            </AnimatePresence>
+
             <Footer />
         </main>
     );
 }
 
-function CourseCard({ course, delay }: any) {
+function CourseDetailModal({ course, onClose }: { course: any, onClose: () => void }) {
+    const [activeTab, setActiveTab] = useState('curriculum');
+    const [showEnrollForm, setShowEnrollForm] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+
+    const handleFormSubmit = (e: any) => {
+        e.preventDefault();
+        setIsSending(true);
+
+        // Simulating "Automatically Sending to Admin Email" without user interaction
+        setTimeout(() => {
+            console.log("Admission Data sent to admin@bytecode.com");
+            window.location.href = `/payment?course=${encodeURIComponent(course.title)}&price=${encodeURIComponent(course.price)}`;
+        }, 2000);
+    };
+
+    return (
+        <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+        >
+            <motion.div
+                className={styles.megaDetailModal}
+                initial={{ scale: 0.9, y: 50, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.9, y: 50, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button className={styles.modalCloseIcon} onClick={onClose}><X size={32} /></button>
+
+                <div className={styles.modalSplit}>
+                    {/* MODAL LEFT: OVERVIEW */}
+                    <div className={styles.modalSidebar}>
+                        <div className={styles.modalImageWrapper}>
+                            <img src={course.image} alt={course.title} />
+                            <div className={styles.modalImageOverlay} />
+                        </div>
+                        <div className={styles.modalInfoPanel}>
+                            <h2 className={styles.modalTitle}>{course.title}</h2>
+                            <div className={styles.modalMetaGrid}>
+                                <div className={styles.modalMetaItem}><Clock size={18} /> {course.duration}</div>
+                                <div className={styles.modalMetaItem}><Users size={18} /> {course.students}</div>
+                                <div className={styles.modalMetaItem}><Star size={18} fill="#fbbf24" /> {course.rating}</div>
+                            </div>
+                            <div className={styles.modalPriceSection}>
+                                <span className={styles.modalPriceLabel}>Course Investment</span>
+                                <h3 className={styles.modalPriceValue}>{course.price}</h3>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <button className={styles.modalEnrollBtn} onClick={() => setShowEnrollForm(true)}>
+                                    Enroll into Next Batch <ChevronRight size={18} />
+                                </button>
+                                <button className={styles.brochureBtn} onClick={() => window.open(course.brochureUrl, '_blank')}>
+                                    <Download size={18} /> Download Brochure
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* MODAL RIGHT: TABS CONTENT */}
+                    <div className={styles.modalMainContent}>
+                        <AnimatePresence>
+                            {showEnrollForm && (
+                                <motion.div
+                                    className={styles.enrollFormOverlay}
+                                    initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                                    animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
+                                    exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                                >
+                                    <div className={styles.formGlow} />
+                                    <div className={styles.enrollHeader}>
+                                        <button className={styles.backBtn} onClick={() => setShowEnrollForm(false)}><ChevronRight style={{ transform: 'rotate(180deg)', width: '16px' }} /> Back to Details</button>
+                                        <h3>Quick Admission</h3>
+                                        <p>Secure your seat in the upcoming batch.</p>
+                                    </div>
+
+                                    <form className={styles.enquiryForm} onSubmit={handleFormSubmit}>
+                                        <div className={styles.inputGroup}>
+                                            <label>Full Name</label>
+                                            <input type="text" placeholder="Enter your full name" required />
+                                        </div>
+                                        <div className={styles.inputGroup}>
+                                            <label>Email Address</label>
+                                            <input type="email" placeholder="email@example.com" required />
+                                        </div>
+                                        <div className={styles.inputGroup}>
+                                            <label>Phone Number</label>
+                                            <input type="tel" placeholder="+91 XXXXX XXXXX" required />
+                                        </div>
+
+                                        <button className={styles.submitAdmissionBtn} disabled={isSending}>
+                                            {isSending ? (
+                                                <span className={styles.sendingNote}>Securing Seat... Sending to Admin</span>
+                                            ) : (
+                                                <>Proceed to Payment (₹{course.price}) <ArrowRight size={20} /></>
+                                            )}
+                                        </button>
+
+                                        <div className={styles.secureNote}>
+                                            <Lock size={14} /> Your data is encrypted and sent directly to our admission office.
+                                        </div>
+                                    </form>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <div className={styles.modalTabs}>
+                            {['overview', 'curriculum', 'tools', 'placements', 'mentors'].map(tab => (
+                                <button
+                                    key={tab}
+                                    className={`${styles.modalTabBtn} ${activeTab === tab ? styles.active : ''}`}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    {tab.toUpperCase()}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className={styles.tabScrollArea}>
+                            {activeTab === 'placements' && (
+                                <div className={styles.placementsTabContent}>
+                                    <h3 className={styles.tabSectionTitle}>Recent Success Stories</h3>
+                                    <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Meet our alumni who recently secured packages up to {course.price === '₹45,000' ? '32' : '24'} LPA.</p>
+                                    <div className={styles.placementsGrid}>
+                                        {course.placements?.map((p: any, i: number) => (
+                                            <div key={i} className={styles.placementMiniCard}>
+                                                <img src={p.image} alt={p.name} className={styles.pAvatar} />
+                                                <div className={styles.pInfo}>
+                                                    <h4>{p.name}</h4>
+                                                    <p>{p.role} @ <strong>{p.company}</strong></p>
+                                                    <div className={styles.pPackage}>{p.package} Package</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'tools' && (
+                                <div className={styles.toolsTabContent}>
+                                    <h3 className={styles.tabSectionTitle}>Industrial Tools & Stack</h3>
+                                    <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Master these 15+ industry-leading tools used by top product companies.</p>
+                                    <div className={styles.toolsCloud}>
+                                        {course.techStack?.map((tool: string, i: number) => (
+                                            <motion.div
+                                                key={i}
+                                                className={styles.toolChip}
+                                                initial={{ scale: 0.8, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ delay: i * 0.1 }}
+                                            >
+                                                <Layers size={20} />
+                                                <span>{tool}</span>
+                                            </motion.div>
+                                        ))}
+                                        {/* Added generic tools for better visuals */}
+                                        {['Git', 'Docker', 'Jenkins', 'Postman', 'JIRA', 'AWS'].filter(t => !course.techStack.includes(t)).map((tool: string, i: number) => (
+                                            <div key={`extra-${i}`} className={styles.toolChip} style={{ opacity: 0.7 }}>
+                                                <Layers size={20} />
+                                                <span>{tool}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {activeTab === 'curriculum' && (
+                                <div className={styles.curriculumFlow}>
+                                    <h3 className={styles.tabSectionTitle}>Advanced 7-Module Curriculum</h3>
+                                    {course.modules ? course.modules.map((mod: any, i: number) => (
+                                        <motion.div
+                                            key={i}
+                                            className={styles.moduleCard}
+                                            initial={{ x: -20, opacity: 0 }}
+                                            animate={{ x: 0, opacity: 1 }}
+                                            transition={{ delay: i * 0.05 }}
+                                        >
+                                            <div className={styles.moduleNumber}>{i + 1}</div>
+                                            <div className={styles.moduleContent}>
+                                                <h4>{mod.title}</h4>
+                                                <p>{mod.desc}</p>
+                                            </div>
+                                        </motion.div>
+                                    )) : (
+                                        <p style={{ color: '#94a3b8' }}>Dynamic curriculum is being prepared for this specialized track.</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'overview' && (
+                                <div className={styles.overviewText}>
+                                    <h3 className={styles.tabSectionTitle}>Program Overview</h3>
+                                    <p>This {course.duration} intensive masterclass is designed for serious learners aiming for top-tier product companies. Our curriculum is reverse-engineered from interviews at Google, Amazon, and Microsoft.</p>
+                                    <h4 style={{ marginTop: '1.5rem', color: 'white' }}>Built-in Features:</h4>
+                                    <ul className={styles.featureList}>
+                                        <li>1:1 Mentorship from Industry Experts</li>
+                                        <li>Real-world Industrial Capstone Projects</li>
+                                        <li>Technical & HR Mock Interviews</li>
+                                        <li>Professional Communication & Personality Development</li>
+                                        <li>100% Direct Job Referrals in Tier-1 MNCs</li>
+                                        <li>Official ByteCode Industry-Vendor Certification</li>
+                                    </ul>
+                                </div>
+                            )}
+
+                            {activeTab === 'mentors' && (
+                                <div className={styles.mentorsGrid}>
+                                    <h3 className={styles.tabSectionTitle}>Our Specialized Mentors</h3>
+                                    {course.mentors?.map((mentor: string, i: number) => (
+                                        <div key={i} className={styles.mentorBriefCard}>
+                                            <div className={styles.mentorIcon}><Users size={24} /></div>
+                                            <span>{mentor}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
+
+function CourseCard({ course, delay, onSelect }: any) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -549,7 +883,7 @@ function CourseCard({ course, delay }: any) {
 
                 <div className={styles.cardFooter}>
                     <span className={styles.cardPrice}>{course.price}</span>
-                    <button className={styles.enrollBtn}>View Details</button>
+                    <button className={styles.enrollBtn} onClick={(e) => { e.stopPropagation(); onSelect(); }}>View Details</button>
                 </div>
             </div>
         </motion.div>

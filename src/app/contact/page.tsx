@@ -244,9 +244,27 @@ export default function Contact() {
                         <p className={styles.heroSubtitle}>Apply for our 2026 Tech Bootcamps. Master high-demand skills with placement guarantee.</p>
                     </section>
                     <div className={styles.channelsList}>
-                        <div className={styles.channelItem}><div className={styles.iconBox}><MessageSquare size={24} /></div><div><h4>Instant AI Chat</h4><p>Talk to Nova for instant answers on fees and curriculum.</p></div></div>
-                        <div className={styles.channelItem}><div className={styles.iconBox}><Phone size={24} /></div><div><h4>Direct Helpdesk</h4><p>Emergency inquiry? Call us at +91 87900 55638</p></div></div>
-                        <div className={styles.channelItem}><div className={styles.iconBox}><Mail size={24} /></div><div><h4>Admissions Email</h4><p>Drop a detailed query at admissions@bytecode.com</p></div></div>
+                        <div className={styles.channelItem} style={{ cursor: 'pointer' }} onClick={() => setIsChatOpen(true)}>
+                            <div className={styles.iconBox}><MessageSquare size={24} /></div>
+                            <div>
+                                <h4>Instant AI Chat</h4>
+                                <p>Talk to Nova for instant answers on fees and curriculum.</p>
+                            </div>
+                        </div>
+                        <div className={styles.channelItem} style={{ cursor: 'pointer' }} onClick={() => window.location.href = 'tel:+918790055638'}>
+                            <div className={styles.iconBox}><Phone size={24} /></div>
+                            <div>
+                                <h4>Direct Helpdesk</h4>
+                                <p>Emergency inquiry? Call us at +91 87900 55638</p>
+                            </div>
+                        </div>
+                        <div className={styles.channelItem} style={{ cursor: 'pointer' }} onClick={() => window.location.href = 'mailto:admissions@bytecode.com'}>
+                            <div className={styles.iconBox}><Mail size={24} /></div>
+                            <div>
+                                <h4>Admissions Email</h4>
+                                <p>Drop a detailed query at admissions@bytecode.com</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

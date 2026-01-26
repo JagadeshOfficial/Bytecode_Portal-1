@@ -9,11 +9,41 @@ import { TrendingUp, Users, Building, Award, Briefcase, DollarSign, CheckCircle,
 import Image from 'next/image';
 
 const STATS = [
-    { label: "Highest Package", value: "45 LPA", icon: <Award size={24} color="#f59e0b" /> },
-    { label: "Average Hike", value: "120%", icon: <TrendingUp size={24} color="#10b981" /> },
-    { label: "Hiring Partners", value: "500+", icon: <Building size={24} color="#3b82f6" /> },
-    { label: "Alumni Hired", value: "8500+", icon: <Users size={24} color="#8b5cf6" /> }
+    { label: "Highest Package", value: 45, suffix: " LPA", icon: <Award size={32} color="#f59e0b" /> },
+    { label: "Average Hike", value: 120, suffix: "%", icon: <TrendingUp size={32} color="#10b981" /> },
+    { label: "Hiring Partners", value: 500, suffix: "+", icon: <Building size={32} color="#3b82f6" /> },
+    { label: "Alumni Hired", value: 8500, suffix: "+", icon: <Users size={32} color="#8b5cf6" /> }
 ];
+
+function CountUp({ end, suffix = "", duration = 2 }: { end: number, suffix?: string, duration?: number }) {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        let start = 0;
+        const totalMiliseconds = duration * 1000;
+        const incrementTime = 50;
+        const totalIncrements = totalMiliseconds / incrementTime;
+        const increment = end / totalIncrements;
+
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= end) {
+                setCount(end);
+                clearInterval(timer);
+            } else {
+                setCount(Math.floor(start));
+            }
+        }, incrementTime);
+
+        return () => clearInterval(timer);
+    }, [end, duration]);
+
+    return (
+        <span className={styles.countUp}>
+            {count.toLocaleString()}{suffix}
+        </span>
+    );
+}
 
 const PARTNERS = [
     "Google", "Microsoft", "Amazon", "Netflix", "Adobe", "Uber",
@@ -127,13 +157,20 @@ export default function Placements() {
                         <button className={styles.demoBtn} onClick={() => openEnroll("Live Demo")}>
                             <PlayCircle size={20} /> Watch Free Demo
                         </button>
+                        <div className={styles.liveBadge}>
+                            <span className={styles.pulseDot} />
+                            <span style={{ color: '#4ade80', fontWeight: 'bold' }}>42 Recruiters</span>
+                            <span style={{ color: '#94a3b8' }}>Active Now</span>
+                        </div>
                     </div>
 
                     <div className={styles.statsContainer}>
                         {STATS.map((stat, i) => (
                             <div key={i} className={styles.statItem}>
-                                {stat.icon}
-                                <span className={styles.statValue}>{stat.value}</span>
+                                <div className={styles.statIconWrapper}>{stat.icon}</div>
+                                <span className={styles.statValue}>
+                                    <CountUp end={stat.value} suffix={stat.suffix} />
+                                </span>
                                 <span className={styles.statLabel}>{stat.label}</span>
                             </div>
                         ))}
@@ -155,29 +192,56 @@ export default function Placements() {
                 </div>
             </section>
 
-            {/* SALARY GROWTH CHART (Simulated) */}
+            {/* SALARY GROWTH TOOL (Best and Best Dynamic Feature) */}
             <section className={styles.salarySection}>
                 <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '2.5rem' }}>Skyrocket Your Earnings</h2>
-                        <p className={styles.heroSubtitle}>Average salary growth of our alumni after completing the program.</p>
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Dynamic Growth <span className={styles.heroHighlight}>Projector</span></h2>
+                        <p className={styles.heroSubtitle}>Simulate your career trajectory based on industry data.</p>
                     </div>
 
-                    <div className={styles.chartContainer}>
-                        <div className={styles.barGroup}>
-                            <div className={styles.barValue}>4.5 LPA</div>
-                            <div className={styles.bar} style={{ height: '30%' }}></div>
-                            <div className={styles.barLabel}>Before</div>
+                    <div className={styles.calculatorCard}>
+                        <div className={styles.calcLeft}>
+                            <h3 className={styles.calcTitle}>Calculate Your Potential</h3>
+                            <div className={styles.calcGroup}>
+                                <label>Current Annual Salary</label>
+                                <div className={styles.calcInputWrapper}>
+                                    <span>₹</span>
+                                    <input type="text" defaultValue="5,00,000" />
+                                </div>
+                            </div>
+                            <div className={styles.calcGroup}>
+                                <label>Years of Experience</label>
+                                <select className={styles.calcSelect}>
+                                    <option>0-1 Years (Fresher)</option>
+                                    <option>1-3 Years</option>
+                                    <option>3-5 Years</option>
+                                    <option>5+ Years</option>
+                                </select>
+                            </div>
+                            <div className={styles.calcGroup}>
+                                <label>Target Domain</label>
+                                <div className={styles.calcTabs}>
+                                    <button className={styles.calcTabActive}>Full Stack</button>
+                                    <button className={styles.calcTab}>AI / ML</button>
+                                    <button className={styles.calcTab}>DevOps</button>
+                                </div>
+                            </div>
                         </div>
-                        <div className={styles.barGroup}>
-                            <div className={styles.barValue}>12.0 LPA</div>
-                            <div className={styles.bar} style={{ height: '60%', background: 'linear-gradient(to top, #8b5cf6, #a78bfa)' }}></div>
-                            <div className={styles.barLabel}>Average</div>
-                        </div>
-                        <div className={styles.barGroup}>
-                            <div className={styles.barValue}>45.0 LPA</div>
-                            <div className={styles.bar} style={{ height: '100%', background: 'linear-gradient(to top, #10b981, #34d399)' }}></div>
-                            <div className={styles.barLabel}>Highest</div>
+                        <div className={styles.calcRight}>
+                            <div className={styles.resultCircle}>
+                                <div className={styles.resultValue}>
+                                    <CountUp end={185} suffix="%" />
+                                </div>
+                                <div className={styles.resultLabel}>Expected Hike</div>
+                            </div>
+                            <div className={styles.projectedSalary}>
+                                <span>Projected Package</span>
+                                <h4>₹14.25 LPA</h4>
+                            </div>
+                            <button className={styles.demoBtn} style={{ width: '100%' }} onClick={() => openEnroll("Salary Projection")}>
+                                Get This Package <ArrowRight size={20} />
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -186,9 +250,17 @@ export default function Placements() {
             {/* SUCCESS STORIES (Redesigned) */}
             <section className={styles.wallSection}>
                 <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Wall of Fame</h2>
                         <p className={styles.heroSubtitle}>Real people. Real results. Real impact.</p>
+                    </div>
+
+                    <div className={styles.filterBar}>
+                        {["All", "MAANG", "Product", "Unicorn", "Service"].map(cat => (
+                            <button key={cat} className={cat === "All" ? styles.filterBtnActive : styles.filterBtn}>
+                                {cat}
+                            </button>
+                        ))}
                     </div>
 
                     <div className={styles.storyGrid}>

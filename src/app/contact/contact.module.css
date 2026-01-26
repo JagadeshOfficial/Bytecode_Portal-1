@@ -488,6 +488,7 @@
 }
 
 /* --- ADVANCED CHAT WIDGET --- */
+/* --- ADVANCED CHAT WIDGET --- */
 .chatOverlay {
     position: fixed;
     bottom: 2rem;
@@ -504,6 +505,26 @@
     overflow: hidden;
     z-index: 2000;
     transform-origin: bottom right;
+}
+
+.chatCloseBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chatCloseBtn:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: #ef4444;
+    transform: scale(1.1);
 }
 
 .chatHeader {

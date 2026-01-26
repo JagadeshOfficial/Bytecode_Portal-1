@@ -754,7 +754,7 @@ function CourseCard({ title, desc, salary, icon, image }: any) {
         <p className={styles.courseDesc}>{desc}</p>
         <div className={styles.courseMeta}>
           <span className={styles.salary}><Award size={16} /> Avg: {salary}</span>
-          <span className={styles.learnMore}>View Details <ArrowRight size={16} /></span>
+          <Link href="/courses" className={styles.learnMore}>View Details <ArrowRight size={16} /></Link>
         </div>
       </div>
     </motion.div>
@@ -795,9 +795,11 @@ function SyllabusCard({ title, duration, modules, tools }: any) {
       </div>
 
       <div className={styles.syllabusActions}>
-        <button className={styles.downloadButton}>
-          <Download size={18} /> View Full Curriculum
-        </button>
+        <Link href="/courses">
+          <button className={styles.downloadButton}>
+            <Download size={18} /> View Full Curriculum
+          </button>
+        </Link>
       </div>
     </div>
   )
