@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './courses.module.css';
-import { Search, Filter, Clock, Users, Star, BookOpen, ChevronRight, Zap, Code, Database, Cloud, Layers, Terminal, Calendar, AlertCircle, Briefcase, Quote } from 'lucide-react';
+import { Search, Filter, Clock, Users, Star, BookOpen, ChevronRight, Zap, Code, Database, Cloud, Layers, Terminal, Calendar, AlertCircle, Briefcase, Quote, Video } from 'lucide-react';
 import Image from 'next/image';
 
 const COURSES = [
@@ -145,6 +145,27 @@ const STORIES = [
     }
 ];
 
+const VIDEO_PREVIEWS = [
+    {
+        title: "Java Full Stack: Building Microservices",
+        duration: "10:45",
+        thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80",
+        views: "1.2k"
+    },
+    {
+        title: "Data Science: Predicting Stock Prices",
+        duration: "15:20",
+        thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
+        views: "950"
+    },
+    {
+        title: "DevOps: Deploying to Kubernetes",
+        duration: "12:10",
+        thumbnail: "https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80",
+        views: "2.5k"
+    }
+];
+
 const REVIEWS = [
     { name: "Karthik N.", course: "Java Full Stack", text: "The live mentorship program is a game changer. The instructors are real industry engineers." },
     { name: "Ananya B.", course: "Data Science", text: "I came from a non-tech background, but the structured curriculum helped me crack a Data Analyst role." },
@@ -240,7 +261,7 @@ export default function Courses() {
                         className={styles.spotlightCard}
                     >
                         <div className={styles.spotlightContent}>
-                            <div className={styles.spotlightBadge}>Most Popular Choice</div>
+                            <div className={styles.spotlightBadge}>Best For You</div>
                             <h2 className={styles.spotlightTitle}>{SPOTLIGHT_COURSE.title}</h2>
                             <p className={styles.spotlightDesc}>{SPOTLIGHT_COURSE.desc}</p>
 
@@ -368,6 +389,22 @@ export default function Courses() {
                             </button>
                         </div>
                     )}
+                </div>
+            </section>
+
+            {/* EXPERIENCE THE CLASSROOM (VIDEO SECTION) */}
+            <section className={styles.videoSection}>
+                <div className="container">
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>Experience The Classroom</h2>
+                        <p className={styles.heroSubtitle} style={{ margin: 0, textAlign: 'left' }}>Watch snippets from our actual live sessions.</p>
+                    </div>
+
+                    <div className={styles.videoGrid}>
+                        {VIDEO_PREVIEWS.map((video, index) => (
+                            <VideoPreviewCard key={index} {...video} />
+                        ))}
+                    </div>
                 </div>
             </section>
 
@@ -516,6 +553,26 @@ function CourseCard({ course, delay }: any) {
                 </div>
             </div>
         </motion.div>
+    )
+}
+
+function VideoPreviewCard({ title, duration, thumbnail, views }: any) {
+    return (
+        <div className={styles.videoCard}>
+            <div className={styles.thumbnailWrapper}>
+                <img src={thumbnail} alt={title} className={styles.videoThumbnail} />
+                <div className={styles.playOverlay}>
+                    <div className={styles.playButton}>
+                        <div className={styles.playTriangle} />
+                    </div>
+                </div>
+                <span className={styles.videoDuration}>{duration}</span>
+            </div>
+            <div className={styles.videoInfo}>
+                <h3 className={styles.videoTitle}>{title}</h3>
+                <span className={styles.videoViews}>{views} watching</span>
+            </div>
+        </div>
     )
 }
 

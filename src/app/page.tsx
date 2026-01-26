@@ -1,4 +1,5 @@
 "use client";
+// Force rebuild
 
 import AnimatedHero from '@/components/AnimatedHero';
 import Navbar from '@/components/Navbar';
