@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './placements.module.css';
-import { TrendingUp, Users, Building, Award, Briefcase, DollarSign, CheckCircle, ArrowRight, Zap, Target, X, PlayCircle } from 'lucide-react';
+import { TrendingUp, Users, Building, Award, Briefcase, DollarSign, CheckCircle, ArrowRight, Zap, Target, X, PlayCircle, Layers } from 'lucide-react';
 import Image from 'next/image';
 
 const STATS = [
@@ -52,74 +52,71 @@ const PARTNERS = [
 ];
 
 const SUCCESS_STORIES = [
-    {
-        name: "Rohan Das",
-        role: "SDE-II",
-        company: "Amazon",
-        package: "45 LPA",
-        prev: "3.5 LPA",
-        image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80",
-        quote: "I never thought a non-CS grad could crack Amazon. The system design modules were the key differentiator."
-    },
-    {
-        name: "Priya Sharma",
-        role: "Data Scientist",
-        company: "Microsoft",
-        package: "38 LPA",
-        prev: "Fresher",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80",
-        quote: "The mock interviews with actual Microsoft engineers helped me kill my nervousness. Best investment ever."
-    },
-    {
-        name: "Amit Patel",
-        role: "DevOps Engineer",
-        company: "Adobe",
-        package: "28 LPA",
-        prev: "6 LPA",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80",
-        quote: "Understanding the nuances of Kubernetes and Docker depth was what got me this offer. Truly advanced curriculum."
-    },
-    {
-        name: "Sneha Reddy",
-        role: "Product Manager",
-        company: "Uber",
-        package: "35 LPA",
-        prev: "12 LPA",
-        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80",
-        quote: "Moving from development to product management was seamless with the strategic insights from the course."
-    },
-    {
-        name: "Vikram Singh",
-        role: "Backend Lead",
-        company: "Zerodha",
-        package: "42 LPA",
-        prev: "15 LPA",
-        image: "https://images.unsplash.com/photo-1566492031773-4fbc7dddfabd?auto=format&fit=crop&q=80",
-        quote: "High-scale systems architecture is something you only learn by doing. This course made me do it."
-    },
-    {
-        name: "Arjun K.",
-        role: "Full Stack Dev",
-        company: "Cred",
-        package: "26 LPA",
-        prev: "4.5 LPA",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
-        quote: "The frontend specialization with React and Next.js is top-notch. I felt confident from day one."
-    }
+    { name: "Rohan Das", role: "SDE-II", company: "Amazon", package: "45 LPA", prev: "3.5 LPA", image: "https://i.pravatar.cc/150?u=rohan", quote: "The system design modules were the key differentiator.", hike: 240 },
+    { name: "Priya Sharma", role: "Data Scientist", company: "Microsoft", package: "38 LPA", prev: "Fresher", image: "https://i.pravatar.cc/150?u=priya", quote: "Mock interviews with actual MSFT engineers helped me kill my nervousness.", hike: 180 },
+    { name: "Amit Patel", role: "DevOps Engineer", company: "Adobe", package: "28 LPA", prev: "6 LPA", image: "https://i.pravatar.cc/150?u=amit", quote: "Understanding Kubernetes depth was what got me this offer.", hike: 155 },
+    { name: "Sneha Reddy", role: "Product Manager", company: "Uber", package: "35 LPA", prev: "12 LPA", image: "https://i.pravatar.cc/150?u=sneha", quote: "Strategic insights from the course made PM transition seamless.", hike: 190 },
+    { name: "Vikram Singh", role: "Backend Lead", company: "Zerodha", package: "42 LPA", prev: "15 LPA", image: "https://i.pravatar.cc/150?u=vikram", quote: "High-scale systems architecture is something you only learn by doing.", hike: 180 },
+    { name: "Arjun K.", role: "Full Stack Dev", company: "Cred", package: "26 LPA", prev: "4.5 LPA", image: "https://i.pravatar.cc/150?u=arjun", quote: "Frontend specialization with React & Next.js is top-notch.", hike: 210 },
+    { name: "Megha S.", role: "Cloud Architect", company: "Google Cloud", package: "36 LPA", prev: "8 LPA", image: "https://i.pravatar.cc/150?u=megha", quote: "Secured Google Cloud Architect role in just 4 months of prep.", hike: 145 },
+    { name: "Sanjay T.", role: "Backend Dev", company: "Netflix", package: "52 LPA", prev: "18 LPA", image: "https://i.pravatar.cc/150?u=sanjay", quote: "Distributed systems training prepared me perfectly for Netflix.", hike: 188 },
+    { name: "Karan W.", role: "SDE-1", company: "Razorpay", package: "24 LPA", prev: "Fresher", image: "https://i.pravatar.cc/150?u=karan", quote: "The projects made my resume stand out even as a fresher.", hike: 175 },
+    { name: "Nidhi B.", role: "AI Engineer", company: "Meta", package: "48 LPA", prev: "12 LPA", image: "https://i.pravatar.cc/150?u=nidhi", quote: "Cracked Meta's AI team purely on the basis of the capstone project.", hike: 300 },
+    { name: "Rahul G.", role: "Security Eng.", company: "Apple", package: "40 LPA", prev: "10 LPA", image: "https://i.pravatar.cc/150?u=rahulg", quote: "Depth provided for Apple's rigorous security rounds was intense.", hike: 290 },
+    { name: "Divya L.", role: "UI/UX lead", company: "Canva", package: "30 LPA", prev: "7 LPA", image: "https://i.pravatar.cc/150?u=divya", quote: "Design system training completely changed my product approach.", hike: 320 },
+    { name: "Siddharth M.", role: "Machine Learning Eng.", company: "Tesla", package: "55 LPA", prev: "20 LPA", image: "https://i.pravatar.cc/150?u=sid", quote: "The computer vision modules are actually production-grade.", hike: 175 },
+    { name: "Anjali P.", role: "Site Reliability Eng.", company: "Stripe", package: "44 LPA", prev: "14 LPA", image: "https://i.pravatar.cc/150?u=anjali", quote: "Foundational SRE concepts here are better than my university degree.", hike: 214 },
+    { name: "Varun D.", role: "Lead Architect", company: "Oracle", package: "39 LPA", prev: "12 LPA", image: "https://i.pravatar.cc/150?u=varun", quote: "Oracle interviews are database-heavy; this course covers it all.", hike: 225 },
+    { name: "Kavita J.", role: "React Developer", company: "Paypal", package: "22 LPA", prev: "Fresher", image: "https://i.pravatar.cc/150?u=kavita", quote: "The career cell pushed my profile into Paypal's fast-track hiring.", hike: 195 },
+    { name: "Rajesh K.", role: "iOS Developer", company: "Spotify", package: "33 LPA", prev: "Fresher", image: "https://i.pravatar.cc/150?u=rajesh", quote: "Mobile systems optimization was something I learned only here.", hike: 200 },
+    { name: "Ishita R.", role: "Data Engineer", company: "Snowflake", package: "29 LPA", prev: "5 LPA", image: "https://i.pravatar.cc/150?u=ishita", quote: "ETL pipelines and scale modules are extremely relevant to industry.", hike: 480 },
+    { name: "Manish S.", role: "Frontend Lead", company: "Airbnb", package: "47 LPA", prev: "15 LPA", image: "https://i.pravatar.cc/150?u=manish", quote: "Architecture-first approach to frontend is what got me the role.", hike: 210 },
+    { name: "Pooja V.", role: "Product Analyst", company: "Walmart", package: "26 LPA", prev: "Fresher", image: "https://i.pravatar.cc/150?u=pooja", quote: "Analytical thinking drills are superior to traditional courses.", hike: 180 },
+    { name: "Harish N.", role: "Systems Engineer", company: "Cisco", package: "31 LPA", prev: "10 LPA", image: "https://i.pravatar.cc/150?u=harish", quote: "Networking depth in the devops module is enterprise-grade.", hike: 210 },
+    { name: "Simran T.", role: "UI Developer", company: "Flipkart", package: "20 LPA", prev: "3.5 LPA", image: "https://i.pravatar.cc/150?u=simran", quote: "My portfolio got verified by ByteCode leads, which opened doors.", hike: 470 }
 ];
 
-// Fake live hires for the ticker
-const LIVE_HIRES = [
-    { name: "Rahul M.", company: "Google", role: "SDE-1" },
-    { name: "Sara K.", company: "Amazon", role: "Data Analyst" },
-    { name: "Varun T.", company: "Microsoft", role: "Cloud Eng." },
-    { name: "Pooja R.", company: "Adobe", role: "UX Designer" },
-    { name: "Kiran S.", company: "Swiggy", role: "Backend Dev" }
+const RECRUITER_VOICES = [
+    { name: "James Wilson", role: "HR Director @ Flipkart", image: "https://i.pravatar.cc/150?u=jwilson", quote: "ByteCode graduates possess a rare architectural depth that slashes our onboarding 40%." },
+    { name: "Sarah Jenkins", role: "Tech Lead @ Swiggy", image: "https://i.pravatar.cc/150?u=sjenkins", quote: "We prioritize these candidates for our Core Platform teams due to their systems knowledge." },
+    { name: "Michael Chen", role: "SVP Engineering @ Zomato", image: "https://i.pravatar.cc/150?u=mchen", quote: "The problem-solving speed displayed by ByteCode alumni set them apart in our SDE-II rounds." },
+    { name: "Anita Rao", role: "Talent Head @ Razorpay", image: "https://i.pravatar.cc/150?u=arao", quote: "Most freshers lack production context. ByteCode freshers are 'Deploy-Ready' on Day 1." },
+    { name: "David Miller", role: "Head of Talent @ Amazon", image: "https://i.pravatar.cc/150?u=david", quote: "The curriculum here align perfectly with our Bar Raiser standards." },
+    { name: "Elena Gilbert", role: "Engineering Manager @ Meta", image: "https://i.pravatar.cc/150?u=elena", quote: "We find candidates here who actually understand low-level systems and scalability." },
+    { name: "Robert Downey", role: "CTO @ Ather Energy", image: "https://i.pravatar.cc/150?u=rob", quote: "Exceptional quality of engineers. The capstone projects are genuinely impressive." },
+    { name: "Scarlett J.", role: "HR Head @ Netflix", image: "https://i.pravatar.cc/150?u=scarlett", quote: "ByteCode alumni are among the few who can handle Netflix's freedom and responsibility model." },
+    { name: "Chris Evans", role: "SDE Lead @ Google", image: "https://i.pravatar.cc/150?u=chris", quote: "Their focus on algorithmic efficiency and data structures is world-class." }
 ];
+
+const FAANG_DRILLS = [
+    { title: "System Design Drills", icon: <Layers size={24} />, desc: "Weekly deep dives into Netflix, Uber, and WhatsApp architectures." },
+    { title: "Mock FANG Floor", icon: <Users size={24} />, desc: "Interviews conducted by engineers currently working at Google, Meta, and Amazon." },
+    { title: "Salary Negotiation", icon: <TrendingUp size={24} />, desc: "Expert workshops on counter-offering and decoding equity/stock components." }
+];
+
 
 export default function Placements() {
     const [showModal, setShowModal] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState("");
+
+    // Calculator State
+    const [salary, setSalary] = useState(600000);
+    const [experience, setExperience] = useState("1-3 Years");
+    const [domain, setDomain] = useState("Full Stack");
+    const [projected, setProjected] = useState({ hike: 185, total: 1425000 });
+
+    useEffect(() => {
+        let baseMultiplier = domain === "AI / ML" ? 2.5 : domain === "DevOps" ? 2.2 : 2.0;
+        let expBonus = experience === "0-1 Years (Fresher)" ? 1 : experience === "1-3 Years" ? 1.5 : experience === "3-5 Years" ? 2 : 2.5;
+
+        const finalSalary = salary * baseMultiplier * (1 + (expBonus * 0.1));
+        const hikePercent = ((finalSalary - salary) / salary) * 100;
+
+        setProjected({
+            hike: Math.round(hikePercent),
+            total: Math.round(finalSalary)
+        });
+    }, [salary, experience, domain]);
 
     const openEnroll = (course: string = "") => {
         setSelectedCourse(course);
@@ -150,19 +147,8 @@ export default function Placements() {
                         transition={{ delay: 0.1 }}
                         className={styles.heroSubtitle}
                     >
-                        Join thousands of students who have secured high-paying jobs at the world's leading tech companies. Your dream job is just a course away.
+                        TRANSFORMING ENGINEERING CAREERS THROUGH INSTITUTIONAL EXCELLENCE AND FANG-GRADE MENTORSHIP.
                     </motion.p>
-
-                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
-                        <button className={styles.demoBtn} onClick={() => openEnroll("Live Demo")}>
-                            <PlayCircle size={20} /> Watch Free Demo
-                        </button>
-                        <div className={styles.liveBadge}>
-                            <span className={styles.pulseDot} />
-                            <span style={{ color: '#4ade80', fontWeight: 'bold' }}>42 Recruiters</span>
-                            <span style={{ color: '#94a3b8' }}>Active Now</span>
-                        </div>
-                    </div>
 
                     <div className={styles.statsContainer}>
                         {STATS.map((stat, i) => (
@@ -178,7 +164,207 @@ export default function Placements() {
                 </div>
             </section>
 
-            {/* PARTNERS MARQUEE */}
+            {/* RECENT PLACEMENTS - HORIZONTAL MARQUEE */}
+            <section className={styles.wallSection}>
+                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                    <h2 className={styles.heroTitle} style={{ fontSize: '3.5rem' }}>Elite <span className={styles.heroHighlight}>Network</span></h2>
+                    <p className={styles.heroSubtitle}>Latest alumni secured in high-impact engineering roles one after another.</p>
+                </div>
+
+                <div className={styles.horizontalMarquee}>
+                    <div className={styles.horizontalTrack}>
+                        {[...SUCCESS_STORIES, ...SUCCESS_STORIES].map((story, i) => (
+                            <div key={i} className={styles.storyCard}>
+                                <div className={styles.cardHeader}>
+                                    <div className={styles.profileImageWrapper}>
+                                        <img src={story.image} alt={story.name} className={styles.storyImage} />
+                                        <div className={styles.verifiedBadge} title="Verified Alumni">
+                                            <CheckCircle size={14} />
+                                        </div>
+                                    </div>
+                                    <h3 className={styles.storyName}>{story.name}</h3>
+                                </div>
+
+                                <div className={styles.storyRole}>{story.role} @ <span style={{ color: '#fff', fontWeight: 800 }}>{story.company}</span></div>
+
+                                <div className={styles.salaryHighlight}>
+                                    <span className={styles.salaryLabel}>Package Achieved</span>
+                                    <span className={styles.salaryValue}>{story.package}</span>
+                                </div>
+
+                                <p className={styles.storyQuote}>"{story.quote}"</p>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Prior Package: {story.prev}</span>
+                                    <div className={styles.hikeBadge}>+ {story.hike}% Hike</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FAANG DRILLS SECTION */}
+            <section className={styles.faangSection}>
+                <div className="container">
+                    <div className={styles.faangGrid}>
+                        <div className={styles.faangContent}>
+                            <h2 className={styles.heroTitle} style={{ fontSize: '3rem', textAlign: 'left' }}>FANG <span className={styles.heroHighlight}>Intelligence</span></h2>
+                            <p className={styles.heroSubtitle} style={{ margin: '0 0 3rem' }}>REVERSE-ENGINEERING THE INTERVIEW PROCESS FOR WORLD-CLASS ENGINEERING ORGANIZATIONS.</p>
+
+                            <div className={styles.drillList}>
+                                {FAANG_DRILLS.map((drill, i) => (
+                                    <div key={i} className={styles.drillItem}>
+                                        <div className={styles.drillIcon}>{drill.icon}</div>
+                                        <div>
+                                            <h4>{drill.title}</h4>
+                                            <p>{drill.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className={styles.faangImageWrap}>
+                            <div className={styles.faangGlow} />
+                            <Image src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80" alt="FAANG" fill style={{ objectFit: 'cover', borderRadius: '32px' }} />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SALARY GROWTH PROJECTOR */}
+
+            <section className={styles.salarySection}>
+                <div className="container">
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Dynamic Growth <span className={styles.heroHighlight}>Projector</span></h2>
+                        <p className={styles.heroSubtitle}>SIMULATE YOUR CAREER TRAJECTORY BASED ON INSTITUTIONAL CURRICULUM DATA.</p>
+                    </div>
+
+                    <div className={styles.calculatorCard}>
+                        <div className={styles.calcLeft}>
+                            <h3 className={styles.calcTitle}>Calculate Your Potential</h3>
+                            <div className={styles.calcGroup}>
+                                <label>Current Annual Salary</label>
+                                <div className={styles.calcInputWrapper}>
+                                    <span>₹</span>
+                                    <input
+                                        type="number"
+                                        value={salary}
+                                        onChange={(e) => setSalary(Number(e.target.value))}
+                                        placeholder="e.g. 600000"
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.calcGroup}>
+                                <label>Years of Experience</label>
+                                <select
+                                    className={styles.calcSelect}
+                                    value={experience}
+                                    onChange={(e) => setExperience(e.target.value)}
+                                >
+                                    <option>0-1 Years (Fresher)</option>
+                                    <option>1-3 Years</option>
+                                    <option>3-5 Years</option>
+                                    <option>5+ Years</option>
+                                </select>
+                            </div>
+                            <div className={styles.calcGroup}>
+                                <label>Target Domain</label>
+                                <div className={styles.calcTabs}>
+                                    {["Full Stack", "AI / ML", "DevOps"].map(t => (
+                                        <button
+                                            key={t}
+                                            className={domain === t ? styles.calcTabActive : styles.calcTab}
+                                            onClick={() => setDomain(t)}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className={styles.calcRight}>
+                            <div className={styles.resultCircle}>
+                                <div className={styles.resultValue}>
+                                    <CountUp end={projected.hike} suffix="%" />
+                                </div>
+                                <div className={styles.resultLabel}>Expected Hike</div>
+                            </div>
+                            <div className={styles.projectedSalary}>
+                                <span>Projected Package</span>
+                                <h4>₹{(projected.total / 100000).toFixed(2)} LPA</h4>
+                            </div>
+                            <button className={styles.demoBtn} style={{ width: '100%' }} onClick={() => openEnroll("Salary Projection")}>
+                                Get This Package <ArrowRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* PLACEMENT PROCESS ROADMAP */}
+            <section className={styles.roadmapSection}>
+                <div className="container">
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Institutional <span className={styles.heroHighlight}>Pathway</span></h2>
+                        <p className={styles.heroSubtitle}>SYSTEMATIC PROCESS TO TRANSITION INTO TIER-1 ENGINEERING TEAMS.</p>
+                    </div>
+
+                    <div className={styles.roadmapContainer}>
+                        <div className={styles.roadmapStep}>
+                            <div className={styles.stepNumber}>01</div>
+                            <h3 className={styles.stepTitle}>Profile Building</h3>
+                            <p className={styles.stepDesc}>WE HELP YOU CRAFT A DEADLY RESUME AND OPTIMIZE YOUR LINKEDIN PROFILE TO ATTRACT RECRUITERS.</p>
+                        </div>
+                        <div className={styles.roadmapStep}>
+                            <div className={styles.stepNumber}>02</div>
+                            <h3 className={styles.stepTitle}>Mock Interviews</h3>
+                            <p className={styles.stepDesc}>15+ MOCK INTERVIEWS WITH INDUSTRY EXPERTS TO HELP YOU MASTER TECHNICAL AND BEHAVIORAL ROUNDS.</p>
+                        </div>
+                        <div className={styles.roadmapStep}>
+                            <div className={styles.stepNumber}>03</div>
+                            <h3 className={styles.stepTitle}>Company Referrals</h3>
+                            <p className={styles.stepDesc}>OUR INTERNAL PORTAL GIVES YOU DIRECT REFERRALS TO OUR 500+ HIRING PARTNERS.</p>
+                        </div>
+                        <div className={styles.roadmapStep}>
+                            <div className={styles.stepNumber}>04</div>
+                            <h3 className={styles.stepTitle}>Negotiation & Offer</h3>
+                            <p className={styles.stepDesc}>WE DON'T JUST GET YOU AN OFFER; WE HELP YOU NEGOTIATE THE BEST POSSIBLE SALARY.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* RECRUITER INTELLIGENCE - HORIZONTAL MARQUEE */}
+            <section className={styles.recruiterSection} style={{ overflow: 'hidden' }}>
+                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                    <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Recruiter <span className={styles.heroHighlight}>Intelligence</span></h2>
+                    <p className={styles.heroSubtitle}>WHY TOP COMPANIES PREFER BYTECODE GRADUATES FOR CRITICAL ENGINEERING ROLES.</p>
+                </div>
+
+                <div className={styles.horizontalMarquee}>
+                    <div className={styles.horizontalTrackSlow}>
+                        {[...RECRUITER_VOICES, ...RECRUITER_VOICES].map((rec, i) => (
+                            <div key={i} className={styles.recruiterCard} style={{ minWidth: '450px' }}>
+                                <div className={styles.recruiterHeader}>
+                                    <img src={rec.image} alt={rec.name} className={styles.recruiterImage} />
+                                    <div>
+                                        <h4>{rec.name}</h4>
+                                        <div className={styles.recruiterRole}>{rec.role}</div>
+                                    </div>
+                                </div>
+                                <p className={styles.recruiterQuote}>"{rec.quote}"</p>
+                                <div className={styles.recruiterTrust}>
+                                    <CheckCircle size={16} color="#10b981" /> Verified Partner
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* PARTNERS MARQUEE - MOVED DOWN */}
             <section className={styles.partnersSection}>
                 <h3 style={{ textAlign: 'center', color: '#64748b', marginBottom: '3rem', letterSpacing: '2px', fontSize: '0.9rem' }}>TRUSTED BY GLOBAL TEAMS</h3>
                 <div className={styles.marqueeContainer}>
@@ -192,187 +378,10 @@ export default function Placements() {
                 </div>
             </section>
 
-            {/* SALARY GROWTH TOOL (Best and Best Dynamic Feature) */}
-            <section className={styles.salarySection}>
-                <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Dynamic Growth <span className={styles.heroHighlight}>Projector</span></h2>
-                        <p className={styles.heroSubtitle}>Simulate your career trajectory based on industry data.</p>
-                    </div>
-
-                    <div className={styles.calculatorCard}>
-                        <div className={styles.calcLeft}>
-                            <h3 className={styles.calcTitle}>Calculate Your Potential</h3>
-                            <div className={styles.calcGroup}>
-                                <label>Current Annual Salary</label>
-                                <div className={styles.calcInputWrapper}>
-                                    <span>₹</span>
-                                    <input type="text" defaultValue="5,00,000" />
-                                </div>
-                            </div>
-                            <div className={styles.calcGroup}>
-                                <label>Years of Experience</label>
-                                <select className={styles.calcSelect}>
-                                    <option>0-1 Years (Fresher)</option>
-                                    <option>1-3 Years</option>
-                                    <option>3-5 Years</option>
-                                    <option>5+ Years</option>
-                                </select>
-                            </div>
-                            <div className={styles.calcGroup}>
-                                <label>Target Domain</label>
-                                <div className={styles.calcTabs}>
-                                    <button className={styles.calcTabActive}>Full Stack</button>
-                                    <button className={styles.calcTab}>AI / ML</button>
-                                    <button className={styles.calcTab}>DevOps</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className={styles.calcRight}>
-                            <div className={styles.resultCircle}>
-                                <div className={styles.resultValue}>
-                                    <CountUp end={185} suffix="%" />
-                                </div>
-                                <div className={styles.resultLabel}>Expected Hike</div>
-                            </div>
-                            <div className={styles.projectedSalary}>
-                                <span>Projected Package</span>
-                                <h4>₹14.25 LPA</h4>
-                            </div>
-                            <button className={styles.demoBtn} style={{ width: '100%' }} onClick={() => openEnroll("Salary Projection")}>
-                                Get This Package <ArrowRight size={20} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* SUCCESS STORIES (Redesigned) */}
-            <section className={styles.wallSection}>
-                <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Wall of Fame</h2>
-                        <p className={styles.heroSubtitle}>Real people. Real results. Real impact.</p>
-                    </div>
-
-                    <div className={styles.filterBar}>
-                        {["All", "MAANG", "Product", "Unicorn", "Service"].map(cat => (
-                            <button key={cat} className={cat === "All" ? styles.filterBtnActive : styles.filterBtn}>
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className={styles.storyGrid}>
-                        {SUCCESS_STORIES.map((story, i) => (
-                            <motion.div
-                                key={i}
-                                className={styles.storyCard}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                            >
-                                <div className={styles.cardHeader}>
-                                    <div className={styles.profileImageWrapper}>
-                                        <img src={story.image} alt={story.name} className={styles.storyImage} />
-                                        <div className={styles.verifiedBadge} title="Verified Alumni">
-                                            <CheckCircle size={14} />
-                                        </div>
-                                    </div>
-                                    <div className={styles.companyLogoPlaceholder}>
-                                        {story.company}
-                                    </div>
-                                </div>
-
-                                <h3 className={styles.storyName}>{story.name}</h3>
-                                <div className={styles.storyRole}>{story.role} @ {story.company}</div>
-
-                                <div className={styles.salaryHighlight}>
-                                    <span className={styles.salaryLabel}>Package Achieved</span>
-                                    <span className={styles.salaryValue}>{story.package}</span>
-                                </div>
-
-                                <p className={styles.storyQuote}>"{story.quote}"</p>
-
-                                <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
-                                    <span style={{ fontSize: '0.8rem' }}>Prior Salary:</span>
-                                    <span className={styles.prevSalary}>{story.prev}</span>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* PLACEMENT PROCESS ROADMAP (New Feature) */}
-            <section className={styles.roadmapSection}>
-                <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>How We Get You Hired</h2>
-                        <p className={styles.heroSubtitle}>Our dedicated placement cell works with you at every step.</p>
-                    </div>
-
-                    <div className={styles.roadmapContainer}>
-                        <div className={styles.roadmapStep}>
-                            <div className={styles.stepNumber}>01</div>
-                            <h3 className={styles.stepTitle}>Profile Building</h3>
-                            <p className={styles.stepDesc}>We help you craft a deadly resume and optimize your LinkedIn profile to attract recruiters.</p>
-                        </div>
-                        <div className={styles.roadmapStep}>
-                            <div className={styles.stepNumber}>02</div>
-                            <h3 className={styles.stepTitle}>Mock Interviews</h3>
-                            <p className={styles.stepDesc}>15+ Mock interviews with industry experts to help you master technical and behavioral rounds.</p>
-                        </div>
-                        <div className={styles.roadmapStep}>
-                            <div className={styles.stepNumber}>03</div>
-                            <h3 className={styles.stepTitle}>Company Referrals</h3>
-                            <p className={styles.stepDesc}>Our internal portal gives you direct referrals to our 500+ hiring partners.</p>
-                        </div>
-                        <div className={styles.roadmapStep}>
-                            <div className={styles.stepNumber}>04</div>
-                            <h3 className={styles.stepTitle}>Negotiation & Offer</h3>
-                            <p className={styles.stepDesc}>We don't just get you an offer; we help you negotiate the best possible salary.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* RECRUITER VOICES (New Feature) */}
-            <section className={styles.recruiterSection}>
-                <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '2.5rem' }}>What Hiring Managers Say</h2>
-                        <p className={styles.heroSubtitle}>Why top companies prefer ByteCode graduates.</p>
-                    </div>
-
-                    <div className={styles.recruiterGrid}>
-                        <div className={styles.recruiterCard}>
-                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80" alt="Recruiter" className={styles.recruiterImage} />
-                            <div className={styles.recruiterContent}>
-                                <h4>James Wilson</h4>
-                                <div className={styles.recruiterRole}>HR Director @ Flipkart</div>
-                                <p className={styles.recruiterQuote}>"ByteCode students come with practical project experience that is rare to find in freshers. Changes our training timelines significantly."</p>
-                            </div>
-                        </div>
-                        <div className={styles.recruiterCard}>
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80" alt="Recruiter" className={styles.recruiterImage} />
-                            <div className={styles.recruiterContent}>
-                                <h4>Sarah Jenkins</h4>
-                                <div className={styles.recruiterRole}>Tech Lead @ Swiggy</div>
-                                <p className={styles.recruiterQuote}>"The system design knowledge these candidates possess is impressive. They are ready to deploy from Day 1."</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-
-
-            {/* DEMO SECTION */}
+            {/* CTA SECTION */}
             <section className="container">
                 <div className={styles.demoSection}>
-                    <h2 className={styles.heroTitle} style={{ fontSize: '2rem' }}>Not Sure Which Path To Choose?</h2>
+                    <h2 className={styles.heroTitle} style={{ fontSize: '2rem' }}>Ready to Scale Your Career?</h2>
                     <p className={styles.heroSubtitle} style={{ marginBottom: '2rem' }}>
                         Attend a free demo session with our lead instructors and see the magic happen live.
                     </p>
@@ -383,7 +392,6 @@ export default function Placements() {
             </section>
 
             <EnrollModal isOpen={showModal} onClose={() => setShowModal(false)} course={selectedCourse} />
-            <HiredTicker />
 
             <Footer />
         </main>
@@ -434,48 +442,6 @@ function EnrollModal({ isOpen, onClose, course }: any) {
                     </form>
                 </motion.div>
             </motion.div>
-        </AnimatePresence>
-    );
-}
-
-function HiredTicker() {
-    const [index, setIndex] = useState(0);
-    const [visible, setVisible] = useState(false);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setVisible(true);
-            setTimeout(() => {
-                setVisible(false);
-                setTimeout(() => {
-                    setIndex((prev) => (prev + 1) % LIVE_HIRES.length);
-                }, 500);
-            }, 5000);
-        }, 8000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const current = LIVE_HIRES[index];
-
-    return (
-        <AnimatePresence>
-            {visible && (
-                <motion.div
-                    className={styles.hiredToast}
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: 100, opacity: 0 }}
-                >
-                    <div className={styles.toastIcon}>
-                        <Zap size={24} />
-                    </div>
-                    <div className={styles.toastContent}>
-                        <h4>{current.name} just got hired!</h4>
-                        <p>{current.role} @ {current.company}</p>
-                    </div>
-                </motion.div>
-            )}
         </AnimatePresence>
     );
 }

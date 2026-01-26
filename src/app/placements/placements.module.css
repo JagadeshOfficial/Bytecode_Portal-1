@@ -159,6 +159,33 @@
     transform: scale(1.1);
 }
 
+.horizontalMarquee {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 2rem 0;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.horizontalTrack {
+    display: flex;
+    gap: 2rem;
+    width: max-content;
+    animation: scroll 60s linear infinite;
+}
+
+.horizontalTrackSlow {
+    display: flex;
+    gap: 2.5rem;
+    width: max-content;
+    animation: scroll 80s linear infinite;
+}
+
+.horizontalMarquee:hover .horizontalTrack,
+.horizontalMarquee:hover .horizontalTrackSlow {
+    animation-play-state: paused;
+}
+
 /* CALC CARD */
 .calculatorCard {
     background: rgba(15, 23, 42, 0.5);
@@ -343,41 +370,48 @@
 
 .storyGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
     perspective: 1000px;
-    /* Enable 3D space */
 }
 
 .storyCard {
-    background: rgba(10, 15, 30, 0.8);
+    background: rgba(15, 23, 42, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 24px;
-    padding: 2.5rem;
+    border-radius: 20px;
+    padding: 1.75rem;
     position: relative;
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
     transform-style: preserve-3d;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    width: 380px;
+    flex-shrink: 0;
 }
 
 .storyCard:hover {
-    transform: translateY(-15px) rotateX(5deg) scale(1.02);
-    border-color: rgba(59, 130, 246, 0.5);
-    box-shadow:
-        0 30px 60px -15px rgba(59, 130, 246, 0.25),
-        0 0 0 1px rgba(59, 130, 246, 0.2);
-    background: linear-gradient(145deg, rgba(20, 30, 50, 0.9), rgba(10, 15, 30, 0.95));
+    transform: translateY(-10px);
+    border-color: #3b82f6;
+    background: rgba(30, 41, 59, 0.6);
+    box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .storyImage {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
     object-fit: cover;
-    border: 2px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
     transition: transform 0.5s;
 }
 
@@ -407,25 +441,107 @@
 }
 
 .salaryHighlight {
-    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent);
-    border-left: 4px solid #22c55e;
-    padding: 1rem;
-    border-radius: 0 12px 12px 0;
+    background: rgba(34, 197, 94, 0.05);
+    border-left: 3px solid #22c55e;
+    padding: 0.75rem 1rem;
+    border-radius: 0 10px 10px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0.5rem 0;
+    margin: 0.25rem 0;
 }
 
 .salaryValue {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: #22c55e;
     font-family: 'Rajdhani', sans-serif;
-    text-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
 }
 
-/* DEMO CALLOUT - Pulsing Button */
+.hikeBadge {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+/* FAANG SECTION */
+.faangSection {
+    padding: 10rem 0;
+    background: linear-gradient(to bottom, #020617, #0f172a, #020617);
+}
+
+.faangGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+}
+
+.faangImageWrap {
+    height: 600px;
+    position: relative;
+    border-radius: 32px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.faangGlow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.3), transparent 70%);
+    animation: pulse 4s infinite;
+}
+
+.drillList {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.drillItem {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+}
+
+.drillItem:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(15px);
+    border-color: #3b82f6;
+}
+
+.drillIcon {
+    width: 50px;
+    height: 50px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drillItem h4 {
+    color: white;
+    font-size: 1.15rem;
+    margin-bottom: 0.25rem;
+}
+
+.drillItem p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* DEMO CALLOUT */
 .demoSection {
     margin: 8rem 0;
     text-align: center;
@@ -699,51 +815,60 @@
 
 .recruiterGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 2rem;
 }
 
 .recruiterCard {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 2.5rem;
-    border-radius: 20px;
+    border-radius: 24px;
     display: flex;
+    flex-direction: column;
     gap: 1.5rem;
     transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 
 .recruiterCard:hover {
-    background: rgba(255, 255, 255, 0.04);
-    transform: translateX(10px);
+    background: rgba(30, 41, 59, 0.8);
+    transform: translateY(-5px);
+    border-color: #10b981;
+}
+
+.recruiterHeader {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
 }
 
 .recruiterImage {
-    width: 64px;
-    height: 64px;
-    border-radius: 12px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     object-fit: cover;
-    filter: grayscale(100%);
-    transition: filter 0.3s;
+    border: 2px solid #10b981;
 }
 
-.recruiterCard:hover .recruiterImage {
-    filter: grayscale(0%);
-}
-
-.recruiterContent h4 {
-    color: white;
+.recruiterQuote {
+    color: #cbd5e1;
+    font-style: italic;
     font-size: 1.1rem;
-    margin-bottom: 0.25rem;
+    line-height: 1.6;
+    border-left: 2px solid #10b981;
+    padding-left: 1rem;
 }
 
-.recruiterRole {
-    color: #3b82f6;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
+.recruiterTrust {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #10b981;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
 }
 
 /* LIVE BADGE */

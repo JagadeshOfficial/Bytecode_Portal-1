@@ -4,6 +4,21 @@
     color: var(--text-bright);
     padding-top: 100px;
     overflow-x: hidden;
+    position: relative;
+}
+
+.mouseGlow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease-out;
 }
 
 /* 1. HERO SECTION */
@@ -188,6 +203,8 @@
     box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
     position: relative;
     transition: all 0.5s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
 .spotlightCard:hover {
@@ -200,6 +217,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: flex-start;
 }
 
 .spotlightBadge {
@@ -343,7 +361,7 @@
 .searchSection {
     padding: 2rem 0;
     position: sticky;
-    top: 90px;
+    top: 100px;
     z-index: 100;
 }
 
@@ -425,6 +443,8 @@
     transition: all 0.5s var(--ease-elastic);
     display: flex;
     flex-direction: column;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
 .courseCard:hover {
@@ -564,6 +584,8 @@
     justify-content: space-between;
     align-items: center;
     margin-top: 1.5rem;
+    position: relative;
+    z-index: 10;
 }
 
 .cardPrice {
@@ -574,24 +596,30 @@
 }
 
 .enrollBtn {
-    background: var(--text-bright);
-    color: var(--bg-void);
-    padding: 0.8rem 2rem;
-    border-radius: 12px;
-    font-weight: 950;
-    font-size: 0.9rem;
+    background: var(--grad-main);
+    color: white;
+    padding: 0.9rem 2.2rem;
+    border-radius: 14px;
+    font-weight: 850;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: 0.4s var(--ease-elastic);
-    border: none;
+    transition: 0.4s all;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     text-transform: uppercase;
     font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    position: relative;
+    z-index: 5;
 }
 
 .enrollBtn:hover {
-    background: var(--primary);
-    color: white;
-    transform: scale(1.05);
-    box-shadow: var(--glow-lg);
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+    transform: translateY(-2px);
+    border-color: white;
 }
 
 /* 8. VIDEO SECTION */
@@ -739,27 +767,97 @@
     }
 }
 
+.storyHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.storyAvatar {
+    border-radius: 50%;
+    border: 3px solid var(--primary);
+    padding: 3px;
+    object-fit: cover;
+}
+
+.storyAvatarWrap {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    position: relative;
+}
+
+.storyInfo h4 {
+    font-size: 1.1rem;
+    font-weight: 900;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+    color: #fff;
+}
+
+.storyInfo p {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.storyPackage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--grad-main);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 950;
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+}
+
 .reviewCard {
-    min-width: 400px;
-    background: var(--bg-panel);
-    border: var(--border-faint);
+    width: 420px;
+    flex-shrink: 0;
+    background: rgba(15, 10, 40, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 2.5rem;
     border-radius: 24px;
     position: relative;
-    transition: 0.3s;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
 }
 
 .reviewCard:hover {
-    border-color: var(--primary);
-    background: rgba(124, 58, 237, 0.05);
+    border-color: var(--secondary);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.6);
+}
+
+.quoteWrapper {
+    margin: 1.25rem 0;
+    line-height: 0;
+}
+
+.quoteIcon {
+    opacity: 0.15;
+    color: var(--primary);
+    transform: rotate(180deg);
 }
 
 .reviewText {
     font-size: 1.1rem;
-    line-height: 1.6;
-    font-style: italic;
-    color: var(--text-glow);
-    margin: 1.5rem 0;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .reviewerInfo h4 {
@@ -834,8 +932,8 @@
     background: var(--bg-nebula);
     border: var(--border-luminous);
     width: 100%;
-    max-width: 1000px;
-    height: 75vh;
+    max-width: 1100px;
+    height: 80vh;
     border-radius: 32px;
     overflow: hidden;
     position: relative;
@@ -845,13 +943,13 @@
 
 .modalCloseIcon {
     position: absolute;
-    top: 2rem;
-    right: 2rem;
+    top: 1.5rem;
+    right: 1.5rem;
     background: rgba(255, 255, 255, 0.05);
     border: none;
     color: white;
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -872,18 +970,45 @@
 }
 
 .modalSidebar {
-    width: 350px;
-    background: rgba(0, 0, 0, 0.4);
+    width: 320px;
+    background: rgba(10, 5, 30, 0.4);
     border-right: var(--border-faint);
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.modalSidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modalSidebar::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.3);
+}
+
+.modalImageWrapper {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid #7c3aed;
+    flex-shrink: 0;
+}
+
+.modalImageWrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(10, 5, 30, 0.8));
 }
 
 .modalMainContent {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 3rem;
+    padding: 2.5rem;
     overflow-y: auto;
     position: relative;
 }
@@ -893,14 +1018,15 @@
     border: none;
     color: var(--text-dim);
     font-weight: 800;
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     cursor: pointer;
-    padding: 1.5rem 0;
-    margin-right: 4rem;
+    padding: 0.75rem 0;
     position: relative;
     transition: 0.3s;
     font-family: 'Rajdhani', sans-serif;
     text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
 }
 
 .modalTabBtn.active {
@@ -923,15 +1049,17 @@
     background: var(--grad-main);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 1.5rem;
-    border-radius: 24px;
+    padding: 1rem;
+    border-radius: 18px;
     font-weight: 950;
-    font-size: 1.1rem;
+    font-size: 1rem;
     cursor: pointer;
-    margin-top: 2rem;
+    margin-top: 1rem;
     transition: 0.3s var(--ease-elastic);
     text-transform: uppercase;
     font-family: 'Rajdhani', sans-serif;
+    position: relative;
+    z-index: 5;
 }
 
 .modalEnrollBtn:hover {
@@ -940,21 +1068,93 @@
 }
 
 .modalPriceSection {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1.5rem;
     border-radius: 20px;
     margin-top: auto;
-    margin: 1.5rem;
+    margin: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .tabScrollArea {
-    margin-top: 3rem;
+    margin-top: 1.5rem;
+    flex: 1;
 }
 
 .overviewText p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     line-height: 1.8;
     color: var(--text-dim);
+}
+
+.mentorGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.mentorCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: 0.3s;
+}
+
+.mentorCard:hover {
+    background: rgba(124, 58, 237, 0.1);
+    border-color: var(--primary);
+}
+
+.mentorAvatar {
+    width: 60px;
+    height: 60px;
+    background: var(--grad-main);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.placementGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.placementMiniCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.25rem;
+    border-radius: 18px;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.miniAvatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.miniInfo h5 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.miniInfo p {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
 }
 
 /* RESPONSIVE */
@@ -1028,5 +1228,108 @@
         bottom: 1rem;
         right: 1rem;
         max-width: none;
+    }
+}
+
+/* ADVANCED LIVE INDICATORS */
+.liveSignals {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.signal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    background: rgba(34, 211, 238, 0.05);
+    padding: 6px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(34, 211, 238, 0.1);
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: signalPulse 2s infinite;
+}
+
+@keyframes signalPulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.downloadBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    color: var(--accent);
+    padding: 1rem;
+    border-radius: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s;
+    margin-top: 0.75rem;
+    font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+}
+
+.downloadBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.floatingIcons {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.floatIcon {
+    position: absolute;
+    opacity: 0.2;
+    filter: blur(1px);
+    animation: floatSlow 10s infinite;
+}
+
+@keyframes floatSlow {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    33% {
+        transform: translate(30px, -50px) rotate(10deg);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) rotate(-10deg);
     }
 }
