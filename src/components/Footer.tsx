@@ -16,9 +16,9 @@ export default function Footer() {
                             <Image
                                 src="/logo.png"
                                 alt="ByteCode Logo"
-                                layout="fill"
+                                width={160}
+                                height={45}
                                 objectFit="contain"
-                                objectPosition="left"
                             />
                         </Link>
                         <p className={styles.brandDesc}>

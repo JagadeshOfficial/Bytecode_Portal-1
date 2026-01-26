@@ -1,12 +1,10 @@
 .heroSection {
     position: relative;
     min-height: 100vh;
-    margin-top: -80px;
-    /* Counter navbar height */
-    padding: 220px 0 100px;
+    padding: 120px 0 100px;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;
     background-image:
         linear-gradient(rgba(3, 0, 20, 0.9), rgba(3, 0, 20, 0.95)),
         url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
@@ -133,42 +131,89 @@
 
 .primaryCta {
     position: relative;
-    padding: 1rem 2.5rem;
+    padding: 1.1rem 3rem;
     background: white;
     color: black;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
     overflow: hidden;
-    transition: transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1);
 }
 
 .primaryCta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 50px rgba(255, 255, 255, 0.3);
+}
+
+.ctaText {
+    position: relative;
+    z-index: 2;
+}
+
+.ctaArrow {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+}
+
+.shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.8),
+            transparent);
+    transform: skewX(-20deg);
+    z-index: 1;
 }
 
 .secondaryCta {
-    padding: 1rem 2.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 1.1rem 3rem;
+    background: rgba(255, 255, 255, 0.03);
     color: white;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: 600;
     border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    transition: all 0.2s;
-    font-size: 1.1rem;
+    backdrop-filter: blur(15px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 1.15rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.portalText {
+    position: relative;
+    z-index: 2;
+}
+
+.portalGlow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--mouseX, 50%) var(--mouseY, 50%), rgba(124, 58, 237, 0.15) 0%, transparent 80%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+.secondaryCta:hover .portalGlow {
+    opacity: 1;
 }
 
 .secondaryCta:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 .statsGrid {
