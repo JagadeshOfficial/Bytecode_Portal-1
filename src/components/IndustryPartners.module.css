@@ -78,7 +78,7 @@
     display: flex;
     gap: 4rem;
     width: max-content;
-    animation: marqueeMove 80s linear infinite;
+    animation: marqueeMove 160s linear infinite;
 }
 
 .marqueeTrack::before {
@@ -119,14 +119,14 @@
     position: relative;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 2rem 4rem;
-    border-radius: 24px;
+    padding: 0;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    min-width: 200px;
-    height: 120px;
+    min-width: 170px;
+    height: 90px;
 }
 
 .partnerCard:hover {
