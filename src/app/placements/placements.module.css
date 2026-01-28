@@ -122,45 +122,98 @@
 
 /* MARQUEE SECTION - Seamless Scroll */
 .partnersSection {
-    padding: 6rem 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(0, 0, 0, 0.3);
+    padding: 8rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    background:
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.05), transparent 40%),
+        radial-gradient(circle at 80% 50%, rgba(16, 185, 129, 0.05), transparent 40%),
+        rgba(0, 0, 0, 0.4);
+    position: relative;
     overflow: hidden;
+}
+
+.partnersSection::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
 }
 
 .marqueeContainer {
     width: 100%;
     overflow: hidden;
-    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    padding: 2rem 0;
 }
 
 .marqueeTrack {
     display: flex;
-    gap: 6rem;
-    animation: scroll 80s linear infinite;
+    gap: 3.5rem;
+    animation: marqueeFlow 60s linear infinite;
     width: max-content;
+    align-items: center;
+}
+
+@keyframes marqueeFlow {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .partnerLogoWrapper {
-    width: 180px;
-    height: 80px;
+    width: 160px;
+    height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: grayscale(1) opacity(0.5);
-    padding: 1rem;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    filter: grayscale(1) opacity(0.4);
+    position: relative;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .partnerLogoWrapper:hover {
-    filter: grayscale(0) opacity(1) drop-shadow(0 0 10px rgba(59, 130, 246, 0.2));
-    transform: scale(1.15) translateY(-5px);
+    filter: grayscale(0) opacity(1);
+    transform: translateY(-8px) scale(1.1);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow:
+        0 20px 40px -10px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.partnerLogoWrapper::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 10px;
+    background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.2), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.partnerLogoWrapper:hover::after {
+    opacity: 1;
 }
 
 .partnerLogoImage {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    transition: filter 0.4s;
 }
 
 .horizontalMarquee {
