@@ -115,34 +115,27 @@ const FAANG_DRILLS = [
 
 const getCompanyLogo = (company: string) => {
     const mapping: { [key: string]: string } = {
-        'Forsys': 'forsysinc.com',
-        'Absolute Labs': 'absolutelabs.io',
-        'Tech Mahendra': 'techmahindra.com',
-        'Cloud Leaf L.L.C': 'cloudleaf.com',
-        'Centillion Networks': 'centillionnetworks.com',
-        'Nemali Software Solutions': 'nemalisoftware.com',
-        'Arcitech': 'architech.ca',
-        'Terralogic': 'terralogic.com',
-        'Teachmint': 'teachmint.com',
-        'Cognizant': 'cognizant.com',
-        'Accenture': 'accenture.com',
-        'Gemini': 'gemini.com',
-        'Amazon': 'amazon.com',
-        'Microsoft': 'microsoft.com',
-        'Adobe': 'adobe.com',
-        'Uber': 'uber.com',
-        'Zerodha': 'zerodha.com',
-        'Cred': 'cred.club',
-        'Google Cloud': 'cloud.google.com',
-        'Netflix': 'netflix.com',
-        'Razorpay': 'razorpay.com',
-        'Meta': 'meta.com',
-        'Apple': 'apple.com',
-        'Canva': 'canva.com',
-        'Tesla': 'tesla.com'
+        'Google': '1',
+        'Microsoft': '2',
+        'Amazon': '5',
+        'Netflix': '4',
+        'Adobe': '3',
+        'Uber': '6',
+        'Meta': '7',
+        'Apple': '8'
     };
-    const domain = mapping[company] || `${company.toLowerCase().replace(/\s+/g, '')}.com`;
-    return `https://logo.clearbit.com/${domain}`;
+
+    if (mapping[company]) {
+        return `/CompanyLogos/${mapping[company]}.png`;
+    }
+
+    // Deterministic hash to map any company to one of the 29 logos
+    let hash = 0;
+    for (let i = 0; i < company.length; i++) {
+        hash = company.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const logoNumber = (Math.abs(hash) % 29) + 1;
+    return `/CompanyLogos/${logoNumber}.png`;
 };
 
 export default function Placements() {
@@ -167,6 +160,18 @@ export default function Placements() {
             total: Math.round(finalSalary)
         });
     }, [salary, experience, domain]);
+
+    const [particles, setParticles] = useState<any[]>([]);
+
+    useEffect(() => {
+        setParticles([...Array(15)].map((_, i) => ({
+            id: i,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            duration: `${Math.random() * 12 + 8}s`,
+            delay: `${Math.random() * 5}s`
+        })));
+    }, []);
 
     const openEnroll = (course: string = "") => {
         setSelectedCourse(course);
@@ -214,17 +219,79 @@ export default function Placements() {
                 </div>
             </section>
 
-            {/* RECENT PLACEMENTS - HORIZONTAL MARQUEE */}
-            <section className={styles.wallSection}>
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <h2 className={styles.heroTitle} style={{ fontSize: '3.5rem' }}>Elite <span className={styles.heroHighlight}>Network</span></h2>
-                    <p className={styles.heroSubtitle}>Latest alumni secured in high-impact engineering roles one after another.</p>
+            {/* RECENT PLACEMENTS - DYNAMIC GRID */}
+            <section className={styles.wallSection} style={{ position: 'relative' }}>
+                <div className={styles.scanline} />
+                <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+                    {particles.map((p) => (
+                        <div
+                            key={p.id}
+                            className={styles.bgParticle}
+                            style={{
+                                left: p.left,
+                                top: p.top,
+                                animationDuration: p.duration,
+                                animationDelay: p.delay
+                            }}
+                        />
+                    ))}
                 </div>
 
-                <div className={styles.horizontalMarquee}>
-                    <div className={styles.horizontalTrack}>
-                        {[...SUCCESS_STORIES, ...SUCCESS_STORIES].map((story, i) => (
-                            <div key={i} className={styles.storyCard}>
+                <div className="container" style={{ position: 'relative', zIndex: 10 }}>
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className={styles.heroTitle}
+                            style={{ fontSize: '3.5rem' }}
+                        >
+                            Elite <span className={styles.heroHighlight}>Network</span>
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className={styles.heroSubtitle}
+                        >
+                            Advanced outcomes from our institutional ecosystem.
+                            Showcasing {SUCCESS_STORIES.length} verified excellence transitions.
+                        </motion.p>
+                    </div>
+
+                    <motion.div
+                        className={styles.storyGrid}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-50px" }}
+                        variants={{
+                            hidden: { opacity: 0 },
+                            visible: {
+                                opacity: 1,
+                                transition: {
+                                    staggerChildren: 0.05
+                                }
+                            }
+                        }}
+                    >
+                        {SUCCESS_STORIES.map((story, i) => (
+                            <motion.div
+                                key={i}
+                                className={styles.storyCard}
+                                onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const x = e.clientX - rect.left;
+                                    const y = e.clientY - rect.top;
+                                    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+                                    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+                                }}
+                                variants={{
+                                    hidden: { opacity: 0, y: 40, scale: 0.95 },
+                                    visible: { opacity: 1, y: 0, scale: 1 }
+                                }}
+                                whileHover={{ y: -20, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+                            >
                                 <div className={styles.cardHeader}>
                                     <div className={styles.profileImageWrapper}>
                                         <img src={story.image} alt={story.name} className={styles.storyImage} />
@@ -245,23 +312,37 @@ export default function Placements() {
                                 </div>
 
                                 <div className={styles.storyRole}>
-                                    {story.role} @ <span style={{ color: '#fff' }}>{story.company}</span>
+                                    {story.role} @ <span style={{ color: '#fff', fontWeight: 700 }}>{story.company}</span>
                                 </div>
 
                                 <div className={styles.salaryHighlight}>
-                                    <span className={styles.salaryLabel}>Package Achieved</span>
-                                    <span className={styles.salaryValue}>{story.package}</span>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <span className={styles.salaryLabel}>Package Achieved</span>
+                                        <span className={styles.salaryValue}>
+                                            {(() => {
+                                                const match = story.package.match(/^([\d.]+)(.*)$/);
+                                                if (match) {
+                                                    return <CountUp end={parseFloat(match[1])} suffix={match[2]} duration={2} />;
+                                                }
+                                                return story.package;
+                                            })()}
+                                        </span>
+                                    </div>
+                                    <div className={styles.hikeBadge}>+ <CountUp end={story.hike} suffix="%" duration={3} /> Hike</div>
                                 </div>
 
                                 <p className={styles.storyQuote}>"{story.quote}"</p>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Prior Package: {story.prev}</span>
-                                    <div className={styles.hikeBadge}>+ {story.hike}% Hike</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Target size={14} color="#3b82f6" />
+                                        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Prior: {story.prev}</span>
+                                    </div>
+                                    <ArrowRight size={18} color="#3b82f6" style={{ opacity: 0.5 }} />
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -425,14 +506,18 @@ export default function Placements() {
                 </div>
             </section>
 
-            {/* PARTNERS MARQUEE - MOVED DOWN */}
+            {/* COLLEGES & PARTNERS LOGO SCROLL */}
             <section className={styles.partnersSection}>
-                <h3 style={{ textAlign: 'center', color: '#64748b', marginBottom: '3rem', letterSpacing: '2px', fontSize: '0.9rem' }}>TRUSTED BY GLOBAL TEAMS</h3>
+                <h3 style={{ textAlign: 'center', color: '#64748b', marginBottom: '4rem', letterSpacing: '3px', fontSize: '0.9rem', fontWeight: 700 }}>OUR HIRING & ACADEMIC PARTNERS</h3>
                 <div className={styles.marqueeContainer}>
                     <div className={styles.marqueeTrack}>
-                        {[...PARTNERS, ...PARTNERS, ...PARTNERS].map((partner, i) => (
-                            <div key={i} className={styles.partnerLogo}>
-                                <Briefcase size={24} /> {partner}
+                        {[...Array(29), ...Array(29)].map((_, i) => (
+                            <div key={i} className={styles.partnerLogoWrapper}>
+                                <img
+                                    src={`/CompanyLogos/${(i % 29) + 1}.png`}
+                                    alt={`Partner Logo ${(i % 29) + 1}`}
+                                    className={styles.partnerLogoImage}
+                                />
                             </div>
                         ))}
                     </div>
@@ -455,7 +540,7 @@ export default function Placements() {
             <EnrollModal isOpen={showModal} onClose={() => setShowModal(false)} course={selectedCourse} />
 
             <Footer />
-        </main>
+        </main >
     );
 }
 

@@ -141,22 +141,26 @@
     width: max-content;
 }
 
-.partnerLogo {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: rgba(255, 255, 255, 0.3);
+.partnerLogoWrapper {
+    width: 180px;
+    height: 80px;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    transition: all 0.3s;
-    text-transform: uppercase;
-    font-family: 'Rajdhani', sans-serif;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: grayscale(1) opacity(0.5);
+    padding: 1rem;
 }
 
-.partnerLogo:hover {
-    color: white;
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
-    transform: scale(1.1);
+.partnerLogoWrapper:hover {
+    filter: grayscale(0) opacity(1) drop-shadow(0 0 10px rgba(59, 130, 246, 0.2));
+    transform: scale(1.15) translateY(-5px);
+}
+
+.partnerLogoImage {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .horizontalMarquee {
@@ -171,7 +175,6 @@
     display: flex;
     gap: 2rem;
     width: max-content;
-    animation: scroll 120s linear infinite;
 }
 
 .horizontalTrackSlow {
@@ -366,37 +369,130 @@
     padding: 10rem 0;
     position: relative;
     background: radial-gradient(circle at 50% 10%, rgba(59, 130, 246, 0.05), transparent 60%);
+    overflow: hidden;
+}
+
+.wallSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.scanline {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.2), transparent);
+    opacity: 0.5;
+    pointer-events: none;
+    animation: scan 8s linear infinite;
+    z-index: 5;
+}
+
+@keyframes scan {
+    0% {
+        top: -100px;
+    }
+
+    100% {
+        top: 100%;
+    }
 }
 
 .storyGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.5rem;
-    perspective: 1000px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    perspective: 2000px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .storyGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .storyGrid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .storyCard {
     background: rgba(15, 23, 42, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 1.75rem;
+    border-radius: 28px;
+    padding: 2.5rem;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.8rem;
     transform-style: preserve-3d;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    width: 380px;
-    flex-shrink: 0;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    width: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.storyCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+            rgba(59, 130, 246, 0.15),
+            transparent 40%);
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.storyCard:hover::before {
+    opacity: 1;
 }
 
 .storyCard:hover {
-    transform: translateY(-10px);
-    border-color: #3b82f6;
-    background: rgba(30, 41, 59, 0.6);
-    box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2);
+    transform: translateY(-20px) rotateX(4deg) rotateY(2deg);
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(30, 41, 59, 0.5);
+    box-shadow:
+        0 50px 100px -20px rgba(0, 0, 0, 0.8),
+        0 0 40px -10px rgba(59, 130, 246, 0.2),
+        inset 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.storyCard::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            transparent 0%,
+            rgba(59, 130, 246, 0.02) 50%,
+            transparent 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.storyCard:hover::before {
+    opacity: 1;
 }
 
 .cardHeader {
@@ -433,11 +529,57 @@
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
-.storyInfo h3 {
-    font-size: 1.6rem;
+.storyName {
+    font-size: 1.5rem;
     color: white;
     font-family: 'Rajdhani', sans-serif;
-    margin-bottom: 0.25rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.profileImageWrapper {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+}
+
+.verifiedBadge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: #3b82f6;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #020617;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(59, 130, 246, 0.6);
+    z-index: 5;
+    animation: badgeBloom 2s ease-in-out infinite alternate;
+}
+
+@keyframes badgeBloom {
+    from {
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    }
+
+    to {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+}
+
+.salaryLabel {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .salaryHighlight {
@@ -452,20 +594,52 @@
 }
 
 .salaryValue {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    color: #22c55e;
+    color: #4ade80;
     font-family: 'Rajdhani', sans-serif;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+    letter-spacing: 0.5px;
 }
 
 .hikeBadge {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(16, 185, 129, 0.1);
     color: #4ade80;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.5px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+}
+
+/* Background Particle Animation */
+.bgParticle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #3b82f6;
+    border-radius: 50%;
+    opacity: 0.3;
+    pointer-events: none;
+    animation: floatParticle linear infinite;
+}
+
+@keyframes floatParticle {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translateY(-100vh) scale(1.5);
+        opacity: 0;
+    }
 }
 
 /* FAANG SECTION */
