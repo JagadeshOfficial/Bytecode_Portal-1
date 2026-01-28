@@ -52,6 +52,24 @@ const PARTNERS = [
 ];
 
 const SUCCESS_STORIES = [
+    { name: "Vamsi Tammisetty", role: "Software Engineer", company: "Cognizant", package: "3.5 LPA", prev: "Fresher", image: "/placements/Vamsi-T.png", quote: "The foundation built here helped me crack my first tech role.", hike: 100 },
+    { name: "Jagadesh", role: "Backend Developer", company: "Forsys", package: "4 LPA", prev: "Fresher", image: "/placements/Jagadesh.png", quote: "Practical projects gave me the edge during technical rounds.", hike: 120 },
+    { name: "Vamsi K", role: "Software Engineer", company: "Cognizant", package: "3.5 LPA", prev: "Fresher", image: "/placements/Vamsi-K.png", quote: "Step-by-step guidance made my transition into tech very smooth.", hike: 100 },
+    { name: "Rajasekhar", role: "Full Stack Developer", company: "Accenture", package: "5 LPA", prev: "Fresher", image: "/placements/Rajasekhar.png", quote: "Direct mentorship from industry experts is invaluable.", hike: 150 },
+    { name: "Manoj", role: "Associate Developer", company: "Absolute Labs", package: "5 LPA", prev: "Fresher", image: "/placements/Manoj.png", quote: "The platform's recursive training approach is truly unique.", hike: 150 },
+    { name: "Sampath", role: "Systems Engineer", company: "Accenture", package: "5 LPA", prev: "Fresher", image: "/placements/Sampath.png", quote: "Focusing on core fundamentals was the key to my success.", hike: 150 },
+    { name: "Karthik", role: "Software Engineer", company: "Accenture", package: "4 LPA", prev: "Fresher", image: "/placements/Karthik.png", quote: "Mock interviews prepared me for exactly what to expect.", hike: 120 },
+    { name: "Prasad", role: "Associate Engineer", company: "Gemini", package: "3.5 LPA", prev: "Fresher", image: "/placements/Prasad.png", quote: "A great place for freshers to start their software journey.", hike: 100 },
+    { name: "Ganesh", role: "Software Engineer", company: "Tech Mahendra", package: "5 LPA", prev: "Fresher", image: "/placements/Ganesh-K.png", quote: "Curriculum is perfectly aligned with what the industry needs.", hike: 150 },
+    { name: "Harish", role: "Developer", company: "Cloud Leaf L.L.C", package: "5 LPA", prev: "Fresher", image: "/placements/Harish-K.png", quote: "The hands-on assignments helped me understand complex concepts.", hike: 150 },
+    { name: "Santhavana", role: "Software Engineer", company: "Cognizant", package: "4 LPA", prev: "Fresher", image: "/placements/Santhavana.png", quote: "I constant support from recruiters made a huge difference.", hike: 120 },
+    { name: "Phani B", role: "Junior Developer", company: "Centillion Networks", package: "3.5 LPA", prev: "Fresher", image: "/placements/Phani.png", quote: "The real-world project simulations were very helpful.", hike: 100 },
+    { name: "Rishi", role: "Software Engineer", company: "Innovation Labs", package: "3.5 LPA", prev: "Fresher", image: "/placements/Rishi.png", quote: "Excellent training and great placement support.", hike: 100 },
+    { name: "Midhun", role: "Associate Developer", company: "Terralogic", package: "4 LPA", prev: "Fresher", image: "/placements/Midhun.png", quote: "I am grateful for the mentorship I received here.", hike: 120 },
+    { name: "marahor", role: "DevOps Associate", company: "Teachmint", package: "Competitive", prev: "Fresher", image: "/placements/Marohar.png", quote: "Transitioning to DevOps was made easy by ByteCode.", hike: 100 },
+    { name: "Tejaswar", role: "Software Engineer", company: "Arcitech", package: "Competitive", prev: "Fresher", image: "/placements/Tejaswar.png", quote: "The technical depth covered in the course is impressive.", hike: 100 },
+    { name: "Divya", role: "Backend Engineer", company: "Nemali Software Solutions", package: "4 LPA", prev: "Fresher", image: "/placements/Divya.png", quote: "The focus on clean code and architecture was a game changer.", hike: 120 },
+    { name: "Rishwitha", role: "Junior Developer", company: "Tech Solutions", package: "3.5 LPA", prev: "Fresher", image: "/placements/Rishwitha Nalgonda.png", quote: "Highly recommend for anyone looking to enter the IT industry.", hike: 100 },
     { name: "Rohan Das", role: "SDE-II", company: "Amazon", package: "45 LPA", prev: "3.5 LPA", image: "https://i.pravatar.cc/150?u=rohan", quote: "The system design modules were the key differentiator.", hike: 240 },
     { name: "Priya Sharma", role: "Data Scientist", company: "Microsoft", package: "38 LPA", prev: "Fresher", image: "https://i.pravatar.cc/150?u=priya", quote: "Mock interviews with actual MSFT engineers helped me kill my nervousness.", hike: 180 },
     { name: "Amit Patel", role: "DevOps Engineer", company: "Adobe", package: "28 LPA", prev: "6 LPA", image: "https://i.pravatar.cc/150?u=amit", quote: "Understanding Kubernetes depth was what got me this offer.", hike: 155 },
@@ -94,6 +112,38 @@ const FAANG_DRILLS = [
     { title: "Salary Negotiation", icon: <TrendingUp size={24} />, desc: "Expert workshops on counter-offering and decoding equity/stock components." }
 ];
 
+
+const getCompanyLogo = (company: string) => {
+    const mapping: { [key: string]: string } = {
+        'Forsys': 'forsysinc.com',
+        'Absolute Labs': 'absolutelabs.io',
+        'Tech Mahendra': 'techmahindra.com',
+        'Cloud Leaf L.L.C': 'cloudleaf.com',
+        'Centillion Networks': 'centillionnetworks.com',
+        'Nemali Software Solutions': 'nemalisoftware.com',
+        'Arcitech': 'architech.ca',
+        'Terralogic': 'terralogic.com',
+        'Teachmint': 'teachmint.com',
+        'Cognizant': 'cognizant.com',
+        'Accenture': 'accenture.com',
+        'Gemini': 'gemini.com',
+        'Amazon': 'amazon.com',
+        'Microsoft': 'microsoft.com',
+        'Adobe': 'adobe.com',
+        'Uber': 'uber.com',
+        'Zerodha': 'zerodha.com',
+        'Cred': 'cred.club',
+        'Google Cloud': 'cloud.google.com',
+        'Netflix': 'netflix.com',
+        'Razorpay': 'razorpay.com',
+        'Meta': 'meta.com',
+        'Apple': 'apple.com',
+        'Canva': 'canva.com',
+        'Tesla': 'tesla.com'
+    };
+    const domain = mapping[company] || `${company.toLowerCase().replace(/\s+/g, '')}.com`;
+    return `https://logo.clearbit.com/${domain}`;
+};
 
 export default function Placements() {
     const [showModal, setShowModal] = useState(false);
@@ -182,10 +232,21 @@ export default function Placements() {
                                             <CheckCircle size={14} />
                                         </div>
                                     </div>
-                                    <h3 className={styles.storyName}>{story.name}</h3>
+                                    <div className={styles.nameHeader}>
+                                        <h3 className={styles.storyName}>{story.name}</h3>
+                                        <div className={styles.companyBadgeMini}>
+                                            <img
+                                                src={getCompanyLogo(story.company)}
+                                                alt={story.company}
+                                                onError={(e: any) => e.target.style.display = 'none'}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div className={styles.storyRole}>{story.role} @ <span style={{ color: '#fff', fontWeight: 800 }}>{story.company}</span></div>
+                                <div className={styles.storyRole}>
+                                    {story.role} @ <span style={{ color: '#fff' }}>{story.company}</span>
+                                </div>
 
                                 <div className={styles.salaryHighlight}>
                                     <span className={styles.salaryLabel}>Package Achieved</span>

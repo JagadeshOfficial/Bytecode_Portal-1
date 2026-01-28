@@ -4,18 +4,18 @@ import { useRef, useEffect, useState } from 'react';
 import AnimatedHero from '@/components/AnimatedHero';
 import Navbar from '@/components/Navbar';
 import IndustryPartners from '@/components/IndustryPartners';
-import { motion, animate, useInView } from 'framer-motion';
+import { motion, animate, useInView, Variants } from 'framer-motion';
 import { Code, Database, Globe, Layers, CheckCircle, ArrowRight, ShieldCheck, BookOpen, Cpu, Server, Lock, Download, TrendingUp, Quote, Star, Linkedin, Twitter, Github, Instagram, Mail, Phone, MapPin, Send, ChevronRight, Zap, Target, Rocket, Lightbulb, Video } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
 // BEST ANIMATIONS: VARIANT DEFINITIONS
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -43,6 +43,38 @@ function Counter({ value, suffix = "", duration = 2 }: { value: number, suffix?:
 
   return <span ref={ref}>{displayValue}{suffix}</span>;
 }
+
+const getCompanyLogo = (company: string) => {
+  const mapping: { [key: string]: string } = {
+    'Forsys': 'forsysinc.com',
+    'Absolute Labs': 'absolutelabs.io',
+    'Tech Mahendra': 'techmahindra.com',
+    'Cloud Leaf L.L.C': 'cloudleaf.com',
+    'Centillion Networks': 'centillionnetworks.com',
+    'Nemali Software Solutions': 'nemalisoftware.com',
+    'Arcitech': 'architech.ca',
+    'Terralogic': 'terralogic.com',
+    'Teachmint': 'teachmint.com',
+    'Cognizant': 'cognizant.com',
+    'Accenture': 'accenture.com',
+    'Gemini': 'gemini.com',
+    'Amazon': 'amazon.com',
+    'Microsoft': 'microsoft.com',
+    'Adobe': 'adobe.com',
+    'Uber': 'uber.com',
+    'Zerodha': 'zerodha.com',
+    'Cred': 'cred.club',
+    'Google Cloud': 'cloud.google.com',
+    'Netflix': 'netflix.com',
+    'Razorpay': 'razorpay.com',
+    'Meta': 'meta.com',
+    'Apple': 'apple.com',
+    'Canva': 'canva.com',
+    'Tesla': 'tesla.com'
+  };
+  const domain = mapping[company] || `${company.toLowerCase().replace(/\s+/g, '')}.com`;
+  return `https://logo.clearbit.com/${domain}`;
+};
 
 export default function Home() {
   return (
@@ -197,7 +229,16 @@ export default function Home() {
                     <div className={styles.successBadge}><TrendingUp size={12} /> {s.hike}</div>
                   </div>
                   <div className={styles.successContent}>
-                    <h4 className={styles.successName}>{s.name}</h4>
+                    <div className={styles.nameHeader}>
+                      <h4 className={styles.successName}>{s.name}</h4>
+                      <div className={styles.companyLogoBadgeMini}>
+                        <img
+                          src={getCompanyLogo(s.company)}
+                          alt={s.company}
+                          onError={(e: any) => e.target.style.display = 'none'}
+                        />
+                      </div>
+                    </div>
                     <p className={styles.successRole}>{s.role} @ {s.company}</p>
                     <div className={styles.metaRow}>Package: <span>{s.package}</span></div>
                   </div>
@@ -393,45 +434,252 @@ function Footer() {
 }
 
 const REVIEWS = [
+  // PLACED STUDENTS FIRST (From SUCCESS_STORIES + Verified Text Reviews)
   {
-    name: "Saurav Kumar",
-    role: "Full Stack Dev @ Swiggy",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
+    name: "bolla sahithi",
+    role: "Associate Engineer @ Infosys",
+    image: "https://i.pravatar.cc/150?u=sahithi",
     rating: 5,
-    quote: "The curriculum is perfectly aligned with industry requirements. ByteCode helped me bridge the gap between college and a real job."
+    quote: "Joined in ByteCode Trainings 4 months back and placed successfully in Infosys as a Associate Engineer. Applying to jobs for 11 months before this!"
   },
   {
-    name: "Anjali Mehta",
-    role: "Data Scientist @ Walmart",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80",
+    name: "Sai Vamsheedhar Reddy",
+    role: "System Engineer @ TCS",
+    image: "/placements/Vamsi-K.png",
     rating: 5,
-    quote: "The 1:1 mentorship was a game changer for me. Having a senior dev from MAANG review my code gave me immense confidence."
+    quote: "Bytecode offers an excellent curriculum tailored to the demands of the tech industry. The faculty's expertise helped me secure a position at TCS."
   },
   {
-    name: "Vikram Singh",
-    role: "Software Engineer @ Zomato",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80",
+    name: "Vamsi Thammisetti",
+    role: "Software Engineer @ Cognizant",
+    image: "/placements/Vamsi-T.png",
     rating: 5,
-    quote: "From logic building to system design, they cover everything. The placement support team is relentless in their efforts."
+    quote: "Exceeded my expectations! I highly recommend Bytecode to anyone looking to learn Java. Top-notch training for beginners."
   },
   {
-    name: "Megha Rao",
-    role: "Java Backend @ Oracle",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80",
+    name: "Jagadesh",
+    role: "Backend Developer @ Forsys",
+    image: "/placements/Jagadesh.png",
     rating: 5,
-    quote: "Joining ByteCode was the best career decision I've made. The hands-on project experience is unparalleled in quality."
+    quote: "The program is perfectly structured for beginners. The mentors here are deeply invested in our success and support us constantly."
   },
   {
-    name: "Rahul Deshmukh",
-    role: "Product Engineer @ Uber",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80",
+    name: "Vamsi K",
+    role: "Software Engineer @ Cognizant",
+    image: "/placements/Vamsi-K.png",
     rating: 5,
-    quote: "Their focus on fundamentals is what makes them different. I cracked my Uber interview thanks to their DSA masterclass."
+    quote: "The labs and practical assignments were very helpful. I cleared the Cognizant technical rounds with ease thanks to the curriculum."
+  },
+  {
+    name: "Rajasekhar",
+    role: "Full Stack Developer @ Accenture",
+    image: "/placements/Rajasekhar.png",
+    rating: 5,
+    quote: "Gained technical skills and the confidence to tackle complex problems at scale. The Java Full Stack course is truly industry-grade."
+  },
+  {
+    name: "Manoj",
+    role: "Associate Developer @ Absolute Labs",
+    image: "/placements/Manoj.png",
+    rating: 5,
+    quote: "An incredible journey. The support from the placement cell was constant and very helpful throughout my graduation transition."
+  },
+  {
+    name: "Sampath",
+    role: "Systems Engineer @ Accenture",
+    image: "/placements/Sampath.png",
+    rating: 5,
+    quote: "The career services team was instrumental in navigating the job market and cracking the interview at a top MNC like Accenture."
+  },
+  {
+    name: "Karthik",
+    role: "Software Engineer @ Accenture",
+    image: "/placements/Karthik.png",
+    rating: 5,
+    quote: "Invaluable practical skills. I secured a job even before graduation thanks to the intense mock interview preparation."
+  },
+  {
+    name: "Prasad",
+    role: "Associate Engineer @ Gemini",
+    image: "/placements/Prasad.png",
+    rating: 5,
+    quote: "Curriculum is up-to-date with industry standards. It's the best place for freshers to start their IT journey with confidence."
+  },
+  {
+    name: "Ganesh",
+    role: "Software Engineer @ Tech Mahindra",
+    image: "/placements/Ganesh-K.png",
+    rating: 5,
+    quote: "The Python with Data Analytics program was a game-changer; it gave me the practical confidence I needed for my new role at Tech Mahindra."
+  },
+  {
+    name: "Harish",
+    role: "Developer @ Cloud Leaf L.L.C",
+    image: "/placements/Harish-K.png",
+    rating: 5,
+    quote: "Intense but incredibly rewarding. The hands-on project experience here is unparalleled in terms of quality and depth."
+  },
+  {
+    name: "Santhavana",
+    role: "Software Engineer @ Cognizant",
+    image: "/placements/Santhavana.png",
+    rating: 5,
+    quote: "The 1:1 mentorship from industry experts gave me the confidence to handle any technical round at the corporate level."
+  },
+  {
+    name: "Phani B",
+    role: "Junior Developer @ Centillion Networks",
+    image: "/placements/Phani.png",
+    rating: 5,
+    quote: "The Java Full Stack bootcamp was challenging and thorough. It helped me secure my dream role as a software engineer."
+  },
+  {
+    name: "Rishi",
+    role: "Software Engineer @ Innovation Labs",
+    image: "/placements/Rishi.png",
+    rating: 5,
+    quote: "Excellent training and great placement support. The real-world project simulations were very helpful in understanding production code."
+  },
+  {
+    name: "Midhun",
+    role: "Associate Developer @ Terralogic",
+    image: "/placements/Midhun.png",
+    rating: 5,
+    quote: "Within just a month, I've seen a lot of improvements in my communication and soft skills. The 1-on-1 sessions made me job-ready."
+  },
+  {
+    name: "marahor",
+    role: "DevOps Associate @ Teachmint",
+    image: "/placements/Marohar.png",
+    rating: 5,
+    quote: "There will be definitely a change while coming to this training and leaving. I saw massive growth in both technical and DevOps aspects."
+  },
+  {
+    name: "Yambadi Tejaswar",
+    role: "Software Engineer @ Arcitech",
+    image: "/placements/Tejaswar.png",
+    rating: 5,
+    quote: "Classes are easy to understand, and the trainers explain everything clearly with real-time examples. Practical learning is top focus."
+  },
+  {
+    name: "Divya",
+    role: "Backend Engineer @ Nemali Software",
+    image: "/placements/Divya.png",
+    rating: 5,
+    quote: "The real-world projects and system design drills were the key differentiator for me. Cracking the backend role was easy after this."
+  },
+  {
+    name: "Rishwitha",
+    role: "Junior Developer @ Tech Solutions",
+    image: "/placements/Rishwitha Nalgonda.png",
+    rating: 5,
+    quote: "I highly recommend ByteCode for anyone looking to enter the IT industry. The career guidance here is truly exceptional."
+  },
+
+  // REMAINING STUDENT REVIEWS
+  {
+    name: "Vivek Kamera",
+    role: "Data Analytics Student",
+    image: "https://i.pravatar.cc/150?u=vivek",
+    rating: 5,
+    quote: "The trainers are highly knowledgeable and explain every concept in a very clear way. Highlight is the placement support starting from 60 days!"
+  },
+  {
+    name: "Lakshman Madamanchi",
+    role: "Data Analytics Student",
+    image: "https://i.pravatar.cc/150?u=lakshman",
+    rating: 5,
+    quote: "Highly recommended to all confused freshers! Currently enrolled in Data Analytics and the experience has been amazing so far."
+  },
+  {
+    name: "Archana Davuluru",
+    role: "Python Data Analyst",
+    image: "https://i.pravatar.cc/150?u=archana",
+    rating: 5,
+    quote: "Best institute for training of python with data analysis courses. Good receiving by institute faculty and friendly nature is a plus point."
+  },
+  {
+    name: "AREPALLI SIDDHARTHA",
+    role: "Transformed Graduate",
+    image: "https://i.pravatar.cc/150?u=siddhartha",
+    rating: 5,
+    quote: "I joined Bytecode Trainings where am transforming myself. Got hands-on experience on the real time industry projects."
+  },
+  {
+    name: "Budige Pavani",
+    role: "Python Data Analytics",
+    image: "https://i.pravatar.cc/150?u=pavani",
+    rating: 5,
+    quote: "Trainer and mentors are very friendly and everytime available for clearing our doubts. Gained a lot of knowledge in a short period."
+  },
+  {
+    name: "Charan Teja",
+    role: "Java Full Stack Developer",
+    image: "https://i.pravatar.cc/150?u=charan",
+    rating: 5,
+    quote: "Provides a great environment for learning. The trainers are experienced and give individual attention to every student. Gained strong knowledge."
+  },
+  {
+    name: "Jagadeswararao Vana",
+    role: "Full Stack Student",
+    image: "https://i.pravatar.cc/150?u=jv",
+    rating: 5,
+    quote: "The classes were clear and easy to understand. It's a very good place to learn coding and tech skills for freshers. Very positive experience."
+  },
+  {
+    name: "Praneeth Reddy",
+    role: "Technical Graduate",
+    image: "https://i.pravatar.cc/150?u=praneeth",
+    rating: 5,
+    quote: "Concentrates on not only technical training but also communication and interview prep skills. Placement assistance is very helpful!"
+  },
+  {
+    name: "Avalla Sunil",
+    role: "IT Career Starter",
+    image: "https://i.pravatar.cc/150?u=sunil",
+    rating: 5,
+    quote: "Perfect place to kickstart your IT career. Trainers explain concepts with real examples making learning super easy. Placement support is excellent."
+  },
+  {
+    name: "Sharook khan Pathan",
+    role: "Upskilled Graduate",
+    image: "https://i.pravatar.cc/150?u=sharook",
+    rating: 5,
+    quote: "Staff is very friendly and helpful. They support students throughout the course and answer doubts clearly. Teaching style makes learning easy."
+  },
+  {
+    name: "tharuni Uma",
+    role: "Upskilling Professional",
+    image: "https://i.pravatar.cc/150?u=tharuni",
+    rating: 5,
+    quote: "Supportive trainers and practical approach helped me understand projects. Highly recommended for anyone looking to upskill their career."
+  },
+  {
+    name: "Yashwanth Raja",
+    role: "Data Analytics Aspirant",
+    image: "https://i.pravatar.cc/150?u=yashwanth",
+    rating: 5,
+    quote: "Best institution to land a job in data analytics. Mentors and trainers are very experienced in their field. Highly recommended!"
   }
 ];
 
 const SUCCESS_STORIES = [
-  { name: "Aditya Verma", role: "SDE-1", company: "Amazon", package: "24 LPA", hike: "150%", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80" },
-  { name: "Priya Sharma", role: "Frontend", company: "Microsoft", package: "18 LPA", hike: "120%", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80" },
-  { name: "Rohan Gupta", role: "Data Analyst", company: "Uber", package: "22 LPA", hike: "200%", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80" }
+  { name: "Vamsi Tammisetty", role: "Software Engineer", company: "Cognizant", package: "3.5 LPA", hike: "100%", image: "/placements/Vamsi-T.png" },
+  { name: "Jagadesh", role: "Backend Developer", company: "Forsys", package: "4 LPA", hike: "120%", image: "/placements/Jagadesh.png" },
+  { name: "Vamsi K", role: "Software Engineer", company: "Cognizant", package: "3.5 LPA", hike: "100%", image: "/placements/Vamsi-K.png" },
+  { name: "Rajasekhar", role: "Full Stack Developer", company: "Accenture", package: "5 LPA", hike: "150%", image: "/placements/Rajasekhar.png" },
+  { name: "Manoj", role: "Associate Developer", company: "Absolute Labs", package: "5 LPA", hike: "150%", image: "/placements/Manoj.png" },
+  { name: "Sampath", role: "Systems Engineer", company: "Accenture", package: "5 LPA", hike: "150%", image: "/placements/Sampath.png" },
+  { name: "Karthik", role: "Software Engineer", company: "Accenture", package: "4 LPA", hike: "120%", image: "/placements/Karthik.png" },
+  { name: "Prasad", role: "Associate Engineer", company: "Gemini", package: "3.5 LPA", hike: "100%", image: "/placements/Prasad.png" },
+  { name: "Ganesh", role: "Software Engineer", company: "Tech Mahendra", package: "5 LPA", hike: "150%", image: "/placements/Ganesh-K.png" },
+  { name: "Harish", role: "Developer", company: "Cloud Leaf L.L.C", package: "5 LPA", hike: "150%", image: "/placements/Harish-K.png" },
+  { name: "Santhavana", role: "Software Engineer", company: "Cognizant", package: "4 LPA", hike: "120%", image: "/placements/Santhavana.png" },
+  { name: "Phani B", role: "Junior Developer", company: "Centillion Networks", package: "3.5 LPA", hike: "100%", image: "/placements/Phani.png" },
+  { name: "Rishi", role: "Software Engineer", company: "Innovation Labs", package: "3.5 LPA", hike: "100%", image: "/placements/Rishi.png" },
+  { name: "Midhun", role: "Associate Developer", company: "Terralogic", package: "4 LPA", hike: "120%", image: "/placements/Midhun.png" },
+  { name: "marahor", role: "DevOps Associate", company: "Teachmint", package: "Competitive", hike: "100%", image: "/placements/Marohar.png" },
+  { name: "Tejaswar", role: "Software Engineer", company: "Arcitech", package: "Competitive", hike: "100%", image: "/placements/Tejaswar.png" },
+  { name: "Divya", role: "Backend Engineer", company: "Nemali Software Solutions", package: "4 LPA", hike: "120%", image: "/placements/Divya.png" },
+  { name: "Rishwitha", role: "Junior Developer", company: "Tech Solutions", package: "3.5 LPA", hike: "100%", image: "/placements/Rishwitha Nalgonda.png" }
 ];

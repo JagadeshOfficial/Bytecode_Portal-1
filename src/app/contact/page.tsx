@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './contact.module.css';
-import { Mail, Phone, MapPin, Send, MessageSquare, Globe, ArrowRight, Twitter, Linkedin, Instagram, Facebook, X } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Globe, ArrowRight, Twitter, Linkedin, Instagram, Facebook, X, Users, Target } from 'lucide-react';
+
 
 /* --- ENHANCED KNOWLEDGE BASE --- */
 const COURSE_DB = {
@@ -55,14 +56,23 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
     const [chatState, setChatState] = useState<ChatState>('IDLE');
     const [isTyping, setIsTyping] = useState(false);
     const [leadData, setLeadData] = useState({ name: '', email: '', phone: '', qualification: '', interest: '', gap: '' });
+    const hasInitialized = useRef(false);
 
     useEffect(() => {
+        if (hasInitialized.current) return;
+
         const saved = localStorage.getItem('bytecode_chat_history');
         if (saved) {
-            setMessages(JSON.parse(saved));
-        } else {
-            addBotMessage("Hi there! 👋 I'm **Nova**, your ByteCode Expert. How can I help you today?", 'options', ['Explore Courses', 'Check Fees', 'Talk to Admin'], 500);
+            const parsed = JSON.parse(saved);
+            if (parsed.length > 0) {
+                setMessages(parsed);
+                hasInitialized.current = true;
+                return;
+            }
         }
+
+        addBotMessage("Hi there! 👋 I'm **Nova**, your ByteCode Expert. How can I help you today?", 'options', ['Explore Courses', 'Check Fees', 'Talk to Admin'], 500);
+        hasInitialized.current = true;
     }, []);
 
     useEffect(() => {
@@ -75,14 +85,18 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
         setTimeout(() => setIsTyping(true), 100);
         setTimeout(() => {
             setIsTyping(false);
-            setMessages(prev => [...prev, { id: Date.now().toString(), text, sender: 'bot', type, options, timestamp: getCurrentTime() }]);
+            setMessages(prev => {
+                const newId = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+                return [...prev, { id: newId, text, sender: 'bot', type, options, timestamp: getCurrentTime() }];
+            });
         }, delay);
     };
 
     const handleSend = (textInput = input) => {
         const finalText = textInput.trim();
         if (!finalText) return;
-        setMessages(prev => [...prev, { id: Date.now().toString(), text: finalText, sender: 'user', timestamp: getCurrentTime() }]);
+        const newId = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        setMessages(prev => [...prev, { id: newId, text: finalText, sender: 'user', timestamp: getCurrentTime() }]);
         setInput("");
         processInput(finalText);
     };
@@ -223,11 +237,13 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
 export default function Contact() {
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '', qualification: '', course: '', gap: '', message: '' });
+    const [status, setStatus] = useState("Graduate");
+    const [interest, setInterest] = useState("Java Full Stack");
+    const [formData, setFormData] = useState({ fullName: '', phone: '', goal: '' });
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const text = `🔥 *NEW STUDENT APPLICATION*\n\n*Name:* ${formData.firstName} ${formData.lastName}\n*Email:* ${formData.email}\n*Phone:* ${formData.phone}\n*Education:* ${formData.qualification}\n*Course:* ${formData.course}\n*Gap:* ${formData.gap}\n*Query:* ${formData.message}`;
+        const text = `🔥 *MISSION-CRITICAL ADMISSION*\n\n*Name:* ${formData.fullName}\n*Phone:* ${formData.phone}\n*Status:* ${status}\n*Major Interest:* ${interest}\n*Career Goal:* ${formData.goal}`;
         window.open(`https://wa.me/918790055638?text=${encodeURIComponent(text)}`, '_blank');
     };
 
@@ -236,61 +252,104 @@ export default function Contact() {
             <Navbar />
             <div className={styles.bgDecor}><div className={`${styles.blob} ${styles.blob1}`}></div><div className={`${styles.blob} ${styles.blob2}`}></div></div>
 
-            <div className={styles.splitWrapper}>
-                <div className={styles.infoColumn}>
-                    <LiveOfficeStatus />
-                    <section className={styles.heroSection}>
-                        <h1 className={styles.heroTitle}>Step Into Your <br /><span className={styles.heroHighlight}>Future.</span></h1>
-                        <p className={styles.heroSubtitle}>Apply for our 2026 Tech Bootcamps. Master high-demand skills with placement guarantee.</p>
-                    </section>
-                    <div className={styles.channelsList}>
-                        <div className={styles.channelItem} style={{ cursor: 'pointer' }} onClick={() => setIsChatOpen(true)}>
-                            <div className={styles.iconBox}><MessageSquare size={24} /></div>
-                            <div>
-                                <h4>Instant AI Chat</h4>
-                                <p>Talk to Nova for instant answers on fees and curriculum.</p>
+            <div className={styles.heroRow}>
+                <div className={styles.heroContent}>
+                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
+                        <LiveOfficeStatus />
+                        <section className={styles.landingHeader}>
+                            <h1 className={styles.heroTitle}>Step Into Your <br /><span className={styles.heroHighlight}>Future.</span></h1>
+                            <p className={styles.heroSubtitle}>Master high-demand skills with our elite 2026 Tech Bootcamps and 100% placement guarantee.</p>
+                        </section>
+
+                        <div className={styles.statusIconsRow}>
+                            <div className={styles.channelTile} onClick={() => setIsChatOpen(true)}>
+                                <MessageSquare size={20} />
+                                <span>AI Chat</span>
+                            </div>
+                            <div className={styles.channelTile} onClick={() => window.location.href = 'tel:+918790055638'}>
+                                <Phone size={20} />
+                                <span>Call Support</span>
+                            </div>
+                            <div className={styles.channelTile} onClick={() => window.location.href = 'mailto:admissions@bytecode.com'}>
+                                <Mail size={20} />
+                                <span>Email Us</span>
                             </div>
                         </div>
-                        <div className={styles.channelItem} style={{ cursor: 'pointer' }} onClick={() => window.location.href = 'tel:+918790055638'}>
-                            <div className={styles.iconBox}><Phone size={24} /></div>
-                            <div>
-                                <h4>Direct Helpdesk</h4>
-                                <p>Emergency inquiry? Call us at +91 87900 55638</p>
-                            </div>
-                        </div>
-                        <div className={styles.channelItem} style={{ cursor: 'pointer' }} onClick={() => window.location.href = 'mailto:admissions@bytecode.com'}>
-                            <div className={styles.iconBox}><Mail size={24} /></div>
-                            <div>
-                                <h4>Admissions Email</h4>
-                                <p>Drop a detailed query at admissions@bytecode.com</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={styles.formColumn}>
-                    <motion.div className={styles.floatingForm} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-                        <h3>Fast-Track Admission</h3>
-                        <p>Fill in this secured form to get the latest brochure.</p>
-                        <form onSubmit={handleFormSubmit}>
-                            <div className={styles.formGrid}>
-                                <div className={styles.inputGroup}><label>First Name</label><input type="text" placeholder="John" required onChange={e => setFormData({ ...formData, firstName: e.target.value })} /></div>
-                                <div className={styles.inputGroup}><label>Last Name</label><input type="text" placeholder="Doe" required onChange={e => setFormData({ ...formData, lastName: e.target.value })} /></div>
-                            </div>
-                            <div className={styles.inputGroup}><label>Email Address</label><input type="email" placeholder="john@example.com" required onChange={e => setFormData({ ...formData, email: e.target.value })} /></div>
-                            <div className={styles.inputGroup}><label>WhatsApp Number</label><input type="tel" placeholder="+91 00000 00000" required onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
-
-                            <div className={styles.formGrid}>
-                                <div className={styles.inputGroup}><label>Education</label><select required onChange={e => setFormData({ ...formData, qualification: e.target.value })}><option value="">Select</option><option value="B.Tech">B.Tech</option><option value="MCA/M.Tech">MCA</option><option value="Degree">Degree</option></select></div>
-                                <div className={styles.inputGroup}><label>Course</label><select required onChange={e => setFormData({ ...formData, course: e.target.value })}><option value="">Select</option><option value="Java">Java</option><option value="Python">Python</option><option value="MERN">MERN</option><option value="AI">AI / DS</option></select></div>
-                            </div>
-
-                            <div className={styles.inputGroup}><label>Career Gap</label><select required onChange={e => setFormData({ ...formData, gap: e.target.value })}><option value="0">No Gap</option><option value="1">1 Year</option><option value="2+">2+ Years</option></select></div>
-                            <div className={styles.inputGroup}><label>Queries</label><textarea placeholder="Ask us anything..." rows={2} onChange={e => setFormData({ ...formData, message: e.target.value })} /></div>
-                            <button type="submit" className={styles.submitBtn}>Apply Now via WhatsApp <Send size={20} /></button>
-                        </form>
                     </motion.div>
                 </div>
+
+                <div className={styles.heroVisual}>
+                    <motion.div className={styles.visualWrapper} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}>
+                        <motion.div className={styles.floatingBox} animate={{ y: [0, -20, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+                            <img src="/tech_admission.png" alt="Tech Future" className={styles.mainIllustration} />
+                            <div className={styles.visualGlow}></div>
+                        </motion.div>
+                    </motion.div>
+                </div>
+            </div>
+
+            <div className={styles.portalRow}>
+                <motion.div className={styles.elitePortal} initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
+                    <div className={styles.portalHeader}>
+                        <div className={styles.statusPill}><span className={styles.pulseDot}></span> ADMISSIONS ACTIVE</div>
+                        <h3>Secure Your Seat</h3>
+                        <p>Direct entry into our 2026 Career Transformation cohorts.</p>
+                    </div>
+
+                    <form onSubmit={handleFormSubmit} className={styles.portalForm}>
+                        <div className={styles.horizontalGroup}>
+                            <div className={styles.formSection} style={{ flex: 1.2 }}>
+                                <div className={styles.sectionLabel}>IDENTITY & COMM</div>
+                                <div className={styles.sideBySide}>
+                                    <div className={styles.advancedInputGroup}>
+                                        <input type="text" required placeholder="Full Name" onChange={e => setFormData({ ...formData, fullName: e.target.value })} />
+                                        <div className={styles.inputIcon}><Users size={18} /></div>
+                                    </div>
+                                    <div className={styles.advancedInputGroup}>
+                                        <input type="tel" required placeholder="WhatsApp Number" onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                                        <div className={styles.inputIcon}><Phone size={18} /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className={styles.formSection} style={{ flex: 1 }}>
+                                <div className={styles.sectionLabel}>CAREER GOAL</div>
+                                <div className={styles.advancedInputGroup}>
+                                    <input type="text" placeholder="e.g. SDE-1 at Amazon" onChange={e => setFormData({ ...formData, goal: e.target.value })} />
+                                    <div className={styles.inputIcon}><Target size={18} /></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.horizontalGroup}>
+                            <div className={styles.formSection} style={{ flex: 1 }}>
+                                <div className={styles.sectionLabel}>CURRENT STATUS</div>
+                                <div className={styles.chipGrid}>
+                                    {["Student", "Graduate", "Professional"].map(s => (
+                                        <button key={s} type="button" className={status === s ? styles.activeChip : styles.chip} onClick={() => setStatus(s)}>{s}</button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className={styles.formSection} style={{ flex: 1.5 }}>
+                                <div className={styles.sectionLabel}>TARGET COHORT</div>
+                                <div className={styles.chipGrid}>
+                                    {["Java Full Stack", "MERN Stack", "Data & AI", "DevOps"].map(c => (
+                                        <button key={c} type="button" className={interest === c ? styles.activeChip : styles.chip} onClick={() => setInterest(c)}>{c}</button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '30px', marginTop: '1rem' }}>
+                            <button type="submit" className={styles.eliteSubmitBtn} style={{ flex: 2, margin: 0 }}>
+                                SUBMIT <ArrowRight size={20} />
+                            </button>
+                            <div className={styles.trustStrip} style={{ flex: 1, margin: 0, justifyContent: 'flex-end' }}>
+                                <Globe size={14} /> Global Admissions Open
+                            </div>
+                        </div>
+                    </form>
+                </motion.div>
             </div>
 
             {/* NEW MODULE: ADMISSION PROCESS TIMELINE */}
