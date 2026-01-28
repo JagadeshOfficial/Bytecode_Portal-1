@@ -144,6 +144,7 @@
     object-fit: contain;
     filter: brightness(1.1);
     transition: all 0.5s;
+    transform: scale(1.4);
 }
 
 .partnerCard:hover .partnerLogoImage {
