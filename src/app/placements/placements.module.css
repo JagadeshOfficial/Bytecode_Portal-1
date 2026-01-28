@@ -126,9 +126,9 @@
     border-top: 1px solid rgba(255, 255, 255, 0.03);
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     background:
-        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.05), transparent 40%),
-        radial-gradient(circle at 80% 50%, rgba(16, 185, 129, 0.05), transparent 40%),
-        rgba(0, 0, 0, 0.4);
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1), transparent 40%),
+        radial-gradient(circle at 80% 50%, rgba(16, 185, 129, 0.1), transparent 40%),
+        transparent;
     position: relative;
     overflow: hidden;
 }
@@ -140,6 +140,29 @@
     background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     opacity: 0.02;
     pointer-events: none;
+}
+
+.ambientGlow {
+    position: absolute;
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 1;
+    animation: flowPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes flowPulse {
+    from {
+        opacity: 0.3;
+        transform: translateX(-50%) scale(0.8);
+    }
+
+    to {
+        opacity: 0.7;
+        transform: translateX(-50%) scale(1.2);
+    }
 }
 
 .marqueeContainer {
@@ -155,6 +178,31 @@
     animation: marqueeFlow 60s linear infinite;
     width: max-content;
     align-items: center;
+    position: relative;
+}
+
+.marqueeTrack::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: glintLine 5s ease-in-out infinite;
+    transform: skewX(-20deg);
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes glintLine {
+    0% {
+        left: -500px;
+    }
+
+    100% {
+        left: 150%;
+    }
 }
 
 @keyframes marqueeFlow {
@@ -168,45 +216,58 @@
 }
 
 .partnerLogoWrapper {
-    width: 160px;
-    height: 90px;
+    width: 300px;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    filter: grayscale(1) opacity(0.4);
+    transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+    filter: opacity(0.9);
     position: relative;
-    padding: 1.25rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    overflow: hidden;
 }
 
 .partnerLogoWrapper:hover {
-    filter: grayscale(0) opacity(1);
-    transform: translateY(-8px) scale(1.1);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(59, 130, 246, 0.3);
+    filter: opacity(1) brightness(1.2);
+    transform: translateY(-15px) scale(1.08) perspective(1000px) rotateX(10deg);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(59, 130, 246, 0.6);
     box-shadow:
-        0 20px 40px -10px rgba(0, 0, 0, 0.5),
-        0 0 20px rgba(59, 130, 246, 0.1);
+        0 40px 80px -20px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(59, 130, 246, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.05);
 }
 
-.partnerLogoWrapper::after {
+.partnerLogoWrapper::before {
     content: '';
     position: absolute;
-    bottom: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 10px;
-    background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.2), transparent 70%);
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.2), transparent 30%);
+    animation: rotateGlow 4s linear infinite;
     opacity: 0;
     transition: opacity 0.5s;
 }
 
-.partnerLogoWrapper:hover::after {
+.partnerLogoWrapper:hover::before {
     opacity: 1;
+}
+
+@keyframes rotateGlow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .partnerLogoImage {
@@ -951,16 +1012,25 @@
 }
 
 .companyBadgeMini {
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+    width: 80px;
+    height: 80px;
+    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3px;
+    padding: 10px;
     flex-shrink: 0;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.storyCard:hover .companyBadgeMini {
+    transform: scale(1.1) rotate(-3deg);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
 }
 
 .companyBadgeMini img {

@@ -1,105 +1,169 @@
 .partnersSection {
-    padding: 60px 0;
+    padding: 100px 0;
     position: relative;
-    background: rgba(10, 5, 30, 0.4);
-    border-top: 1px solid rgba(124, 58, 237, 0.1);
-    border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+    background: transparent;
     overflow: hidden;
+}
+
+.ambientGlow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1000px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.08), transparent 70%);
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 1;
+    animation: pulseGlow 10s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    to {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
 }
 
 .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 2rem;
+    position: relative;
+    z-index: 5;
 }
 
 .sectionHeader {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 5rem;
 }
 
 .title {
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 800;
     font-family: 'Rajdhani', sans-serif;
     color: white;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
-    background: linear-gradient(to right, #fff, #94a3b8);
+    letter-spacing: 4px;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.5) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    color: rgba(148, 163, 184, 0.8);
-    max-width: 600px;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    max-width: 700px;
     margin: 0 auto;
+    font-weight: 500;
 }
 
 .marqueeContainer {
     width: 100%;
     overflow: hidden;
     position: relative;
-    padding: 2rem 0;
+    padding: 3rem 0;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
 .marqueeTrack {
     display: flex;
-    gap: 2rem;
+    gap: 4rem;
     width: max-content;
+    animation: marqueeMove 80s linear infinite;
+}
+
+.marqueeTrack::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    animation: glintLine 6s ease-in-out infinite;
+    transform: skewX(-25deg);
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes glintLine {
+    0% {
+        left: -500px;
+    }
+
+    100% {
+        left: 150%;
+    }
+}
+
+@keyframes marqueeMove {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .partnerCard {
     position: relative;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 1.5rem 3rem;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2rem 4rem;
+    border-radius: 24px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-    min-width: 180px;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    min-width: 200px;
+    height: 120px;
 }
 
-.iconWrapper {
-    filter: drop-shadow(0 0 8px currentColor);
-    transition: transform 0.3s ease;
+.partnerCard:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(124, 58, 237, 0.4);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(124, 58, 237, 0.2);
 }
 
-.partnerCard:hover .iconWrapper {
-    transform: scale(1.2);
+.partnerLogoImage {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: brightness(1.1);
+    transition: all 0.5s;
 }
 
-.partnerName {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+.partnerCard:hover .partnerLogoImage {
+    filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
 
 .glow {
     position: absolute;
-    bottom: -50px;
+    bottom: -20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 60px;
-    filter: blur(40px);
+    width: 60%;
+    height: 10px;
+    background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.4), transparent 70%);
     opacity: 0;
-    border-radius: 50%;
-    transition: opacity 0.4s ease, bottom 0.4s ease;
+    transition: all 0.5s ease;
+    filter: blur(5px);
 }
 
 .partnerCard:hover .glow {
-    opacity: 0.4;
-    bottom: -20px;
+    opacity: 1;
+    bottom: -5px;
 }

@@ -46,34 +46,27 @@ function Counter({ value, suffix = "", duration = 2 }: { value: number, suffix?:
 
 const getCompanyLogo = (company: string) => {
   const mapping: { [key: string]: string } = {
-    'Forsys': 'forsysinc.com',
-    'Absolute Labs': 'absolutelabs.io',
-    'Tech Mahendra': 'techmahindra.com',
-    'Cloud Leaf L.L.C': 'cloudleaf.com',
-    'Centillion Networks': 'centillionnetworks.com',
-    'Nemali Software Solutions': 'nemalisoftware.com',
-    'Arcitech': 'architech.ca',
-    'Terralogic': 'terralogic.com',
-    'Teachmint': 'teachmint.com',
-    'Cognizant': 'cognizant.com',
-    'Accenture': 'accenture.com',
-    'Gemini': 'gemini.com',
-    'Amazon': 'amazon.com',
-    'Microsoft': 'microsoft.com',
-    'Adobe': 'adobe.com',
-    'Uber': 'uber.com',
-    'Zerodha': 'zerodha.com',
-    'Cred': 'cred.club',
-    'Google Cloud': 'cloud.google.com',
-    'Netflix': 'netflix.com',
-    'Razorpay': 'razorpay.com',
-    'Meta': 'meta.com',
-    'Apple': 'apple.com',
-    'Canva': 'canva.com',
-    'Tesla': 'tesla.com'
+    'Google': '1',
+    'Microsoft': '2',
+    'Amazon': '5',
+    'Netflix': '4',
+    'Adobe': '3',
+    'Uber': '6',
+    'Meta': '7',
+    'Apple': '8'
   };
-  const domain = mapping[company] || `${company.toLowerCase().replace(/\s+/g, '')}.com`;
-  return `https://logo.clearbit.com/${domain}`;
+
+  if (mapping[company]) {
+    return `/CompanyLogos/${mapping[company]}.png`;
+  }
+
+  // Deterministic hash to map any company to one of the 29 logos
+  let hash = 0;
+  for (let i = 0; i < company.length; i++) {
+    hash = company.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const logoNumber = (Math.abs(hash) % 29) + 1;
+  return `/CompanyLogos/${logoNumber}.png`;
 };
 
 export default function Home() {

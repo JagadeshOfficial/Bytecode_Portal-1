@@ -453,18 +453,21 @@
 
 .successCard {
   width: 360px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 40px;
   overflow: hidden;
   backdrop-filter: blur(20px);
-  transition: 0.4s;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .successCard:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-10px);
-  border-color: #d946ef;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-12px) scale(1.02);
+  border-color: #8b5cf6;
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(139, 92, 246, 0.2);
 }
 
 .successHeader {
@@ -514,16 +517,16 @@
 }
 
 .companyLogoBadgeMini {
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 10px;
   flex-shrink: 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
 .companyLogoBadgeMini img {

@@ -18,6 +18,7 @@ const partners = [
 export default function IndustryPartners() {
     return (
         <section className={styles.partnersSection}>
+            <div className={styles.ambientGlow} />
             <div className={styles.container}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -25,30 +26,23 @@ export default function IndustryPartners() {
                     viewport={{ once: true }}
                     className={styles.sectionHeader}
                 >
-                    <h2 className={styles.title}>Our Hiring Networks</h2>
-                    <p className={styles.subtitle}>Our alumni are driving innovation at the world's leading technology companies.</p>
+                    <h2 className={styles.title}>Elite Hiring Network</h2>
+                    <p className={styles.subtitle}>Our alumni are driving innovation at the world's leading technology institutions.</p>
                 </motion.div>
 
                 <div className={styles.marqueeContainer}>
-                    <motion.div
-                        className={styles.marqueeTrack}
-                        animate={{ x: [0, "-50%"] }}
-                        transition={{
-                            duration: 30,
-                            repeat: Infinity,
-                            ease: "linear"
-                        }}
-                    >
-                        {[...partners, ...partners, ...partners, ...partners].map((partner, idx) => (
-                            <div key={`${partner.name}-${idx}`} className={styles.partnerCard}>
-                                <div className={styles.iconWrapper} style={{ color: partner.color }}>
-                                    {partner.icon}
-                                </div>
-                                <span className={styles.partnerName}>{partner.name}</span>
-                                <div className={styles.glow} style={{ backgroundColor: partner.color }} />
+                    <div className={styles.marqueeTrack}>
+                        {[...Array(29), ...Array(29), ...Array(29), ...Array(29)].map((_, i) => (
+                            <div key={i} className={styles.partnerCard}>
+                                <img
+                                    src={`/CompanyLogos/${(i % 29) + 1}.png`}
+                                    alt={`Partner Logo ${(i % 29) + 1}`}
+                                    className={styles.partnerLogoImage}
+                                />
+                                <div className={styles.glow} />
                             </div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         </section>

@@ -508,10 +508,11 @@ export default function Placements() {
 
             {/* COLLEGES & PARTNERS LOGO SCROLL */}
             <section className={styles.partnersSection}>
-                <h3 style={{ textAlign: 'center', color: '#64748b', marginBottom: '4rem', letterSpacing: '3px', fontSize: '0.9rem', fontWeight: 700 }}>OUR HIRING & ACADEMIC PARTNERS</h3>
+                <div className={styles.ambientGlow} style={{ top: '0', left: '50%', transform: 'translateX(-50%)' }} />
+                <h3 style={{ textAlign: 'center', color: '#64748b', marginBottom: '4rem', letterSpacing: '3px', fontSize: '0.9rem', fontWeight: 700, position: 'relative', zIndex: 5 }}>OUR HIRING & ACADEMIC PARTNERS</h3>
                 <div className={styles.marqueeContainer}>
                     <div className={styles.marqueeTrack}>
-                        {[...Array(29), ...Array(29)].map((_, i) => (
+                        {[...Array(29), ...Array(29), ...Array(29), ...Array(29)].map((_, i) => (
                             <div key={i} className={styles.partnerLogoWrapper}>
                                 <img
                                     src={`/CompanyLogos/${(i % 29) + 1}.png`}
