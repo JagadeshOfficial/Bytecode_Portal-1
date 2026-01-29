@@ -494,9 +494,14 @@ function CourseDetailModal({ course, onClose }: any) {
                             <h3 style={{ fontSize: '2.5rem', fontFamily: 'Rajdhani', margin: '0.5rem 0 1.5rem' }}>{course.price}</h3>
                             <button className={styles.modalEnrollBtn} style={{ width: '100%', padding: '1.2rem' }}>Enroll Now</button>
 
-                            <button className={styles.downloadBtn} style={{ width: '100%' }}>
-                                <Download size={18} /> Download Curriculum
-                            </button>
+                            <div className={styles.modalActionGrid}>
+                                <button className={styles.viewBrochureBtn}>
+                                    <Rocket size={18} /> View Brochure
+                                </button>
+                                <button className={styles.downloadBtn}>
+                                    <Download size={18} /> Download Brochure
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div className={styles.modalMainContent}>

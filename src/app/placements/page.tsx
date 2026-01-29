@@ -115,27 +115,83 @@ const FAANG_DRILLS = [
 
 const getCompanyLogo = (company: string) => {
     const mapping: { [key: string]: string } = {
-        'Google': '1',
-        'Microsoft': '2',
-        'Amazon': '5',
-        'Netflix': '4',
-        'Adobe': '3',
-        'Uber': '6',
-        'Meta': '7',
-        'Apple': '8'
+        'Cognizant': '1',
+        'Terralogic': '2',
+        'Oracle': '3',
+        'Absolute Labs': '4',
+        'AbsoluteLabs': '4',
+        'Forsys': '5',
+        'SparxIT': '6',
+        'Algoworks': '7',
+        'DXMINDS': '8',
+        'Nexgen': '9',
+        'Honeywell': '10',
+        'Deloitte': '11',
+        'Cisco': '12',
+        'ZenSar Technologies': '13',
+        'ZenSar': '13',
+        'ITC INFOTECH': '14',
+        'Hexaware Technologies': '15',
+        'HP': '16',
+        'Mphasis': '17',
+        'Mindtree': '18',
+        'Wipro': '19',
+        'DXC Technology': '24',
+        'Dr. Reddy\'s': '21',
+        'Salesforce': '22',
+        'IBM': '23',
+        'Facebook': '25',
+        'AWS': '26',
+        'Tech Mahindra': '27',
+        'Tech Mahendra': '27',
+        'Accenture': '28',
+        'HCLTech': '29',
+        'HCL': '29',
+        'Arcitech': '31',
+        'Cloud Leaf L.L.C': '32',
+        'CloudLeaf': '32',
+        'Teachmint': '33',
+        'Centillion Networks': '34',
+        'Centelon': '34',
+        'Tech Solutions': '35',
+        'Gemini': '36',
+        'Amazon': '37',
+        'Microsoft': '38',
+        'Adobe': '39',
+        'Uber': '40',
+        'Cred': '41',
+        'Zerodha': '42',
+        'Netflix': '43',
+        'Google Cloud': '44',
+        'Google': '44',
+        'Apple': '45',
+        'Razorpay': '46',
+        'Meta': '47',
+        'Canva': '48',
+        'Stripe': '49',
+        'Walmart': '50',
+        'Flipkart': '51',
+        'Airbnb': '52',
+        'Snowflake': '46',
+        'PayPal': '51',
+        'Nemali Software Solutions': '53',
+        'Innovation Labs': '54'
     };
 
-    if (mapping[company]) {
-        return `/CompanyLogos/${mapping[company]}.png`;
-    }
+    const normalized = company.trim();
+    const logoId = mapping[normalized] || String((Math.abs(deterministicHash(normalized)) % 54) + 1);
+    const extension = logoId === '54' ? 'svg' : 'png';
 
-    // Deterministic hash to map any company to one of the 29 logos
+    return `/CompanyLogos/${logoId}.${extension}`;
+};
+
+// Helper for hash
+const deterministicHash = (str: string) => {
     let hash = 0;
-    for (let i = 0; i < company.length; i++) {
-        hash = company.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const logoNumber = (Math.abs(hash) % 29) + 1;
-    return `/CompanyLogos/${logoNumber}.png`;
+    return hash;
 };
 
 export default function Placements() {
@@ -305,6 +361,7 @@ export default function Placements() {
                                             <img
                                                 src={getCompanyLogo(story.company)}
                                                 alt={story.company}
+                                                style={story.company === 'Innovation Labs' ? { filter: 'brightness(0)' } : {}}
                                                 onError={(e: any) => e.target.style.display = 'none'}
                                             />
                                         </div>
@@ -512,15 +569,19 @@ export default function Placements() {
                 <h3 style={{ textAlign: 'center', color: '#64748b', marginBottom: '4rem', letterSpacing: '3px', fontSize: '0.9rem', fontWeight: 700, position: 'relative', zIndex: 5 }}>OUR HIRING & ACADEMIC PARTNERS</h3>
                 <div className={styles.marqueeContainer}>
                     <div className={styles.marqueeTrack}>
-                        {[...Array(29), ...Array(29), ...Array(29), ...Array(29)].map((_, i) => (
-                            <div key={i} className={styles.partnerLogoWrapper}>
-                                <img
-                                    src={`/CompanyLogos/${(i % 29) + 1}.png`}
-                                    alt={`Partner Logo ${(i % 29) + 1}`}
-                                    className={styles.partnerLogoImage}
-                                />
-                            </div>
-                        ))}
+                        {[...Array(54), ...Array(54)].map((_, i) => {
+                            const logoNumber = (i % 54) + 1;
+                            const extension = logoNumber === 54 ? 'svg' : 'png';
+                            return (
+                                <div key={i} className={styles.partnerLogoWrapper}>
+                                    <img
+                                        src={`/CompanyLogos/${logoNumber}.${extension}`}
+                                        alt={`Partner Logo ${logoNumber}`}
+                                        className={styles.partnerLogoImage}
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>

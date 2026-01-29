@@ -32,16 +32,20 @@ export default function IndustryPartners() {
 
                 <div className={styles.marqueeContainer}>
                     <div className={styles.marqueeTrack}>
-                        {[...Array(29), ...Array(29), ...Array(29), ...Array(29)].map((_, i) => (
-                            <div key={i} className={styles.partnerCard}>
-                                <img
-                                    src={`/CompanyLogos/${(i % 29) + 1}.png`}
-                                    alt={`Partner Logo ${(i % 29) + 1}`}
-                                    className={styles.partnerLogoImage}
-                                />
-                                <div className={styles.glow} />
-                            </div>
-                        ))}
+                        {[...Array(54), ...Array(54)].map((_, i) => {
+                            const logoNumber = (i % 54) + 1;
+                            const extension = logoNumber === 54 ? 'svg' : 'png';
+                            return (
+                                <div key={i} className={styles.partnerCard}>
+                                    <img
+                                        src={`/CompanyLogos/${logoNumber}.${extension}`}
+                                        alt={`Partner Logo ${logoNumber}`}
+                                        className={styles.partnerLogoImage}
+                                    />
+                                    <div className={styles.glow} />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
