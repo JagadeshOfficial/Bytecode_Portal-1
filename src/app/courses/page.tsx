@@ -1,4 +1,5 @@
 "use client";
+// force rebuild
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
@@ -11,6 +12,35 @@ import Image from 'next/image';
 const COURSES = [
     {
         id: 1,
+        title: "Python with Data Analytics",
+        category: "Data Science",
+        level: "Beginner to Advanced",
+        duration: "5 Months",
+        students: "4.2k+",
+        rating: 4.9,
+        price: "₹30,000",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
+        featured: true,
+        techStack: ["Python", "SQL", "Pandas", "PowerBI", "Tableau"],
+        startDate: "Feb 10, 2024",
+        seatsLeft: 8,
+        modules: [
+            { title: "Module 1: Python Programming Core", desc: "Data types, Control Flow, Functions, and OOPs concepts for Data Science." },
+            { title: "Module 2: Advanced Data Manipulation", desc: "Mastering NumPy and Pandas for high-performance data analysis." },
+            { title: "Module 3: SQL for Data Analysis", desc: "Complex queries, Joins, Window Functions, and Database Design." },
+            { title: "Module 4: Data Visualization Mastery", desc: "Creating dashboards with PowerBI and Tableau for business intelligence." },
+            { title: "Module 5: Exploratory Data Analysis", desc: "Statistical analysis, Hypothesis testing, and finding patterns in data." },
+            { title: "Module 6: Big Data Overview", desc: "Introduction to Hadoop, Spark, and handling massive datasets." }
+        ],
+        mentors: ["Senior Data Analyst @ Uber", "BI Developer @ Microsoft"],
+        placements: [
+            { name: "Sneha P.", company: "Infosys", role: "Data Analyst", package: "6.8 LPA", image: "https://i.pravatar.cc/150?u=sneha" },
+            { name: "Rahul G.", company: "Deloitte", role: "Business Analyst", package: "12.5 LPA", image: "https://i.pravatar.cc/150?u=rahul" }
+        ],
+        brochureUrl: "/brochure/python-data-analytics"
+    },
+    {
+        id: 2,
         title: "Java Full Stack Masterclass",
         category: "Development",
         level: "Intermediate",
@@ -37,20 +67,49 @@ const COURSES = [
             { name: "Rahul S.", company: "Amazon", role: "SDE-1", package: "24 LPA", image: "https://i.pravatar.cc/150?u=rahul" },
             { name: "Priya D.", company: "Microsoft", role: "Backend Dev", package: "18 LPA", image: "https://i.pravatar.cc/150?u=priya" }
         ],
-        brochureUrl: "#"
+        brochureUrl: "/brochure/java-full-stack"
     },
     {
-        id: 2,
-        title: "Data Science & AI with Python",
+        id: 3,
+        title: "Python Full Stack Architect",
+        category: "Development",
+        level: "Advanced",
+        duration: "6 Months",
+        students: "3.2k+",
+        rating: 4.9,
+        price: "₹38,000",
+        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80",
+        featured: true,
+        techStack: ["Python", "Django", "FastAPI", "React", "Next.js", "Docker"],
+        startDate: "Feb 20, 2024",
+        seatsLeft: 8,
+        modules: [
+            { title: "Module 1: Advanced Python Internals", desc: "Memory management, GIL, Asyncio, and Professional Design Patterns." },
+            { title: "Module 2: Scalable Backend with Django & FastAPI", desc: "Building monolithic and microservice architectures with high-performance routing." },
+            { title: "Module 3: Database Optimization (SQL/NoSQL)", desc: "Relational modeling with PostgreSQL and fast caching with Redis." },
+            { title: "Module 4: Professional Frontend with Next.js", desc: "Server Actions, App Router Mastery, and React UI engineering." },
+            { title: "Module 5: Distributed Systems & Logic", desc: "Task queues with Celery, Message brokers like RabbitMQ/Kafka." },
+            { title: "Module 6: Production Grade Cloud DevOps", desc: "Dockerizing whole stack, Kubernetes orchestration, and AWS Lambda/EC2." }
+        ],
+        mentors: ["Senior SDE @ Meta", "System Architect @ Netflix"],
+        placements: [
+            { name: "Karan M.", company: "Google", role: "Backend Architect", package: "28 LPA", image: "https://i.pravatar.cc/150?u=karan" },
+            { name: "Megha S.", company: "Zomato", role: "Full Stack Lead", package: "22 LPA", image: "https://i.pravatar.cc/150?u=megha" }
+        ],
+        brochureUrl: "/brochure/python-full-stack"
+    },
+    {
+        id: 4,
+        title: "Data Science & AI Masterclass",
         category: "Data Science",
         level: "Advanced",
         duration: "8 Months",
         students: "1.8k+",
         rating: 4.9,
         price: "₹45,000",
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
-        featured: true,
-        techStack: ["Python", "TensorFlow", "Pandas", "PyTorch"],
+        image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&q=80",
+        featured: false,
+        techStack: ["Python", "TensorFlow", "Pandas", "PyTorch", "OpenAI"],
         startDate: "Feb 15, 2024",
         seatsLeft: 12,
         modules: [
@@ -70,7 +129,7 @@ const COURSES = [
         brochureUrl: "#"
     },
     {
-        id: 3,
+        id: 5,
         title: "DevOps & Cloud Engineering",
         category: "Cloud",
         level: "Advanced",
@@ -78,9 +137,9 @@ const COURSES = [
         students: "1.2k+",
         rating: 4.7,
         price: "₹40,000",
-        image: "https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80",
+        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80",
         featured: false,
-        techStack: ["AWS", "Docker", "Kubernetes", "Jenkins"],
+        techStack: ["AWS", "Docker", "Kubernetes", "Jenkins", "Terraform"],
         startDate: "Mar 01, 2024",
         seatsLeft: 20,
         modules: [
@@ -100,33 +159,34 @@ const COURSES = [
         brochureUrl: "#"
     },
     {
-        id: 4,
-        title: "Python Full Stack Architect",
-        category: "Development",
+        id: 6,
+        title: "Cyber Security & Ethical Hacking",
+        category: "Security",
         level: "Advanced",
-        duration: "6 Months",
-        students: "3.2k+",
-        rating: 4.9,
-        price: "₹38,000",
-        image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80",
-        featured: true,
-        techStack: ["Python", "Django", "FastAPI", "React", "Next.js", "Docker"],
-        startDate: "Feb 20, 2024",
-        seatsLeft: 8,
+        duration: "5 Months",
+        students: "950+",
+        rating: 4.8,
+        price: "₹42,000",
+        image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80",
+        featured: false,
+        techStack: ["Kali Linux", "Burp Suite", "Metasploit", "Python", "Wireshark"],
+        startDate: "Mar 10, 2024",
+        seatsLeft: 15,
         modules: [
-            { title: "Module 1: Advanced Python Internals", desc: "Memory management, GIL, Asyncio, and Professional Design Patterns." },
-            { title: "Module 2: Scalable Backend with Django & FastAPI", desc: "Building monolithic and microservice architectures with high-performance routing." },
-            { title: "Module 3: Database Optimization (SQL/NoSQL)", desc: "Relational modeling with PostgreSQL and fast caching with Redis." },
-            { title: "Module 4: Professional Frontend with Next.js", desc: "Server Actions, App Router Mastery, and React UI engineering." },
-            { title: "Module 5: Distributed Systems & Logic", desc: "Task queues with Celery, Message brokers like RabbitMQ/Kafka." },
-            { title: "Module 6: Production Grade Cloud DevOps", desc: "Dockerizing whole stack, Kubernetes orchestration, and AWS Lambda/EC2." }
+            { title: "Module 1: Networking Foundations", desc: "OSI Model, TCP/IP, DNS, DHCP, and Subnetting mastery." },
+            { title: "Module 2: Linux Security & Scripting", desc: "Kali Linux tools, Bash scripting for automation, and System hardening." },
+            { title: "Module 3: Ethical Hacking & Penetration Testing", desc: "Information gathering, Scanning, Exploitation, and Post-exploitation." },
+            { title: "Module 4: Web Application Security", desc: "OWASP Top 10, SQL Injection, XSS, CSRF, and Burp Suite mastery." },
+            { title: "Module 5: Network Security & Firewalls", desc: "IDS/IPS configuration, Firewall rules, and VPN setup." },
+            { title: "Module 6: Cryptography & Wireless Security", desc: "Encryption algorithms, PKI, and WiFi hacking techniques." },
+            { title: "Module 7: SOC & Incident Response", desc: "Security Operations Center basics, SIEM tools, and Threat hunting." }
         ],
-        mentors: ["Senior SDE @ Meta", "System Architect @ Netflix"],
+        mentors: ["Lead Pen Tester @ IBM", "Security Architect @ Chase"],
         placements: [
-            { name: "Karan M.", company: "Google", role: "Backend Architect", package: "28 LPA", image: "https://i.pravatar.cc/150?u=karan" },
-            { name: "Megha S.", company: "Zomato", role: "Full Stack Lead", package: "22 LPA", image: "https://i.pravatar.cc/150?u=megha" }
+            { name: "Kiran S.", company: "Palo Alto Networks", role: "Security Analyst", package: "18 LPA", image: "https://i.pravatar.cc/150?u=kiran" },
+            { name: "Rohit V.", company: "CrowdStrike", role: "Pen Tester", package: "24 LPA", image: "https://i.pravatar.cc/150?u=rohit" }
         ],
-        brochureUrl: "/brochure/python-full-stack"
+        brochureUrl: "#"
     }
 ];
 

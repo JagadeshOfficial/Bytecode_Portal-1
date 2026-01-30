@@ -160,10 +160,10 @@ export default function PythonFullStackBrochure() {
                         </div>
 
                         <div className={styles.masterHeadline}>
-                            <h2>PYTHON FULL STACK <br /> ENGINEERING</h2>
+                            <h2>PYTHON WITH <br /> DATA ANALYTICS</h2>
                             <p>
-                                Ignite your potential with India's most comprehensive job-oriented architecture.
-                                Master everything from backend fundamentals to enterprise-grade cloud systems.
+                                Unlock the power of data with India's most comprehensive job-oriented architecture.
+                                Master everything from Python basics to advanced Machine Learning models.
                             </p>
                         </div>
 
@@ -201,8 +201,8 @@ export default function PythonFullStackBrochure() {
                         <div>
                             <p style={{ fontSize: '1.2rem', lineHeight: 1.8, marginBottom: '2rem' }}>
                                 Bytecode Trainings & Placements is a trusted institute offering high-quality training in
-                                Python Full Stack Development. Our program is designed to equip students and fresh graduates
-                                with the skills needed to succeed in the IT industry.
+                                Python with Data Analytics. Our program is designed to equip students and fresh graduates
+                                with the skills needed to succeed in the data-driven IT industry.
                             </p>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                                 {[
@@ -235,17 +235,17 @@ export default function PythonFullStackBrochure() {
                             <div className={styles.insightCard}>
                                 <div className={styles.insightIconBox}><Target size={40} /></div>
                                 <h3>Careers on the Rise</h3>
-                                <p>60,000+ Active Job Openings for Django, React, and Full Stack Master Engineers.</p>
+                                <p>60,000+ Active Job Openings for Data Analysts, Data Scientists, and Python Developers.</p>
                             </div>
                             <div className={styles.insightCard}>
                                 <div className={styles.insightIconBox}><Award size={40} /></div>
                                 <h3>Salary Packages</h3>
-                                <p>Starting from 8 LPA to over 24 LPA+ for developers with elite architectural skills.</p>
+                                <p>Starting from 8 LPA to over 24 LPA+ for experts with elite analytical and ML skills.</p>
                             </div>
                             <div className={styles.insightCard}>
                                 <div className={styles.insightIconBox}><ShieldCheck size={40} /></div>
                                 <h3>Global Growth</h3>
-                                <p>75% expected growth in Full Stack engineering roles by 2028 across major tech hubs.</p>
+                                <p>75% expected growth in Data Science & Analytics roles by 2028 across major tech hubs.</p>
                             </div>
                         </div>
 
@@ -254,9 +254,9 @@ export default function PythonFullStackBrochure() {
                                 <h2>Why <br /> ByteCode?</h2>
                                 <div className={styles.benefitGrid}>
                                     {[
-                                        "Master In-Demand Tech: Django, React, AWS",
+                                        "Master In-Demand Tech: Python, SQL, PowerBI",
                                         "Official Industry Recognized Certifications",
-                                        "LeetCode & GitHub Profile Building",
+                                        "LeetCode & Kaggle Portfolio Building",
                                         "Direct Placement Access to 300+ Partners"
                                     ].map((benefit, idx) => (
                                         <div key={idx} className={styles.benefitItem}>
@@ -318,19 +318,19 @@ export default function PythonFullStackBrochure() {
                                     {
                                         n: "02",
                                         t: "Industry Mentorship",
-                                        d: "Direct guidance from senior architects and engineering leads who have built enterprise-scale systems.",
+                                        d: "Direct guidance from Senior Data Architects and Analytics Leads who have built enterprise-scale models.",
                                         c: "#27ae60"
                                     },
                                     {
                                         n: "03",
                                         t: "Hands-on Experience with Projects",
-                                        d: "End-to-end development of production-ready applications, following Agile and DevOps methodologies.",
+                                        d: "End-to-end analysis of real-world datasets, following Agile and Data Science methodologies.",
                                         c: "#d63031"
                                     },
                                     {
                                         n: "04",
                                         t: "Comprehensive Placement Prep",
-                                        d: "Rigorous mock interviews, resume engineering, and profile building on LeetCode & GitHub.",
+                                        d: "Rigorous mock interviews, resume engineering, and profile building on Kaggle & GitHub.",
                                         c: "#f39200"
                                     }
                                 ].map((step, i) => (
@@ -369,25 +369,19 @@ export default function PythonFullStackBrochure() {
 
                         <div className={styles.skillCategoryWrap}>
                             <div className={styles.skillCategoryHeader}>
-                                <h3>Full Stack & Emerging Tech</h3>
-                                <div className={styles.skillCountTag}>12 Core Modules</div>
+                                <h3>Core Analytics Engine</h3>
+                                <div className={styles.skillCountTag}>Data Science Core</div>
                             </div>
                             <div className={styles.skillGrid}>
                                 {[
                                     { s: 'Python', p: 'python/python-original.svg' },
-                                    { s: 'Django', p: 'django/django-plain.svg' },
-                                    { s: 'React', p: 'react/react-original.svg' },
-                                    { s: 'Next.js', p: 'nextjs/nextjs-original.svg' },
-                                    { s: 'FastAPI', p: 'fastapi/fastapi-original.svg' },
-                                    { s: 'HTML5', p: 'html5/html5-original.svg' },
-                                    { s: 'CSS3', p: 'css3/css3-original.svg' },
-                                    { s: 'JavaScript', p: 'javascript/javascript-original.svg' },
-                                    { s: 'TypeScript', p: 'typescript/typescript-original.svg' },
-                                    { s: 'Redux', p: 'redux/redux-original.svg' },
-                                    { s: 'PostgreSQL', p: 'postgresql/postgresql-original.svg' },
-                                    { s: 'Redis', p: 'redis/redis-original.svg' }
-                                ].map(tech => (
-                                    <div key={tech.s} className={styles.skillItemLuxury}>
+                                    { s: 'Pandas', p: 'pandas/pandas-original.svg' },
+                                    { s: 'NumPy', p: 'numpy/numpy-original.svg' },
+                                    { s: 'Matplotlib', p: 'matplotlib/matplotlib-original.svg' },
+                                    { s: 'Scikit-Learn', p: 'scikitlearn/scikitlearn-original.svg' },
+                                    { s: 'Jupyter', p: 'jupyter/jupyter-original-wordmark.svg' }
+                                ].map((tech, i) => (
+                                    <div key={i} className={styles.skillItemLuxury}>
                                         <div className={styles.skillLogoBox}>
                                             <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${tech.p}`} alt={tech.s} />
                                         </div>
@@ -399,23 +393,26 @@ export default function PythonFullStackBrochure() {
 
                         <div className={styles.skillCategoryWrap}>
                             <div className={styles.skillCategoryHeader}>
-                                <h3>Infra & Architectural Tools</h3>
-                                <div className={styles.skillCountTag}>8 Professional Tools</div>
+                                <h3>Business Intelligence & Tools</h3>
+                                <div className={styles.skillCountTag}>Enterprise Standard</div>
                             </div>
                             <div className={styles.skillGrid}>
                                 {[
-                                    { s: 'AWS', p: 'amazonwebservices/amazonwebservices-original-wordmark.svg' },
-                                    { s: 'Docker', p: 'docker/docker-original.svg' },
+                                    { s: 'MySQL', p: 'mysql/mysql-original.svg' },
+                                    { s: 'SQL', p: 'postgresql/postgresql-original.svg' },
+                                    { s: 'Tableau', p: 'https://cdn.worldvectorlogo.com/logos/tableau-software.svg', isUrl: true },
+                                    { s: 'PowerBI', p: 'https://upload.wikimedia.org/wikipedia/commons/c/cf/New_Power_BI_Logo.svg', isUrl: true },
+                                    { s: 'Excel', p: 'https://cdn.worldvectorlogo.com/logos/microsoft-excel-2013.svg', isUrl: true },
                                     { s: 'Git', p: 'git/git-original.svg' },
                                     { s: 'GitHub', p: 'github/github-original.svg' },
-                                    { s: 'Linux', p: 'linux/linux-original.svg' },
-                                    { s: 'Vercel', p: 'vercel/vercel-original.svg' },
-                                    { s: 'Jenkins', p: 'jenkins/jenkins-original.svg' },
-                                    { s: 'Nginx', p: 'nginx/nginx-original.svg' }
-                                ].map(tech => (
-                                    <div key={tech.s} className={styles.skillItemLuxury}>
+                                    { s: 'VS Code', p: 'vscode/vscode-original.svg' }
+                                ].map((tech, i) => (
+                                    <div key={i} className={styles.skillItemLuxury}>
                                         <div className={styles.skillLogoBox}>
-                                            <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${tech.p}`} alt={tech.s} />
+                                            <img
+                                                src={tech.isUrl ? tech.p : `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${tech.p}`}
+                                                alt={tech.s}
+                                            />
                                         </div>
                                         <div className={styles.skillName}>{tech.s}</div>
                                     </div>
@@ -458,40 +455,40 @@ export default function PythonFullStackBrochure() {
                     </div>
                 </section>
 
-                {/* PAGE 6: ELITE CURRICULUM - FRONTEND */}
+                {/* PAGE 6: ELITE CURRICULUM - FOUNDATIONS */}
                 <section className={styles.page}>
                     <Header pageNum="06" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
-                            <h2>FRONTEND ARCHITECTURE</h2>
-                            <p>Modern Web Ecosystem</p>
+                            <h2>PYTHON & ANALYTICS CORE</h2>
+                            <p>Data Engineering Foundation</p>
                         </div>
 
                         <div className={styles.curriculumGrid}>
                             {[
                                 {
                                     n: "01",
-                                    t: "UI/UX Foundation",
-                                    p: ["HTML5 Semantic Tags", "CSS3 Flex & Grid Master", "Responsive Web Design", "Animations (Framer/GSAP)"],
-                                    tech: ["HTML5", "CSS3"]
+                                    t: "Python Architecture",
+                                    p: ["Variables & Advanced Types", "Control Flow Logic", "Functional Programming", "File I/O & Automation"],
+                                    tech: ["Python 3.12", "Scripting"]
                                 },
                                 {
                                     n: "02",
-                                    t: "JavaScript ES2026+",
-                                    p: ["Asynchronous Mechanisms", "Prototypes & Closures", "Modular Architecture", "Build Systems (Vite)"],
-                                    tech: ["JS", "TS"]
+                                    t: "Data Analysis Engines",
+                                    p: ["NumPy Vectorization", "Pandas DataFrames", "Data Wrangling", "Time Series Analysis"],
+                                    tech: ["Pandas", "NumPy"]
                                 },
                                 {
                                     n: "03",
-                                    t: "React & Next.js",
-                                    p: ["Hooks & Context API", "Server Actions", "App Router Mastery", "SSR & ISR Patterns"],
-                                    tech: ["React", "Next.js"]
+                                    t: "Visual Intelligence",
+                                    p: ["Matplotlib Architectures", "Seaborn Statistical Plots", "Interactive Visuals", "Storytelling with Data"],
+                                    tech: ["Matplotlib", "Seaborn"]
                                 },
                                 {
                                     n: "04",
-                                    t: "State Management",
-                                    p: ["Redux Toolkit Workflow", "TanStack (React Query)", "Zustand Global State", "Real-time WebSockets"],
-                                    tech: ["Redux", "Query"]
+                                    t: "SQL for Analysts",
+                                    p: ["RDBMS Architecture", "Complex Joins & CTEs", "Window Functions", "Performance Tuning"],
+                                    tech: ["MySQL", "PostgreSQL"]
                                 }
                             ].map((mod, i) => (
                                 <div key={i} className={styles.moduleCardLuxury}>
@@ -523,51 +520,51 @@ export default function PythonFullStackBrochure() {
                         <div className={styles.progressStrip}>
                             <div className={styles.progressNode}>
                                 <div className={`${styles.nodeCircle} ${styles.active}`}><Check size={10} /></div>
-                                <span>Frontend Foundation</span>
+                                <span>Core Analytics</span>
                             </div>
                             <div style={{ flex: 1, height: '2px', background: 'rgba(0,48,135,0.1)', margin: '0 1rem' }} />
                             <div className={styles.progressNode}>
                                 <div className={styles.nodeCircle}>02</div>
-                                <span>Backend Logic</span>
+                                <span>Business Intelligence</span>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* PAGE 7: ELITE CURRICULUM - BACKEND */}
+                {/* PAGE 7: ELITE CURRICULUM - ADVANCED */}
                 <section className={styles.page}>
                     <Header pageNum="07" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
-                            <h2>BACKEND MASTERY</h2>
-                            <p>Pythonic Engineering</p>
+                            <h2>ADVANCED INTELLIGENCE</h2>
+                            <p>Predictive Modeling & BI</p>
                         </div>
 
                         <div className={styles.curriculumGrid}>
                             {[
                                 {
                                     n: "05",
-                                    t: "Python Core",
-                                    p: ["CPython Internals & GIL", "Meta-programming", "Asyncio Mechanics", "Dependency (Poetry)"],
-                                    tech: ["Python", "Core"]
+                                    t: "Machine Learning Concepts",
+                                    p: ["Supervised Protocols", "Unsupervised Clustering", "Regression Models", "Scikit-Learn Workflows"],
+                                    tech: ["ML", "Scikit"]
                                 },
                                 {
                                     n: "06",
-                                    t: "Django Enterprise",
-                                    p: ["ORM Performance Tuning", "Custom Middleware", "DRF Mastery", "JWT & OAuth2 Auth"],
-                                    tech: ["Django", "DRF"]
+                                    t: "Enterprise BI Tools",
+                                    p: ["PowerBI DAX Formulas", "Tableau Dashboards", "Data Connectivity FLows", "Business Reporting"],
+                                    tech: ["PowerBI", "Tableau"]
                                 },
                                 {
                                     n: "07",
-                                    t: "High Perf APIs",
-                                    p: ["FastAPI Type Safety", "Injection Patterns", "Background Tasks", "Scalable Swagger"],
-                                    tech: ["FastAPI", "Async"]
+                                    t: "Advanced Excel",
+                                    p: ["Pivot Tables & Charts", "VLOOKUP/XLOOKUP", "Data Validation", "Macro Recording"],
+                                    tech: ["Excel", "Macros"]
                                 },
                                 {
                                     n: "08",
-                                    t: "System Design",
-                                    p: ["Microservices Concepts", "Rate Limiting", "Caching Strategies", "Nginx Configuration"],
-                                    tech: ["Architecture"]
+                                    t: "Industrial Capstone",
+                                    p: ["End-to-End Analysis", "Business Problem Solving", "Executive Presentation", "Portfolio Deployment"],
+                                    tech: ["Project", "Strategy"]
                                 }
                             ].map((mod, i) => (
                                 <div key={i} className={styles.moduleCardLuxury}>
@@ -599,50 +596,50 @@ export default function PythonFullStackBrochure() {
                         <div className={styles.progressStrip}>
                             <div className={styles.progressNode}>
                                 <div className={styles.nodeCircle}><Check size={10} /></div>
-                                <span>Frontend Foundation</span>
+                                <span>Core Analytics</span>
                             </div>
                             <div style={{ flex: 1, height: '2px', background: 'var(--primary)', margin: '0 1rem' }} />
                             <div className={styles.progressNode}>
                                 <div className={`${styles.nodeCircle} ${styles.active}`}><Check size={10} /></div>
-                                <span>Backend Logic</span>
+                                <span>Business Intelligence</span>
                             </div>
                             <div style={{ flex: 1, height: '2px', background: 'rgba(0,48,135,0.1)', margin: '0 1rem' }} />
                             <div className={styles.progressNode}>
                                 <div className={styles.nodeCircle}>03</div>
-                                <span>Cloud & Ops</span>
+                                <span>Tools & Pro</span>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* PAGE 8: ELITE CURRICULUM - DATA & OPS */}
+                {/* PAGE 8: ELITE CURRICULUM - TOOLS */}
                 <section className={styles.page}>
                     <Header pageNum="08" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
-                            <h2>DATA & DEPLOYMENT</h2>
-                            <p>Enterprise Scalability</p>
+                            <h2>TOOLS & PROFESSIONALISM</h2>
+                            <p>Industry Standard Ecosystem</p>
                         </div>
 
                         <div className={styles.curriculumGrid}>
                             {[
                                 {
                                     n: "09",
-                                    t: "Database Engineering",
-                                    p: ["SQL Injection Prevention", "Complex CTEs", "Indexing & Sharding", "Normalization Master"],
-                                    tech: ["SQL", "NoSQL"]
+                                    t: "Git & Version Control",
+                                    p: ["Repo Management", "Branching Strategies", "Pull Requests/Merge", "Collaboration Workflows"],
+                                    tech: ["Git", "GitHub"]
                                 },
                                 {
                                     n: "10",
-                                    t: "DevOps Logic",
-                                    p: ["Docker Orchestration", "CI/CD Pipelines", "Nginx Proxy", "SSL & Domain Setup"],
-                                    tech: ["Docker", "Linux"]
+                                    t: "Modern Data Stack",
+                                    p: ["Jupyter Notebooks", "VS Code Environment", "Anaconda Distribution", "Virtual Environments"],
+                                    tech: ["Jupyter", "Conda"]
                                 },
                                 {
                                     n: "11",
-                                    t: "Cloud (AWS)",
-                                    p: ["EC2 Deployment", "RDS Instance Mgmt", "S3 Storage Service", "Lambda Serverless"],
-                                    tech: ["AWS", "Cloud"]
+                                    t: "Generative AI Basics",
+                                    p: ["Prompt Engineering", "LLM Fundamentals", "AI-Assisted Coding", "Future of Analytics"],
+                                    tech: ["GenAI", "ChatGPT"]
                                 },
                                 {
                                     n: "12",
@@ -680,17 +677,17 @@ export default function PythonFullStackBrochure() {
                         <div className={styles.progressStrip}>
                             <div className={styles.progressNode}>
                                 <div className={styles.nodeCircle}><Check size={10} /></div>
-                                <span>Frontend Foundation</span>
+                                <span>Core Analytics</span>
                             </div>
                             <div style={{ flex: 1, height: '2px', background: 'var(--primary)', margin: '0 1rem' }} />
                             <div className={styles.progressNode}>
                                 <div className={styles.nodeCircle}><Check size={10} /></div>
-                                <span>Backend Logic</span>
+                                <span>Business Intelligence</span>
                             </div>
                             <div style={{ flex: 1, height: '2px', background: 'var(--primary)', margin: '0 1rem' }} />
                             <div className={styles.progressNode}>
                                 <div className={`${styles.nodeCircle} ${styles.active}`}><Check size={10} /></div>
-                                <span>Cloud & Ops</span>
+                                <span>Tools & Pro</span>
                             </div>
                         </div>
                     </div>
@@ -708,24 +705,24 @@ export default function PythonFullStackBrochure() {
                         <div className={styles.projectGridLuxury}>
                             {[
                                 {
-                                    t: "E-Commerce Engine",
-                                    d: "High-scale architecture with payment vaulting & intelligent inventory scaling.",
-                                    tech: "Django, React, Redis"
+                                    t: "Sales Forecasting",
+                                    d: "Predictive modeling for retail sales using time-series analysis.",
+                                    tech: "Python, ARIMA, Pandas"
                                 },
                                 {
-                                    t: "SaaS CRM Analytics",
-                                    d: "Enterprise board featuring real-time lead tracking & predictive visualization.",
-                                    tech: "Next.js, FastAPI, PG"
+                                    t: "Customer Churn Analysis",
+                                    d: "Identifying at-risk customers through classification algorithms.",
+                                    tech: "Scikit-Learn, Logistic Reg"
                                 },
                                 {
-                                    t: "Banking Secure Hub",
-                                    d: "Military-grade transaction security with multi-sig auth protocols.",
-                                    tech: "Python, Docker, AWS"
+                                    t: "Financial Dashboard",
+                                    d: "Real-time visualization of stock market trends and portfolio performance.",
+                                    tech: "Power BI, SQL, Python"
                                 },
                                 {
-                                    t: "Chat Matrix Sync",
-                                    d: "Distributed socket server handling massive concurrent user sync.",
-                                    tech: "WebSockets, Redis"
+                                    t: "Sentiment Analysis",
+                                    d: "Analyzing social media data to gauge public opinion on products.",
+                                    tech: "NLP, NLTK, Python"
                                 }
                             ].map((pj, i) => (
                                 <div key={i} className={styles.projectCardLuxury}>
@@ -798,11 +795,11 @@ export default function PythonFullStackBrochure() {
                                         <div key={i} className={styles.testimonialCard}>
                                             <div className={styles.testiHeader}>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <span className={styles.testiName}>{t.name}</span>
-                                                    <span style={{ fontSize: '0.65rem', opacity: 0.7, fontWeight: 700 }}>{t.role}</span>
+                                                    <div className={styles.testiName}>{t.name}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)' }}>{t.role}</div>
                                                 </div>
                                                 <div className={styles.stars}>
-                                                    {[...Array(t.star)].map((_, si) => <Star key={si} size={10} fill="currentColor" />)}
+                                                    {[...Array(t.star)].map((_, si) => <Star key={si} size={12} fill="#f39200" stroke="none" />)}
                                                 </div>
                                             </div>
                                             <p className={styles.testiText}>"{t.text}"</p>
@@ -817,9 +814,9 @@ export default function PythonFullStackBrochure() {
                 {/* PAGE 11: STRATEGIC CAREER ROADMAP */}
                 <section className={styles.page}>
                     <Header pageNum="11" />
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)', letterSpacing: '-1px' }}>ELITE CAREER ARCHITECTURE</h2>
-                        <p style={{ fontWeight: 700, opacity: 0.7 }}>A 12-Week Strategic Evolution from Foundation to FANG-Ready</p>
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)', textTransform: 'uppercase' }}>Strategic Career Roadmap</h2>
+                        <p style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-dim)' }}>The Blueprint for Your Professional Ascension</p>
                     </div>
 
                     <div className={styles.roadmapConduit}>
@@ -827,24 +824,24 @@ export default function PythonFullStackBrochure() {
 
                         {[
                             {
-                                weeks: "1-3", phase: "UI & UX",
-                                tech: ["HTML5 & CSS3 Advanced", "JavaScript ES6+ Core", "Responsive Architecture"],
-                                soft: ["Profile Assessment", "LinkedIn Mastery", "The Perfect Self-Intro"]
+                                weeks: "0-4",
+                                tech: ["Python Fundamentals", "Data Structures", "NumPy & Pandas", "SQL Basics"],
+                                soft: ["Communication Audit", "LinkedIn Optimisation", "Goal Setting"]
                             },
                             {
-                                weeks: "4-6", phase: "BACKEND",
-                                tech: ["Core Python Engineering", "OOPs & System Design", "SQL Database Design"],
-                                soft: ["ATS Resume Crafting", "Mock Group Discussion", "JAM Session Drills"]
+                                weeks: "5-8",
+                                tech: ["Data Cleaning", "Exploratory Analysis", "Matplotlib & Seaborn", "Advanced SQL"],
+                                soft: ["Agile Methodologies", "Presentation Skills", "Team Collaboration"]
                             },
                             {
-                                weeks: "7-9", phase: "FULL STACK",
-                                tech: ["Django Framework Mastery", "REST API Development", "React Integration"],
-                                soft: ["Professional Emailing", "Tech Vocabulary", "Presentation Excellence"]
+                                weeks: "9-12",
+                                tech: ["Machine Learning", "Scikit-Learn", "PowerBI / Tableau", "Feature Engineering"],
+                                soft: ["Mock Interviews (HR)", "Resume Engineering", "Portfolio Building"]
                             },
                             {
-                                weeks: "10-12", phase: "OPS & LIVE",
-                                tech: ["AWS Cloud Deployment", "Docker & CI/CD Ops", "Production Grade Projects"],
-                                soft: ["HR Reference Network", "Personal Branding", "Direct Placement Prep"]
+                                weeks: "13+",
+                                tech: ["Capstone Project", "Deep Learning Basics", "Model Deployment", "Generative AI"],
+                                soft: ["Mock Interviews (Tech)", "Salary Negotiation", "Final Placements"]
                             }
                         ].map((step, i) => (
                             <div key={i} className={styles.roadmapStepLuxury}>
@@ -900,54 +897,46 @@ export default function PythonFullStackBrochure() {
 
                     <div className={styles.wreathGrid}>
                         {[
-                            { name: "Vamsi T", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-T.png" },
-                            { name: "Jagadesh", company: "Forsys", pkg: "4.0", image: "/placements/Jagadesh.png" },
+                            { name: "Vamsi Tammisetty", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-T.png" },
+                            { name: "Jagadesh", company: "Forsys", pkg: "4", image: "/placements/Jagadesh.png" },
                             { name: "Vamsi K", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-K.png" },
-                            { name: "Rajasekhar", company: "Accenture", pkg: "5.0", image: "/placements/Rajasekhar.png" },
-                            { name: "Manoj", company: "Absolute Labs", pkg: "5.0", image: "/placements/Manoj.png" },
-                            { name: "Sampath", company: "Accenture", pkg: "5.0", image: "/placements/Sampath.png" },
-                            { name: "Karthik", company: "Accenture", pkg: "4.0", image: "/placements/Karthik.png" },
+                            { name: "Rajasekhar", company: "Accenture", pkg: "5", image: "/placements/Rajasekhar.png" },
+                            { name: "Manoj", company: "Absolute Labs", pkg: "5", image: "/placements/Manoj.png" },
+                            { name: "Sampath", company: "Accenture", pkg: "5", image: "/placements/Sampath.png" },
+                            { name: "Karthik", company: "Accenture", pkg: "4", image: "/placements/Karthik.png" },
                             { name: "Prasad", company: "Gemini", pkg: "3.5", image: "/placements/Prasad.png" },
-                            { name: "Ganesh", company: "Tech Mahindra", pkg: "5.0", image: "/placements/Ganesh-K.png" },
-                            { name: "Harish", company: "Cloud Leaf", pkg: "5.0", image: "/placements/Harish-K.png" },
-                            { name: "Santhavana", company: "Cognizant", pkg: "4.0", image: "/placements/Santhavana.png" },
-                            { name: "Phani B", company: "Centillion", pkg: "3.5", image: "/placements/Phani.png" },
+                            { name: "Ganesh", company: "Tech Mahendra", pkg: "5", image: "/placements/Ganesh-K.png" },
+                            { name: "Harish", company: "Cloud Leaf L.L.C", pkg: "5", image: "/placements/Harish-K.png" },
+                            { name: "Santhavana", company: "Cognizant", pkg: "4", image: "/placements/Santhavana.png" },
+                            { name: "Phani B", company: "Centillion Networks", pkg: "3.5", image: "/placements/Phani.png" },
                             { name: "Rishi", company: "Innovation Labs", pkg: "3.5", image: "/placements/Rishi.png" },
-                            { name: "Midhun", company: "Terralogic", pkg: "4.0", image: "/placements/Midhun.png" },
-                            { name: "marahor", company: "Teachmint", pkg: "Comp.", image: "/placements/Marohar.png" },
-                            { name: "Tejaswar", company: "Arcitech", pkg: "Comp.", image: "/placements/Tejaswar.png" },
-                            { name: "Divya", company: "Nemali Software", pkg: "4.0", image: "/placements/Divya.png" },
+                            { name: "Midhun", company: "Terralogic", pkg: "4", image: "/placements/Midhun.png" },
+                            { name: "marahor", company: "Teachmint", pkg: "4.5", image: "/placements/Marohar.png" },
+                            { name: "Tejaswar", company: "Arcitech", pkg: "4.5", image: "/placements/Tejaswar.png" },
+                            { name: "Divya", company: "Nemali Software", pkg: "4", image: "/placements/Divya.png" },
                             { name: "Rishwitha", company: "Tech Solutions", pkg: "3.5", image: "/placements/Rishwitha Nalgonda.png" },
-                            { name: "Rohan Das", company: "Amazon", pkg: "45", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200" },
-                            { name: "Priya S", company: "Microsoft", pkg: "38", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200" },
-                            { name: "Amit Patel", company: "Adobe", pkg: "28", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200" },
-                            { name: "Sneha R", company: "Uber", pkg: "35", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200" },
-                            { name: "Vikram S", company: "Zerodha", pkg: "42", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200" },
-                            { name: "Arjun K", company: "Cred", pkg: "26", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200" },
-                            { name: "Megha S", company: "G-Cloud", pkg: "36", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200" },
-                            { name: "Sanjay T", company: "Netflix", pkg: "52", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200" },
-                            { name: "Karan W", company: "Razorpay", pkg: "24", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" },
-                            { name: "Nidhi B", company: "Meta", pkg: "48", image: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=200" },
-                            { name: "Rahul G", company: "Apple", pkg: "40", image: "https://images.unsplash.com/photo-1618077360395-f3068be8e001?q=80&w=200" },
-                            { name: "Divya L", company: "Canva", pkg: "30", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200" },
-                            { name: "Siddharth", company: "Tesla", pkg: "55", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" },
-                            { name: "Anjali P", company: "Stripe", pkg: "44", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200" },
-                            { name: "Rahul K", company: "TCS", pkg: "7.5", image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=200" },
-                            { name: "Sneha P", company: "Infosys", pkg: "6.8", image: "https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=200" },
-                            { name: "Aditya S", company: "Wipro", pkg: "5.5", image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200" },
-                            { name: "Pooja R", company: "HCLTech", pkg: "8.2", image: "https://images.unsplash.com/photo-1548142813-c348350df2b?q=80&w=200" },
-                            { name: "Vikram M", company: "Oracle", pkg: "18", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200" },
-                            { name: "Ananya G", company: "Swiggy", pkg: "12", image: "https://images.unsplash.com/photo-1590649839149-7fd4981d593f?q=80&w=200" },
-                            { name: "Rohan V", company: "Zomato", pkg: "14", image: "https://images.unsplash.com/photo-1628157588553-5eeea00af15c?q=80&w=200" },
-                            { name: "Kavya S", company: "PhonePe", pkg: "20", image: "https://images.unsplash.com/photo-1596215143922-eedeaba0d91c?q=80&w=200" },
-                            { name: "Arjun M", company: "Paytm", pkg: "16", image: "https://images.unsplash.com/photo-1614289371518-722f2615943d?q=80&w=200" },
-                            { name: "Ishani D", company: "Capgemini", pkg: "9.5", image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=200" },
-                            { name: "Manish T", company: "LTI", pkg: "8.8", image: "https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=200" },
-                            { name: "Shreya I", company: "Mindtree", pkg: "10", image: "https://images.unsplash.com/photo-1589571894960-20bbe2828d02?q=80&w=200" },
-                            { name: "Nikhil B", company: "Deloitte", pkg: "12.5", image: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=200" },
-                            { name: "Tanvi S", company: "KPMG", pkg: "11", image: "https://images.unsplash.com/photo-1607503813978-296a67eed82a?q=80&w=200" },
-                            { name: "Sameer K", company: "Postman", pkg: "22", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" },
-                            { name: "Sai Teja", company: "Qualcomm", pkg: "21", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200" }
+                            { name: "Rohan Das", company: "Amazon", pkg: "45", image: "https://i.pravatar.cc/150?u=rohan" },
+                            { name: "Priya Sharma", company: "Microsoft", pkg: "38", image: "https://i.pravatar.cc/150?u=priya" },
+                            { name: "Amit Patel", company: "Adobe", pkg: "28", image: "https://i.pravatar.cc/150?u=amit" },
+                            { name: "Sneha Reddy", company: "Uber", pkg: "35", image: "https://i.pravatar.cc/150?u=sneha" },
+                            { name: "Vikram Singh", company: "Zerodha", pkg: "42", image: "https://i.pravatar.cc/150?u=vikram" },
+                            { name: "Arjun K.", company: "Cred", pkg: "26", image: "https://i.pravatar.cc/150?u=arjun" },
+                            { name: "Megha S.", company: "Google Cloud", pkg: "36", image: "https://i.pravatar.cc/150?u=megha" },
+                            { name: "Sanjay T.", company: "Netflix", pkg: "52", image: "https://i.pravatar.cc/150?u=sanjay" },
+                            { name: "Karan W.", company: "Razorpay", pkg: "24", image: "https://i.pravatar.cc/150?u=karan" },
+                            { name: "Nidhi B.", company: "Meta", pkg: "48", image: "https://i.pravatar.cc/150?u=nidhi" },
+                            { name: "Rahul G.", company: "Apple", pkg: "40", image: "https://i.pravatar.cc/150?u=rahulg" },
+                            { name: "Divya L.", company: "Canva", pkg: "30", image: "https://i.pravatar.cc/150?u=divya" },
+                            { name: "Siddharth M.", company: "Tesla", pkg: "55", image: "https://i.pravatar.cc/150?u=sid" },
+                            { name: "Anjali P.", company: "Stripe", pkg: "44", image: "https://i.pravatar.cc/150?u=anjali" },
+                            { name: "Varun D.", company: "Oracle", pkg: "39", image: "https://i.pravatar.cc/150?u=varun" },
+                            { name: "Kavita J.", company: "Paypal", pkg: "22", image: "https://i.pravatar.cc/150?u=kavita" },
+                            { name: "Rajesh K.", company: "Spotify", pkg: "33", image: "https://i.pravatar.cc/150?u=rajesh" },
+                            { name: "Ishita R.", company: "Snowflake", pkg: "29", image: "https://i.pravatar.cc/150?u=ishita" },
+                            { name: "Manish S.", company: "Airbnb", pkg: "47", image: "https://i.pravatar.cc/150?u=manish" },
+                            { name: "Pooja V.", company: "Walmart", pkg: "26", image: "https://i.pravatar.cc/150?u=pooja" },
+                            { name: "Harish N.", company: "Cisco", pkg: "31", image: "https://i.pravatar.cc/150?u=harish" },
+                            { name: "Simran T.", company: "Flipkart", pkg: "20", image: "https://i.pravatar.cc/150?u=simran" }
                         ].map((s, i) => (
                             <div key={i} className={styles.studentCard}>
                                 <div className={styles.wreath}>
@@ -989,9 +978,9 @@ export default function PythonFullStackBrochure() {
                     </div>
                 </section>
 
-                {/* PAGE 14: ZENITH ADMISSION COMMAND CENTER */}
+                {/* PAGE 13: ZENITH ADMISSION COMMAND CENTER */}
                 <section className={`${styles.page} ${styles.zenithPage}`}>
-                    <Header pageNum="14" />
+                    <Header pageNum="13" />
 
                     <div className={styles.zenithHeader}>
                         <h2>Initialize Your Journey</h2>
@@ -1070,7 +1059,7 @@ export default function PythonFullStackBrochure() {
                             <button
                                 className={styles.zenithAction}
                                 onClick={() => {
-                                    const message = encodeURIComponent("Hello, I am interested in the Python Full Stack Masterclass. I would like to secure my seat and get more details regarding the next batch.");
+                                    const message = encodeURIComponent("Hello, I am interested in the Python with Data Analytics Masterclass. I would like to secure my seat and get more details regarding the next batch.");
                                     window.open(`https://wa.me/918309879187?text=${message}`);
                                 }}
                             >

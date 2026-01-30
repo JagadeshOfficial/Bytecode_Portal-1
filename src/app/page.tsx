@@ -211,14 +211,6 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <CourseCard
-              title="Java Full Stack Mastery"
-              desc="The ultimate guide to building enterprise distributed systems at scale."
-              salary="14 LPA"
-              icon={<Code size={24} />}
-              image="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80"
-              tags={['Java', 'Spring', 'React']}
-            />
-            <CourseCard
               title="Python with Data Analytics"
               desc="Master data architecture and engineering to drive product intelligence."
               salary="12 LPA"
@@ -227,12 +219,44 @@ export default function Home() {
               tags={['Python', 'SQL', 'Pandas']}
             />
             <CourseCard
-              title="Full Stack Python Dev"
+              title="Java Full Stack Mastery"
+              desc="The ultimate guide to building enterprise distributed systems at scale."
+              salary="14 LPA"
+              icon={<Code size={24} />}
+              image="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80"
+              tags={['Java', 'Spring', 'React']}
+            />
+            <CourseCard
+              title="Python Full Stack"
               desc="End-to-end modern application development with the world's fastest stack."
               salary="12 LPA"
               icon={<Layers size={24} />}
               image="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80"
               tags={['Python', 'Django', 'React']}
+            />
+            <CourseCard
+              title="Data Science"
+              desc="Unlock the power of predictive modeling and artificial intelligence."
+              salary="16 LPA"
+              icon={<Cpu size={24} />}
+              image="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&q=80"
+              tags={['ML', 'AI', 'TensorFlow']}
+            />
+            <CourseCard
+              title="DevOps with AWS"
+              desc="Automate infrastructure and master cloud-native deployment pipelines."
+              salary="18 LPA"
+              icon={<Server size={24} />}
+              image="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80"
+              tags={['AWS', 'Docker', 'K8s']}
+            />
+            <CourseCard
+              title="Cyber Security"
+              desc="Defend enterprise networks and master ethical hacking techniques."
+              salary="15 LPA"
+              icon={<ShieldCheck size={24} />}
+              image="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80"
+              tags={['Ethical Hacking', 'NetSec', 'SOC']}
             />
           </motion.div>
 
