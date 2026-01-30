@@ -98,6 +98,35 @@ const COURSES = [
             { name: "Nisha P.", company: "Adobe", role: "Cloud Security", package: "26 LPA", image: "https://i.pravatar.cc/150?u=nisha" }
         ],
         brochureUrl: "#"
+    },
+    {
+        id: 4,
+        title: "Python Full Stack Architect",
+        category: "Development",
+        level: "Advanced",
+        duration: "6 Months",
+        students: "3.2k+",
+        rating: 4.9,
+        price: "₹38,000",
+        image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80",
+        featured: true,
+        techStack: ["Python", "Django", "FastAPI", "React", "Next.js", "Docker"],
+        startDate: "Feb 20, 2024",
+        seatsLeft: 8,
+        modules: [
+            { title: "Module 1: Advanced Python Internals", desc: "Memory management, GIL, Asyncio, and Professional Design Patterns." },
+            { title: "Module 2: Scalable Backend with Django & FastAPI", desc: "Building monolithic and microservice architectures with high-performance routing." },
+            { title: "Module 3: Database Optimization (SQL/NoSQL)", desc: "Relational modeling with PostgreSQL and fast caching with Redis." },
+            { title: "Module 4: Professional Frontend with Next.js", desc: "Server Actions, App Router Mastery, and React UI engineering." },
+            { title: "Module 5: Distributed Systems & Logic", desc: "Task queues with Celery, Message brokers like RabbitMQ/Kafka." },
+            { title: "Module 6: Production Grade Cloud DevOps", desc: "Dockerizing whole stack, Kubernetes orchestration, and AWS Lambda/EC2." }
+        ],
+        mentors: ["Senior SDE @ Meta", "System Architect @ Netflix"],
+        placements: [
+            { name: "Karan M.", company: "Google", role: "Backend Architect", package: "28 LPA", image: "https://i.pravatar.cc/150?u=karan" },
+            { name: "Megha S.", company: "Zomato", role: "Full Stack Lead", package: "22 LPA", image: "https://i.pravatar.cc/150?u=megha" }
+        ],
+        brochureUrl: "/brochure/python-full-stack"
     }
 ];
 
@@ -495,7 +524,10 @@ function CourseDetailModal({ course, onClose }: any) {
                             <button className={styles.modalEnrollBtn} style={{ width: '100%', padding: '1.2rem' }}>Enroll Now</button>
 
                             <div className={styles.modalActionGrid}>
-                                <button className={styles.viewBrochureBtn}>
+                                <button
+                                    className={styles.viewBrochureBtn}
+                                    onClick={() => window.location.href = course.brochureUrl}
+                                >
                                     <Rocket size={18} /> View Brochure
                                 </button>
                                 <button className={styles.downloadBtn}>
