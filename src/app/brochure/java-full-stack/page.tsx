@@ -827,119 +827,127 @@ export default function PythonFullStackBrochure() {
 
                         {[
                             {
-                                n: "01", t: "Assessment", s: "Baseline Analysis",
-                                l: ["Aptitude Evaluation", "Technical Diagnostics", "Communication Audit"],
-                                r: ["Profile Gaps ID", "Goal Setting", "Custom Roadmap"]
+                                weeks: "0-4",
+                                tech: ["Java 17 Fundamentals", "OOPs Architecture", "Exception Handling", "Collections Framework"],
+                                soft: ["Communication Audit", "LinkedIn Optimization", "Goal Setting Blueprint"]
                             },
                             {
-                                n: "02", t: "Core Engineering", s: "Foundation Layer",
-                                l: ["Java SE Mastery", "Data Structures", "Algorithms & Logic"],
-                                r: ["Live Coding", "Code Reviews", "System Design Basics"]
+                                weeks: "5-8",
+                                tech: ["Advanced DSA", "Time & Space Complexity", "Multi-Threading", "SQL & Database Design"],
+                                soft: ["Problem Solving Logic", "Technical Storytelling", "GitHub Profile Building"]
                             },
                             {
-                                n: "03", t: "Enterprise Stack", s: "Application Phase",
-                                l: ["Spring Boot & Cloud", "Microservices Auth", "AWS Deployment"],
-                                r: ["Portfolio Build", "Documentation", "Team Syncs"]
+                                weeks: "9-12",
+                                tech: ["Spring Boot 3.0", "Microservices", "RESTful APIs", "Hibernate/JPA"],
+                                soft: ["System Design Basics", "Code Review Etiquette", "Agile Methodologies"]
                             },
                             {
-                                n: "04", t: "Placement", s: "Market Entry",
-                                l: ["Resume Engineering", "Mock Interviews", "Salary Negotiation"],
-                                r: ["Profile Optimization", "HR Screens", "Offer Rollout"]
+                                weeks: "13+",
+                                tech: ["React Integration", "AWS Cloud Deployment", "Docker & Kubernetes", "Capstone Project"],
+                                soft: ["Mock Interviews (HR/Tech)", "Salary Negotiation", "Resume Engineering"]
                             }
                         ].map((step, i) => (
                             <div key={i} className={styles.roadmapStepLuxury}>
                                 <div className={`${styles.roadmapWing} ${styles.left}`}>
-                                    <div className={styles.wingHeader}>{step.t}</div>
+                                    <div className={styles.wingHeader}>
+                                        <Database size={16} /> <span>TECHNICAL SKILLS</span>
+                                    </div>
                                     <ul className={styles.wingList}>
-                                        {step.l.map((it, idx) => <li key={idx}><span>{it}</span> <div style={{ width: 6, height: 6, background: 'var(--secondary)', borderRadius: '50%' }} /></li>)}
+                                        {step.tech.map((t, ti) => (
+                                            <li key={ti}>{t} <CheckCircle2 size={12} style={{ color: 'var(--secondary)' }} /></li>
+                                        ))}
                                     </ul>
                                 </div>
 
                                 <div className={styles.roadmapNodeCircle}>
-                                    <strong>{step.n}</strong>
-                                    <span>PHASE</span>
+                                    <strong>{step.weeks}</strong>
+                                    <span>WEEKS</span>
                                 </div>
 
                                 <div className={`${styles.roadmapWing} ${styles.right}`}>
-                                    <div className={styles.wingHeader}>{step.s}</div>
+                                    <div className={styles.wingHeader}>
+                                        <Users size={16} /> <span>INTERVIEW SKILLS</span>
+                                    </div>
                                     <ul className={styles.wingList}>
-                                        {step.r.map((it, idx) => <li key={idx}><div style={{ width: 6, height: 6, background: 'var(--primary)', borderRadius: '50%' }} /> <span>{it}</span></li>)}
+                                        {step.soft.map((s, si) => (
+                                            <li key={si}><CheckCircle2 size={12} style={{ color: 'var(--secondary)' }} /> {s}</li>
+                                        ))}
                                     </ul>
                                 </div>
                             </div>
                         ))}
-                        <div className={styles.rocketContainer}>
-                            <div style={{ background: '#fff', padding: '1rem', borderRadius: '50%', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-                                <Rocket size={40} fill="var(--secondary)" stroke="var(--primary)" />
-                            </div>
-                        </div>
+                        <motion.div
+                            className={styles.rocketContainer}
+                            animate={{ y: [450, -50], opacity: [0, 1, 1, 0] }}
+                            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                        >
+                            <Rocket color="var(--secondary)" size={40} />
+                        </motion.div>
                     </div>
                 </section>
 
                 {/* PAGE 12: ELITE PLACEMENT WALL */}
                 <section className={styles.page}>
                     <Header pageNum="12" />
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)' }}>ELITE PLACEMENT WALL</h2>
-                        <p style={{ fontWeight: 700, opacity: 0.7 }}>Joining the Ranks of Top Engineers</p>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)', letterSpacing: '-1px' }}>RECENT PLACEMENTS</h2>
+                        <p style={{ fontWeight: 700, opacity: 0.7 }}>A Legacy of Success: Real Students, Real Companies, Real Transitions</p>
                     </div>
 
                     <div className={styles.wreathGrid}>
                         {[
-                            { name: "Suresh P.", company: "Cognizant", pkg: "12", role: "SDE-1", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Priya M.", company: "Terralogic", pkg: "10", role: "Dev", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Rahul V.", company: "Oracle", pkg: "18", role: "Eng", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Anil K.", company: "Absolute Labs", pkg: "14", role: "Full Stack", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Sneha R.", company: "Forsys", pkg: "11", role: "Analyst", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Vikram S.", company: "SparxIT", pkg: "9", role: "SDE", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Kavya L.", company: "Algoworks", pkg: "12", role: "Dev", img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Arjun N.", company: "DXMINDS", pkg: "10", role: "Backend", img: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Meera T.", company: "Nexgen", pkg: "8", role: "Frontend", img: "https://images.unsplash.com/photo-1629425733761-caae3b5f2e50?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Rohan D.", company: "Honeywell", pkg: "15", role: "Eng", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Divya B.", company: "Deloitte", pkg: "13", role: "Consultant", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Kiran J.", company: "Cisco", pkg: "16", role: "Net Eng", img: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Swathi K.", company: "ZenSar", pkg: "11", role: "Dev", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Manoj R.", company: "ITC INFOTECH", pkg: "12", role: "SDE-1", img: "https://images.unsplash.com/photo-1600486913747-55e5470d6f40?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Varun P.", company: "Hexaware Technologies", pkg: "10", role: "Analyst", img: "https://images.unsplash.com/photo-1521119989659-a83eee488058?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Sana A.", company: "HP", pkg: "14", role: "Sys Eng", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Srikanth", company: "Mphasis", pkg: "11", role: "Dev", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Naveen", company: "Mindtree", pkg: "12", role: "SDE", img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Harsha", company: "Wipro", pkg: "9", role: "Proj Eng", img: "https://images.unsplash.com/photo-1463453091185-61582044d556?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Ravi Teja", company: "DXC Technology", pkg: "10", role: "Assoc", img: "https://images.unsplash.com/photo-1481437642641-2f0ae875f836?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Jyothi", company: "Dr. Reddy's", pkg: "13", role: "Analyst", img: "https://images.unsplash.com/photo-1558203728-00f45181dd84?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Vamshi", company: "Salesforce", pkg: "21", role: "MTS", img: "https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Akhil", company: "IBM", pkg: "14", role: "App Dev", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Madhu", company: "Mphasis", pkg: "11", role: "Eng", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Sandeep", company: "Facebook", pkg: "32", role: "SDE-2", img: "https://images.unsplash.com/photo-1522075469751-3a3694c60e9e?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Praneeth", company: "AWS", pkg: "28", role: "Cloud Eng", img: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Dinesh", company: "Tech Mahindra", pkg: "9", role: "SDE", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Manish", company: "Accenture", pkg: "11", role: "ASE", img: "https://images.unsplash.com/photo-1520697517317-087e8e663361?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Uday", company: "HCLTech", pkg: "10", role: "Dev", img: "https://images.unsplash.com/photo-1545696968-1a5245650b91?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Santosh", company: "Cognizant", pkg: "12", role: "PAT", img: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Deepak", company: "Arcitech", pkg: "8", role: "Jr Dev", img: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Vinay", company: "Cloud Leaf L.L.C", pkg: "15", role: "SDE", img: "https://images.unsplash.com/photo-1513956589380-bad6188e1196?q=80&w=200&auto=format&fit=crop" },
-                            // Row 5 (Added more diverse Indian names)
-                            { name: "Bhavya S.", company: "Teachmint", pkg: "16", role: "SDE-1", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Kartik A.", company: "Centillion Networks", pkg: "10", role: "Net Eng", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Pooja D.", company: "Tech Solutions", pkg: "8", role: "Dev", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Gautam R.", company: "Gemini", pkg: "14", role: "Analyst", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Aditi S.", company: "Amazon", pkg: "29", role: "SDE", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Rishabh K.", company: "Microsoft", pkg: "30", role: "SDE", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Neha G.", company: "Adobe", pkg: "25", role: "MTS", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Aakash M.", company: "Uber", pkg: "28", role: "SDE-1", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" },
-                            // Row 6
-                            { name: "Ananya P.", company: "Cred", pkg: "22", role: "Backend", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Varun K.", company: "Zerodha", pkg: "18", role: "Dev", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Siddhi J.", company: "Netflix", pkg: "35", role: "Sr Eng", img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Eshan T.", company: "Google Cloud", pkg: "31", role: "Cloud Eng", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Tanvi B.", company: "Apple", pkg: "29", role: "iOS Dev", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Yash S.", company: "Razorpay", pkg: "20", role: "SDE", img: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Ishaan R.", company: "Meta", pkg: "33", role: "F. Stack", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" },
-                            { name: "Simran L.", company: "Canva", pkg: "24", role: "Frontend", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" }
+                            { name: "Vamsi T", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-T.png" },
+                            { name: "Jagadesh", company: "Forsys", pkg: "4.0", image: "/placements/Jagadesh.png" },
+                            { name: "Vamsi K", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-K.png" },
+                            { name: "Rajasekhar", company: "Accenture", pkg: "5.0", image: "/placements/Rajasekhar.png" },
+                            { name: "Manoj", company: "Absolute Labs", pkg: "5.0", image: "/placements/Manoj.png" },
+                            { name: "Sampath", company: "Accenture", pkg: "5.0", image: "/placements/Sampath.png" },
+                            { name: "Karthik", company: "Accenture", pkg: "4.0", image: "/placements/Karthik.png" },
+                            { name: "Prasad", company: "Gemini", pkg: "3.5", image: "/placements/Prasad.png" },
+                            { name: "Ganesh", company: "Tech Mahindra", pkg: "5.0", image: "/placements/Ganesh-K.png" },
+                            { name: "Harish", company: "Cloud Leaf", pkg: "5.0", image: "/placements/Harish-K.png" },
+                            { name: "Santhavana", company: "Cognizant", pkg: "4.0", image: "/placements/Santhavana.png" },
+                            { name: "Phani B", company: "Centillion", pkg: "3.5", image: "/placements/Phani.png" },
+                            { name: "Rishi", company: "Innovation Labs", pkg: "3.5", image: "/placements/Rishi.png" },
+                            { name: "Midhun", company: "Terralogic", pkg: "4.0", image: "/placements/Midhun.png" },
+                            { name: "marahor", company: "Teachmint", pkg: "Comp.", image: "/placements/Marohar.png" },
+                            { name: "Tejaswar", company: "Arcitech", pkg: "Comp.", image: "/placements/Tejaswar.png" },
+                            { name: "Divya", company: "Nemali Software", pkg: "4.0", image: "/placements/Divya.png" },
+                            { name: "Rishwitha", company: "Tech Solutions", pkg: "3.5", image: "/placements/Rishwitha Nalgonda.png" },
+                            { name: "Rohan Das", company: "Amazon", pkg: "45", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200" },
+                            { name: "Priya S", company: "Microsoft", pkg: "38", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200" },
+                            { name: "Amit Patel", company: "Adobe", pkg: "28", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200" },
+                            { name: "Sneha R", company: "Uber", pkg: "35", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200" },
+                            { name: "Vikram S", company: "Zerodha", pkg: "42", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200" },
+                            { name: "Arjun K", company: "Cred", pkg: "26", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200" },
+                            { name: "Megha S", company: "G-Cloud", pkg: "36", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200" },
+                            { name: "Sanjay T", company: "Netflix", pkg: "52", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200" },
+                            { name: "Karan W", company: "Razorpay", pkg: "24", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" },
+                            { name: "Nidhi B", company: "Meta", pkg: "48", image: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=200" },
+                            { name: "Rahul G", company: "Apple", pkg: "40", image: "https://images.unsplash.com/photo-1618077360395-f3068be8e001?q=80&w=200" },
+                            { name: "Divya L", company: "Canva", pkg: "30", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200" },
+                            { name: "Siddharth", company: "Tesla", pkg: "55", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" },
+                            { name: "Anjali P", company: "Stripe", pkg: "44", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200" },
+                            { name: "Rahul K", company: "TCS", pkg: "7.5", image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=200" },
+                            { name: "Sneha P", company: "Infosys", pkg: "6.8", image: "https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=200" },
+                            { name: "Aditya S", company: "Wipro", pkg: "5.5", image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200" },
+                            { name: "Pooja R", company: "HCLTech", pkg: "8.2", image: "https://images.unsplash.com/photo-1548142813-c348350df2b?q=80&w=200" },
+                            { name: "Vikram M", company: "Oracle", pkg: "18", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200" },
+                            { name: "Ananya G", company: "Swiggy", pkg: "12", image: "https://images.unsplash.com/photo-1590649839149-7fd4981d593f?q=80&w=200" },
+                            { name: "Rohan V", company: "Zomato", pkg: "14", image: "https://images.unsplash.com/photo-1628157588553-5eeea00af15c?q=80&w=200" },
+                            { name: "Kavya S", company: "PhonePe", pkg: "20", image: "https://images.unsplash.com/photo-1596215143922-eedeaba0d91c?q=80&w=200" },
+                            { name: "Arjun M", company: "Paytm", pkg: "16", image: "https://images.unsplash.com/photo-1614289371518-722f2615943d?q=80&w=200" },
+                            { name: "Ishani D", company: "Capgemini", pkg: "9.5", image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=200" },
+                            { name: "Manish T", company: "LTI", pkg: "8.8", image: "https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=200" },
+                            { name: "Shreya I", company: "Mindtree", pkg: "10", image: "https://images.unsplash.com/photo-1589571894960-20bbe2828d02?q=80&w=200" },
+                            { name: "Nikhil B", company: "Deloitte", pkg: "12.5", image: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=200" },
+                            { name: "Tanvi S", company: "KPMG", pkg: "11", image: "https://images.unsplash.com/photo-1607503813978-296a67eed82a?q=80&w=200" },
+                            { name: "Sameer K", company: "Postman", pkg: "22", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" },
+                            { name: "Sai Teja", company: "Qualcomm", pkg: "21", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200" }
                         ].map((s, i) => (
                             <div key={i} className={styles.studentCard}>
                                 <div className={styles.wreath}>
-                                    <img src={s.img} alt={s.name} className={styles.studentImage} />
+                                    <img src={s.image} alt={s.name} className={styles.studentImage} />
                                     <div className={styles.packageBadge}>
                                         <span>{s.pkg}</span>
                                         <strong>LPA</strong>
@@ -948,55 +956,38 @@ export default function PythonFullStackBrochure() {
                                 <div className={styles.studentInfoMini}>
                                     <h5>{s.name}</h5>
                                     <p>{s.company}</p>
-                                    <img src={getCompanyLogo(s.company)} alt={s.company} className={styles.companyLogoMini} style={{ height: '20px', objectFit: 'contain', marginTop: '4px', opacity: 0.8 }} />
                                 </div>
                             </div>
                         ))}
                     </div>
-                </section>
-
-                {/* PAGE 13: ADVANCED PLACEMENT STATISTICS (NEW) */}
-                <section className={styles.page}>
-                    <Header pageNum="13" />
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)', textTransform: 'uppercase' }}>IMPACT ANALYTICS</h2>
-                        <p style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-dim)' }}>Measuring Excellence in Real-Time</p>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
-                        <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0,48,135,0.05)' }}>
-                            <h3 style={{ fontSize: '1.5rem', color: '#003087', fontWeight: 900, marginBottom: '1rem' }}>Hiring Speed</h3>
-                            <div style={{ fontSize: '3rem', fontWeight: 1000, color: '#27ae60' }}>21 <span style={{ fontSize: '1rem', color: '#94a3b8' }}>DAYS</span></div>
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', opacity: 0.7 }}>Average time to offer after course completion.</p>
-                        </div>
-                        <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0,48,135,0.05)' }}>
-                            <h3 style={{ fontSize: '1.5rem', color: '#003087', fontWeight: 900, marginBottom: '1rem' }}>Salary Hiking</h3>
-                            <div style={{ fontSize: '3rem', fontWeight: 1000, color: '#f39200' }}>150%</div>
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', opacity: 0.7 }}>Average salary hike for experienced professionals.</p>
-                        </div>
-                        <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0,48,135,0.05)' }}>
-                            <h3 style={{ fontSize: '1.5rem', color: '#003087', fontWeight: 900, marginBottom: '1rem' }}>Global Reach</h3>
-                            <div style={{ fontSize: '3rem', fontWeight: 1000, color: '#d63031' }}>5+</div>
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', opacity: 0.7 }}>Countries where our alumni are currently working.</p>
-                        </div>
-                    </div>
-
-                    <div style={{ marginTop: '4rem', padding: '3rem', background: '#00153d', borderRadius: '32px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
-                        <div style={{ position: 'relative', zIndex: 2 }}>
-                            <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>PARTNER ECOSYSTEM</h3>
-                            <p style={{ fontSize: '1.1rem', opacity: 0.8, marginBottom: '2rem', maxWidth: '600px' }}>Our curriculum is vetted by engineering leaders from these top-tier organizations to ensure Day-1 productivity.</p>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', opacity: 0.7 }}>
-                                {['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix', 'Uber', 'Atlassian', 'Salesforce'].map(p => (
-                                    <span key={p} style={{ fontSize: '1.2rem', fontWeight: 800 }}>{p}</span>
-                                ))}
-                            </div>
+                    <div style={{ marginTop: 'auto', background: 'rgba(0, 48, 135, 0.02)', padding: '3rem', border: '1px solid rgba(0, 48, 135, 0.05)', borderRadius: '30px' }}>
+                        <h3 style={{ textAlign: 'center', marginBottom: '3rem', fontSize: '1rem', color: 'var(--primary)', letterSpacing: '4px', fontWeight: 900 }}>OUR HIRING & ACADEMIC PARTNER NETWORK</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '2.5rem', alignItems: 'center' }}>
+                            {[...Array(54)].map((_, i) => {
+                                const id = i + 1;
+                                return (
+                                    <div key={id} style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <img
+                                            src={`/CompanyLogos/${id}.${id === 54 ? 'svg' : 'png'}`}
+                                            alt="Partner"
+                                            style={{ width: '100%', maxWidth: '85px', height: 'auto', transition: '0.3s', cursor: 'pointer' }}
+                                            onMouseOver={(e) => {
+                                                e.currentTarget.style.transform = 'scale(1.1)';
+                                            }}
+                                            onMouseOut={(e) => {
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
 
-                {/* PAGE 14: ZENITH ADMISSION COMMAND CENTER */}
+                {/* PAGE 13: ZENITH ADMISSION COMMAND CENTER */}
                 <section className={`${styles.page} ${styles.zenithPage}`}>
-                    <Header pageNum="14" />
+                    <Header pageNum="13" />
 
                     <div className={styles.zenithHeader}>
                         <h2>Initialize Your Journey</h2>
@@ -1006,14 +997,14 @@ export default function PythonFullStackBrochure() {
                     <div className={styles.zenithGrid}>
                         {/* LEFT: INVESTMENT ARCHITECTURE */}
                         <div className={`${styles.zenithCard} ${styles.primary}`}>
-                            <div className={styles.zenithPriceLabel}>Tuition & Certification Fee</div>
+                            <div className={styles.zenithPriceLabel}>Training Fee</div>
                             <div className={styles.zenithPriceValue}>
                                 <span className={styles.zenithOriginalPrice}>₹45,000</span>
                                 <span className={styles.zenithFinalPrice}>₹35,000</span>
                             </div>
 
                             <div className={styles.zenithFeatureList}>
-                                {['6 Months Live Training', 'Industrial Internship', '100% Placement Support', 'Lifetime LMS Access', 'Mock Interviews & Resume Building'].map(item => (
+                                {['3 Months Live Training', 'Industrial Internship', '100% Placement Guarantee', 'Lifetime LMS Access', 'Mock Interviews & Resume Building'].map(item => (
                                     <div key={item} className={styles.zenithFeature}>
                                         <div className={styles.zenithCheck}><Check size={16} strokeWidth={4} /></div>
                                         <span>{item}</span>
