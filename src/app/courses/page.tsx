@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import styles from './courses.module.css';
 import { Search, Clock, Users, Star, Zap, Code, Database, Cloud, Layers, Calendar, AlertCircle, Quote, X, ArrowRight, Trophy, Rocket, Download, ShieldCheck, Heart } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const COURSES = [
     {
@@ -126,7 +127,7 @@ const COURSES = [
             { name: "Arjun K.", company: "Google", role: "AI Engineer", package: "32 LPA", image: "https://i.pravatar.cc/150?u=arjun" },
             { name: "Sneha V.", company: "Uber", role: "Data Scientist", package: "22 LPA", image: "https://i.pravatar.cc/150?u=sneha" }
         ],
-        brochureUrl: "#"
+        brochureUrl: "/brochure/data-science-ai"
     },
     {
         id: 5,
@@ -156,7 +157,7 @@ const COURSES = [
             { name: "Vikram R.", company: "Oracle", role: "DevOps Engineer", package: "20 LPA", image: "https://i.pravatar.cc/150?u=vikram" },
             { name: "Nisha P.", company: "Adobe", role: "Cloud Security", package: "26 LPA", image: "https://i.pravatar.cc/150?u=nisha" }
         ],
-        brochureUrl: "#"
+        brochureUrl: "/brochure/devops-cloud"
     },
     {
         id: 6,
@@ -186,7 +187,7 @@ const COURSES = [
             { name: "Kiran S.", company: "Palo Alto Networks", role: "Security Analyst", package: "18 LPA", image: "https://i.pravatar.cc/150?u=kiran" },
             { name: "Rohit V.", company: "CrowdStrike", role: "Pen Tester", package: "24 LPA", image: "https://i.pravatar.cc/150?u=rohit" }
         ],
-        brochureUrl: "#"
+        brochureUrl: "/brochure/cyber-security"
     }
 ];
 
@@ -564,6 +565,7 @@ function VideoPreviewCard({ title, duration, thumbnail, views }: any) {
 
 
 function CourseDetailModal({ course, onClose }: any) {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState('curriculum');
 
     return (
@@ -586,7 +588,7 @@ function CourseDetailModal({ course, onClose }: any) {
                             <div className={styles.modalActionGrid}>
                                 <button
                                     className={styles.viewBrochureBtn}
-                                    onClick={() => window.location.href = course.brochureUrl}
+                                    onClick={() => router.push(course.brochureUrl)}
                                 >
                                     <Rocket size={18} /> View Brochure
                                 </button>
