@@ -159,11 +159,13 @@ export default function Navbar() {
             <div className={styles.notificationDot} />
             <div className={styles.iconGlow} />
           </button>
-          <button className={styles.loginBtn}>
-            <div className={styles.loginBtnBorder} />
-            <div className={styles.loginBtnBg} />
-            <span className={styles.loginBtnText}>Portal</span>
-          </button>
+          <Link href="/login">
+            <button className={styles.loginBtn}>
+              <div className={styles.loginBtnBorder} />
+              <div className={styles.loginBtnBg} />
+              <span className={styles.loginBtnText}>Portal</span>
+            </button>
+          </Link>
         </div>
       </div>
     </motion.nav>

@@ -1,81 +1,73 @@
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
 import styles from './Footer.module.css';
+import Link from 'next/link';
+import { Twitter, Linkedin, Github, Instagram } from 'lucide-react';
 
 export default function Footer() {
-    return (
-        <footer className={styles.footer}>
-            <div className="container">
-                <div className={styles.footerGrid}>
-                    {/* Brand Column */}
-                    <div className={styles.brandCol}>
-                        <Link href="/" className={styles.logo}>
-                            <Image
-                                src="/logo.png"
-                                alt="ByteCode Logo"
-                                width={160}
-                                height={45}
-                                objectFit="contain"
-                            />
-                        </Link>
-                        <p className={styles.brandDesc}>
-                            Premium coding bootcamps designed to take you from hello world to hired.
-                            Join the top 1% of engineers with our advanced curriculum.
-                        </p>
-                        <div className={styles.socials}>
-                            <a href="#" className={styles.socialIcon}><Facebook size={18} /></a>
-                            <a href="#" className={styles.socialIcon}><Twitter size={18} /></a>
-                            <a href="#" className={styles.socialIcon}><Instagram size={18} /></a>
-                            <a href="#" className={styles.socialIcon}><Linkedin size={18} /></a>
-                        </div>
-                    </div>
-
-                    {/* Links Column 1 */}
-                    <div className={styles.footerCol}>
-                        <h4>Company</h4>
-                        <div className={styles.footerLinks}>
-                            <Link href="/about">About Us</Link>
-                            <Link href="/careers">Careers</Link>
-                            <Link href="/placements">Placements</Link>
-                            <Link href="/partners">For Partners</Link>
-                        </div>
-                    </div>
-
-                    {/* Links Column 2 */}
-                    <div className={styles.footerCol}>
-                        <h4>Resources</h4>
-                        <div className={styles.footerLinks}>
-                            <Link href="/blog">Blog</Link>
-                            <Link href="/events">Events</Link>
-                            <Link href="/community">Community</Link>
-                            <Link href="/support">Support Center</Link>
-                        </div>
-                    </div>
-
-                    {/* Newsletter */}
-                    <div className={styles.footerCol}>
-                        <h4>Stay Updated</h4>
-                        <div className={styles.newsletter}>
-                            <p>Get the latest tech trends and course updates.</p>
-                            <div className={styles.inputGroup}>
-                                <input type="email" placeholder="Enter your email" className={styles.emailInput} />
-                                <button className={styles.subscribeBtn}><Send size={16} /></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={styles.footerBottom}>
-                    <div>&copy; {new Date().getFullYear()} ByteCode Trainings. All rights reserved.</div>
-                    <div className={styles.legalLinks}>
-                        <Link href="/privacy">Privacy Policy</Link>
-                        <Link href="/terms">Terms of Service</Link>
-                    </div>
-                </div>
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.container}>
+        <div className={styles.footerGrid}>
+          <div className={styles.footerInfo}>
+            <h2>BYTECODE</h2>
+            <p className={styles.footerDesc}>
+              Architecting the next generation of software engineers through
+              world-class curriculum and industry-leading mentorship.
+            </p>
+            <div className={styles.footerSocials}>
+              <a href="#" className={styles.socialIcon}><Twitter size={20} /></a>
+              <a href="#" className={styles.socialIcon}><Linkedin size={20} /></a>
+              <a href="#" className={styles.socialIcon}><Github size={20} /></a>
+              <a href="#" className={styles.socialIcon}><Instagram size={20} /></a>
             </div>
-        </footer>
-    );
+          </div>
+
+          <div>
+            <h4 className={styles.footerTitle}>Quick Links</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/about">About Us</Link></li>
+              <li><Link href="/courses">All Courses</Link></li>
+              <li><Link href="/placements">Placements</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className={styles.footerTitle}>Resources</h4>
+            <ul className={styles.footerLinks}>
+              <li><a href="#">Syllabus PDF</a></li>
+              <li><a href="#">Success Stories</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className={styles.footerTitle}>Newsletter</h4>
+            <p className={styles.newsletterDesc}>
+              Get the latest tech insights and career tips delivered to your inbox.
+            </p>
+            <div className={styles.newsletterInput}>
+              <input type="email" placeholder="Enter your email" />
+              <button className={styles.newsletterBtn}>Join</button>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <p>© 2026 ByteCode Trainings. All rights reserved.</p>
+          <div className={styles.footerSystemStatus}>
+            <div className={styles.statusDot} />
+            <span>Operational: 99.9% Uptime</span>
+          </div>
+          <div className={styles.footerBottomLinks}>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Cookie Policy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

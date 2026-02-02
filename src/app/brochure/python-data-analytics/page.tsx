@@ -94,19 +94,111 @@ const deterministicHash = (str: string) => {
 };
 
 export default function PythonFullStackBrochure() {
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const router = useRouter();
     const brochureRef = useRef<HTMLDivElement>(null);
 
     const downloadPDF = async () => {
-        if (!brochureRef.current) return;
-        const canvas = await html2canvas(brochureRef.current, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('ByteCode-Python-Full-Stack-Brochure.pdf');
+        if (!brochureRef.current || isGeneratingPdf) return;
+
+        setIsGeneratingPdf(true);
+        const originalScroll = window.scrollY;
+
+        // 1. Force styles to ensure all content is visible and layout is robust
+        const style = document.createElement('style');
+        style.innerHTML = `
+            * {
+                transition: none !important;
+                animation: none !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+            [data-pdf-page="true"] {
+                background: #ffffff !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        try {
+            // We'll use a dynamic sized PDF.
+            // Standardizing the capture width ensures consistent "Desktop" look
+            const FORCE_WIDTH = 1440;
+
+            const pdf = new jsPDF('p', 'pt', [595.28, 841.89]); // A4 start, but we will resize pages
+
+            const pages = brochureRef.current.querySelectorAll('[data-pdf-page="true"]');
+
+            if (pages.length === 0) {
+                alert("Could not find brochure pages to print.");
+                return;
+            }
+
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i] as HTMLElement;
+
+                // 2. Scroll page into view
+                page.scrollIntoView({ behavior: 'instant' });
+                // 3. Wait longer for images and heavy layouts (like placements) to render
+                await new Promise(r => setTimeout(r, 500)); // Wait for render
+
+                const canvas = await html2canvas(page, {
+                    scale: 2, // 2x scale for Retina-like crispness
+                    useCORS: true,
+                    logging: false,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff', // Force White Background
+                    windowWidth: FORCE_WIDTH, // FORCE DESKTOP LAYOUT
+                    width: FORCE_WIDTH,
+                    onclone: (clonedDoc) => {
+                        // Ensure the cloned body has the forced width to trigger desktop styles
+                        const clonedPage = clonedDoc.body.querySelector(`[data-pdf-page="true"]`) as HTMLElement;
+                        if (clonedPage) {
+                            clonedPage.style.width = `${FORCE_WIDTH}px`;
+                            clonedPage.style.maxWidth = 'none';
+                            clonedPage.style.background = '#ffffff';
+
+                            // Force text to be visible (fix for white text issues)
+                            const allText = clonedPage.querySelectorAll('*');
+                            allText.forEach((el: any) => {
+                                el.style.opacity = '1';
+                                el.style.visibility = 'visible';
+                            });
+                        }
+                    }
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgProps = pdf.getImageProperties(imgData);
+
+                // PDF Page Width (fixed to A4 width usually, or custom)
+                // Let's use A4 Width in points (595.28) as a base reference
+                const pdfPageWidth = 595.28;
+                const pdfPageHeight = (imgProps.height * pdfPageWidth) / imgProps.width;
+
+                if (i === 0) {
+                    pdf.deletePage(1); // Remove default start page
+                    pdf.addPage([pdfPageWidth, pdfPageHeight]);
+                } else {
+                    pdf.addPage([pdfPageWidth, pdfPageHeight]);
+                }
+
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfPageWidth, pdfPageHeight);
+            }
+
+            pdf.save('ByteCode-Python-Analytics-Brochure.pdf');
+
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            alert("Failed to generate PDF. Please check console for errors.");
+        } finally {
+            document.head.removeChild(style);
+            window.scrollTo(0, originalScroll);
+            setIsGeneratingPdf(false);
+        }
     };
 
     const Header = ({ pageNum }: { pageNum: string }) => (
@@ -121,14 +213,21 @@ export default function PythonFullStackBrochure() {
             <nav className={styles.nav}>
                 <button className={styles.exitBtn} onClick={() => router.back()}>Exit</button>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className={styles.exitBtn} onClick={downloadPDF} style={{ background: '#27ae60' }}>Download PDF</button>
+                    <button
+                        className={styles.exitBtn}
+                        onClick={downloadPDF}
+                        disabled={isGeneratingPdf}
+                        style={{ background: isGeneratingPdf ? '#95a5a6' : '#27ae60', cursor: isGeneratingPdf ? 'wait' : 'pointer' }}
+                    >
+                        {isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}
+                    </button>
                     <button className={styles.exitBtn} style={{ background: '#f39200' }} onClick={() => window.open('https://wa.me/918309879187')}>Enroll Now</button>
                 </div>
             </nav>
 
             <div ref={brochureRef}>
                 {/* PAGE 1: VERTICAL MASTER COVER */}
-                <section className={styles.heroPage}>
+                <section data-pdf-page="true" className={styles.heroPage}>
                     <div className={styles.verticalSidebar}>
                         <img src="/logo.png" className={styles.logoMini} alt="Logo" />
                         <div className={styles.verticalPillars}>
@@ -191,7 +290,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 2: PROGRAM HIGHLIGHTS */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="02" />
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                         <h2 style={{ fontSize: '3rem', color: 'var(--primary)', fontWeight: 900 }}>Complete Job Ready Program</h2>
@@ -223,7 +322,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 3: THE FUTURE */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="03" />
                     <div className={styles.futurePageWrapper}>
                         <div className={styles.futureHeader}>
@@ -299,7 +398,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 4: ZENITH JOB READINESS PATH */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="04" />
                     <div className={styles.roadmapPage}>
                         <div className={styles.roadmapHeader}>
@@ -359,7 +458,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 5: ADVANCED SKILLS UNIVERSE */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="05" />
                     <div className={styles.skillsUniverse}>
                         <div className={styles.skillsHeader}>
@@ -456,7 +555,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 6: ELITE CURRICULUM - FOUNDATIONS */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="06" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
@@ -532,7 +631,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 7: ELITE CURRICULUM - ADVANCED */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="07" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
@@ -613,7 +712,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 8: ELITE CURRICULUM - TOOLS */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="08" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
@@ -694,7 +793,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 09: ELITE REAL-WORLD PROJECTS */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="09" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.curriculumHeader}>
@@ -753,7 +852,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 10: ELITE TRAINER & TESTIMONIALS */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="10" />
                     <div className={styles.curriculumUniverse}>
                         <div className={styles.trainerWrapLuxury}>
@@ -812,7 +911,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 11: STRATEGIC CAREER ROADMAP */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="11" />
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)', textTransform: 'uppercase' }}>Strategic Career Roadmap</h2>
@@ -888,7 +987,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 12: ELITE PLACEMENT WALL */}
-                <section className={styles.page}>
+                <section data-pdf-page="true" className={styles.page}>
                     <Header pageNum="12" />
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                         <h2 style={{ fontSize: '2.5rem', fontWeight: 1000, color: 'var(--primary)', letterSpacing: '-1px' }}>RECENT PLACEMENTS</h2>
@@ -898,45 +997,43 @@ export default function PythonFullStackBrochure() {
                     <div className={styles.wreathGrid}>
                         {[
                             { name: "Vamsi Tammisetty", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-T.png" },
+                            { name: "Sai Kumar", company: "TCS", pkg: "3.36", image: "https://ui-avatars.com/api/?name=Sai+Kumar&background=random" },
                             { name: "Jagadesh", company: "Forsys", pkg: "4", image: "/placements/Jagadesh.png" },
+                            { name: "Venkatesh Y.", company: "Infosys", pkg: "3.6", image: "https://ui-avatars.com/api/?name=Venkatesh+Y&background=random" },
                             { name: "Vamsi K", company: "Cognizant", pkg: "3.5", image: "/placements/Vamsi-K.png" },
+                            { name: "Lakshmi Prasanna", company: "Wipro", pkg: "3.5", image: "https://ui-avatars.com/api/?name=Lakshmi+Prasanna&background=random" },
                             { name: "Rajasekhar", company: "Accenture", pkg: "5", image: "/placements/Rajasekhar.png" },
+                            { name: "Srinivas Rao", company: "HCLTech", pkg: "4.25", image: "https://ui-avatars.com/api/?name=Srinivas+Rao&background=random" },
                             { name: "Manoj", company: "Absolute Labs", pkg: "5", image: "/placements/Manoj.png" },
+                            { name: "Ravi Teja", company: "Tech Mahindra", pkg: "3.25", image: "https://ui-avatars.com/api/?name=Ravi+Teja&background=random" },
                             { name: "Sampath", company: "Accenture", pkg: "5", image: "/placements/Sampath.png" },
+                            { name: "Anusha Reddy", company: "Accenture", pkg: "4.5", image: "https://ui-avatars.com/api/?name=Anusha+Reddy&background=random" },
                             { name: "Karthik", company: "Accenture", pkg: "4", image: "/placements/Karthik.png" },
+                            { name: "Sai Krishna", company: "Cognizant", pkg: "4.0", image: "https://ui-avatars.com/api/?name=Sai+Krishna&background=random" },
                             { name: "Prasad", company: "Gemini", pkg: "3.5", image: "/placements/Prasad.png" },
+                            { name: "Bhanu Prakash", company: "Capgemini", pkg: "4.0", image: "https://ui-avatars.com/api/?name=Bhanu+Prakash&background=random" },
                             { name: "Ganesh", company: "Tech Mahendra", pkg: "5", image: "/placements/Ganesh-K.png" },
+                            { name: "Nagarjuna K.", company: "LTIMindtree", pkg: "5.0", image: "https://ui-avatars.com/api/?name=Nagarjuna+K&background=random" },
                             { name: "Harish", company: "Cloud Leaf L.L.C", pkg: "5", image: "/placements/Harish-K.png" },
+                            { name: "Haritha G.", company: "DXC Technology", pkg: "4.2", image: "https://ui-avatars.com/api/?name=Haritha+G&background=random" },
                             { name: "Santhavana", company: "Cognizant", pkg: "4", image: "/placements/Santhavana.png" },
+                            { name: "Shiva Kumar", company: "Hexaware", pkg: "6.0", image: "https://ui-avatars.com/api/?name=Shiva+Kumar&background=random" },
                             { name: "Phani B", company: "Centillion Networks", pkg: "3.5", image: "/placements/Phani.png" },
+                            { name: "Vamsi Krishna", company: "Virtusa", pkg: "5.5", image: "https://ui-avatars.com/api/?name=Vamsi+Krishna&background=random" },
                             { name: "Rishi", company: "Innovation Labs", pkg: "3.5", image: "/placements/Rishi.png" },
+                            { name: "Swathi M.", company: "Tata Elxsi", pkg: "7.0", image: "https://ui-avatars.com/api/?name=Swathi+M&background=random" },
                             { name: "Midhun", company: "Terralogic", pkg: "4", image: "/placements/Midhun.png" },
+                            { name: "Naresh Babu", company: "Happiest Minds", pkg: "6.5", image: "https://ui-avatars.com/api/?name=Naresh+Babu&background=random" },
                             { name: "marahor", company: "Teachmint", pkg: "4.5", image: "/placements/Marohar.png" },
+                            { name: "Sravani P.", company: "Mphasis", pkg: "4.0", image: "https://ui-avatars.com/api/?name=Sravani+P&background=random" },
                             { name: "Tejaswar", company: "Arcitech", pkg: "4.5", image: "/placements/Tejaswar.png" },
+                            { name: "Karthik Goud", company: "Cyient", pkg: "3.8", image: "https://ui-avatars.com/api/?name=Karthik+Goud&background=random" },
                             { name: "Divya", company: "Nemali Software", pkg: "4", image: "/placements/Divya.png" },
+                            { name: "Manasa V.", company: "Zensar", pkg: "4.5", image: "https://ui-avatars.com/api/?name=Manasa+V&background=random" },
                             { name: "Rishwitha", company: "Tech Solutions", pkg: "3.5", image: "/placements/Rishwitha Nalgonda.png" },
-                            { name: "Rohan Das", company: "Amazon", pkg: "45", image: "https://i.pravatar.cc/150?u=rohan" },
-                            { name: "Priya Sharma", company: "Microsoft", pkg: "38", image: "https://i.pravatar.cc/150?u=priya" },
-                            { name: "Amit Patel", company: "Adobe", pkg: "28", image: "https://i.pravatar.cc/150?u=amit" },
-                            { name: "Sneha Reddy", company: "Uber", pkg: "35", image: "https://i.pravatar.cc/150?u=sneha" },
-                            { name: "Vikram Singh", company: "Zerodha", pkg: "42", image: "https://i.pravatar.cc/150?u=vikram" },
-                            { name: "Arjun K.", company: "Cred", pkg: "26", image: "https://i.pravatar.cc/150?u=arjun" },
-                            { name: "Megha S.", company: "Google Cloud", pkg: "36", image: "https://i.pravatar.cc/150?u=megha" },
-                            { name: "Sanjay T.", company: "Netflix", pkg: "52", image: "https://i.pravatar.cc/150?u=sanjay" },
-                            { name: "Karan W.", company: "Razorpay", pkg: "24", image: "https://i.pravatar.cc/150?u=karan" },
-                            { name: "Nidhi B.", company: "Meta", pkg: "48", image: "https://i.pravatar.cc/150?u=nidhi" },
-                            { name: "Rahul G.", company: "Apple", pkg: "40", image: "https://i.pravatar.cc/150?u=rahulg" },
-                            { name: "Divya L.", company: "Canva", pkg: "30", image: "https://i.pravatar.cc/150?u=divya" },
-                            { name: "Siddharth M.", company: "Tesla", pkg: "55", image: "https://i.pravatar.cc/150?u=sid" },
-                            { name: "Anjali P.", company: "Stripe", pkg: "44", image: "https://i.pravatar.cc/150?u=anjali" },
-                            { name: "Varun D.", company: "Oracle", pkg: "39", image: "https://i.pravatar.cc/150?u=varun" },
-                            { name: "Kavita J.", company: "Paypal", pkg: "22", image: "https://i.pravatar.cc/150?u=kavita" },
-                            { name: "Rajesh K.", company: "Spotify", pkg: "33", image: "https://i.pravatar.cc/150?u=rajesh" },
-                            { name: "Ishita R.", company: "Snowflake", pkg: "29", image: "https://i.pravatar.cc/150?u=ishita" },
-                            { name: "Manish S.", company: "Airbnb", pkg: "47", image: "https://i.pravatar.cc/150?u=manish" },
-                            { name: "Pooja V.", company: "Walmart", pkg: "26", image: "https://i.pravatar.cc/150?u=pooja" },
-                            { name: "Harish N.", company: "Cisco", pkg: "31", image: "https://i.pravatar.cc/150?u=harish" },
-                            { name: "Simran T.", company: "Flipkart", pkg: "20", image: "https://i.pravatar.cc/150?u=simran" }
+                            { name: "Pavan Kalyan", company: "Sonata Software", pkg: "4.0", image: "https://ui-avatars.com/api/?name=Pavan+Kalyan&background=random" },
+                            { name: "Gopi Chand", company: "ValueLabs", pkg: "5.5", image: "https://ui-avatars.com/api/?name=Gopi+Chand&background=random" },
+                            { name: "Renuka Devi", company: "Kellton", pkg: "3.5", image: "https://ui-avatars.com/api/?name=Renuka+Devi&background=random" }
                         ].map((s, i) => (
                             <div key={i} className={styles.studentCard}>
                                 <div className={styles.wreath}>
@@ -979,7 +1076,7 @@ export default function PythonFullStackBrochure() {
                 </section>
 
                 {/* PAGE 13: ZENITH ADMISSION COMMAND CENTER */}
-                <section className={`${styles.page} ${styles.zenithPage}`}>
+                <section data-pdf-page="true" className={`${styles.page} ${styles.zenithPage}`}>
                     <Header pageNum="13" />
 
                     <div className={styles.zenithHeader}>
