@@ -17,7 +17,8 @@ import {
     Layers,
     PieChart,
     Wallet,
-    Award
+    Award,
+    Bell
 } from "lucide-react";
 
 export type Role = 'super_admin' | 'admin' | 'trainer' | 'hr' | 'counselor' | 'finance' | 'student';
@@ -49,6 +50,7 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Placements', href: '/admin/super/placements', icon: Briefcase },
         { label: 'Assets & Inventory', href: '/admin/super/assets', icon: Building2 },
         { label: 'Reports & Analytics', href: '/admin/super/reports', icon: BarChart3 },
+        { label: 'Notice Board', href: '/admin/super/notices', icon: Bell },
         { label: 'Platform Settings', href: '/admin/super/settings', icon: Settings },
     ],
     admin: [
@@ -57,8 +59,6 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Employee Management', href: '/admin/dashboard/employees', icon: Users },
         { label: 'Courses & Batches', href: '/admin/dashboard/courses', icon: BookOpen },
         { label: 'Attendance', href: '/admin/dashboard/attendance', icon: Calendar },
-        { label: 'Finance & Fees', href: '/admin/dashboard/finance', icon: Wallet },
-        { label: 'Reports', href: '/admin/dashboard/reports', icon: FileText },
     ],
     trainer: [
         { label: 'My Batches', href: '/employee/trainer', icon: LayoutDashboard },

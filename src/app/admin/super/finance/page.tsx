@@ -12,6 +12,27 @@ import {
     Briefcase, FileDigit, Users, BarChart3, Calculator, Rocket, ShieldCheck, Edit3, History, Printer, Send
 } from 'lucide-react';
 import styles from '../SuperAdmin.module.css';
+import {
+    AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+    PieChart, Pie, Cell, Legend
+} from 'recharts';
+
+// -- Chart Data --
+const CASH_FLOW_DATA = [
+    { name: 'Jan', income: 45000, expenses: 18000, payroll: 22000 },
+    { name: 'Feb', income: 52000, expenses: 15000, payroll: 22500 },
+    { name: 'Mar', income: 48000, expenses: 16000, payroll: 22500 },
+    { name: 'Apr', income: 61000, expenses: 19000, payroll: 23000 },
+    { name: 'May', income: 55000, expenses: 17000, payroll: 23000 },
+    { name: 'Jun', income: 67000, expenses: 21000, payroll: 24000 },
+];
+
+const EXPENSE_BREAKDOWN = [
+    { name: 'Payroll', value: 60, color: '#10b981' }, // Matching the green used for payroll module
+    { name: 'Rent & Infra', value: 20, color: '#3b82f6' },
+    { name: 'Marketing', value: 15, color: '#f43f5e' },
+    { name: 'Ops', value: 5, color: '#f59e0b' },
+];
 
 // -- Types & Interfaces --
 
@@ -294,6 +315,59 @@ export default function FinancePage() {
                 <div style={{ marginBottom: '2rem' }}>
                     <div className={styles.textLabel}>Master Finance</div>
                     <h1 className={styles.textH1}>Integrated Finance Controller</h1>
+                </div>
+
+                {/* Analytics Charts */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                    <div className={styles.card} style={{ height: '350px', display: 'flex', flexDirection: 'column' }}>
+                        <div className={styles.cardHeader} style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white', fontFamily: 'Rajdhani', textTransform: 'uppercase' }}>Cash Flow Analysis</span>
+                            <button className={styles.btnSecondary} style={{ padding: '4px 8px' }}><Calendar size={14} /></button>
+                        </div>
+                        <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={CASH_FLOW_DATA}>
+                                    <defs>
+                                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="colorPayroll" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 12 }} />
+                                    <YAxis stroke="#64748b" tick={{ fontSize: 12 }} />
+                                    <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }} />
+                                    <Area type="monotone" dataKey="income" name="Revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />
+                                    <Area type="monotone" dataKey="payroll" name="Payroll Cost" stroke="#10b981" fillOpacity={1} fill="url(#colorPayroll)" strokeWidth={2} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                    <div className={styles.card} style={{ height: '350px', display: 'flex', flexDirection: 'column' }}>
+                        <div className={styles.cardHeader} style={{ marginBottom: '1rem' }}>
+                            <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white', fontFamily: 'Rajdhani', textTransform: 'uppercase' }}>Expense Allocation</span>
+                        </div>
+                        <div style={{ flex: 1, width: '100%', minHeight: 0, position: 'relative' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={EXPENSE_BREAKDOWN} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                                        {EXPENSE_BREAKDOWN.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }} />
+                                    <Legend verticalAlign="bottom" height={36} iconSize={10} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'white' }}>$86k</div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Total Monthly</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Modules */}

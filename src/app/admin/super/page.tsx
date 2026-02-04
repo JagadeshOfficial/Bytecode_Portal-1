@@ -5,7 +5,8 @@ import StatsCard from '@/components/dashboard/StatsCard';
 import {
     Building2, Users, DollarSign, GraduationCap,
     TrendingUp, Activity, CheckCircle, AlertTriangle,
-    Server, Shield, Plus, FileText, Settings, Database
+    Server, Shield, Plus, FileText, Settings, Database,
+    Cpu, HardDrive, Globe, Zap, Wifi, Signal
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -207,34 +208,72 @@ export default function SuperAdminDashboard() {
                         </div>
                     </motion.div>
 
-                    {/* System Health Nodes */}
-                    <motion.div variants={itemVariants} className={styles.card}>
+                    {/* System Health Nodes - ADVANCED */}
+                    <motion.div variants={itemVariants} className={styles.card} style={{ display: 'flex', flexDirection: 'column' }}>
                         <div className={styles.cardHeader}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <Server size={20} className={styles.cardHeaderIcon} style={{ color: '#3b82f6' }} />
                                 Platform Infrastructure
                             </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span className={styles.pulseDot} style={{ background: '#10b981' }} />
+                                <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Systems Normal</span>
+                            </div>
                         </div>
-                        <div className={styles.healthGrid}>
-                            {[
-                                { label: 'Student Portal', status: 'Operational', ping: '12ms', icon: Database, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-                                { label: 'LMS Server', status: 'Operational', ping: '45ms', icon: Shield, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-                                { label: 'Attendance Bio', status: 'Sync Delayed', ping: '120ms', icon: Server, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
-                                { label: 'AI Inference', status: 'Operational', ping: '89ms', icon: Activity, color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
-                            ].map((node, i) => (
-                                <div key={i} className={styles.healthNode}>
-                                    <div className={styles.nodeIconBox} style={{ background: node.bg, color: node.color }}>
-                                        <node.icon size={20} />
-                                    </div>
-                                    <div>
-                                        <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#e2e8f0' }}>{node.label}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: node.color }}></span>
-                                            {node.status} ({node.ping})
+
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingTop: '0.5rem' }}>
+                            {/* Resource Gauges */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                                {[
+                                    { label: 'CPU Load', value: '32%', icon: Cpu, color: '#3b82f6', bar: '32%' },
+                                    { label: 'Memory', value: '14/64 GB', icon: HardDrive, color: '#8b5cf6', bar: '22%' },
+                                    { label: 'Network', value: '1.2 Gbps', icon: Globe, color: '#10b981', bar: '65%' }
+                                ].map((stat, i) => (
+                                    <div key={i} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 600 }}>
+                                            <stat.icon size={14} color={stat.color} /> {stat.label}
+                                        </div>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', fontFamily: 'Rajdhani', marginBottom: '0.5rem' }}>{stat.value}</div>
+                                        <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                            <motion.div
+                                                initial={{ width: 0 }} animate={{ width: stat.bar }} transition={{ duration: 1, delay: 0.5 }}
+                                                style={{ height: '100%', background: stat.color, borderRadius: '2px' }}
+                                            />
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+
+                            {/* Advanced Services List */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Microservices Status</div>
+                                {[
+                                    { name: 'Core API Gateway', region: 'us-east-1(a)', lat: '12ms', status: 'Healthy', load: 24, color: '#10b981' },
+                                    { name: 'LMS Database Shard-01', region: 'us-east-1(b)', lat: '18ms', status: 'Healthy', load: 45, color: '#10b981' },
+                                    { name: 'AI Inference Neural Engine', region: 'eu-west-2', lat: '142ms', status: 'High Load', load: 88, color: '#f59e0b' },
+                                    { name: 'Socket Realtime Svc', region: 'Global Edge', lat: '4ms', status: 'Healthy', load: 12, color: '#10b981' },
+                                ].map((service, i) => (
+                                    <div key={i} className={styles.interactiveRow} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '8px', borderLeft: `3px solid ${service.color}` }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{ background: `rgba(255,255,255,0.03)`, padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                {service.status === 'High Load' ? <Zap size={14} color="#f59e0b" fill="#f59e0b" /> : <Wifi size={14} color="#10b981" />}
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#e2e8f0', fontFamily: 'Rajdhani' }}>{service.name}</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Globe size={10} /> {service.region} • {service.lat}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.75rem', color: service.color, fontWeight: 700, background: `${service.color}15`, padding: '2px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '2px' }}>{service.status.toUpperCase()}</div>
+                                            <div style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                                                <Activity size={10} /> {service.load}% Load
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </motion.div>
                 </div>
@@ -290,8 +329,8 @@ export default function SuperAdminDashboard() {
                                             <td style={{ color: '#64748b' }}>{log.time}</td>
                                             <td style={{ textAlign: 'right' }}>
                                                 <span className={`${styles.statusBadge} ${log.status === 'Success' ? styles.statusSuccess :
-                                                        log.status === 'Warning' ? styles.statusWarning :
-                                                            styles.statusFailed
+                                                    log.status === 'Warning' ? styles.statusWarning :
+                                                        styles.statusFailed
                                                     }`}>
                                                     {log.status}
                                                 </span>
