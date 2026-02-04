@@ -1,10 +1,10 @@
 
-"use client";
-
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { DASHBOARD_NAV, Role } from '@/lib/dashboard-config';
-import { LogOut, Hexagon } from 'lucide-react';
+import { LogOut, Hexagon, User, Settings, Shield, Bell, X, CheckCircle, Zap, CreditCard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SidebarProps {
     role: Role;
@@ -20,7 +20,7 @@ export default function Sidebar({ role }: SidebarProps) {
             left: 0,
             top: 0,
             height: '100vh',
-            width: '260px',
+            width: '280px',
             background: 'rgba(3, 0, 20, 0.95)',
             borderRight: '1px solid rgba(124, 58, 237, 0.2)',
             backdropFilter: 'blur(10px)',
@@ -49,7 +49,6 @@ export default function Sidebar({ role }: SidebarProps) {
             {/* Navigation */}
             <div style={{
                 flex: 1,
-                overflowY: 'auto',
                 padding: '1.5rem 1rem',
                 display: 'flex',
                 flexDirection: 'column',
@@ -81,40 +80,49 @@ export default function Sidebar({ role }: SidebarProps) {
 
             {/* User Profile / Logout */}
             <div style={{ padding: '1rem', borderTop: '1px solid rgba(124,58,237,0.1)' }}>
-                <div style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    padding: '0.75rem',
-                    borderRadius: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #7c3aed, #d946ef)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.75rem',
-                            fontWeight: 'bold',
-                            color: 'white'
-                        }}>
-                            {role.slice(0, 2).toUpperCase()}
+                <Link href="/admin/super/profile" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        background: pathname.includes('/profile') ? 'rgba(124, 58, 237, 0.15)' : 'rgba(255,255,255,0.03)',
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        border: pathname.includes('/profile') ? '1px solid rgba(124, 58, 237, 0.5)' : '1px solid transparent'
+                    }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'transparent'; }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #7c3aed, #d946ef)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                color: 'white'
+                            }}>
+                                {role.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</div>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'white', textTransform: 'capitalize' }}>{role.replace('_', ' ')}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'white', textTransform: 'capitalize' }}>{role.replace('_', ' ')}</div>
+                        <div onClick={(e) => { e.preventDefault(); /* Handle logout logic separately if needed */ }}>
+                            <Link href="/login">
+                                <LogOut size={16} color="#94a3b8" />
+                            </Link>
                         </div>
                     </div>
-                    <Link href="/login">
-                        <LogOut size={16} color="#94a3b8" />
-                    </Link>
-                </div>
+                </Link>
             </div>
-        </aside>
+        </aside >
     );
 }

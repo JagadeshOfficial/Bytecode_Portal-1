@@ -2,8 +2,26 @@
 "use client";
 
 import { Bell, Search } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function Topbar() {
+    const pathname = usePathname();
+
+    const getPageTitle = (path: string) => {
+        if (path === '/admin/super') return 'OVERVIEW';
+        if (path === '/admin/super/courses') return 'BATCH & RESOURCE MANAGER';
+        if (path.includes('/profile')) return 'MY PROFILE';
+        if (path.includes('/academics')) return 'ACADEMICS';
+        if (path.includes('/admissions')) return 'ADMISSIONS';
+        if (path.includes('/users')) return 'USER MANAGEMENT';
+        if (path.includes('/finance')) return 'FINANCIALS';
+
+        // Fallback: take last segment
+        const segments = path.split('/').filter(Boolean);
+        const last = segments[segments.length - 1];
+        return last ? last.toUpperCase().replace('-', ' ') : 'DASHBOARD';
+    };
+
     return (
         <header style={{
             height: '80px',
@@ -22,7 +40,7 @@ export default function Topbar() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div>
                     <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'white', fontFamily: 'Rajdhani, sans-serif', textTransform: 'uppercase' }}>
-                        DASHBOARD <span style={{ color: '#22d3ee' }}>\</span> OVERVIEW
+                        DASHBOARD <span style={{ color: '#22d3ee' }}>\</span> {getPageTitle(pathname)}
                     </h2>
                 </div>
             </div>

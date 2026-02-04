@@ -87,6 +87,7 @@ export default function UsersPage() {
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     // Filter Logic
     const filteredUsers = users.filter(user => {
@@ -129,6 +130,25 @@ export default function UsersPage() {
     const handleLeaveAction = (id: number, action: 'Approved' | 'Rejected') => {
         setLeaveRequests(prev => prev.map(req => req.id === id ? { ...req, status: action } : req));
         setSelectedLeave(null); // Close modal
+    };
+
+    const handleUpdateUser = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedUser) return;
+        const form = e.target as HTMLFormElement;
+
+        const updatedUser: User = {
+            ...selectedUser,
+            name: (form.elements.namedItem('edit_name') as HTMLInputElement).value,
+            role: (form.elements.namedItem('edit_role') as HTMLSelectElement).value as UserRole,
+            department: (form.elements.namedItem('edit_dept') as HTMLInputElement).value,
+            status: (form.elements.namedItem('edit_status') as HTMLSelectElement).value as Status,
+            email: (form.elements.namedItem('edit_email') as HTMLInputElement).value,
+        };
+
+        setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+        setSelectedUser(updatedUser);
+        setIsEditing(false);
     };
 
     return (
@@ -230,7 +250,7 @@ export default function UsersPage() {
                                 </thead>
                                 <tbody>
                                     {filteredUsers.map(user => (
-                                        <tr key={user.id} onClick={() => setSelectedUser(user)} style={{ cursor: 'pointer' }}>
+                                        <tr key={user.id} onClick={() => { setSelectedUser(user); setIsEditing(false); }} style={{ cursor: 'pointer' }}>
                                             <td style={{ paddingLeft: '1.5rem' }}>
                                                 <div className={styles.userTableProfile}>
                                                     <div className={styles.userAvatar} style={{
@@ -525,55 +545,97 @@ export default function UsersPage() {
                             >
                                 <div className={styles.modalHeader}>
                                     <div>
-                                        <h2 className={styles.modalTitle}>User Profile</h2>
+                                        <h2 className={styles.modalTitle}>{isEditing ? 'Edit Profile' : 'User Profile'}</h2>
                                         <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>ID: {selectedUser.id}</span>
                                     </div>
-                                    <button onClick={() => setSelectedUser(null)} className={styles.closeBtn}>✕</button>
+                                    <button onClick={() => { setSelectedUser(null); setIsEditing(false); }} className={styles.closeBtn}>✕</button>
                                 </div>
-                                <div className={styles.modalBody}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
-                                        <div style={{
-                                            width: '80px', height: '80px', borderRadius: '50%',
-                                            background: '#334155', color: 'white', display: 'flex',
-                                            alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700
-                                        }}>
-                                            {selectedUser.avatarInitials}
-                                        </div>
-                                        <div>
-                                            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{selectedUser.name}</h3>
-                                            <div style={{ color: '#94a3b8', display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>
-                                                <span style={{ textTransform: 'capitalize' }}>{selectedUser.role}</span>
-                                                <span>•</span>
-                                                <span>{selectedUser.department}</span>
-                                            </div>
-                                            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-                                                <span className={`${styles.statusBadge} ${selectedUser.status === 'Present' ? styles.statusSuccess : styles.statusFailed}`}>
-                                                    {selectedUser.status}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                                        <div style={{ padding: '1rem', background: 'rgba(30,41,59,0.5)', borderRadius: '8px' }}>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Check-In Time</div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>{selectedUser.checkInTime || '--:--'}</div>
+                                {isEditing ? (
+                                    <form onSubmit={handleUpdateUser} className={styles.modalBody}>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Full Name</label>
+                                            <input name="edit_name" defaultValue={selectedUser.name} className={styles.formInput} required />
                                         </div>
-                                        <div style={{ padding: '1rem', background: 'rgba(30,41,59,0.5)', borderRadius: '8px' }}>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Attendance Rate</div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981' }}>{selectedUser.attendanceRate}%</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.formLabel}>Role</label>
+                                                <select name="edit_role" defaultValue={selectedUser.role} className={styles.formSelect}>
+                                                    <option value="student">Student</option>
+                                                    <option value="faculty">Faculty</option>
+                                                    <option value="staff">Staff</option>
+                                                </select>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.formLabel}>Department</label>
+                                                <input name="edit_dept" defaultValue={selectedUser.department} className={styles.formInput} required />
+                                            </div>
                                         </div>
-                                    </div>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Email</label>
+                                            <input name="edit_email" defaultValue={selectedUser.email} className={styles.formInput} required type="email" />
+                                        </div>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.formLabel}>Current Status</label>
+                                            <select name="edit_status" defaultValue={selectedUser.status} className={styles.formSelect}>
+                                                <option value="Present">Present</option>
+                                                <option value="Absent">Absent</option>
+                                                <option value="On Leave">On Leave</option>
+                                                <option value="Remote">Remote</option>
+                                            </select>
+                                        </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        <button className={styles.btnSecondary} style={{ justifyContent: 'center' }}>
-                                            <Edit size={16} /> Edit Profile
-                                        </button>
-                                        <button className={styles.btnSecondary} style={{ justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }}>
-                                            <Trash2 size={16} /> Remove User
-                                        </button>
+                                        <div className={styles.formActions} style={{ marginTop: '1.5rem' }}>
+                                            <button type="button" onClick={() => setIsEditing(false)} className={styles.btnSecondary} style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
+                                            <button type="submit" className={styles.btnPrimary} style={{ flex: 1, justifyContent: 'center' }}>Save Changes</button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className={styles.modalBody}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
+                                            <div style={{
+                                                width: '80px', height: '80px', borderRadius: '50%',
+                                                background: '#334155', color: 'white', display: 'flex',
+                                                alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700
+                                            }}>
+                                                {selectedUser.avatarInitials}
+                                            </div>
+                                            <div>
+                                                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{selectedUser.name}</h3>
+                                                <div style={{ color: '#94a3b8', display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>
+                                                    <span style={{ textTransform: 'capitalize' }}>{selectedUser.role}</span>
+                                                    <span>•</span>
+                                                    <span>{selectedUser.department}</span>
+                                                </div>
+                                                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                                                    <span className={`${styles.statusBadge} ${selectedUser.status === 'Present' ? styles.statusSuccess : styles.statusFailed}`}>
+                                                        {selectedUser.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                                            <div style={{ padding: '1rem', background: 'rgba(30,41,59,0.5)', borderRadius: '8px' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Check-In Time</div>
+                                                <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>{selectedUser.checkInTime || '--:--'}</div>
+                                            </div>
+                                            <div style={{ padding: '1rem', background: 'rgba(30,41,59,0.5)', borderRadius: '8px' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Attendance Rate</div>
+                                                <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981' }}>{selectedUser.attendanceRate}%</div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <button className={styles.btnSecondary} onClick={() => setIsEditing(true)} style={{ justifyContent: 'center' }}>
+                                                <Edit size={16} /> Edit Profile
+                                            </button>
+                                            <button className={styles.btnSecondary} style={{ justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }}>
+                                                <Trash2 size={16} /> Remove User
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </motion.div>
                         </div>
                     )}

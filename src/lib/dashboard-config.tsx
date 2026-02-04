@@ -14,6 +14,7 @@ import {
     Calendar,
     MessageSquare,
     UserCheck,
+    Layers,
     PieChart,
     Wallet,
     Award
@@ -41,6 +42,7 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     super_admin: [
         { label: 'Overview', href: '/admin/super', icon: LayoutDashboard },
         { label: 'Academics', href: '/admin/super/academics', icon: BookOpen },
+        { label: 'Course Management', href: '/admin/super/courses', icon: Layers },
         { label: 'Admissions & CRM', href: '/admin/super/admissions', icon: UserCheck },
         { label: 'User Management', href: '/admin/super/users', icon: Users },
         { label: 'Financials', href: '/admin/super/finance', icon: DollarSign },
