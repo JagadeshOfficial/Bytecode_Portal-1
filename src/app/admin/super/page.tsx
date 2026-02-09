@@ -1,346 +1,342 @@
 "use client";
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import StatsCard from '@/components/dashboard/StatsCard';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Building2, Users, DollarSign, GraduationCap,
-    TrendingUp, Activity, CheckCircle, AlertTriangle,
-    Server, Shield, Plus, FileText, Settings, Database,
-    Cpu, HardDrive, Globe, Zap, Wifi, Signal
+    Users,
+    Building2,
+    DollarSign,
+    Briefcase,
+    ShieldCheck,
+    Globe,
+    Zap,
+    TrendingUp,
+    BarChart3,
+    Cpu,
+    Activity,
+    Plus,
+    LayoutDashboard,
+    Layers,
+    FileText,
+    Settings,
+    Bell,
+    CheckCircle2,
+    HardDrive,
+    Video,
+    GraduationCap,
+    Wallet,
+    PieChart,
+    UserCheck,
+    Search,
+    Download
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, PieChart, Pie, Cell, Legend
+    BarChart, Bar, Cell, Pie
 } from 'recharts';
-import { motion } from 'framer-motion';
-import styles from './SuperAdmin.module.css';
 
-// Mock Data
 const REVENUE_DATA = [
-    { name: 'Jan', value: 45000, previous: 38000 },
-    { name: 'Feb', value: 52000, previous: 42000 },
-    { name: 'Mar', value: 48000, previous: 45000 },
-    { name: 'Apr', value: 61000, previous: 50000 },
-    { name: 'May', value: 55000, previous: 48000 },
-    { name: 'Jun', value: 67000, previous: 53000 },
-    { name: 'Jul', value: 72000, previous: 58000 },
-    { name: 'Aug', value: 85000, previous: 62000 },
-    { name: 'Sep', value: 92000, previous: 68000 },
+    { name: 'Jan', revenue: 45 }, { name: 'Feb', revenue: 52 }, { name: 'Mar', revenue: 48 },
+    { name: 'Apr', revenue: 61 }, { name: 'May', revenue: 55 }, { name: 'Jun', revenue: 67 },
+    { name: 'Jul', revenue: 72 }, { name: 'Aug', revenue: 85 }, { name: 'Sep', revenue: 92 },
 ];
 
-const COURSE_PERFORMANCE = [
-    { name: 'Java Full Stack', value: 120, color: '#8b5cf6' },
-    { name: 'Python & AI', value: 95, color: '#3b82f6' },
-    { name: 'DevOps & Cloud', value: 80, color: '#06b6d4' },
-    { name: 'Data Science', value: 60, color: '#10b981' },
-    { name: 'Cyber Security', value: 45, color: '#f59e0b' },
+const PLATFORM_HEALTH = [
+    { label: "Core Services", status: "Healthy", uptime: "99.99%", latency: "12ms" },
+    { label: "LMS Database", status: "Healthy", uptime: "99.95%", latency: "24ms" },
+    { label: "AI Engine", status: "Scaling", uptime: "98.8%", latency: "142ms" },
 ];
 
-const PLACEMENT_DATA = [
-    { name: 'Placed', value: 850, color: '#10b981' },
-    { name: 'In Progress', value: 300, color: '#f59e0b' },
-    { name: 'Training', value: 450, color: '#3b82f6' },
-];
+export default function SuperAdminMasterDashboard() {
+    // Advanced Animations Variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
 
-const RECENT_LOGS = [
-    { id: 1, user: 'Principal', action: 'System Update', target: 'Core v4.2', time: '10 mins ago', status: 'Success' },
-    { id: 2, user: 'Counselor', action: 'New Admission', target: 'Ravi Kumar', time: '45 mins ago', status: 'Success' },
-    { id: 3, user: 'System Bot', action: 'Space Warning', target: 'Server DB-01', time: '2 hours ago', status: 'Warning' },
-    { id: 4, user: 'Accounts', action: 'Fee Collected', target: 'Batch #204', time: '4 hours ago', status: 'Success' },
-    { id: 5, user: 'Faculty Lead', action: 'Update Schedule', target: 'Java Batch', time: '5 hours ago', status: 'Failed' },
-];
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0, opacity: 1,
+            transition: {
+                type: "spring",
+                stiffness: 100
+            }
+        }
+    };
 
-// Variants for Staggered Animation
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1 }
-    }
-};
+    const shimmerEffect = {
+        initial: { backgroundPosition: "-200% 0" },
+        animate: {
+            backgroundPosition: "200% 0",
+            transition: {
+                repeat: Infinity,
+                duration: 3,
+                ease: "linear"
+            }
+        }
+    };
 
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-};
-
-export default function SuperAdminDashboard() {
     return (
         <DashboardLayout role="super_admin">
             <motion.div
+                variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                variants={containerVariants}
-                className={styles.container}
+                className="flex flex-col gap-10"
             >
-                {/* 1. Header & Quick Stats */}
-                <motion.div variants={itemVariants} className={styles.statsGrid}>
-                    <StatsCard
-                        title="Total Revenue"
-                        value="$1.2M"
-                        trend="+12.5%"
-                        trendUp={true}
-                        icon={DollarSign}
-                        color="#10b981"
-                    />
-                    <StatsCard
-                        title="Active Batches"
-                        value="42"
-                        trend="+4"
-                        trendUp={true}
-                        icon={Building2}
-                        color="#3b82f6"
-                    />
-                    <StatsCard
-                        title="Total Students"
-                        value="2,450"
-                        trend="+8.2%"
-                        trendUp={true}
-                        icon={GraduationCap}
-                        color="#8b5cf6"
-                    />
-                    <StatsCard
-                        title="Faculty Strength"
-                        value="35"
-                        trend="Hiring"
-                        trendUp={true}
-                        icon={Users}
-                        color="#ec4899"
-                    />
+                {/* Master Control Header - Premium Gradient & Glass */}
+                <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl p-1 bg-gradient-to-r from-[rgba(124,58,237,0.5)] via-[rgba(34,211,238,0.5)] to-[rgba(217,70,239,0.5)]">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-3xl z-0" />
+                    <div className="relative z-10 bg-[#030014]/90 rounded-[22px] p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 overflow-hidden">
+
+                        {/* Animated Background Mesh */}
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#7c3aed]/20 to-transparent rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
+                        <div>
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    System Online
+                                </span>
+                                <span className="px-3 py-1 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <ShieldCheck className="w-3 h-3" /> Root Access
+                                </span>
+                            </div>
+                            <h1 className="text-5xl md:text-6xl font-display font-bold text-white tracking-wide uppercase leading-none mt-2">
+                                Global <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7c3aed] to-[#22d3ee]">Command Center</span>
+                            </h1>
+                            <p className="text-[var(--text-dim)] mt-2 font-light text-lg">Orchestrating multi-tenant architecture across 12 institutes.</p>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="flex items-center gap-2 px-6 py-4 bg-[rgba(255,255,255,0.05)] border border-white/10 text-white rounded-xl font-bold hover:bg-white/10 transition-all group"
+                            >
+                                <Download className="w-4 h-4 text-[var(--text-dim)] group-hover:text-white transition-colors" />
+                                <span className="text-sm">Export Report</span>
+                            </motion.button>
+
+                            <motion.button
+                                whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(124,58,237,0.5)" }}
+                                whileTap={{ scale: 0.95 }}
+                                className="relative overflow-hidden flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#7c3aed] to-[#d946ef] text-white rounded-xl font-bold shadow-2xl skew-x-0"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                <Plus className="w-5 h-5" />
+                                <span className="tracking-wider">DEPLOY NEW INSTITUTE</span>
+                            </motion.button>
+                        </div>
+                    </div>
                 </motion.div>
 
-                {/* 2. Main Analytics Section */}
-                <div className={styles.chartGrid}>
-                    {/* Revenue Trend (Large) */}
-                    <motion.div variants={itemVariants} className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <TrendingUp size={20} className={styles.cardHeaderIcon} />
-                                Revenue Analytics
+                {/* Master KPI Grid - 3D Cards with Hover Lift */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    {[
+                        { label: "Total Institutes", value: "12", trend: "+2 New", icon: Building2, color: "text-[#22d3ee]", bg: "from-cyan-500/10 to-blue-500/5", border: "border-cyan-500/20" },
+                        { label: "Active Users", value: "12,450", trend: "+8.2%", icon: Users, color: "text-[#7c3aed]", bg: "from-violet-500/10 to-purple-500/5", border: "border-violet-500/20" },
+                        { label: "Total Placements", value: "842", trend: "Top Tier", icon: Briefcase, color: "text-[#d946ef]", bg: "from-fuchsia-500/10 to-pink-500/5", border: "border-fuchsia-500/20" },
+                        { label: "Staff Strength", value: "156", trend: "Full Cap", icon: UserCheck, color: "text-amber-400", bg: "from-amber-500/10 to-orange-500/5", border: "border-amber-500/20" },
+                        { label: "Total Revenue", value: "₹8.42 Cr", trend: "+12.5%", icon: DollarSign, color: "text-emerald-400", bg: "from-emerald-500/10 to-teal-500/5", border: "border-emerald-500/20" },
+                    ].map((stat, idx) => (
+                        <motion.div
+                            key={idx}
+                            variants={itemVariants}
+                            whileHover={{ y: -10, transition: { type: "spring", stiffness: 300 } }}
+                            className={`bg-gradient-to-br ${stat.bg} border ${stat.border} rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group`}
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <stat.icon size={80} />
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'none', fontWeight: 400 }}>This Year vs Last Year</div>
-                        </div>
-                        <div className={styles.chartContainer}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={REVENUE_DATA}>
-                                    <defs>
-                                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                        </linearGradient>
-                                        <linearGradient id="colorPrev" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                    <XAxis dataKey="name" stroke="#64748b" axisLine={false} tickLine={false} dy={10} />
-                                    <YAxis stroke="#64748b" axisLine={false} tickLine={false} dx={-10} tickFormatter={(value) => `$${value / 1000}k`} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-                                        itemStyle={{ color: '#fff' }}
-                                    />
-                                    <Area type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Current Year" />
-                                    <Area type="monotone" dataKey="previous" stroke="#3b82f6" strokeWidth={2} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorPrev)" name="Previous Year" />
-                                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </motion.div>
 
-                    {/* Placement Stats (Donut) */}
-                    <motion.div variants={itemVariants} className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CheckCircle size={20} className={styles.cardHeaderIcon} style={{ color: '#10b981' }} />
-                                Placement Status
+                            <div className="flex justify-between items-center mb-6 relative z-10">
+                                <div className={`p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform shadow-lg ${stat.color}`}>
+                                    <stat.icon className="w-6 h-6" />
+                                </div>
+                                <span className="text-[10px] font-bold text-white bg-white/10 px-3 py-1 rounded-full backdrop-blur-md border border-white/5">{stat.trend}</span>
                             </div>
-                        </div>
-                        <div className="flex-1 min-h-[250px] relative" style={{ flex: 1, minHeight: '300px', position: 'relative' }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={PLACEMENT_DATA}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {PLACEMENT_DATA.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-                                    />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className={styles.donutCenter}>
-                                <div className={styles.donutCenterValue}>850+</div>
-                                <div className={styles.donutCenterLabel}>Students Placed</div>
+
+                            <div className="relative z-10">
+                                <div className="text-4xl font-bold text-white font-display mb-1 tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{stat.value}</div>
+                                <div className="text-[11px] text-[var(--text-dim)] uppercase tracking-[0.2em] font-bold">{stat.label}</div>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    ))}
                 </div>
 
-                {/* 3. Middle Section: Top Institutes & System Health */}
-                <div className={styles.middleGrid}>
-                    {/* Top Performing Institutes (Bar Chart) */}
-                    <motion.div variants={itemVariants} className={styles.card}>
-                        <div className={styles.cardHeader}>Course Enrollment Trends</div>
-                        <div style={{ height: '300px', width: '100%' }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={COURSE_PERFORMANCE} layout="vertical">
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
-                                    <XAxis type="number" hide />
-                                    <YAxis dataKey="name" type="category" width={120} stroke="#94a3b8" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#1e293b', border: 'none' }} />
-                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
-                                        {COURSE_PERFORMANCE.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Revenue Multi-Analysis - Glassmorphic Panel */}
+                    <motion.div variants={itemVariants} className="lg:col-span-2 flex flex-col gap-8">
+                        <div className="bg-[#0f0728]/60 border border-[var(--primary)]/20 rounded-[32px] p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+                            {/* Decorative Grid Line */}
+                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent opacity-50" />
+
+                            <div className="flex justify-between items-center mb-10">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-[var(--primary)]/10">
+                                            <TrendingUp className="w-6 h-6 text-[#7c3aed]" />
+                                        </div>
+                                        Platform Revenue Trends
+                                    </h3>
+                                    <p className="text-xs text-[var(--text-dim)] mt-2 ml-1">Cross-Institute consolidated recurring revenue (INR In Millions)</p>
+                                </div>
+                                <div className="flex gap-2 bg-black/20 p-1 rounded-xl border border-white/5">
+                                    {['7D', '1M', '1Y'].map(t => (
+                                        <button key={t} className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${t === '1M' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-[var(--text-dim)] hover:text-white'}`}>
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="h-[380px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={REVENUE_DATA}>
+                                        <defs>
+                                            <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                                        <XAxis dataKey="name" stroke="#64748b" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 500 }} dy={10} />
+                                        <YAxis stroke="#64748b" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 500 }} tickFormatter={(val) => `₹${val}M`} dx={-10} />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#030014', border: '1px solid #7c3aed', borderRadius: '12px', boxShadow: '0 0 20px rgba(124,58,237,0.2)' }}
+                                            itemStyle={{ color: '#fff' }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="revenue"
+                                            stroke="#7c3aed"
+                                            strokeWidth={4}
+                                            fillOpacity={1}
+                                            fill="url(#colorRev)"
+                                            animationDuration={2000}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Module Grid Access - Glowing Tiles */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                            {[
+                                { label: "Academic Management", icon: LayoutDashboard, color: "text-[#7c3aed]", gradient: "hover:from-violet-600 hover:to-indigo-600" },
+                                { label: "LMS & Online Classes", icon: Video, color: "text-[#22d3ee]", gradient: "hover:from-cyan-500 hover:to-blue-500" },
+                                { label: "Placement System", icon: Briefcase, color: "text-[#d946ef]", gradient: "hover:from-fuchsia-600 hover:to-pink-600" },
+                                { label: "Online Exam Engine", icon: GraduationCap, color: "text-amber-400", gradient: "hover:from-amber-500 hover:to-orange-500" },
+                                { label: "Business & Employees", icon: Globe, color: "text-blue-400", gradient: "hover:from-blue-600 hover:to-sky-600" },
+                                { label: "Finance & Payroll", icon: Wallet, color: "text-emerald-400", gradient: "hover:from-emerald-600 hover:to-teal-600" },
+                                { label: "Analytics & Reports", icon: PieChart, color: "text-orange-400", gradient: "hover:from-orange-600 hover:to-red-600" },
+                                { label: "Platform Settings", icon: Settings, color: "text-slate-400", gradient: "hover:from-slate-600 hover:to-gray-600" },
+                            ].map((module, i) => (
+                                <motion.button
+                                    key={i}
+                                    whileHover={{ scale: 1.03, y: -5 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className={`relative flex flex-col items-center justify-center p-6 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-[24px] transition-all group overflow-hidden`}
+                                >
+                                    <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 bg-gradient-to-br ${module.gradient.replace('hover:', '')} transition-opacity duration-500`} />
+
+                                    <div className={`p-4 rounded-2xl bg-white/5 mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl ${module.color}`}>
+                                        <module.icon className="w-8 h-8" strokeWidth={1.5} />
+                                    </div>
+                                    <span className="text-[11px] font-bold text-white uppercase tracking-widest text-center leading-tight relative z-10 group-hover:text-white/90 transition-colors">
+                                        {module.label}
+                                    </span>
+                                </motion.button>
+                            ))}
                         </div>
                     </motion.div>
 
-                    {/* System Health Nodes - ADVANCED */}
-                    <motion.div variants={itemVariants} className={styles.card} style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div className={styles.cardHeader}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Server size={20} className={styles.cardHeaderIcon} style={{ color: '#3b82f6' }} />
-                                Platform Infrastructure
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span className={styles.pulseDot} style={{ background: '#10b981' }} />
-                                <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Systems Normal</span>
-                            </div>
-                        </div>
-
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingTop: '0.5rem' }}>
-                            {/* Resource Gauges */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-                                {[
-                                    { label: 'CPU Load', value: '32%', icon: Cpu, color: '#3b82f6', bar: '32%' },
-                                    { label: 'Memory', value: '14/64 GB', icon: HardDrive, color: '#8b5cf6', bar: '22%' },
-                                    { label: 'Network', value: '1.2 Gbps', icon: Globe, color: '#10b981', bar: '65%' }
-                                ].map((stat, i) => (
-                                    <div key={i} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 600 }}>
-                                            <stat.icon size={14} color={stat.color} /> {stat.label}
-                                        </div>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', fontFamily: 'Rajdhani', marginBottom: '0.5rem' }}>{stat.value}</div>
-                                        <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-                                            <motion.div
-                                                initial={{ width: 0 }} animate={{ width: stat.bar }} transition={{ duration: 1, delay: 0.5 }}
-                                                style={{ height: '100%', background: stat.color, borderRadius: '2px' }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
+                    {/* Left Sidebar: Realtime Infrastructure & Audit */}
+                    <div className="flex flex-col gap-8">
+                        {/* Platform Nodes Health - Futuristic Panel */}
+                        <motion.div variants={itemVariants} className="bg-[#0f0728]/60 border border-cyan-500/20 rounded-[32px] p-8 backdrop-blur-md relative">
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-bl-[32px] flex items-center justify-center">
+                                <Activity className="w-6 h-6 text-[#22d3ee] animate-pulse" />
                             </div>
 
-                            {/* Advanced Services List */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Microservices Status</div>
-                                {[
-                                    { name: 'Core API Gateway', region: 'us-east-1(a)', lat: '12ms', status: 'Healthy', load: 24, color: '#10b981' },
-                                    { name: 'LMS Database Shard-01', region: 'us-east-1(b)', lat: '18ms', status: 'Healthy', load: 45, color: '#10b981' },
-                                    { name: 'AI Inference Neural Engine', region: 'eu-west-2', lat: '142ms', status: 'High Load', load: 88, color: '#f59e0b' },
-                                    { name: 'Socket Realtime Svc', region: 'Global Edge', lat: '4ms', status: 'Healthy', load: 12, color: '#10b981' },
-                                ].map((service, i) => (
-                                    <div key={i} className={styles.interactiveRow} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '8px', borderLeft: `3px solid ${service.color}` }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                            <div style={{ background: `rgba(255,255,255,0.03)`, padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                {service.status === 'High Load' ? <Zap size={14} color="#f59e0b" fill="#f59e0b" /> : <Wifi size={14} color="#10b981" />}
+                            <h3 className="text-xl font-bold text-white mb-8">Infrastructure Status</h3>
+
+                            <div className="space-y-4">
+                                {PLATFORM_HEALTH.map((node, i) => (
+                                    <div key={i} className="group flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative">
+                                                <div className={`w-3 h-3 rounded-full ${node.status === 'Healthy' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                                <div className={`absolute inset-0 rounded-full animate-ping ${node.status === 'Healthy' ? 'bg-emerald-500' : 'bg-amber-500'} opacity-75`} />
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#e2e8f0', fontFamily: 'Rajdhani' }}>{service.name}</div>
-                                                <div style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Globe size={10} /> {service.region} • {service.lat}
+                                                <div className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">{node.label}</div>
+                                                <div className="text-[10px] text-[var(--text-dim)] font-mono flex items-center gap-1">
+                                                    <Zap className="w-3 h-3" /> {node.latency} latency
                                                 </div>
                                             </div>
                                         </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '0.75rem', color: service.color, fontWeight: 700, background: `${service.color}15`, padding: '2px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '2px' }}>{service.status.toUpperCase()}</div>
-                                            <div style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-                                                <Activity size={10} /> {service.load}% Load
-                                            </div>
+                                        <div className="text-right">
+                                            <div className="text-xs font-bold text-white font-mono">{node.uptime}</div>
+                                            <div className="text-[8px] text-[var(--text-dim)] uppercase tracking-wide">Uptime</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    </motion.div>
-                </div>
 
-                {/* 4. Bottom Section: Quick Actions & Recent Logs */}
-                <div className={styles.bottomGrid}>
-                    {/* Quick Actions Panel */}
-                    <motion.div variants={itemVariants} className={styles.card}>
-                        <div className={styles.cardHeader}>Quick Actions</div>
-                        <div className={styles.actionsGrid}>
-                            <button className={styles.actionBtn}>
-                                <Plus size={24} style={{ marginBottom: '0.5rem' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Create Batch</span>
-                            </button>
-                            <button className={styles.actionBtn}>
-                                <Users size={24} style={{ marginBottom: '0.5rem' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Add Faculty</span>
-                            </button>
-                            <button className={styles.actionBtn}>
-                                <FileText size={24} style={{ marginBottom: '0.5rem' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Admissions</span>
-                            </button>
-                            <button className={styles.actionBtn}>
-                                <Settings size={24} style={{ marginBottom: '0.5rem' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Platform Config</span>
-                            </button>
-                        </div>
-                    </motion.div>
+                            <div className="mt-8 pt-8 border-t border-white/5 grid grid-cols-2 gap-4">
+                                <div className="p-4 rounded-2xl bg-black/20 border border-white/5 text-center relative overflow-hidden">
+                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-[#22d3ee]" />
+                                    <div className="text-[10px] text-[var(--text-dim)] uppercase font-bold mb-1">CPU Load</div>
+                                    <div className="text-2xl font-bold text-[#22d3ee] font-display">24.8%</div>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-black/20 border border-white/5 text-center relative overflow-hidden">
+                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-[#d946ef]" />
+                                    <div className="text-[10px] text-[var(--text-dim)] uppercase font-bold mb-1">RAM Cache</div>
+                                    <div className="text-2xl font-bold text-[#d946ef] font-display">12.4 GB</div>
+                                </div>
+                            </div>
+                        </motion.div>
 
-                    {/* Recent Audit Logs */}
-                    <motion.div variants={itemVariants} className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            Recent Audit Logs
-                            <button style={{ fontSize: '0.75rem', color: '#a78bfa', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'none' }}>View All</button>
-                        </div>
-                        <div className={styles.tableContainer}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>USER</th>
-                                        <th>ACTION</th>
-                                        <th>TARGET</th>
-                                        <th>TIME</th>
-                                        <th style={{ textAlign: 'right' }}>STATUS</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {RECENT_LOGS.map((log) => (
-                                        <tr key={log.id}>
-                                            <td style={{ fontWeight: 500, color: '#e2e8f0' }}>{log.user}</td>
-                                            <td style={{ color: '#cbd5e1' }}>{log.action}</td>
-                                            <td style={{ fontFamily: 'monospace', color: '#94a3b8', fontSize: '0.75rem' }}>{log.target}</td>
-                                            <td style={{ color: '#64748b' }}>{log.time}</td>
-                                            <td style={{ textAlign: 'right' }}>
-                                                <span className={`${styles.statusBadge} ${log.status === 'Success' ? styles.statusSuccess :
-                                                    log.status === 'Warning' ? styles.statusWarning :
-                                                        styles.statusFailed
-                                                    }`}>
-                                                    {log.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </motion.div>
+                        {/* Recent Governance Audit - Security Panel */}
+                        <motion.div variants={itemVariants} className="bg-[#0f0728]/60 border border-fuchsia-500/20 rounded-[32px] p-8 backdrop-blur-md">
+                            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-emerald-500/10">
+                                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                                </div>
+                                Security Audit
+                            </h3>
+                            <div className="space-y-4">
+                                {[
+                                    { act: "Security Patch 4.2", by: "SysAdmin", time: "12m ago", status: "success" },
+                                    { act: "New Institute Added", by: "SuperAdmin", time: "4h ago", status: "info" },
+                                    { act: "DB Migration Successful", by: "Automator", time: "1d ago", status: "warning" },
+                                ].map((log, i) => (
+                                    <div key={i} className="flex items-start justify-between p-3 rounded-xl hover:bg-white/5 transition-colors cursor-default">
+                                        <div className="flex gap-3">
+                                            <div className={`mt-1 w-1.5 h-1.5 rounded-full ${log.status === 'success' ? 'bg-emerald-500' : log.status === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                                            <div>
+                                                <div className="text-xs font-bold text-white">{log.act}</div>
+                                                <div className="text-[10px] text-[var(--text-dim)]">by {log.by}</div>
+                                            </div>
+                                        </div>
+                                        <span className="text-[9px] font-mono text-[var(--text-dim)] bg-white/5 px-2 py-0.5 rounded-md">{log.time}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <button className="w-full mt-8 py-4 bg-[rgba(255,255,255,0.03)] border border-white/5 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-white/10 hover:border-fuchsia-500/30 transition-all flex items-center justify-center gap-2 group">
+                                <FileText className="w-4 h-4 group-hover:text-fuchsia-400 transition-colors" />
+                                Access Audit Vault
+                            </button>
+                        </motion.div>
+                    </div>
                 </div>
             </motion.div>
         </DashboardLayout>

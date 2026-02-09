@@ -19,7 +19,8 @@ import {
     Wallet,
     Award,
     Bell,
-    Video
+    Video,
+    Code2
 } from "lucide-react";
 
 export type Role = 'super_admin' | 'admin' | 'trainer' | 'hr' | 'counselor' | 'finance' | 'student';
@@ -56,11 +57,12 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     ],
     admin: [
         { label: 'Institute Snapshot', href: '/admin/dashboard', icon: LayoutDashboard },
-        { label: 'Student Management', href: '/admin/dashboard/students', icon: GraduationCap },
-        { label: 'Employee Management', href: '/admin/dashboard/employees', icon: Users },
-        { label: 'Courses & Batches', href: '/admin/dashboard/courses', icon: BookOpen },
-        { label: 'Attendance', href: '/admin/dashboard/attendance', icon: Calendar },
+        { label: 'Academic Management', href: '/admin/dashboard/academics', icon: BookOpen },
         { label: 'Online Sessions', href: '/admin/dashboard/sessions', icon: Video },
+        { label: 'Online Exam Engine', href: '/admin/dashboard/exams', icon: FileText },
+        { label: 'Business & Employees', href: '/admin/dashboard/business', icon: Building2 },
+        { label: 'Placement Officer', href: '/admin/dashboard/placements', icon: Briefcase },
+        { label: 'Financial Control', href: '/admin/dashboard/finance', icon: Wallet },
     ],
     trainer: [
         { label: 'My Batches', href: '/employee/trainer', icon: LayoutDashboard },
@@ -91,10 +93,12 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     ],
     student: [
         { label: 'Learning Hub', href: '/student/dashboard', icon: BookOpen },
-        { label: 'My Courses', href: '/student/dashboard/courses', icon: GraduationCap },
-        { label: 'Assignments', href: '/student/dashboard/assignments', icon: FileText },
-        { label: 'Attendance', href: '/student/dashboard/attendance', icon: Calendar },
-        { label: 'Placement Hub', href: '/student/dashboard/placement', icon: Briefcase },
-        { label: 'Fees & Certs', href: '/student/dashboard/fees', icon: Wallet },
+        { label: 'Online Compiler', href: '/student/compiler', icon: Code2 },
+        { label: 'MNC Placement Hub', href: '/student/placements/mnc', icon: Briefcase },
+        { label: 'Mock Assessments', href: '/student/assessments/mock', icon: GraduationCap },
+        { label: 'Online Classes', href: '/student/dashboard/sessions', icon: Video },
+        { label: 'Fee Portal', href: '/student/dashboard/fees', icon: Wallet },
+        { label: 'Notice Board', href: '/student/dashboard/notices', icon: Bell },
     ]
 };
+
