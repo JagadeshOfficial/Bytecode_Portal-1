@@ -1,7 +1,9 @@
 "use client";
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import styles from './SuperAdmin.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import {
     Users,
     Building2,
@@ -89,7 +91,7 @@ export default function SuperAdminMasterDashboard() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="flex flex-col gap-10"
+                className="flex flex-col gap-6"
             >
                 {/* Master Control Header - Premium Gradient & Glass */}
                 <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl p-1 bg-gradient-to-r from-[rgba(124,58,237,0.5)] via-[rgba(34,211,238,0.5)] to-[rgba(217,70,239,0.5)]">
@@ -109,37 +111,37 @@ export default function SuperAdminMasterDashboard() {
                                     <ShieldCheck className="w-3 h-3" /> Root Access
                                 </span>
                             </div>
-                            <h1 className="text-5xl md:text-6xl font-display font-bold text-white tracking-wide uppercase leading-none mt-2">
+                            <h1 className="text-3xl md:text-4xl font-display font-bold text-white tracking-wide uppercase leading-none mt-2">
                                 Global <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7c3aed] to-[#22d3ee]">Command Center</span>
                             </h1>
-                            <p className="text-[var(--text-dim)] mt-2 font-light text-lg">Orchestrating multi-tenant architecture across 12 institutes.</p>
+                            <p className="text-[var(--text-dim)] mt-2 font-light text-sm">Orchestrating multi-tenant architecture across 12 institutes.</p>
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="flex gap-3">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-2 px-6 py-4 bg-[rgba(255,255,255,0.05)] border border-white/10 text-white rounded-xl font-bold hover:bg-white/10 transition-all group"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-[rgba(255,255,255,0.05)] border border-white/10 text-white rounded-xl font-bold hover:bg-white/10 transition-all group"
                             >
                                 <Download className="w-4 h-4 text-[var(--text-dim)] group-hover:text-white transition-colors" />
-                                <span className="text-sm">Export Report</span>
+                                <span className="text-xs">Export Report</span>
                             </motion.button>
 
                             <motion.button
                                 whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(124,58,237,0.5)" }}
                                 whileTap={{ scale: 0.95 }}
-                                className="relative overflow-hidden flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#7c3aed] to-[#d946ef] text-white rounded-xl font-bold shadow-2xl skew-x-0"
+                                className="relative overflow-hidden flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#d946ef] text-white rounded-xl font-bold shadow-2xl skew-x-0"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                                <Plus className="w-5 h-5" />
-                                <span className="tracking-wider">DEPLOY NEW INSTITUTE</span>
+                                <Plus className="w-4 h-4" />
+                                <span className="text-xs tracking-wider">DEPLOY NEW INSTITUTE</span>
                             </motion.button>
                         </div>
                     </div>
                 </motion.div>
 
                 {/* Master KPI Grid - 3D Cards with Hover Lift */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
                     {[
                         { label: "Total Institutes", value: "12", trend: "+2 New", icon: Building2, color: "text-[#22d3ee]", bg: "from-cyan-500/10 to-blue-500/5", border: "border-cyan-500/20" },
                         { label: "Active Users", value: "12,450", trend: "+8.2%", icon: Users, color: "text-[#7c3aed]", bg: "from-violet-500/10 to-purple-500/5", border: "border-violet-500/20" },
@@ -154,50 +156,50 @@ export default function SuperAdminMasterDashboard() {
                             className={`bg-gradient-to-br ${stat.bg} border ${stat.border} rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group`}
                         >
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <stat.icon size={80} />
+                                <stat.icon size={60} />
                             </div>
 
-                            <div className="flex justify-between items-center mb-6 relative z-10">
-                                <div className={`p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform shadow-lg ${stat.color}`}>
-                                    <stat.icon className="w-6 h-6" />
+                            <div className="flex justify-between items-center mb-4 relative z-10">
+                                <div className={`p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform shadow-lg ${stat.color}`}>
+                                    <stat.icon className="w-5 h-5" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white bg-white/10 px-3 py-1 rounded-full backdrop-blur-md border border-white/5">{stat.trend}</span>
+                                <span className="text-[10px] font-bold text-white bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-md border border-white/5">{stat.trend}</span>
                             </div>
 
                             <div className="relative z-10">
-                                <div className="text-4xl font-bold text-white font-display mb-1 tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{stat.value}</div>
-                                <div className="text-[11px] text-[var(--text-dim)] uppercase tracking-[0.2em] font-bold">{stat.label}</div>
+                                <div className="text-3xl font-bold text-white font-display mb-1 tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{stat.value}</div>
+                                <div className="text-[10px] text-[var(--text-dim)] uppercase tracking-[0.2em] font-bold">{stat.label}</div>
                             </div>
                         </motion.div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Revenue Multi-Analysis - Glassmorphic Panel */}
-                    <motion.div variants={itemVariants} className="lg:col-span-2 flex flex-col gap-8">
+                    <motion.div variants={itemVariants} className="lg:col-span-2 flex flex-col gap-6">
                         <div className="bg-[#0f0728]/60 border border-[var(--primary)]/20 rounded-[32px] p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
                             {/* Decorative Grid Line */}
                             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent opacity-50" />
 
-                            <div className="flex justify-between items-center mb-10">
+                            <div className="flex justify-between items-center mb-6">
                                 <div>
-                                    <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-[var(--primary)]/10">
-                                            <TrendingUp className="w-6 h-6 text-[#7c3aed]" />
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-3">
+                                        <div className="p-1.5 rounded-lg bg-[var(--primary)]/10">
+                                            <TrendingUp className="w-5 h-5 text-[#7c3aed]" />
                                         </div>
                                         Platform Revenue Trends
                                     </h3>
-                                    <p className="text-xs text-[var(--text-dim)] mt-2 ml-1">Cross-Institute consolidated recurring revenue (INR In Millions)</p>
+                                    <p className="text-[10px] text-[var(--text-dim)] mt-1 ml-1">Cross-Institute consolidated recurring revenue (INR In Millions)</p>
                                 </div>
                                 <div className="flex gap-2 bg-black/20 p-1 rounded-xl border border-white/5">
                                     {['7D', '1M', '1Y'].map(t => (
-                                        <button key={t} className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${t === '1M' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-[var(--text-dim)] hover:text-white'}`}>
+                                        <button key={t} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all ${t === '1M' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-[var(--text-dim)] hover:text-white'}`}>
                                             {t}
                                         </button>
                                     ))}
                                 </div>
                             </div>
-                            <div className="h-[380px] w-full">
+                            <div className="h-[280px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={REVENUE_DATA}>
                                         <defs>
@@ -227,46 +229,50 @@ export default function SuperAdminMasterDashboard() {
                             </div>
                         </div>
 
-                        {/* Module Grid Access - Glowing Tiles */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                        {/* Module Grid Access - New Premium CSS Implementation */}
+                        <div className={styles.moduleGrid}>
                             {[
-                                { label: "Academic Management", icon: LayoutDashboard, color: "text-[#7c3aed]", gradient: "hover:from-violet-600 hover:to-indigo-600" },
-                                { label: "LMS & Online Classes", icon: Video, color: "text-[#22d3ee]", gradient: "hover:from-cyan-500 hover:to-blue-500" },
-                                { label: "Placement System", icon: Briefcase, color: "text-[#d946ef]", gradient: "hover:from-fuchsia-600 hover:to-pink-600" },
-                                { label: "Online Exam Engine", icon: GraduationCap, color: "text-amber-400", gradient: "hover:from-amber-500 hover:to-orange-500" },
-                                { label: "Business & Employees", icon: Globe, color: "text-blue-400", gradient: "hover:from-blue-600 hover:to-sky-600" },
-                                { label: "Finance & Payroll", icon: Wallet, color: "text-emerald-400", gradient: "hover:from-emerald-600 hover:to-teal-600" },
-                                { label: "Analytics & Reports", icon: PieChart, color: "text-orange-400", gradient: "hover:from-orange-600 hover:to-red-600" },
-                                { label: "Platform Settings", icon: Settings, color: "text-slate-400", gradient: "hover:from-slate-600 hover:to-gray-600" },
+                                { label: "Academic Management", icon: LayoutDashboard, hex: "#7c3aed", href: "/admin/super/academics" },
+                                { label: "LMS & Online Classes", icon: Video, hex: "#06b6d4", href: "/admin/super/courses" },
+                                { label: "Placement System", icon: Briefcase, hex: "#d946ef", href: "/admin/super/placements" },
+                                { label: "Online Exam Engine", icon: GraduationCap, hex: "#f59e0b", href: "/admin/super/exams" },
+                                { label: "Business & Employees", icon: Globe, hex: "#3b82f6", href: "/admin/super/business" },
+                                { label: "Finance & Payroll", icon: Wallet, hex: "#10b981", href: "/admin/super/finance" },
+                                { label: "Analytics & Reports", icon: PieChart, hex: "#f97316", href: "/admin/super/reports" },
+                                { label: "Platform Settings", icon: Settings, hex: "#94a3b8", href: "/admin/super/settings" },
                             ].map((module, i) => (
-                                <motion.button
-                                    key={i}
-                                    whileHover={{ scale: 1.03, y: -5 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className={`relative flex flex-col items-center justify-center p-6 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-[24px] transition-all group overflow-hidden`}
-                                >
-                                    <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 bg-gradient-to-br ${module.gradient.replace('hover:', '')} transition-opacity duration-500`} />
-
-                                    <div className={`p-4 rounded-2xl bg-white/5 mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl ${module.color}`}>
-                                        <module.icon className="w-8 h-8" strokeWidth={1.5} />
-                                    </div>
-                                    <span className="text-[11px] font-bold text-white uppercase tracking-widest text-center leading-tight relative z-10 group-hover:text-white/90 transition-colors">
-                                        {module.label}
-                                    </span>
-                                </motion.button>
+                                <Link key={i} href={module.href} style={{ textDecoration: 'none' }}>
+                                    <motion.div
+                                        className={styles.moduleCard}
+                                        style={{
+                                            '--glow-color': module.hex,
+                                            '--icon-color': module.hex
+                                        } as React.CSSProperties}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                    >
+                                        <div className={styles.moduleIconBox}>
+                                            <module.icon className={styles.moduleIcon} strokeWidth={1.5} />
+                                        </div>
+                                        <span className={styles.moduleLabel}>
+                                            {module.label}
+                                        </span>
+                                    </motion.div>
+                                </Link>
                             ))}
                         </div>
                     </motion.div>
 
                     {/* Left Sidebar: Realtime Infrastructure & Audit */}
-                    <div className="flex flex-col gap-8">
+                    <div className="flex flex-col gap-6">
                         {/* Platform Nodes Health - Futuristic Panel */}
                         <motion.div variants={itemVariants} className="bg-[#0f0728]/60 border border-cyan-500/20 rounded-[32px] p-8 backdrop-blur-md relative">
                             <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-bl-[32px] flex items-center justify-center">
                                 <Activity className="w-6 h-6 text-[#22d3ee] animate-pulse" />
                             </div>
 
-                            <h3 className="text-xl font-bold text-white mb-8">Infrastructure Status</h3>
+                            <h3 className="text-lg font-bold text-white mb-6">Infrastructure Status</h3>
 
                             <div className="space-y-4">
                                 {PLATFORM_HEALTH.map((node, i) => (
@@ -295,21 +301,21 @@ export default function SuperAdminMasterDashboard() {
                                 <div className="p-4 rounded-2xl bg-black/20 border border-white/5 text-center relative overflow-hidden">
                                     <div className="absolute inset-x-0 bottom-0 h-1 bg-[#22d3ee]" />
                                     <div className="text-[10px] text-[var(--text-dim)] uppercase font-bold mb-1">CPU Load</div>
-                                    <div className="text-2xl font-bold text-[#22d3ee] font-display">24.8%</div>
+                                    <div className="text-xl font-bold text-[#22d3ee] font-display">24.8%</div>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-black/20 border border-white/5 text-center relative overflow-hidden">
                                     <div className="absolute inset-x-0 bottom-0 h-1 bg-[#d946ef]" />
                                     <div className="text-[10px] text-[var(--text-dim)] uppercase font-bold mb-1">RAM Cache</div>
-                                    <div className="text-2xl font-bold text-[#d946ef] font-display">12.4 GB</div>
+                                    <div className="text-xl font-bold text-[#d946ef] font-display">12.4 GB</div>
                                 </div>
                             </div>
                         </motion.div>
 
                         {/* Recent Governance Audit - Security Panel */}
                         <motion.div variants={itemVariants} className="bg-[#0f0728]/60 border border-fuchsia-500/20 rounded-[32px] p-8 backdrop-blur-md">
-                            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-emerald-500/10">
-                                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                            <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-emerald-500/10">
+                                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
                                 </div>
                                 Security Audit
                             </h3>

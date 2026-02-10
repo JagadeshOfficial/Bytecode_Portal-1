@@ -1,397 +1,239 @@
 "use client";
 
 import { useState } from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { motion, AnimatePresence } from 'framer-motion';
+import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
+import { motion } from 'framer-motion';
 import {
-    BookOpen, Users, Calendar, Clock,
-    MoreVertical, Plus, Search, Filter,
-    CheckCircle, AlertCircle, BarChart3,
-    Layers, Code, Database, Globe, Cpu,
-    ChevronRight, PlayCircle, Book,
-    MessageSquare, AlertTriangle, Monitor, Star
+    GraduationCap,
+    BookOpen,
+    Users,
+    TrendingUp,
+    CheckCircle,
+    Calendar,
+    Clock,
+    FileText,
+    PieChart,
+    Layers,
+    PlayCircle,
+    MoreVertical,
+    Plus,
+    Search
 } from 'lucide-react';
-import styles from '../SuperAdmin.module.css';
-import StatsCard from '@/components/dashboard/StatsCard';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-// -- Advanced Mock Data --
-
-const ACADEMIC_STATS = [
-    { title: 'Total Active Students', value: '2,450', icon: Users, color: '#8b5cf6', trend: '+12% vs last month', chartData: [40, 55, 45, 60, 75, 65, 85] },
-    { title: 'Course Completion Rate', value: '94.2%', icon: CheckCircle, color: '#10b981', trend: '+2.5% efficiency', chartData: [88, 90, 89, 92, 93, 94, 94] },
-    { title: 'Running Batches', value: '42', icon: Layers, color: '#3b82f6', trend: '8 starting next week', chartData: [30, 32, 35, 38, 40, 41, 42] },
-    { title: 'Content Repository', value: '1.2TB', icon: Database, color: '#ec4899', trend: '+50GB new assets', chartData: [100, 105, 110, 112, 115, 118, 120] },
-];
-
-const RUNNING_BATCHES_ADV = [
-    {
-        id: 'B204', course: 'Java Full Stack', phase: 'Spring Boot Microservices',
-        trainer: 'Sarah Jenkins', attendance: 92, progress: 65, status: 'In Session',
-        nextItem: 'Live Coding: API Gateway', time: '09:00 - 11:00 AM',
-        stack: ['Java', 'Spring', 'React']
-    },
-    {
-        id: 'B205', course: 'Data Science & AI', phase: 'Neural Networks Deep Dive',
-        trainer: 'Dr. Rao', attendance: 88, progress: 42, status: 'Lab Session',
-        nextItem: 'Project: Image Classification', time: '11:00 - 01:00 PM',
-        stack: ['Python', 'TensorFlow', 'Pandas']
-    },
-    {
-        id: 'B206', course: 'DevOps Engineering', phase: 'Kubernetes Orchestration',
-        trainer: 'Karthik M.', attendance: 95, progress: 78, status: 'Break',
-        nextItem: 'Helm Charts Demo', time: '10:00 - 12:00 PM',
-        stack: ['Docker', 'K8s', 'AWS']
-    },
-];
-
-const CURRICULUM_CATALOG = [
-    { id: 1, title: 'Full Stack Development', modules: 24, projects: 8, duration: '6 Months', icon: Globe, color: '#a78bfa', bg: 'rgba(139, 92, 246, 0.1)' },
-    { id: 2, title: 'AI & Machine Learning', modules: 18, projects: 12, duration: '8 Months', icon: Cpu, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-    { id: 3, title: 'Cloud Computing', modules: 15, projects: 5, duration: '4 Months', icon: Database, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
-    { id: 4, title: 'Cyber Security Ops', modules: 20, projects: 10, duration: '5 Months', icon: Shield, color: '#f87171', bg: 'rgba(248, 113, 113, 0.1)' },
-];
-
-const RECENT_FEEDBACK = [
-    { id: 1, trainer: 'Sarah Jenkins', rating: 4.8, type: 'Kudos', msg: "Great explanation of Hooks!" },
-    { id: 2, trainer: 'Karthik M.', rating: 3.5, type: 'Critical', msg: "Pace was too fast today." },
-];
-
-import { Shield } from 'lucide-react';
-
-// -- Components --
-
-const MiniChart = ({ data, color }: { data: number[], color: string }) => (
-    <div className={styles.miniChartContainer}>
-        <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data.map((val, i) => ({ i, val }))}>
-                <defs>
-                    <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-                        <stop offset="100%" stopColor={color} stopOpacity={0} />
-                    </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="val" stroke={color} strokeWidth={2} fill={`url(#grad-${color})`} />
-            </AreaChart>
-        </ResponsiveContainer>
-    </div>
-);
 
 export default function AcademicsPage() {
-    const [isScheduleOpen, setIsScheduleOpen] = useState(false);
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
+
+    const stats = [
+        { label: "Total Courses", value: "24", icon: BookOpen, color: "#3b82f6", trend: "+2 New" },
+        { label: "Active Batches", value: "18", icon: Users, color: "#8b5cf6", trend: "High Demand" },
+        { label: "Enrolled Students", value: "850", icon: GraduationCap, color: "#10b981", trend: "+15% YoY" },
+        { label: "Completion Rate", value: "92%", icon: CheckCircle, color: "#f59e0b", trend: "Top Tier" },
+    ];
+
+    const courses = [
+        { title: "Full Stack Development", modules: 12, duration: "6 Months", rating: 4.8, students: 320, level: "Advanced" },
+        { title: "Data Science & AI", modules: 15, duration: "8 Months", rating: 4.9, students: 250, level: "Expert" },
+        { title: "UI/UX Design Masterclass", modules: 8, duration: "4 Months", rating: 4.7, students: 180, level: "Intermediate" },
+        { title: "Cloud Computing (AWS)", modules: 10, duration: "5 Months", rating: 4.8, students: 210, level: "Advanced" },
+    ];
 
     return (
-        <DashboardLayout role="super_admin">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={styles.container}
-            >
-                {/* 1. Dynamic Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
-                    <div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a78bfa', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-                            Academic Control Center
+        <AdvancedModuleLayout
+            title="Academic Management"
+            subtitle="Oversee curriculum, courses, batches, and student progression."
+            stats={stats}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            tabs={[
+                { id: 'overview', label: 'Overview', icon: PieChart },
+                { id: 'courses', label: 'Course Library', icon: BookOpen },
+                { id: 'batches', label: 'Active Batches', icon: Users },
+                { id: 'curriculum', label: 'Curriculum Builder', icon: Layers },
+            ]}
+        >
+            {activeTab === 'overview' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Active Batches List */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-slate-900/50 border border-white/5 rounded-2xl p-6 backdrop-blur-sm lg:col-span-2"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                <Users className="text-blue-400" /> Live Batches
+                            </h3>
+                            <button className="text-xs text-blue-400 font-bold hover:underline">View Schedule</button>
                         </div>
-                        <h1 className={styles.textH1}>Academics & Curriculum</h1>
-                    </div>
-                    <div className={styles.actionBtnRow}>
-                        <button
-                            className={styles.btnSecondary}
-                            onClick={() => setIsScheduleOpen(true)}
-                        >
-                            <Calendar size={18} /> Master Schedule
-                        </button>
-                        <button
-                            className={styles.btnPrimary}
-                            onClick={() => setIsCreateOpen(true)}
-                        >
-                            <Plus size={18} /> Create New
-                        </button>
-                    </div>
-                </div>
-
-                {/* -- Modals -- */}
-                {/* -- Modals -- */}
-                <AnimatePresence>
-                    {isScheduleOpen && (
-                        <div className={styles.modalOverlay}>
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className={`${styles.modalContent} ${styles.modalContentLarge}`}
-                            >
-                                <div className={styles.modalHeader}>
-                                    <h2 className={styles.modalTitle}>Institute Master Schedule</h2>
-                                    <button onClick={() => setIsScheduleOpen(false)} className={styles.closeBtn}>✕</button>
-                                </div>
-                                <div className={styles.modalBody}>
-                                    <div className={styles.scheduleGrid}>
-                                        <div className={styles.scheduleHeader} style={{ background: 'transparent' }}>Time</div>
-                                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(d => (
-                                            <div key={d} className={styles.scheduleHeader}>{d}</div>
-                                        ))}
-
-                                        {['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'].map((time, i) => (
-                                            <>
-                                                <div className={styles.scheduleTime}>{time}</div>
-                                                {[1, 2, 3, 4, 5].map(col => (
-                                                    <div key={col} className={styles.scheduleCell}>
-                                                        {(i === 0 && col % 2 !== 0) && (
-                                                            <div className={`${styles.scheduleEvent} ${styles.eventViolet}`}>
-                                                                <div className={styles.eventTitle}>Java Batch</div>
-                                                                <div className={styles.eventSub}>Lab A</div>
-                                                            </div>
-                                                        )}
-                                                        {(i === 1 && col === 3) && (
-                                                            <div className={`${styles.scheduleEvent} ${styles.eventViolet}`} style={{ borderColor: 'rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.15)' }}>
-                                                                <div className={styles.eventTitle} style={{ color: '#34d399' }}>Python AI</div>
-                                                                <div className={styles.eventSub} style={{ color: '#6ee7b7' }}>Room 302</div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </>
-                                        ))}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-
-                    {isCreateOpen && (
-                        <div className={styles.modalOverlay}>
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className={`${styles.modalContent} ${styles.modalContentMedium}`}
-                            >
-                                <div className={styles.modalHeader}>
-                                    <h2 className={styles.modalTitle}>Create New Academic Entry</h2>
-                                    <button onClick={() => setIsCreateOpen(false)} className={styles.closeBtn}>✕</button>
-                                </div>
-                                <div className={styles.modalBody}>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.formLabel}>Entry Type</label>
-                                        <select className={styles.formSelect}>
-                                            <option>New Batch</option>
-                                            <option>New Course</option>
-                                            <option>Schedule Event</option>
-                                            <option>Curriculum Module</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.formLabel}>Title / Name</label>
-                                        <input type="text" className={styles.formInput} placeholder="e.g. Java Weekend Batch 24" />
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.formLabel}>Start Date</label>
-                                        <input type="date" className={styles.formInput} />
-                                    </div>
-                                    <div className={styles.formActions}>
-                                        <button onClick={() => setIsCreateOpen(false)} className={styles.btnSecondary} style={{ justifyContent: 'center', flex: 1 }}>Cancel</button>
-                                        <button className={styles.btnPrimary} style={{ justifyContent: 'center', flex: 1 }}>Create</button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
-
-                {/* 2. Advanced Stats Row */}
-                <div className={styles.advStatsGrid}>
-                    {ACADEMIC_STATS.map((stat, idx) => (
-                        <div key={idx} className={styles.advCard}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                                <div className={styles.advCardIconBox} style={{
-                                    background: stat.title.includes('Total') ? 'rgba(139,92,246,0.1)' : stat.title.includes('Completion') ? 'rgba(16,185,129,0.1)' : stat.title.includes('Batches') ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
-                                    color: stat.color
-                                }}>
-                                    <stat.icon size={22} />
-                                </div>
-                                <span className={styles.statusBadge} style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}>{stat.trend}</span>
-                            </div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem', fontFamily: 'Rajdhani' }}>{stat.value}</div>
-                            <div className={styles.textLabel}>{stat.title}</div>
-                            <MiniChart data={stat.chartData} color={stat.color} />
-                        </div>
-                    ))}
-                </div>
-
-                {/* 3. Live Operations Center */}
-                <div className={styles.academicsGrid}>
-
-                    {/* Running Batches - Live Status */}
-                    <div className={styles.card} style={{ gridColumn: 'span 1' }}> {/* Force span 1 in mobile, grid handles desktop */}
-                        <div className={styles.cardHeader}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <PlayCircle size={20} style={{ color: '#34d399' }} />
-                                Live Classroom Status
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span> Live Streaming
-                            </div>
-                        </div>
-
-                        <div className={styles.liveBatchList}>
-                            {/* Academic Risk Alert */}
-                            <div className={styles.alertBox}>
-                                <div className={styles.alertIcon}><AlertTriangle size={20} /></div>
-                                <div>
-                                    <div style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>Schedule Risk Alert</div>
-                                    <div style={{ color: '#f87171', fontSize: '0.8rem' }}>Batch B201 is 2 sessions behind schedule.</div>
-                                </div>
-                            </div>
-
-                            {RUNNING_BATCHES_ADV.map((batch) => (
-                                <div key={batch.id} className={styles.batchItem}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <div style={{
-                                                width: '48px', height: '48px', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.8)',
-                                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(51, 65, 85, 0.5)'
-                                            }}>
-                                                <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>BATCH</span>
-                                                <span style={{ fontSize: '14px', fontWeight: 700, color: 'white' }}>{batch.id}</span>
-                                            </div>
-                                            <div>
-                                                <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem' }}>{batch.course}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                                                    <Users size={12} /> {batch.trainer}
-                                                    <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#475569' }}></span>
-                                                    <Clock size={12} /> {batch.time}
-                                                </div>
+                        <div className="space-y-4">
+                            {[
+                                { name: "Full Stack Winter 2024", time: "10:00 AM - 12:00 PM", instructor: "Rahul S.", students: 45, progress: 60, status: "Ongoing" },
+                                { name: "Data Science Spring 2024", time: "02:00 PM - 04:00 PM", instructor: "Priya M.", students: 32, progress: 25, status: "Ongoing" },
+                                { name: "AWS Cloud Certification", time: "06:00 PM - 08:00 PM", instructor: "Amit K.", students: 50, progress: 90, status: "Finalizing" },
+                            ].map((batch, i) => (
+                                <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all cursor-pointer group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform">
+                                            <b className="text-lg">{batch.name.charAt(0)}</b>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-white group-hover:text-blue-400 transition-colors">{batch.name}</div>
+                                            <div className="text-xs text-slate-400 flex items-center gap-2">
+                                                <span><Clock size={10} className="inline mr-1" />{batch.time}</span>
+                                                <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                                                <span>{batch.instructor}</span>
                                             </div>
                                         </div>
-                                        <div className={styles.statusBadge} style={{
-                                            background: batch.status === 'In Session' ? 'rgba(16, 185, 129, 0.1)' : batch.status === 'Lab Session' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                            color: batch.status === 'In Session' ? '#10b981' : batch.status === 'Lab Session' ? '#8b5cf6' : '#f59e0b',
-                                            border: `1px solid ${batch.status === 'In Session' ? 'rgba(16, 185, 129, 0.2)' : batch.status === 'Lab Session' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(245, 158, 11, 0.2)'}`
-                                        }}>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${batch.status === 'Ongoing' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                                            }`}>
                                             {batch.status}
+                                        </span>
+                                        <div className="mt-2 w-24 h-1 bg-slate-700 rounded-full overflow-hidden ml-auto">
+                                            <div className="h-full bg-blue-500" style={{ width: `${batch.progress}%` }} />
                                         </div>
-                                    </div>
-
-                                    {/* Progress & Phase */}
-                                    <div style={{ marginBottom: '0.75rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
-                                            <span style={{ color: '#cbd5e1', fontWeight: 500 }}>Current Module: <span style={{ color: 'white' }}>{batch.phase}</span></span>
-                                            <span style={{ color: '#94a3b8' }}>{batch.progress}% Complete</span>
-                                        </div>
-                                        <div className={styles.progressTrack}>
-                                            <div className={styles.progressBar} style={{ width: `${batch.progress}%` }}></div>
-                                        </div>
-                                    </div>
-
-                                    {/* Tech Stack Pills */}
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        {batch.stack.map((tech) => (
-                                            <span key={tech} style={{
-                                                fontSize: '10px', padding: '2px 8px', borderRadius: '4px',
-                                                border: '1px solid rgba(71, 85, 105, 0.5)', color: '#94a3b8', background: 'rgba(30, 41, 59, 0.5)'
-                                            }}>
-                                                {tech}
-                                            </span>
-                                        ))}
                                     </div>
                                 </div>
                             ))}
                         </div>
+                    </motion.div>
+
+                    {/* Quick Course Stats */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-slate-900/50 border border-white/5 rounded-2xl p-6 backdrop-blur-sm flex flex-col gap-6"
+                    >
+                        <h3 className="text-lg font-bold text-white mb-2">Category Spread</h3>
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="relative w-48 h-48 rounded-full border-[16px] border-slate-800 flex items-center justify-center">
+                                {/* Simulated Pie Chart Segments using Conic Gradients - simplified for CSS */}
+                                <div className="absolute inset-0 rounded-full" style={{ background: 'conic-gradient(#3b82f6 0% 40%, #8b5cf6 40% 70%, #10b981 70% 90%, #f59e0b 90% 100%)', opacity: 0.8 }}></div>
+                                <div className="absolute inset-4 bg-slate-900 rounded-full flex flex-col items-center justify-center z-10">
+                                    <span className="text-3xl font-bold text-white">24</span>
+                                    <span className="text-xs text-slate-400 uppercase tracking-widest">Total</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div>Development (40%)</div>
+                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-violet-500"></div>Data Science (30%)</div>
+                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div>Design (20%)</div>
+                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div>Cloud (10%)</div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {activeTab === 'courses' && (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <div className="relative w-96">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                            <input type="text" placeholder="Search courses..." className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" />
+                        </div>
+                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
+                            <Plus size={16} /> Add New Course
+                        </button>
                     </div>
 
-                    {/* Quick Access / Curriculum Snapshot */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        {/* Syllabus Catalog Widget */}
-                        <div className={styles.card} style={{ flex: 1 }}>
-                            <div className={styles.cardHeader} style={{ marginBottom: '1rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <BookOpen size={20} style={{ color: '#60a5fa' }} />
-                                    Curriculum Hub
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {courses.map((course, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-blue-500/50 transition-all group relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button className="p-2 hover:bg-white/10 rounded-lg text-white"><MoreVertical size={16} /></button>
                                 </div>
-                            </div>
-                            <div className={styles.hubList}>
-                                {CURRICULUM_CATALOG.map((item) => (
-                                    <div key={item.id} className={styles.hubItem}>
-                                        <div style={{ padding: '0.5rem', borderRadius: '0.5rem', background: item.bg, color: item.color }}>
-                                            <item.icon size={18} />
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'white' }}>{item.title}</div>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{item.modules} Modules • {item.projects} Projects</div>
-                                        </div>
-                                        <ChevronRight size={16} style={{ color: '#475569' }} />
-                                    </div>
-                                ))}
-                            </div>
-                            <button className={styles.btnSecondary} style={{ width: '100%', marginTop: '1rem', justifyContent: 'center' }}>
-                                View Full Syllabus Catalog
-                            </button>
-                        </div>
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-500/20">
+                                    <Layers size={24} />
+                                </div>
+                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{course.title}</h3>
+                                <div className="flex gap-2 mb-4">
+                                    <span className="text-[10px] bg-white/5 border border-white/5 px-2 py-0.5 rounded text-slate-400">{course.level}</span>
+                                    <span className="text-[10px] bg-white/5 border border-white/5 px-2 py-0.5 rounded text-slate-400">{course.duration}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs text-slate-400 border-t border-white/5 pt-4">
+                                    <div className="flex items-center gap-1"><BookOpen size={12} /> {course.modules} Modules</div>
+                                    <div className="flex items-center gap-1"><Users size={12} /> {course.students}</div>
+                                </div>
+                            </motion.div>
+                        ))}
 
-                        {/* Lab Availability Widget */}
-                        <div className={styles.card}>
-                            <div className={styles.cardHeader} style={{ marginBottom: '1rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Monitor size={20} style={{ color: '#f472b6' }} />
-                                    Lab Availability
-                                </div>
+                        {/* Add New Placeholder Card */}
+                        <button className="border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 text-slate-500 hover:text-blue-400 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group">
+                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Plus size={24} />
                             </div>
-                            <div className={styles.labGrid}>
-                                <div className={`${styles.labItem} ${styles.labOccupied}`}>
-                                    <div className={styles.labName}>Lab A (Main)</div>
-                                    <div className={`${styles.labStatus} ${styles.textOccupied}`}>Occupied</div>
-                                </div>
-                                <div className={`${styles.labItem} ${styles.labFree}`}>
-                                    <div className={styles.labName}>Lab B (AI)</div>
-                                    <div className={`${styles.labStatus} ${styles.textFree}`}>Available</div>
-                                </div>
-                                <div className={`${styles.labItem} ${styles.labFree}`}>
-                                    <div className={styles.labName}>Lab C (Exam)</div>
-                                    <div className={`${styles.labStatus} ${styles.textFree}`}>Available</div>
-                                </div>
-                                <div className={`${styles.labItem} ${styles.labOccupied}`}>
-                                    <div className={styles.labName}>Lab D (Cloud)</div>
-                                    <div className={`${styles.labStatus} ${styles.textOccupied}`}>Maintenance</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Feedback Widget */}
-                        <div className={styles.card}>
-                            <div className={styles.cardHeader} style={{ marginBottom: '1rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <MessageSquare size={20} style={{ color: '#facc15' }} />
-                                    Session Quality
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                {RECENT_FEEDBACK.map(f => (
-                                    <div key={f.id} className={styles.feedbackItem}>
-                                        <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'white' }}>
-                                            {f.trainer.charAt(0)}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white' }}>{f.trainer}</span>
-                                                <div className={styles.starRating}>
-                                                    <Star size={12} fill="#facc15" />
-                                                    <span style={{ color: 'white' }}>{f.rating}</span>
-                                                </div>
-                                            </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>"{f.msg}"</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
+                            <span className="text-sm font-bold">Create New Course</span>
+                        </button>
                     </div>
                 </div>
+            )}
 
-            </motion.div>
-        </DashboardLayout>
+            {activeTab === 'curriculum' && (
+                <div className="flex h-[600px] border border-white/10 rounded-2xl overflow-hidden bg-slate-900/30">
+                    {/* Sidebar */}
+                    <div className="w-64 border-r border-white/10 p-4 bg-slate-900/50">
+                        <h4 className="text-sm font-bold text-slate-400 uppercase mb-4">Modules</h4>
+                        <div className="space-y-2">
+                            {['Introduction to React', 'State Management', 'Hooks Deep Dive', 'Routing in React', 'API Integration', 'Deployment'].map((mod, i) => (
+                                <div key={i} className={`p-3 rounded-lg text-sm font-bold cursor-pointer transition-colors flex items-center justify-between ${i === 1 ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-slate-300'}`}>
+                                    <span>{i + 1}. {mod}</span>
+                                    <MoreVertical size={14} className="opacity-50" />
+                                </div>
+                            ))}
+                        </div>
+                        <button className="mt-4 w-full py-2 border border-dashed border-white/20 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:border-white/40 transition-colors">
+                            + Add Module
+                        </button>
+                    </div>
+                    {/* Main Canvas */}
+                    <div className="flex-1 p-8 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] relative">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <span className="text-xs font-bold text-blue-400 uppercase">Module 2</span>
+                                    <h2 className="text-3xl font-bold text-white">State Management</h2>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white">Preview</button>
+                                    <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold text-white">Save Changes</button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {['Understanding useState', 'Complex State Logic', 'Prop Drilling vs Context', 'Lab: ToDo App'].map((lesson, i) => (
+                                    <div key={i} className="bg-slate-800/80 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-blue-500/30 transition-colors cursor-move">
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-slate-500 font-mono text-sm">0{i + 1}</div>
+                                            <div className="w-8 h-8 rounded bg-slate-700 flex items-center justify-center text-slate-300">
+                                                <PlayCircle size={16} />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-white">{lesson}</div>
+                                                <div className="text-[10px] text-slate-400">Video • 12:00 mins</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 opacity-50 hover:opacity-100">
+                                            <button className="p-1 hover:bg-white/10 rounded"><Settings size={14} /></button>
+                                            <button className="p-1 hover:bg-white/10 rounded"><MoreVertical size={14} /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <button className="w-full py-3 border border-dashed border-white/10 rounded-xl text-sm font-bold text-slate-500 hover:text-blue-400 hover:border-blue-500/30 transition-all flex items-center justify-center gap-2">
+                                    <Plus size={16} /> Add Lesson Content
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </AdvancedModuleLayout>
     );
 }

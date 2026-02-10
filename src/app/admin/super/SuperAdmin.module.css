@@ -84,8 +84,8 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
         0 2px 4px -1px rgba(0, 0, 0, 0.06),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
     border-radius: 1.5rem;
@@ -94,8 +94,8 @@
 
 .glassPanel:hover {
     background: rgba(15, 23, 42, 0.8);
-    box-shadow: 
-        0 20px 25px -5px rgba(0, 0, 0, 0.2), 
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.2),
         0 10px 10px -5px rgba(0, 0, 0, 0.1),
         inset 0 0 0 1px rgba(139, 92, 246, 0.3);
     transform: translateY(-2px);
@@ -801,6 +801,109 @@
     min-width: 280px;
     transition: background 0.2s;
     border: 1px solid rgba(51, 65, 85, 0.3);
+}
+
+/* --- NEW PREMIUM MODULE GRID STYLES (MATCHING USER REQUEST) --- */
+.moduleGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .moduleGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.moduleCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(10, 10, 20, 0.6);
+    /* Very dark background */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.moduleCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, var(--glow-color, rgba(124, 58, 237, 0.15)) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.moduleCard:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: var(--glow-color, rgba(124, 58, 237, 0.5));
+    box-shadow: 0 10px 30px -10px var(--glow-color, rgba(124, 58, 237, 0.3));
+}
+
+.moduleCard:hover::before {
+    opacity: 1;
+}
+
+.moduleIconBox {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    /* Slightly squared */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.moduleCard:hover .moduleIconBox {
+    transform: scale(1.1) rotate(5deg);
+    border-color: var(--glow-color);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 15px var(--glow-color);
+}
+
+.moduleIcon {
+    width: 32px;
+    height: 32px;
+    color: var(--icon-color, #fff);
+    transition: all 0.3s ease;
+}
+
+.moduleCard:hover .moduleIcon {
+    filter: drop-shadow(0 0 8px var(--icon-color));
+}
+
+.moduleLabel {
+    font-family: 'Inter', sans-serif;
+    /* Or the system font, looks standard sans-serif */
+    font-size: 0.75rem;
+    /* Small */
+    font-weight: 800;
+    /* Extra Bold */
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #fff;
+    text-align: center;
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: color 0.3s;
+}
+
+.moduleCard:hover .moduleLabel {
+    color: var(--icon-color);
 }
 
 .kanbanHeader {
