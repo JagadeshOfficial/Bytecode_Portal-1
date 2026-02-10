@@ -20,7 +20,8 @@ import {
     Award,
     Bell,
     Video,
-    Code2
+    Code2,
+    CheckCircle2
 } from "lucide-react";
 
 export type Role = 'super_admin' | 'admin' | 'trainer' | 'hr' | 'counselor' | 'finance' | 'student';
@@ -58,13 +59,13 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Platform Settings', href: '/admin/super/settings', icon: Settings },
     ],
     admin: [
-        { label: 'Institute Snapshot', href: '/admin/dashboard', icon: LayoutDashboard },
-        { label: 'Academic Management', href: '/admin/dashboard/academics', icon: BookOpen },
+        { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+        { label: 'User Management', href: '/admin/dashboard/users', icon: Users },
+        { label: 'Academic & Courses', href: '/admin/dashboard/academics', icon: BookOpen },
         { label: 'Online Sessions', href: '/admin/dashboard/sessions', icon: Video },
-        { label: 'Online Exam Engine', href: '/admin/dashboard/exams', icon: FileText },
-        { label: 'Business & Employees', href: '/admin/dashboard/business', icon: Building2 },
-        { label: 'Placement Officer', href: '/admin/dashboard/placements', icon: Briefcase },
-        { label: 'Financial Control', href: '/admin/dashboard/finance', icon: Wallet },
+        { label: 'Assessments', href: '/admin/dashboard/assessments', icon: CheckCircle2 },
+        { label: 'Finance', href: '/admin/dashboard/finance', icon: Wallet },
+        { label: 'Reports', href: '/admin/dashboard/reports', icon: BarChart3 },
     ],
     trainer: [
         { label: 'My Batches', href: '/employee/trainer', icon: LayoutDashboard },

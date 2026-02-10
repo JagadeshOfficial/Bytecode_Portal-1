@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import DashboardLayout from './DashboardLayout';
+import { Role } from '@/lib/dashboard-config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, Plus, Search, MoreVertical, LayoutGrid, List } from 'lucide-react';
 import styles from '@/app/admin/super/SuperAdmin.module.css';
@@ -29,6 +30,7 @@ interface AdvancedModuleLayoutProps {
     children: React.ReactNode;
     activeTab?: string;
     onTabChange?: (id: string) => void;
+    role?: Role;
 }
 
 export default function AdvancedModuleLayout({
@@ -39,12 +41,13 @@ export default function AdvancedModuleLayout({
     actions,
     children,
     activeTab,
-    onTabChange
+    onTabChange,
+    role = 'super_admin'
 }: AdvancedModuleLayoutProps) {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     return (
-        <DashboardLayout role="super_admin">
+        <DashboardLayout role={role}>
             <div className={styles.container}>
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -125,8 +128,8 @@ export default function AdvancedModuleLayout({
                                 key={tab.id}
                                 onClick={() => onTabChange && onTabChange(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === tab.id
-                                        ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {tab.icon && <tab.icon size={16} />}

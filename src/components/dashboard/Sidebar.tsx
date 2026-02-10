@@ -13,112 +13,113 @@ interface SidebarProps {
 export default function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
     const navItems = DASHBOARD_NAV[role] || [];
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
     return (
-        <aside style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            height: '100vh',
-            width: '280px',
-            background: 'rgba(3, 0, 20, 0.95)',
-            borderRight: '1px solid rgba(124, 58, 237, 0.2)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 50,
-            display: 'flex',
-            flexDirection: 'column',
-        }}>
-            {/* Logo Section */}
-            <div style={{
-                padding: '1.5rem',
-                borderBottom: '1px solid rgba(124, 58, 237, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                fontFamily: 'Rajdhani, sans-serif',
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                color: 'white'
-            }}>
-                <Hexagon size={28} color="#22d3ee" strokeWidth={1.5} />
-                <div>
-                    BYTE<span style={{ color: '#7c3aed' }}>CODE</span>
+        <aside className="fixed left-0 top-0 h-screen w-[280px] z-50 flex flex-col bg-[#030014]/90 backdrop-blur-xl border-r border-white/5 shadow-2xl shadow-violet-500/10 transition-all duration-300">
+            {/* Premium Logo Section */}
+            <div className="p-6 border-b border-white/5 flex items-center gap-3 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-10 p-2 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl shadow-lg shadow-violet-500/30">
+                    <Hexagon size={24} color="white" strokeWidth={2} className="group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
+                </div>
+                <div className="relative z-10">
+                    <div className="font-[Rajdhani] text-2xl font-bold text-white tracking-wide leading-none">
+                        BYTE<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">CODE</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 tracking-[0.2em] uppercase font-bold mt-1">Admin Console</div>
                 </div>
             </div>
 
-            {/* Navigation */}
-            <div style={{
-                flex: 1,
-                padding: '1.5rem 1rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem'
-            }}>
+            {/* Advanced Navigation */}
+            <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
+                <style jsx global>{`
+                    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.5); }
+                `}</style>
+
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
-                        <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                padding: '0.75rem 1rem',
-                                borderRadius: '0.5rem',
-                                color: isActive ? '#22d3ee' : '#94a3b8',
-                                background: isActive ? 'rgba(124, 58, 237, 0.15)' : 'transparent',
-                                border: isActive ? '1px solid rgba(124, 58, 237, 0.2)' : 'none',
-                                transition: 'all 0.2s',
-                                fontWeight: 500
-                            }}>
-                                <item.icon size={20} color={isActive ? '#22d3ee' : 'currentColor'} />
-                                <span>{item.label}</span>
-                            </div>
+                        <Link key={item.href} href={item.href}>
+                            <motion.div
+                                onHoverStart={() => setHoveredItem(item.href)}
+                                onHoverEnd={() => setHoveredItem(null)}
+                                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer overflow-hidden ${isActive
+                                    ? 'bg-gradient-to-r from-violet-600/20 to-blue-600/10 border border-violet-500/30 shadow-[0_0_20px_rgba(124,58,237,0.15)]'
+                                    : 'hover:bg-white/5 border border-transparent'
+                                    }`}
+                                whileHover={{ scale: 1.02, x: 4 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                {/* Active Indicator Bar */}
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeIndicator"
+                                        className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-violet-400 to-fuchsia-400 shadow-[0_0_10px_rgba(167,139,250,0.8)]"
+                                    />
+                                )}
+
+                                <div className={`relative z-10 p-1.5 rounded-lg transition-colors duration-300 ${isActive ? 'text-white bg-violet-500/20' : 'text-slate-400 group-hover:text-white'
+                                    }`}>
+                                    <item.icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+                                </div>
+                                <span className={`relative z-10 text-sm font-medium transition-colors duration-300 ${isActive ? 'text-white font-bold tracking-wide' : 'text-slate-400 group-hover:text-white'
+                                    }`}>
+                                    {item.label}
+                                </span>
+
+                                {/* Hover Glow Effect */}
+                                {hoveredItem === item.href && !isActive && (
+                                    <motion.div
+                                        layoutId="hoverGlow"
+                                        className="absolute inset-0 bg-white/5 rounded-xl z-0"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                    />
+                                )}
+                            </motion.div>
                         </Link>
-                    )
+                    );
                 })}
             </div>
 
-            {/* User Profile / Logout */}
-            <div style={{ padding: '1rem', borderTop: '1px solid rgba(124,58,237,0.1)' }}>
-                <div style={{
-                    background: pathname.includes('/profile') ? 'rgba(124, 58, 237, 0.15)' : 'rgba(255,255,255,0.03)',
-                    padding: '0.75rem',
-                    borderRadius: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.2s',
-                    border: pathname.includes('/profile') ? '1px solid rgba(124, 58, 237, 0.5)' : '1px solid transparent'
-                }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'transparent'; }}
+            {/* Premium Profile Section */}
+            <div className="p-4 border-t border-white/5 bg-[#020010]/50 backdrop-blur-md">
+                <motion.div
+                    whileHover={{ y: -2 }}
+                    className="relative group p-3 rounded-2xl bg-gradient-to-b from-white/5 to-white/0 border border-white/5 hover:border-violet-500/30 transition-all duration-300"
                 >
-                    <Link href={role === 'super_admin' ? "/admin/super/profile" : "/admin/dashboard/profile"} style={{ textDecoration: 'none', flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <div style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #7c3aed, #d946ef)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.75rem',
-                            fontWeight: 'bold',
-                            color: 'white'
-                        }}>
-                            {role.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'white', textTransform: 'capitalize' }}>{role.replace('_', ' ')}</div>
-                        </div>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link href={role === 'super_admin' ? "/admin/super/profile" : "/admin/dashboard/profile"} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                            <div className="relative">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 p-[2px]">
+                                    <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-xs font-bold text-white relative overflow-hidden">
+                                        {role.slice(0, 2).toUpperCase()}
+                                        {/* Shine effect */}
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#030014] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                            </div>
 
-                    <Link href="/login" style={{ cursor: 'pointer', padding: '0.25rem' }}>
-                        <LogOut size={16} color="#94a3b8" />
-                    </Link>
-                </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-xs text-slate-400 font-medium mb-0.5">Logged in as</div>
+                                <div className="text-sm font-bold text-white truncate capitalize bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 group-hover:from-violet-200 group-hover:to-white transition-all">
+                                    {role.replace('_', ' ')}
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link href="/login" className="p-2 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors pointer-events-auto relative z-20">
+                            <LogOut size={18} />
+                        </Link>
+                    </div>
+                </motion.div>
             </div>
-        </aside >
+        </aside>
     );
 }

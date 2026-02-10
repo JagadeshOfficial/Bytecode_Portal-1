@@ -18,7 +18,8 @@ import {
     Filter,
     Plus,
     LayoutGrid,
-    MoreVertical
+    MoreVertical,
+    Clock
 } from 'lucide-react';
 
 export default function PlacementsPage() {

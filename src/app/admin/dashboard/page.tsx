@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
     BookOpen,
@@ -16,212 +17,334 @@ import {
     CheckCircle2,
     Clock,
     Plus,
-    Activity
+    Activity,
+    ChevronRight,
+    Search,
+    Filter,
+    MoreVertical,
+    AlertCircle,
+    ArrowUpRight,
+    CheckCircle
 } from 'lucide-react';
 
-const TODAY_SESSIONS = [
-    { title: "React Advanced", tutor: "Dr. Alan", time: "10:00 AM", batch: "#B22", status: "Live" },
-    { title: "Python Basics", tutor: "Prof. Sarah", time: "02:00 PM", batch: "#P08", status: "Scheduled" },
-    { title: "System Design", tutor: "Mr. Rajesh", time: "04:30 PM", batch: "#S05", status: "Scheduled" },
+const STATS = [
+    { label: "Active Batches", value: "24", trend: "+3 this week", icon: BookOpen, color: "#7c3aed", subtext: "03 starting today" },
+    { label: "Total Students", value: "1,248", trend: "+12%", icon: GraduationCap, color: "#22d3ee", subtext: "42 new enrollments" },
+    { label: "Fee Collection", value: "₹18.4L", trend: "85% of target", icon: Wallet, color: "#10b981", subtext: "₹2.5L pending" },
+    { label: "Pending Tasks", value: "12", trend: "05 urgent", icon: CheckCircle2, color: "#f59e0b", subtext: "Assigned to you" },
 ];
 
-const RECENT_ENROLLMENTS = [
-    { name: "Arjun Mehra", course: "Java Full Stack", date: "Today", fee: "Paid" },
-    { name: "Sita Kumari", course: "Data Science", date: "Yesterday", fee: "Pending" },
-    { name: "John Wick", course: "Cyber Security", date: "Yesterday", fee: "Paid" },
+const TODAY_CLASSES = [
+    { id: 1, title: "React Advanced Architecture", tutor: "Dr. Alan Smith", time: "10:00 AM", batch: "BATCH-R22", status: "Live", students: 45 },
+    { id: 2, title: "Backend Scaling with Go", tutor: "Prof. Sarah Chen", time: "02:00 PM", batch: "GO-B08", status: "Upcoming", students: 32 },
+    { id: 3, title: "System Design Masterclass", tutor: "Mr. Rajesh Kumar", time: "04:30 PM", batch: "SYS-P05", status: "Upcoming", students: 50 },
+];
+
+const TASKS = [
+    { id: 1, task: "Approve Batch R22 Schedule", priority: "High", due: "2h left", category: "Academic" },
+    { id: 2, task: "Review Fee Discount for Arjun", priority: "Medium", due: "Today", category: "Finance" },
+    { id: 3, task: "Assign Tutor for Java Batch", priority: "High", due: "Tomorrow", category: "Staffing" },
 ];
 
 export default function AdminOperationsDashboard() {
+    const [activeTab, setActiveTab] = useState('overview');
+
     return (
         <DashboardLayout role="admin">
-            <div className="flex flex-col gap-8">
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-[Rajdhani] font-bold text-white tracking-widest uppercase">
-                            Institute <span className="text-[#7c3aed]">Operations Hub</span>
-                        </h1>
-                        <p className="text-[var(--text-dim)]">Real-time oversight of academic and administrative metrics.</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all relative">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#030014]" />
-                        </button>
-                        <button className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-[#7c3aed] to-[#d946ef] rounded-xl text-white font-bold shadow-lg hover:scale-105 transition-all">
-                            <Plus className="w-4 h-4" /> Quick Action
-                        </button>
+            <div className="space-y-8 pb-12">
+                {/* Header with Glassmorphism */}
+                <div className="relative p-8 rounded-3xl bg-gradient-to-br from-violet-600/10 via-transparent to-fuchsia-600/10 border border-white/5 backdrop-blur-xl overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 blur-[100px] -mr-48 -mt-48 rounded-full transition-transform duration-1000 group-hover:scale-110" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-fuchsia-600/10 blur-[100px] -ml-48 -mb-48 rounded-full transition-transform duration-1000 group-hover:scale-110" />
+
+                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <motion.h1
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="text-4xl font-[Rajdhani] font-bold text-white tracking-wider flex items-center gap-3"
+                            >
+                                <div className="p-2 bg-violet-600 rounded-lg shadow-lg shadow-violet-500/50">
+                                    <Activity className="w-8 h-8 text-white" />
+                                </div>
+                                INSTITUTE <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 uppercase">Operations Hub</span>
+                            </motion.h1>
+                            <p className="mt-2 text-slate-400 text-lg flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                Real-time oversight of administrative & academic excellence.
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#030014] bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white">
+                                        JD
+                                    </div>
+                                ))}
+                                <div className="w-10 h-10 rounded-full border-2 border-[#030014] bg-violet-600 flex items-center justify-center text-[10px] font-bold text-white">
+                                    +12
+                                </div>
+                            </div>
+                            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl text-white font-bold shadow-xl shadow-violet-500/20 hover:scale-105 transition-all group">
+                                <Plus size={20} className="group-hover:rotate-180 transition-transform duration-500" />
+                                NEW SESSION
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Institute-level Stats */}
+                {/* Advanced Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[
-                        { label: "Active Batches", value: "24", trend: "03 Starting", icon: BookOpen, color: "text-[#7c3aed]" },
-                        { label: "Total Students", value: "1,248", trend: "+42 Enrollments", icon: Users, color: "text-[#22d3ee]" },
-                        { label: "Fee Collection", value: "₹18.4L", trend: "85% Target", icon: Wallet, color: "text-emerald-400" },
-                        { label: "Avg. Performance", value: "72%", trend: "Needs Focus", icon: Activity, color: "text-[#d946ef]" },
-                    ].map((stat, idx) => (
-                        <div key={idx} className="bg-[rgba(19,10,48,0.5)] border border-[rgba(124,58,237,0.1)] rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group">
-                            <div className="flex justify-between items-center mb-4">
-                                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full">{stat.trend}</span>
+                    {STATS.map((stat, idx) => (
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            whileHover={{ y: -5 }}
+                            className="p-6 bg-[#0a0a1a]/60 border border-white/5 rounded-3xl backdrop-blur-md relative overflow-hidden group cursor-pointer"
+                        >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full transition-transform duration-500 group-hover:scale-125" />
+
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors">
+                                    <stat.icon size={24} style={{ color: stat.color }} />
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full flex items-center gap-1">
+                                        <TrendingUp size={10} /> {stat.trend}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="text-3xl font-bold text-white font-[Rajdhani]">{stat.value}</div>
-                            <div className="text-xs text-[var(--text-dim)] uppercase tracking-wider font-bold mt-1">{stat.label}</div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#7c3aed]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
+
+                            <div className="space-y-1">
+                                <h3 className="text-3xl font-bold text-white font-[Rajdhani]">{stat.value}</h3>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{stat.label}</p>
+                                <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1 italic">
+                                    <AlertCircle size={10} /> {stat.subtext}
+                                </p>
+                            </div>
+
+                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-violet-500/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                        </motion.div>
                     ))}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Academic & Session Monitoring */}
-                    <div className="lg:col-span-2 flex flex-col gap-6">
-                        <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(124,58,237,0.1)] rounded-2xl overflow-hidden shadow-2xl">
-                            <div className="p-6 border-b border-[rgba(255,255,255,0.05)] flex justify-between items-center bg-[rgba(255,255,255,0.02)]">
+                    {/* Live academic pulse */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-[#0a0a1a]/60 border border-white/5 rounded-3xl backdrop-blur-md overflow-hidden shadow-2xl">
+                            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/20">
                                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <Video className="w-5 h-5 text-[#22d3ee]" />
-                                    Academic Schedule Today
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                                    Academic Pulse Today
                                 </h3>
-                                <button className="text-[10px] text-[#22d3ee] font-bold uppercase tracking-widest">Manage Schedule</button>
+                                <div className="flex gap-2 text-[10px] font-bold uppercase tracking-widest">
+                                    <button className="text-slate-400 hover:text-white transition-colors">List View</button>
+                                    <span className="text-slate-700">|</span>
+                                    <button className="text-violet-400 transition-colors">Grid View</button>
+                                </div>
                             </div>
-                            <div className="p-4 space-y-3">
-                                {TODAY_SESSIONS.map((session, i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-[#7c3aed]/30 hover:bg-white/[0.08] transition-all">
+
+                            <div className="p-6 space-y-4">
+                                {TODAY_CLASSES.map((session, i) => (
+                                    <motion.div
+                                        key={session.id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all group flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                                    >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#130a30] to-[#0f0728] flex flex-col items-center justify-center border border-white/10 font-[Rajdhani]">
-                                                <span className="text-[10px] text-[var(--text-dim)]">{session.time.split(' ')[1]}</span>
-                                                <span className="text-sm font-bold text-white">{session.time.split(' ')[0]}</span>
+                                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 border border-white/10 flex flex-col items-center justify-center font-[Rajdhani] relative shadow-inner">
+                                                <span className="text-[10px] text-slate-400 -mb-1">{session.time.split(' ')[1]}</span>
+                                                <span className="text-xl font-bold text-white">{session.time.split(' ')[0]}</span>
+                                                {session.status === 'Live' && (
+                                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#030014] animate-pulse" />
+                                                )}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-white">{session.title}</div>
-                                                <div className="text-[10px] text-[var(--text-dim)]">Tutor: {session.tutor} • Batch: {session.batch}</div>
+                                                <div className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors">{session.title}</div>
+                                                <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                                                    <span className="flex items-center gap-1"><Users size={12} /> {session.students} Attending</span>
+                                                    <span className="w-1 h-1 bg-slate-700 rounded-full" />
+                                                    <span className="flex items-center gap-1 font-bold text-slate-300 underline decoration-violet-500/50 underline-offset-4">{session.tutor}</span>
+                                                    <span className="w-1 h-1 bg-slate-700 rounded-full" />
+                                                    <span className="px-2 py-0.5 bg-white/5 rounded-md font-mono text-[10px]">{session.batch}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            {session.status === 'Live' && (
-                                                <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full">
-                                                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                                                    <span className="text-[10px] font-bold text-red-500 uppercase">Live</span>
-                                                </div>
-                                            )}
-                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-all">
-                                                <TrendingUp className="w-4 h-4 text-[var(--text-dim)]" />
+
+                                        <div className="flex items-center gap-3 w-full md:w-auto">
+                                            <button className="flex-1 md:flex-none px-4 py-2 bg-violet-600/10 border border-violet-500/20 rounded-xl text-violet-400 text-xs font-bold hover:bg-violet-600 hover:text-white transition-all">
+                                                MODERATE
+                                            </button>
+                                            <button className="flex-1 md:flex-none px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-300 text-xs font-bold hover:bg-white/10 transition-all">
+                                                REPORTS
                                             </button>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 ))}
+
+                                <button className="w-full py-4 border border-dashed border-white/10 rounded-2xl text-slate-500 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/5 transition-all font-bold text-sm tracking-widest uppercase">
+                                    View Full Academic Calendar
+                                </button>
                             </div>
                         </div>
 
-                        {/* Admissions & Finance Overview */}
+                        {/* Middle Row with tasks and collection */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(34,211,238,0.1)] rounded-2xl overflow-hidden">
-                                <div className="p-4 border-b border-white/5 bg-white/20">
+                            {/* Collection Analytics */}
+                            <div className="bg-[#0a0a1a]/60 border border-emerald-500/10 rounded-3xl overflow-hidden backdrop-blur-md">
+                                <div className="p-5 border-b border-white/5 bg-emerald-500/5 flex justify-between items-center">
                                     <h4 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest">
                                         <Wallet className="w-4 h-4 text-emerald-400" />
-                                        Collection Log
+                                        Fee Revenue Status
                                     </h4>
+                                    <span className="text-[10px] text-emerald-400 font-bold">MONTHLY TARGET</span>
                                 </div>
-                                <div className="p-4 space-y-4">
-                                    {RECENT_ENROLLMENTS.map((r, i) => (
-                                        <div key={i} className="flex justify-between items-center text-xs">
-                                            <div>
-                                                <div className="font-bold text-white">{r.course}</div>
-                                                <div className="text-[var(--text-dim)]">{r.name}</div>
-                                            </div>
-                                            <span className={`px-2 py-1 rounded text-[10px] font-bold ${r.fee === 'Paid' ? 'text-emerald-400 bg-emerald-400/10' : 'text-amber-500 bg-amber-500/10'}`}>
-                                                {r.fee}
-                                            </span>
+                                <div className="p-6">
+                                    <div className="flex justify-between items-end mb-4">
+                                        <div>
+                                            <div className="text-xs text-slate-400">Total Collected</div>
+                                            <div className="text-3xl font-bold text-white font-[Rajdhani]">₹18,45,000</div>
                                         </div>
-                                    ))}
+                                        <div className="text-right">
+                                            <div className="text-[10px] text-slate-500">Remaining</div>
+                                            <div className="text-lg font-bold text-emerald-400">₹2.5L</div>
+                                        </div>
+                                    </div>
+                                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden mb-6">
+                                        <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full" style={{ width: '85%' }} />
+                                    </div>
+                                    <div className="space-y-3">
+                                        {[
+                                            { label: "Installments Collected", val: "₹12.4L", icon: CheckCircle },
+                                            { label: "New Admissions", val: "₹4.2L", icon: Plus },
+                                            { label: "Miscellaneous", val: "₹1.85L", icon: ArrowUpRight },
+                                        ].map((item, i) => (
+                                            <div key={i} className="flex justify-between items-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+                                                <div className="flex items-center gap-3">
+                                                    <item.icon size={14} className="text-emerald-500" />
+                                                    <span className="text-xs text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+                                                </div>
+                                                <span className="text-xs font-bold text-white">{item.val}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-rows-2 gap-4">
-                                <div className="bg-gradient-to-br from-[#7c3aed]/20 to-transparent border border-[#7c3aed]/30 rounded-2xl p-4 flex items-center gap-4 group cursor-pointer hover:bg-[#7c3aed]/30 transition-all">
-                                    <div className="p-3 bg-[#7c3aed]/20 rounded-xl border border-[#7c3aed]/30">
-                                        <FileText className="w-6 h-6 text-[#7c3aed]" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-bold text-white">LMS Analytics</div>
-                                        <div className="text-[10px] text-[var(--text-dim)]">Track video views & downloads</div>
-                                    </div>
+                            {/* Pending Tasks */}
+                            <div className="bg-[#0a0a1a]/60 border border-violet-500/10 rounded-3xl overflow-hidden backdrop-blur-md">
+                                <div className="p-5 border-b border-white/5 bg-violet-500/5 flex justify-between items-center">
+                                    <h4 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest">
+                                        <CheckCircle2 className="w-4 h-4 text-violet-400" />
+                                        Operational Queue
+                                    </h4>
+                                    <button className="text-[10px] text-violet-400 font-bold hover:underline">NEW TASK</button>
                                 </div>
-                                <div className="bg-gradient-to-br from-[#22d3ee]/20 to-transparent border border-[#22d3ee]/30 rounded-2xl p-4 flex items-center gap-4 group cursor-pointer hover:bg-[#22d3ee]/30 transition-all">
-                                    <div className="p-3 bg-[#22d3ee]/20 rounded-xl border border-[#22d3ee]/30">
-                                        <GraduationCap className="w-6 h-6 text-[#22d3ee]" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-bold text-white">Assessment Engine</div>
-                                        <div className="text-[10px] text-[var(--text-dim)]">Create & Evaluate Tests</div>
-                                    </div>
+                                <div className="p-6 space-y-3">
+                                    {TASKS.map((task, i) => (
+                                        <div key={i} className="flex flex-col gap-2 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-violet-500/30 transition-all cursor-pointer group">
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors">{task.task}</span>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${task.priority === 'High' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'
+                                                    }`}>{task.priority}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="text-slate-500 flex items-center gap-1"><Clock size={10} /> {task.due}</span>
+                                                <span className="px-2 py-0.5 bg-violet-600/10 text-violet-300 rounded-lg">{task.category}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button className="w-full flex items-center justify-center gap-2 text-xs text-slate-500 font-bold hover:text-white mt-2 transition-colors">
+                                        View Task Manager <ChevronRight size={14} />
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Left Sidebar: Reports & Alerts */}
-                    <div className="flex flex-col gap-8">
-                        {/* Attendance Snapshot */}
-                        <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(217,70,239,0.1)] rounded-2xl p-6 backdrop-blur-md">
+                    {/* Right Column: Alerts & Analytics */}
+                    <div className="space-y-8">
+                        {/* Attendance Tracker */}
+                        <div className="p-6 bg-[#0a0a1a]/60 border border-fuchsia-500/10 rounded-3xl backdrop-blur-md">
                             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-[#d946ef]" />
-                                Staff Attendance
+                                <Calendar className="w-5 h-5 text-fuchsia-500" />
+                                Operations Readiness
                             </h3>
-                            <div className="space-y-5">
+                            <div className="space-y-6">
                                 {[
-                                    { label: "Faculty", val: 12, tot: 14, color: "#7c3aed" },
-                                    { label: "Admissions", val: 5, tot: 5, color: "#22d3ee" },
-                                    { label: "Support", val: 8, tot: 10, color: "#d946ef" },
+                                    { label: "Faculty Presence", val: 12, tot: 14, color: "#7c3aed" },
+                                    { label: "Student Turnout", val: 840, tot: 1248, color: "#22d3ee" },
+                                    { label: "Infrastructure Ready", val: 95, tot: 100, color: "#d946ef" },
                                 ].map((item, i) => (
                                     <div key={i}>
-                                        <div className="flex justify-between text-[10px] font-bold text-[var(--text-dim)] mb-1 uppercase">
-                                            {item.label} <span className="text-white">{item.val}/{item.tot}</span>
+                                        <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">
+                                            {item.label} <span className="text-white">{Math.round((item.val / item.tot) * 100)}%</span>
                                         </div>
-                                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full" style={{ width: `${(item.val / item.tot) * 100}%`, background: item.color }} />
+                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${(item.val / item.tot) * 100}%` }}
+                                                className="h-full rounded-full"
+                                                style={{ background: item.color }}
+                                            />
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Low Performance Alerts */}
-                        <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(239,68,68,0.1)] rounded-2xl p-6 backdrop-blur-md">
+                        {/* Critical Operations Alerts */}
+                        <div className="p-6 bg-red-500/5 border border-red-500/20 rounded-3xl backdrop-blur-md">
                             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                <Bell className="w-5 h-5 text-red-500" />
-                                Critical Alerts
-                            </h3>
-                            <div className="space-y-4">
-                                {[
-                                    { msg: "Batch #B22 attendance dropped to 45%", color: "text-red-400" },
-                                    { msg: "3 Assessments pending grading for > 48h", color: "text-amber-400" },
-                                    { msg: "Subscription for AWS Lab expiring soon", color: "text-blue-400" },
-                                ].map((alert, i) => (
-                                    <div key={i} className="flex gap-3 text-[11px] leading-relaxed p-2 rounded-lg bg-white/5 border border-white/5">
-                                        <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${alert.color.replace('text', 'bg')}`} />
-                                        <span className={alert.color}>{alert.msg}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Recent Reports */}
-                        <div className="bg-gradient-to-br from-[#130a30] to-[#0f0728] border border-[rgba(255,255,255,0.05)] rounded-2xl p-6">
-                            <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-widest flex items-center justify-between">
-                                Recent Reports
-                                <BarChart3 className="w-4 h-4 text-[var(--accent)]" />
+                                <div className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center">
+                                    <Bell className="w-4 h-4 text-red-500 animate-bounce" />
+                                </div>
+                                Critical Pulse
                             </h3>
                             <div className="space-y-3">
-                                <button className="w-full text-left flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all">
-                                    <FileText className="w-4 h-4 text-[var(--text-dim)]" />
-                                    <span className="text-xs text-white">Monthly Revenue.pdf</span>
-                                </button>
-                                <button className="w-full text-left flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all">
-                                    <FileText className="w-4 h-4 text-[var(--text-dim)]" />
-                                    <span className="text-xs text-white">Batch Success Rate.csv</span>
-                                </button>
+                                {[
+                                    { msg: "Batch SYS-P5 attendance dropped below 40%", tag: "Urgent" },
+                                    { msg: "Dr. Alan requested schedule change", tag: "Staffing" },
+                                    { msg: "AWS Server reaching 90% storage capacity", tag: "IT" },
+                                ].map((alert, i) => (
+                                    <div key={i} className="p-3 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-1 items-start group hover:bg-white/10 transition-colors cursor-pointer">
+                                        <span className="text-[9px] font-bold uppercase tracking-widest text-red-500">{alert.tag}</span>
+                                        <span className="text-[11px] text-slate-300 leading-tight group-hover:text-white transition-colors">{alert.msg}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Summary reports */}
+                        <div className="p-6 bg-[#0a0a1a]/60 border border-white/5 rounded-3xl backdrop-blur-md relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-widest flex items-center justify-between relative z-10">
+                                Global Reports
+                                <BarChart3 className="w-4 h-4 text-violet-400" />
+                            </h3>
+                            <div className="space-y-2 relative z-10">
+                                {[
+                                    { name: "Executive Summary.pdf", date: "2h ago", icon: FileText },
+                                    { name: "Q1 Financial Audit.csv", date: "Yesterday", icon: TrendingUp },
+                                    { name: "Student Performance.json", date: "Nov 24", icon: Activity },
+                                ].map((report, i) => (
+                                    <button key={i} className="w-full text-left flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group/btn">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-white/5 text-slate-500 group-hover/btn:text-violet-400 transition-colors">
+                                                <report.icon size={14} />
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-bold text-white">{report.name}</div>
+                                                <div className="text-[10px] text-slate-500">{report.date}</div>
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={14} className="text-slate-600 group-hover/btn:text-white translate-x-[-10px] opacity-0 group-hover/btn:translate-x-0 group-hover/btn:opacity-100 transition-all" />
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>

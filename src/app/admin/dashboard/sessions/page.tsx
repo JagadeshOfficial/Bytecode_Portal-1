@@ -1,404 +1,185 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
+import { motion } from 'framer-motion';
 import {
-    Video, Calendar, Clock, Users, Plus, X, Search,
-    Filter, MoreHorizontal, Link as LinkIcon, CheckCircle
+    Video,
+    Mic,
+    Users,
+    MessageSquare,
+    Play,
+    Pause,
+    MoreVertical,
+    Clock,
+    Plus,
+    Search,
+    Monitor,
+    Airplay,
+    UserCheck,
+    Settings,
+    XCircle,
+    CheckCircle2
 } from 'lucide-react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import styles from './Sessions.module.css';
-
-// --- Mock Data ---
-
-const COURSES = ['Full Stack Java', 'Python Data Science', 'DevOps & Cloud', 'MERN Stack'];
-const BATCHES = ['Batch A (Morning)', 'Batch B (Evening)', 'Batch C (Weekend)'];
-const MOCK_STUDENTS = [
-    { id: '1', name: 'Alice Johnson' },
-    { id: '2', name: 'Bob Smith' },
-    { id: '3', name: 'Charlie Brown' },
-    { id: '4', name: 'Diana Prince' },
-    { id: '5', name: 'Evan Wright' },
-];
-
-interface Session {
-    id: string;
-    title: string;
-    course: string;
-    batch: string;
-    date: string;
-    startTime: string;
-    duration: string;
-    platform: string;
-    link: string;
-    status: 'LIVE' | 'UPCOMING' | 'COMPLETED';
-    instructor: string;
-}
-
-const INITIAL_SESSIONS: Session[] = [
-    {
-        id: '1',
-        title: 'Advanced Java Collections',
-        course: 'Full Stack Java',
-        batch: 'Batch A (Morning)',
-        date: '2024-02-10',
-        startTime: '10:00 AM',
-        duration: '90 min',
-        platform: 'Zoom',
-        link: 'https://zoom.us/j/123456789',
-        status: 'UPCOMING',
-        instructor: 'Dr. Smith'
-    },
-    {
-        id: '2',
-        title: 'React Hooks Deep Dive',
-        course: 'MERN Stack',
-        batch: 'Batch B (Evening)',
-        date: '2024-02-05',
-        startTime: '06:00 PM',
-        duration: '120 min',
-        platform: 'Google Meet',
-        link: 'https://meet.google.com/abc-defg-hij',
-        status: 'LIVE',
-        instructor: 'Prof. Sarah'
-    },
-    {
-        id: '3',
-        title: 'Intro to Kubernetes',
-        course: 'DevOps & Cloud',
-        batch: 'Batch C (Weekend)',
-        date: '2024-02-04',
-        startTime: '02:00 PM',
-        duration: '60 min',
-        platform: 'Zoom',
-        link: '#',
-        status: 'COMPLETED',
-        instructor: 'Eng. Mike'
-    }
-];
-
-// --- Components ---
 
 export default function OnlineSessionsPage() {
-    const [sessions, setSessions] = useState<Session[]>(INITIAL_SESSIONS);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterCourse, setFilterCourse] = useState('All');
+    const [activeTab, setActiveTab] = useState('active');
 
-    // Modal Form State
-    const [formData, setFormData] = useState({
-        title: '',
-        course: COURSES[0],
-        batch: BATCHES[0],
-        date: '',
-        startTime: '',
-        duration: '60',
-        platform: 'Zoom',
-        link: '',
-        audienceType: 'all', // 'all' or 'specific'
-        selectedStudents: [] as string[]
-    });
+    const stats = [
+        { label: "Live Sessions", value: "05", icon: Video, color: "#ef4444", trend: "02 starting now" },
+        { label: "Total Participants", value: "180+", icon: Users, color: "#3b82f6", trend: "Normal" },
+        { label: "Avg. Engagement", value: "88%", icon: Airplay, color: "#10b981", trend: "+5% peak" },
+        { label: "Recording Hours", value: "1,240", icon: Monitor, color: "#8b5cf6" },
+    ];
 
-    const handleCreateSession = (e: React.FormEvent) => {
-        e.preventDefault();
-        const newSession: Session = {
-            id: Math.random().toString(36).substr(2, 9),
-            title: formData.title,
-            course: formData.course,
-            batch: formData.batch,
-            date: formData.date || new Date().toISOString().split('T')[0],
-            startTime: formData.startTime || '10:00 AM',
-            duration: formData.duration + ' min',
-            platform: formData.platform,
-            link: formData.link,
-            status: 'UPCOMING',
-            instructor: 'Current Admin' // In real app, get from auth
-        };
-        setSessions([newSession, ...sessions]);
-        setIsCreateModalOpen(false);
-        // Reset form
-        setFormData({
-            title: '',
-            course: COURSES[0],
-            batch: BATCHES[0],
-            date: '',
-            startTime: '',
-            duration: '60',
-            platform: 'Zoom',
-            link: '',
-            audienceType: 'all',
-            selectedStudents: []
-        });
-    };
+    const activeSessions = [
+        { id: 1, title: "React State Management", tutor: "Dr. Alan Smith", batch: "B22", viewers: 45, duration: "45:12", status: "Live", bitRate: "2.4 Mbps" },
+        { id: 2, title: "Backend GoLang Lab", tutor: "Prof. Sarah Chen", batch: "B08", viewers: 32, duration: "12:05", status: "Live", bitRate: "3.1 Mbps" },
+    ];
 
-    const toggleStudentSelection = (studentId: string) => {
-        setFormData(prev => {
-            const isSelected = prev.selectedStudents.includes(studentId);
-            if (isSelected) {
-                return { ...prev, selectedStudents: prev.selectedStudents.filter(id => id !== studentId) };
-            } else {
-                return { ...prev, selectedStudents: [...prev.selectedStudents, studentId] };
-            }
-        });
-    };
-
-    const filteredSessions = sessions.filter(session => {
-        const matchesSearch = session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            session.course.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesFilter = filterCourse === 'All' || session.course === filterCourse;
-        return matchesSearch && matchesFilter;
-    });
+    const upcomingSessions = [
+        { id: 3, title: "System Design Q&A", tutor: "Mr. Rajesh Kumar", batch: "P05", startTime: "04:30 PM", attendees: 50 },
+        { id: 4, title: "Career Guidance", tutor: "Placement Team", batch: "ALL", startTime: "06:00 PM", attendees: 120 },
+    ];
 
     return (
-        <DashboardLayout role="admin">
-            <div className={styles.container}>
-                {/* Header */}
-                <div className={styles.header}>
-                    <div className={styles.titleGroup}>
-                        <Video size={32} color="#22d3ee" />
-                        <h2>Online Sessions</h2>
+        <AdvancedModuleLayout
+            title="Online Operations & Sessions"
+            subtitle="Real-time monitoring and management of virtual classrooms and live sessions."
+            stats={stats}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            role="admin"
+            tabs={[
+                { id: 'active', label: 'Live Sessions', icon: Video },
+                { id: 'upcoming', label: 'Upcoming', icon: Clock },
+                { id: 'attendance', label: 'Attendance Tracking', icon: UserCheck },
+                { id: 'recordings', label: 'Session Archive', icon: Monitor },
+            ]}
+        >
+            {activeTab === 'active' && (
+                <div className="space-y-8">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full">
+                                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Global Live Console</span>
+                            </div>
+                        </div>
+                        <button className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-xl shadow-red-500/20 transition-all">
+                            <Plus size={18} /> START INSTANT SESSION
+                        </button>
                     </div>
-                    <button className={styles.createBtn} onClick={() => setIsCreateModalOpen(true)}>
-                        <Plus size={20} /> Create New Session
-                    </button>
-                </div>
 
-                {/* Filters */}
-                <div className={styles.filters}>
-                    <div className={styles.searchBox}>
-                        <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                        <input
-                            type="text"
-                            placeholder="Search sessions, topics..."
-                            className={styles.searchInput}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <select
-                        className={styles.filterSelect}
-                        value={filterCourse}
-                        onChange={(e) => setFilterCourse(e.target.value)}
-                    >
-                        <option value="All">All Courses</option>
-                        {COURSES.map(course => (
-                            <option key={course} value={course}>{course}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Grid */}
-                <motion.div
-                    layout
-                    className={styles.sessionGrid}
-                >
-                    <AnimatePresence>
-                        {filteredSessions.map((session) => (
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        {activeSessions.map((session, i) => (
                             <motion.div
                                 key={session.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className={styles.sessionCard}
+                                transition={{ delay: i * 0.1 }}
+                                className="bg-[#0a0a1a]/80 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl relative group overflow-hidden"
                             >
-                                <div className={styles.cardHeader}>
-                                    <div className={styles.dateBox}>
-                                        <span className={styles.day}>{new Date(session.date).toLocaleString('en-US', { weekday: 'short' })}</span>
-                                        <span className={styles.date}>{new Date(session.date).getDate()}</span>
-                                    </div>
-                                    <span className={`${styles.statusBadge} ${session.status === 'LIVE' ? styles.statusLive :
-                                            session.status === 'UPCOMING' ? styles.statusUpcoming :
-                                                styles.statusCompleted
-                                        }`}>
-                                        {session.status}
-                                    </span>
-                                </div>
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
 
-                                <div className={styles.cardTitle}>{session.title}</div>
-                                <div className={styles.cardCourse}>
-                                    <span style={{ color: '#22d3ee' }}>{session.course}</span> • {session.batch}
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', fontSize: '0.85rem', color: '#94a3b8' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <Clock size={14} />
-                                        {session.startTime} ({session.duration})
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <Video size={14} />
-                                        {session.platform}
-                                    </div>
-                                </div>
-
-                                <div className={styles.cardFooter}>
-                                    <div className={styles.avatars}>
-                                        {[1, 2, 3].map((_, i) => (
-                                            <div key={i} className={styles.avatar}>
-                                                <Users size={12} />
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-orange-600/20 border border-red-500/30 flex items-center justify-center text-red-400 group-hover:rotate-6 transition-transform duration-500 shadow-inner">
+                                            <Video size={40} />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-2xl font-bold text-white tracking-tight">{session.title}</h3>
+                                                <span className="px-2 py-0.5 bg-red-600 text-[9px] font-bold rounded-md uppercase tracking-tighter">LIVE</span>
                                             </div>
-                                        ))}
-                                        <div className={styles.avatar} style={{ background: '#475569' }}>+12</div>
+                                            <p className="text-slate-400 font-medium">Batch: {session.batch} • {session.tutor}</p>
+                                        </div>
                                     </div>
-                                    <a href={session.link} target="_blank" rel="noopener noreferrer" className={styles.joinBtn}>
-                                        {session.status === 'LIVE' ? 'Join Now' : 'Start Session'}
-                                    </a>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </motion.div>
-
-                {/* Create Modal */}
-                <AnimatePresence>
-                    {isCreateModalOpen && (
-                        <div className={styles.modalOverlay}>
-                            <motion.div
-                                initial={{ opacity: 0, y: 50 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 50 }}
-                                className={styles.modalContent}
-                            >
-                                <div className={styles.modalHeader}>
-                                    <h3>Schedule New Session</h3>
-                                    <button className={styles.closeBtn} onClick={() => setIsCreateModalOpen(false)}>
-                                        <X size={20} />
+                                    <button className="p-3 bg-white/5 border border-white/10 rounded-2xl text-slate-500 hover:text-white transition-colors">
+                                        <MoreVertical size={20} />
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleCreateSession}>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Session Topic</label>
-                                        <input
-                                            required
-                                            type="text"
-                                            className={styles.input}
-                                            placeholder="e.g., Advanced Java Streams"
-                                            value={formData.title}
-                                            onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.label}>Course</label>
-                                            <select
-                                                className={styles.select}
-                                                value={formData.course}
-                                                onChange={e => setFormData({ ...formData, course: e.target.value })}
-                                            >
-                                                {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.label}>Batch</label>
-                                            <select
-                                                className={styles.select}
-                                                value={formData.batch}
-                                                onChange={e => setFormData({ ...formData, batch: e.target.value })}
-                                            >
-                                                {BATCHES.map(b => <option key={b} value={b}>{b}</option>)}
-                                            </select>
+                                <div className="grid grid-cols-3 gap-4 mb-8">
+                                    <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center">
+                                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Viewers</div>
+                                        <div className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                                            <Users size={16} className="text-blue-400" /> {session.viewers}
                                         </div>
                                     </div>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.label}>Date</label>
-                                            <input
-                                                required
-                                                type="date"
-                                                className={styles.input}
-                                                value={formData.date}
-                                                onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.label}>Start Time</label>
-                                            <input
-                                                required
-                                                type="time"
-                                                className={styles.input}
-                                                value={formData.startTime}
-                                                onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.label}>Duration (min)</label>
-                                            <input
-                                                type="number"
-                                                className={styles.input}
-                                                value={formData.duration}
-                                                onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                                            />
+                                    <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center">
+                                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Duration</div>
+                                        <div className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                                            <Clock size={16} className="text-emerald-400" /> {session.duration}
                                         </div>
                                     </div>
-
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Participants</label>
-                                        <div className={styles.radioGroup}>
-                                            <label className={styles.radioLabel}>
-                                                <input
-                                                    type="radio"
-                                                    name="audience"
-                                                    checked={formData.audienceType === 'all'}
-                                                    onChange={() => setFormData({ ...formData, audienceType: 'all' })}
-                                                />
-                                                All Students in Batch
-                                            </label>
-                                            <label className={styles.radioLabel}>
-                                                <input
-                                                    type="radio"
-                                                    name="audience"
-                                                    checked={formData.audienceType === 'specific'}
-                                                    onChange={() => setFormData({ ...formData, audienceType: 'specific' })}
-                                                />
-                                                Select Specific Students
-                                            </label>
+                                    <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center">
+                                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Stream</div>
+                                        <div className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                                            <Airplay size={16} className="text-fuchsia-400" /> 2.4<span className="text-[10px] ml-1">Mbps</span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {formData.audienceType === 'specific' && (
-                                        <div className={styles.formGroup} style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '0.5rem' }}>
-                                            <label className={styles.label} style={{ marginBottom: '1rem' }}>Select Students</label>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto' }}>
-                                                {MOCK_STUDENTS.map(student => (
-                                                    <label key={student.id} className={styles.radioLabel} style={{ fontSize: '0.9rem' }}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={formData.selectedStudents.includes(student.id)}
-                                                            onChange={() => toggleStudentSelection(student.id)}
-                                                            style={{ marginRight: '0.5rem' }}
-                                                        />
-                                                        {student.name}
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Meeting Link</label>
-                                        <input
-                                            required
-                                            type="url"
-                                            className={styles.input}
-                                            placeholder="https://zoom.us/..."
-                                            value={formData.link} // Changed from formData.url which was undefined in state setup
-                                            onChange={e => setFormData({ ...formData, link: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className={styles.modalActions}>
-                                        <button type="button" className={styles.cancelBtn} onClick={() => setIsCreateModalOpen(false)}>Cancel</button>
-                                        <button type="submit" className={styles.submitBtn}>Schedule Session</button>
-                                    </div>
-                                </form>
+                                <div className="flex gap-4">
+                                    <button className="flex-1 py-4 bg-red-600/10 border border-red-500/20 rounded-2xl text-red-400 font-bold text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all">
+                                        <XCircle size={18} /> STOP STREAM
+                                    </button>
+                                    <button className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all">
+                                        <Monitor size={18} /> OPERATE CONSOLE
+                                    </button>
+                                </div>
                             </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'upcoming' && (
+                <div className="max-w-4xl mx-auto space-y-4">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-bold text-white uppercase tracking-widest">Next 24 Hours</h3>
+                        <div className="flex gap-2">
+                            <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-2">
+                                <Search size={14} className="text-slate-500" />
+                                <input type="text" placeholder="Search upcoming..." className="bg-transparent border-none text-xs text-white focus:outline-none w-32" />
+                            </div>
                         </div>
-                    )}
-                </AnimatePresence>
-            </div>
-        </DashboardLayout>
+                    </div>
+                    {upcomingSessions.map((session, i) => (
+                        <motion.div
+                            key={session.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="bg-[#0a0a1a]/60 border border-white/5 rounded-3xl p-6 flex items-center justify-between group hover:border-violet-500/30 transition-all hover:translate-x-1"
+                        >
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center font-[Rajdhani] group-hover:bg-violet-600 group-hover:border-violet-400 transition-all">
+                                    <span className="text-[10px] text-slate-500 group-hover:text-violet-200">START</span>
+                                    <span className="text-lg font-bold text-white">{session.startTime.split(' ')[0]}</span>
+                                </div>
+                                <div>
+                                    <h4 className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors">{session.title}</h4>
+                                    <div className="flex gap-4 items-center mt-1">
+                                        <span className="text-xs text-slate-500 flex items-center gap-1.5"><Users size={12} /> {session.attendees} Registered</span>
+                                        <span className="text-xs text-slate-500 flex items-center gap-1.5"><UserCheck size={12} /> {session.tutor}</span>
+                                        <span className="px-2 py-0.5 bg-violet-600/10 text-violet-400 text-[10px] font-bold rounded uppercase">Batch {session.batch}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                                    <Settings size={18} />
+                                </button>
+                                <button className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-xs uppercase tracking-widest group-hover:bg-violet-600 group-hover:border-violet-500 transition-all">
+                                    MANAGE
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+        </AdvancedModuleLayout>
     );
 }

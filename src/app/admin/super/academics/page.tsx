@@ -17,7 +17,8 @@ import {
     PlayCircle,
     MoreVertical,
     Plus,
-    Search
+    Search,
+    Settings
 } from 'lucide-react';
 
 export default function AcademicsPage() {
