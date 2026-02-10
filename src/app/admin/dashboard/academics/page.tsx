@@ -59,8 +59,8 @@ export default function AcademicManagementPage() {
 
     return (
         <AdvancedModuleLayout
-            title="Academic & Course Management"
-            subtitle="Deep control over your institutional curriculum, batch operations, faculty scheduling, and LMS assets."
+            title="Academic Operations & Schedules"
+            subtitle="Manage institutional schedules, faculty assignments, and batch progress."
             stats={stats}
             activeTab={activeTab}
             onTabChange={setActiveTab}
@@ -110,7 +110,7 @@ export default function AcademicManagementPage() {
                                             <div className="flex items-center gap-3">
                                                 <h3 className="text-xl font-bold text-white group-hover:text-violet-400 transition-colors">{batch.id}</h3>
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${batch.status === 'Ongoing' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                        batch.status === 'New' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
+                                                    batch.status === 'New' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
                                                     }`}>{batch.status}</span>
                                             </div>
                                             <p className="text-sm text-slate-400 font-medium">{batch.course}</p>

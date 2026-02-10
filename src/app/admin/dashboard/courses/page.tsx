@@ -10,7 +10,7 @@ import {
     Edit, Trash2, ChevronDown, ChevronUp,
     FileText, Video, PenTool, Layout, Upload, Calendar, Link, MoreHorizontal, Download, File, Folder, ChevronRight, CornerUpLeft, Lock, Unlock, Eye
 } from 'lucide-react';
-import styles from '../Admin.module.css';
+import styles from '../../super/SuperAdmin.module.css';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 // -- Types --

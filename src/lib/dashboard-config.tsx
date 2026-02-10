@@ -96,13 +96,14 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Reports', href: '/employee/finance/reports', icon: BarChart3 },
     ],
     student: [
-        { label: 'Learning Hub', href: '/student/dashboard', icon: BookOpen },
-        { label: 'Online Compiler', href: '/student/compiler', icon: Code2 },
-        { label: 'MNC Placement Hub', href: '/student/placements/mnc', icon: Briefcase },
-        { label: 'Mock Assessments', href: '/student/assessments/mock', icon: GraduationCap },
-        { label: 'Online Classes', href: '/student/dashboard/sessions', icon: Video },
-        { label: 'Fee Portal', href: '/student/dashboard/fees', icon: Wallet },
-        { label: 'Notice Board', href: '/student/dashboard/notices', icon: Bell },
+        { label: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
+        { label: 'Online Classes', href: '/student/dashboard/classes', icon: Video },
+        { label: 'LMS Access', href: '/student/dashboard/lms', icon: BookOpen },
+        { label: 'Assessments', href: '/student/dashboard/assessments', icon: CheckCircle2 },
+        { label: 'Online Compiler', href: '/student/dashboard/compiler', icon: Code2 },
+        { label: 'Fees Portal', href: '/student/dashboard/fees', icon: Wallet },
+        { label: 'Placement HQ', href: '/student/dashboard/placements', icon: Briefcase },
+        { label: 'Mock Tests', href: '/student/dashboard/mock-tests', icon: GraduationCap },
     ]
 };
 

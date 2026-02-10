@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     BookOpen,
     PlayCircle,
@@ -13,160 +14,270 @@ import {
     Zap,
     Rocket,
     BarChart3,
-    MoreVertical
+    MoreVertical,
+    Calendar,
+    Video,
+    ChevronRight,
+    Search,
+    Filter,
+    ArrowUpRight,
+    Wallet,
+    AlertCircle
 } from 'lucide-react';
+import Link from 'next/link';
 
 const ENROLLED_COURSES = [
-    { name: "Full Stack Development", progress: 65, status: "Ongoing", color: "#7c3aed" },
-    { name: "Cloud Computing", progress: 20, status: "New", color: "#22d3ee" },
+    { name: "Full Stack Development", progress: 65, status: "Ongoing", color: "#7c3aed", icon: "⚛️" },
+    { name: "Cloud Computing", progress: 20, status: "New", color: "#22d3ee", icon: "☁️" },
+    { name: "System Design", progress: 45, status: "Ongoing", color: "#d946ef", icon: "🏗️" },
 ];
 
 const UPCOMING_CLASSES = [
-    { title: "React Query & State", time: "2:00 PM", tutor: "Dr. Alan", type: "Live" },
-    { title: "AWS Deployment Lab", time: "Tomorrow", tutor: "Prof. Sarah", type: "Virtual" },
+    { title: "React Query & State", time: "2:00 PM Today", tutor: "Dr. Alan", type: "Live", link: "#" },
+    { title: "AWS Deployment Lab", time: "Tomorrow 10:00 AM", tutor: "Prof. Sarah", type: "Virtual", link: "#" },
+];
+
+const PENDING_ASSIGNMENTS = [
+    { title: "Redux Middleware Task", deadline: "Today, 11:59 PM", subject: "React JS", status: "Critical" },
+    { title: "Terraform Infrastructure", deadline: "Feb 12", subject: "Cloud Ops", status: "Upcoming" },
 ];
 
 export default function StudentMasterDashboard() {
     return (
         <DashboardLayout role="student">
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-8 pb-10">
                 {/* Greeting Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h1 className="text-4xl font-display font-bold text-white tracking-widest uppercase">
-                            Welcome Back, <span className="text-[#22d3ee]">Student</span>
-                        </h1>
-                        <p className="text-[var(--text-dim)]">Your academic and placement journey is on track.</p>
+                        <motion.h1
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="text-4xl font-display font-bold text-white tracking-tight"
+                        >
+                            Elevate, <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">Jagadesh</span>
+                        </motion.h1>
+                        <p className="text-slate-400 font-medium mt-1">Your training and placement journey is 82% ahead of your batchmates.</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <Link href="/student/dashboard/classes" className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/20 flex items-center gap-2 transition-all">
+                            <Video size={18} /> JOIN LIVE NOW
+                        </Link>
                     </div>
                 </div>
 
                 {/* Top Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { label: "Overall Progress", value: "68%", trend: "On Track", icon: TrendingUp, color: "text-[#7c3aed]" },
-                        { label: "Assignments", value: "12/15", trend: "+2 New", icon: FileText, color: "text-[#22d3ee]" },
-                        { label: "Placement Score", value: "840", trend: "Top 5%", icon: Rocket, color: "text-emerald-400" },
-                        { label: "Attendance", value: "95%", trend: "Excellent", icon: CheckCircle2, color: "text-[#d946ef]" },
+                        { label: "Placement Score", value: "840", trend: "Top 5%", icon: Rocket, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+                        { label: "Pending Tasks", value: "05", trend: "2 Critical", icon: FileText, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+                        { label: "Learning Hours", value: "142h", trend: "+12h this week", icon: Zap, color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/20" },
+                        { label: "Fee Status", value: "Paid", trend: "No Dues", icon: Wallet, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20" },
                     ].map((stat, idx) => (
-                        <div key={idx} className="bg-gradient-to-br from-[rgba(19,10,48,0.8)] to-[#030014] border border-[rgba(124,58,237,0.1)] rounded-3xl p-6 backdrop-blur-3xl relative overflow-hidden group border-b-2">
-                            <stat.icon className={`w-8 h-8 ${stat.color} mb-4 group-hover:scale-110 transition-transform`} />
-                            <div className="text-3xl font-bold text-white font-display mb-1">{stat.value}</div>
-                            <div className="text-xs text-[var(--text-dim)] uppercase tracking-wider font-bold mb-3">{stat.label}</div>
-                            <div className="text-[10px] text-emerald-400 font-bold bg-emerald-400/10 px-2 py-0.5 rounded-full inline-block">{stat.trend}</div>
-                        </div>
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className={`${stat.bg} ${stat.border} border rounded-3xl p-6 backdrop-blur-xl group hover:scale-[1.02] transition-all cursor-pointer`}
+                        >
+                            <div className="flex justify-between items-start mb-4">
+                                <div className={`p-3 rounded-2xl bg-[#0a0a1a]/80 ${stat.color} shadow-lg`}>
+                                    <stat.icon className="w-6 h-6" />
+                                </div>
+                                <ArrowUpRight className="text-slate-600 group-hover:text-white transition-colors" size={20} />
+                            </div>
+                            <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                            <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">{stat.label}</div>
+                            <div className={`mt-3 text-[10px] font-bold ${stat.color} flex items-center gap-1`}>
+                                {stat.trend}
+                            </div>
+                        </motion.div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Primary Learning Area */}
                     <div className="lg:col-span-2 flex flex-col gap-8">
-                        <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(124,58,237,0.1)] rounded-3xl p-8 backdrop-blur-md">
-                            <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <BookOpen className="w-5 h-5 text-[#7c3aed]" />
-                                    Active Courses
-                                </h3>
-                                <button className="text-[10px] text-[#22d3ee] font-bold uppercase tracking-widest hover:underline">View Roadmap</button>
+                        {/* Enrolled Courses */}
+                        <div className="bg-[#0a0a1a]/60 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
+                            <div className="flex justify-between items-center mb-10 relative z-10">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white tracking-tight">Enrolled Courses</h3>
+                                    <p className="text-sm text-slate-500">Pick up where you left off</p>
+                                </div>
+                                <Link href="/student/dashboard/lms" className="text-xs text-violet-400 font-bold hover:text-violet-300 flex items-center gap-1 transition-colors">
+                                    OPEN LMS VAULT <ChevronRight size={14} />
+                                </Link>
                             </div>
-                            <div className="space-y-6">
+                            <div className="space-y-4 relative z-10">
                                 {ENROLLED_COURSES.map((course, i) => (
-                                    <div key={i} className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:border-[#7c3aed]/40 transition-all cursor-pointer group">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#d946ef] flex items-center justify-center text-2xl shadow-lg">⚛️</div>
-                                                <div>
-                                                    <div className="font-bold text-white text-lg group-hover:text-[#22d3ee] transition-colors">{course.name}</div>
-                                                    <div className="text-xs text-[var(--text-dim)]">{course.status} • 24 Lessons Left</div>
+                                    <div key={i} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-violet-500/30 hover:bg-white/[0.04] transition-all cursor-pointer group/item flex items-center justify-between gap-6">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-16 h-16 rounded-2xl bg-[#0a0a1a] border border-white/10 flex items-center justify-center text-3xl shadow-xl group-hover/item:scale-110 group-hover/item:border-violet-500/50 transition-all duration-500">
+                                                {course.icon}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-white text-lg group-hover/item:text-violet-400 transition-colors uppercase tracking-tight">{course.name}</h4>
+                                                <div className="mt-2 flex items-center gap-3">
+                                                    <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${course.progress}%` }}
+                                                            className="h-full bg-gradient-to-r from-violet-600 to-cyan-400"
+                                                        />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{course.progress}%</span>
                                                 </div>
                                             </div>
-                                            <button className="px-6 py-2 bg-[#7c3aed] text-white rounded-lg text-xs font-bold shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-[#d946ef] transition-all">Resume</button>
                                         </div>
-                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-gradient-to-r from-[#7c3aed] to-[#22d3ee]" style={{ width: `${course.progress}%` }} />
-                                        </div>
-                                        <div className="flex justify-between mt-2 text-[10px] text-[var(--text-dim)] font-bold uppercase letter-spacing-widest">
-                                            <span>{course.progress}% Completed</span>
-                                            <span>Module 4 of 12</span>
-                                        </div>
+                                        <button className="hidden md:flex flex-col items-center gap-1 p-3 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl shadow-lg shadow-violet-500/20 transition-all uppercase text-[10px] font-black tracking-widest">
+                                            <PlayCircle size={20} />
+                                            RESUME
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Quick Access Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            {[
-                                { label: "Compiler", icon: Zap, color: "text-amber-400" },
-                                { label: "Mock Tests", icon: FileText, color: "text-[#d946ef]" },
-                                { label: "Career HQ", icon: Rocket, color: "text-emerald-400" },
-                                { label: "LMS Vault", icon: BookOpen, color: "text-[#22d3ee]" },
-                            ].map((item, i) => (
-                                <button key={i} className="flex flex-col items-center justify-center p-6 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] rounded-2xl hover:border-[#7c3aed] hover:bg-[#7c3aed]/5 transition-all group">
-                                    <item.icon className={`w-6 h-6 ${item.color} mb-3 group-hover:scale-110 transition-transform`} />
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">{item.label}</span>
+                        {/* Recent Performance & Mock Analysis */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="bg-[#0a0a1a]/60 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl">
+                                <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+                                    <Award className="text-violet-400" size={24} />
+                                    Job Readiness
+                                </h3>
+                                <div className="space-y-6">
+                                    {[
+                                        { label: "Aptitude", score: 88, color: "bg-cyan-400" },
+                                        { label: "Coding Round", score: 72, color: "bg-violet-600" },
+                                        { label: "Soft Skills", score: 94, color: "bg-fuchsia-500" },
+                                    ].map((skill, i) => (
+                                        <div key={i} className="space-y-2">
+                                            <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-tighter">
+                                                <span>{skill.label}</span>
+                                                <span className="text-white">{skill.score}%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${skill.score}%` }}
+                                                    className={`h-full ${skill.color}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button className="w-full mt-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-slate-400 hover:text-white hover:bg-violet-600 hover:border-violet-500 transition-all uppercase tracking-widest">
+                                    Detailed Analysis
                                 </button>
-                            ))}
+                            </div>
+
+                            <div className="bg-[#0a0a1a]/60 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl">
+                                <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+                                    <Clock className="text-amber-400" size={24} />
+                                    Pending Tasks
+                                </h3>
+                                <div className="space-y-4">
+                                    {PENDING_ASSIGNMENTS.map((task, i) => (
+                                        <div key={i} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col gap-2">
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-xs font-bold text-white">{task.title}</span>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full ${task.status === 'Critical' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'} font-bold`}>
+                                                    {task.status}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                                                <span>{task.subject}</span>
+                                                <span className="flex items-center gap-1"><AlertCircle size={10} /> {task.deadline}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button className="w-full mt-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-slate-400 hover:text-white hover:bg-violet-600 hover:border-violet-500 transition-all uppercase tracking-widest">
+                                    Submit Assignments
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Secondary Information Bar */}
+                    {/* Right Sidebar - Info Hub */}
                     <div className="flex flex-col gap-8">
-                        {/* Upcoming Live Sessions */}
-                        <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(34,211,238,0.1)] rounded-3xl p-6 backdrop-blur-md">
-                            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                                <PlayCircle className="w-5 h-5 text-[#d946ef]" />
-                                Next Up
+                        {/* Session Hub */}
+                        <div className="bg-[#0a0a1a]/60 border border-[#22d3ee]/20 rounded-[2.5rem] p-8 backdrop-blur-xl">
+                            <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+                                <PlayCircle className="text-cyan-400" size={24} />
+                                Next Session
                             </h3>
                             <div className="space-y-4">
                                 {UPCOMING_CLASSES.map((cls, i) => (
-                                    <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] group cursor-pointer hover:bg-white/[0.08] transition-all">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${cls.type === 'Live' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'}`}>
-                                            <Video className="w-5 h-5" />
+                                    <div key={i} className="flex flex-col gap-4 p-5 rounded-3xl bg-white/[0.03] border border-white/5 group hover:bg-white/[0.05] transition-all relative overflow-hidden">
+                                        {cls.type === 'Live' && (
+                                            <div className="absolute top-0 right-0 p-2">
+                                                <div className="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full animate-pulse">
+                                                    <div className="w-1 h-1 bg-red-500 rounded-full" />
+                                                    <span className="text-[10px] font-black">LIVE</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400">
+                                                <Video size={24} />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">{cls.title}</div>
+                                                <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">{cls.time}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="text-sm font-bold text-white group-hover:text-[#22d3ee] transition-colors">{cls.title}</div>
-                                            <div className="text-[10px] text-[var(--text-dim)] font-bold">{cls.time} • {cls.tutor}</div>
-                                        </div>
+                                        <button className={`w-full py-3 ${cls.type === 'Live' ? 'bg-cyan-500 text-black' : 'bg-white/5 text-white'} font-bold rounded-xl text-xs transition-all uppercase tracking-widest`}>
+                                            {cls.type === 'Live' ? 'JOIN CLASS' : 'SET REMINDER'}
+                                        </button>
                                     </div>
                                 ))}
                             </div>
-                            <button className="w-full mt-6 py-3 border border-[#d946ef]/20 text-[#d946ef] text-[10px] font-bold uppercase rounded-xl hover:bg-[#d946ef] hover:text-white transition-all">View All Sessions</button>
+                            <button className="w-full mt-6 text-center text-[10px] font-black text-slate-500 hover:text-cyan-400 transition-colors uppercase tracking-[0.2em]">VIEW FULL SCHEDULE</button>
                         </div>
 
-                        {/* Recent Performance Metrics */}
-                        <div className="bg-[rgba(19,10,48,0.5)] border border-[rgba(124,58,237,0.1)] rounded-3xl p-6 backdrop-blur-md">
-                            <h3 className="text-lg font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-2">
-                                <BarChart3 className="w-5 h-5 text-[#7c3aed]" />
-                                Performance
-                            </h3>
+                        {/* Marketplace / Placement Quick Stats */}
+                        <div className="bg-gradient-to-br from-violet-600/20 via-transparent to-transparent border border-violet-500/20 rounded-[2.5rem] p-8 backdrop-blur-xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-6">
+                                <Rocket className="text-violet-500/30 -rotate-12 group-hover:rotate-0 transition-transform duration-700" size={48} />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-tight">Placement HQ</h3>
                             <div className="space-y-6">
-                                {[
-                                    { label: "Aptitude Score", val: 82, color: "#22d3ee" },
-                                    { label: "Coding Score", val: 74, color: "#7c3aed" },
-                                    { label: "Communication", val: 90, color: "#d946ef" },
-                                ].map((item, i) => (
-                                    <div key={i}>
-                                        <div className="flex justify-between text-[10px] font-bold text-[var(--text-dim)] mb-1 uppercase">
-                                            {item.label} <span className="text-white">{item.val}%</span>
-                                        </div>
-                                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full" style={{ width: `${item.val}%`, background: item.color }} />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Quick Alerts */}
-                        <div className="p-5 bg-gradient-to-br from-[#0c051a] to-[#030014] border border-[#22d3ee]/20 rounded-3xl relative overflow-hidden group">
-                            <div className="flex gap-4 items-start">
-                                <div className="p-2 bg-emerald-500/10 rounded-lg"><CheckCircle2 className="w-5 h-5 text-emerald-500" /></div>
-                                <div>
-                                    <div className="text-xs font-bold text-white">Fee Status: Paid</div>
-                                    <p className="text-[10px] text-[var(--text-dim)] mt-1">Receipt #BC-2024-88A is available for download.</p>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-slate-400 font-bold">Recommended Jobs</span>
+                                    <span className="text-lg font-black text-violet-400">12</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs font-bold">
+                                    <span className="text-slate-400">Application Status</span>
+                                    <span className="text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg">Shortlisted (2)</span>
+                                </div>
+                                <div className="pt-6 border-t border-white/10">
+                                    <Link href="/student/dashboard/placements" className="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 transition-all uppercase text-xs tracking-widest">
+                                        GO TO PLACEMENTS <ArrowUpRight size={16} />
+                                    </Link>
                                 </div>
                             </div>
-                            <MoreVertical className="absolute top-4 right-2 text-white/20 w-4 h-4" />
+                        </div>
+
+                        {/* Recent Activity Mini-Feed */}
+                        <div className="p-6 bg-[#0a0a1a]/40 border border-white/5 rounded-[2.5rem]">
+                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Recent Records</h4>
+                            <div className="space-y-6 relative ml-2">
+                                <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-white/5" />
+                                {[
+                                    { label: "Fee Received", time: "2 days ago", icon: Wallet, color: "text-emerald-400" },
+                                    { label: "Assignment Submitted", time: "Feb 06", icon: FileText, color: "text-blue-400" },
+                                    { label: "Mock Test Completed", time: "Jan 28", icon: GraduationCap, color: "text-violet-400" },
+                                ].map((act, i) => (
+                                    <div key={i} className="relative pl-6">
+                                        <div className="absolute left-[-4px] top-1 w-2 h-2 rounded-full bg-slate-800 border border-slate-700" />
+                                        <div className="text-[11px] font-bold text-white">{act.label}</div>
+                                        <div className="text-[10px] text-slate-600 font-bold uppercase">{act.time}</div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,5 +286,4 @@ export default function StudentMasterDashboard() {
     );
 }
 
-// Fixed import for Video icon which was used but potentially missing in the context of the previous file's structure.
-import { Video } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
