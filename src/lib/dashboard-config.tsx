@@ -36,7 +36,7 @@ export const ROLE_CONFIG: Record<Role, { label: string; dashUrl: string }> = {
     super_admin: { label: 'Super Admin', dashUrl: '/admin/super' },
     admin: { label: 'Institute Admin', dashUrl: '/admin/dashboard' },
     trainer: { label: 'Trainer / Faculty', dashUrl: '/employee/trainer' },
-    hr: { label: 'HR / Placement', dashUrl: '/employee/hr' },
+    hr: { label: 'Placement Officer', dashUrl: '/employee/hr' },
     counselor: { label: 'Counselor / Sales', dashUrl: '/employee/counselor' },
     finance: { label: 'Finance Executive', dashUrl: '/employee/finance' },
     student: { label: 'Student', dashUrl: '/student/dashboard' }
@@ -67,6 +67,7 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Assessments', href: '/admin/dashboard/assessments', icon: CheckCircle2 },
         { label: 'Finance', href: '/admin/dashboard/finance', icon: Wallet },
         { label: 'Reports', href: '/admin/dashboard/reports', icon: BarChart3 },
+        { label: 'Business & Ops', href: '/admin/dashboard/business', icon: Building2 },
     ],
     trainer: [
         { label: 'Dashboard', href: '/employee/trainer', icon: LayoutDashboard },
@@ -76,11 +77,12 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Student Tracking', href: '/employee/trainer/tracking', icon: BarChart3 },
     ],
     hr: [
-        { label: 'Job Postings', href: '/employee/hr', icon: Briefcase },
-        { label: 'Company Mgmt', href: '/employee/hr/companies', icon: Building2 },
-        { label: 'Student Mapping', href: '/employee/hr/mapping', icon: Users },
-        { label: 'Interviews', href: '/employee/hr/interviews', icon: MessageSquare },
-        { label: 'Offer Tracking', href: '/employee/hr/offers', icon: Award },
+        { label: 'Dashboard', href: '/employee/hr', icon: LayoutDashboard },
+        { label: 'Company Management', href: '/employee/hr/companies', icon: Building2 },
+        { label: 'Online Test Conduction', href: '/employee/hr/tests', icon: FileText },
+        { label: 'Student Tracking', href: '/employee/hr/students', icon: Users },
+        { label: 'Interview Management', href: '/employee/hr/interviews', icon: Calendar },
+        { label: 'Placement Reports', href: '/employee/hr/reports', icon: BarChart3 },
     ],
     counselor: [
         { label: 'Lead Management', href: '/employee/counselor', icon: Users },
