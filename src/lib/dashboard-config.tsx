@@ -69,12 +69,11 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
         { label: 'Reports', href: '/admin/dashboard/reports', icon: BarChart3 },
     ],
     trainer: [
-        { label: 'My Batches', href: '/employee/trainer', icon: LayoutDashboard },
-        { label: 'Class Schedule', href: '/employee/trainer/schedule', icon: Calendar },
-        { label: 'Content Upload', href: '/employee/trainer/content', icon: FileText },
-        { label: 'Assignments', href: '/employee/trainer/assignments', icon: BookOpen },
-        { label: 'Attendance', href: '/employee/trainer/attendance', icon: UserCheck },
-        { label: 'Student Analytics', href: '/employee/trainer/analytics', icon: BarChart3 },
+        { label: 'Dashboard', href: '/employee/trainer', icon: LayoutDashboard },
+        { label: 'Online Sessions', href: '/employee/trainer/sessions', icon: Video },
+        { label: 'LMS Management', href: '/employee/trainer/lms', icon: BookOpen },
+        { label: 'Assessments', href: '/employee/trainer/assessments', icon: CheckCircle2 },
+        { label: 'Student Tracking', href: '/employee/trainer/tracking', icon: BarChart3 },
     ],
     hr: [
         { label: 'Job Postings', href: '/employee/hr', icon: Briefcase },
