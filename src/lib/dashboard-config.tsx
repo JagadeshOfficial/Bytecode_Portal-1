@@ -61,7 +61,8 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     admin: [
         { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { label: 'User Management', href: '/admin/dashboard/users', icon: Users },
-        { label: 'Academic & Courses', href: '/admin/dashboard/academics', icon: BookOpen },
+        { label: 'Academic', href: '/admin/dashboard/academics', icon: BookOpen },
+        { label: 'Course Management', href: '/admin/dashboard/courses', icon: Layers },
         { label: 'Online Sessions', href: '/admin/dashboard/sessions', icon: Video },
         { label: 'Assessments', href: '/admin/dashboard/assessments', icon: CheckCircle2 },
         { label: 'Finance', href: '/admin/dashboard/finance', icon: Wallet },
