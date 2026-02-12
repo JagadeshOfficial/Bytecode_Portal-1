@@ -19,7 +19,10 @@ public class Notice {
     private String id;
     private String title;
     private String content;
-    private String targetAudience; // ALL, STUDENTS, ADMIN
-    private Date postedDate;
-    private boolean active;
+    private String priority; // LOW, MEDIUM, HIGH
+    private String targetAudience; // ALL, STUDENTS, TRAINERS, ADMIN
+    private String createdBy;
+    private Date createdAt;
+    private Date expiryDate;
+    private Boolean isActive;
 }

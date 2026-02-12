@@ -17,8 +17,12 @@ import java.util.Date;
 public class Attendance {
     @Id
     private String id;
+    private String studentId;
     private String studentEmail;
+    private String sessionId;
+    private String batchId;
     private Date date;
-    private boolean present;
+    private Date markedAt;
+    private Boolean present;
     private String remarks;
 }
