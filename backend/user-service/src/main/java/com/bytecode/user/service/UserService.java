@@ -33,6 +33,12 @@ public class UserService {
             user.setRole(tempUser.getRole());
             user.setBranch(tempUser.getBranch());
             user.setActive(tempUser.isActive());
+            if (tempUser.getPassword() != null && !tempUser.getPassword().isEmpty()) {
+                user.setPassword(tempUser.getPassword());
+            }
+            if (tempUser.getPhoneNumber() != null && !tempUser.getPhoneNumber().isEmpty()) {
+                user.setPhoneNumber(tempUser.getPhoneNumber());
+            }
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }

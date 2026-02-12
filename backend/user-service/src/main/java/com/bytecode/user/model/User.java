@@ -21,6 +21,8 @@ public class User {
     private String fullName;
     private UserRole role; // SUPER_ADMIN, ADMIN, EMPLOYEE, STUDENT
     private String branch; // For Multi-branch management
+    private String password;
+    private String phoneNumber;
     private boolean active;
     private Date createdAt;
 }

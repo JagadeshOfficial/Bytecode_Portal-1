@@ -19,9 +19,20 @@ public class AuthController {
         return userService.getUserByEmail(request.getEmail())
                 .map(user -> {
                     // Simple demo check: match hardcoded passwords for now
-                    String expectedPassword = getDemoPassword(request.getEmail());
+                    // prioritize DB password, fallback to demo password
+                    String dbPassword = user.getPassword();
+                    String demoPassword = getDemoPassword(request.getEmail());
+                    boolean isAuthenticated = false;
 
-                    if (expectedPassword != null && expectedPassword.equals(request.getPassword())) {
+                    if (dbPassword != null && !dbPassword.isEmpty()) {
+                         if (dbPassword.equals(request.getPassword())) {
+                             isAuthenticated = true;
+                         }
+                    } else if (demoPassword != null && demoPassword.equals(request.getPassword())) {
+                        isAuthenticated = true;
+                    }
+
+                    if (isAuthenticated) {
                         return ResponseEntity.ok(AuthResponse.builder()
                                 .email(user.getEmail())
                                 .role(user.getRole().name())
