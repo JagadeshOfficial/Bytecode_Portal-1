@@ -26,6 +26,7 @@ interface User {
     status: Status;
     checkInTime?: string;
     avatarInitials: string;
+    profileImage?: string; // Added field
     joinDate: string;
     attendanceRate: number;
 }
@@ -97,10 +98,11 @@ export default function UsersPage() {
                         role: mapRole,
                         department: u.branch || 'General',
                         email: u.email || '',
-                        phone: 'N/A', // Not in DB yet
+                        phone: u.phoneNumber || 'N/A', // Updated
                         status: u.active ? 'Present' : 'Absent',
                         checkInTime: u.active ? '09:00 AM' : undefined,
                         avatarInitials: (u.fullName || 'U').substring(0, 2).toUpperCase(),
+                        profileImage: u.profileImage, // Map from backend
                         joinDate: u.createdAt ? u.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
                         attendanceRate: 0 // Default
                     };
@@ -301,13 +303,25 @@ export default function UsersPage() {
                                         <tr key={user.id} onClick={() => { setSelectedUser(user); setIsEditing(false); }} style={{ cursor: 'pointer' }}>
                                             <td style={{ paddingLeft: '1.5rem' }}>
                                                 <div className={styles.userTableProfile}>
-                                                    <div className={styles.userAvatar} style={{
-                                                        background: user.role === 'student' ? 'rgba(59,130,246,0.15)' : user.role === 'faculty' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)',
-                                                        color: user.role === 'student' ? '#60a5fa' : user.role === 'faculty' ? '#a78bfa' : '#34d399',
-                                                        border: `1px solid ${user.role === 'student' ? 'rgba(59,130,246,0.3)' : user.role === 'faculty' ? 'rgba(139,92,246,0.3)' : 'rgba(16,185,129,0.3)'}`
-                                                    }}>
-                                                        {user.avatarInitials}
-                                                    </div>
+                                                    {user.profileImage ? (
+                                                        <img
+                                                            src={user.profileImage}
+                                                            alt={user.name}
+                                                            className={styles.userAvatar}
+                                                            style={{
+                                                                objectFit: 'cover',
+                                                                border: `1px solid ${user.role === 'student' ? 'rgba(59,130,246,0.3)' : user.role === 'faculty' ? 'rgba(139,92,246,0.3)' : 'rgba(16,185,129,0.3)'}`
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className={styles.userAvatar} style={{
+                                                            background: user.role === 'student' ? 'rgba(59,130,246,0.15)' : user.role === 'faculty' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)',
+                                                            color: user.role === 'student' ? '#60a5fa' : user.role === 'faculty' ? '#a78bfa' : '#34d399',
+                                                            border: `1px solid ${user.role === 'student' ? 'rgba(59,130,246,0.3)' : user.role === 'faculty' ? 'rgba(139,92,246,0.3)' : 'rgba(16,185,129,0.3)'}`
+                                                        }}>
+                                                            {user.avatarInitials}
+                                                        </div>
+                                                    )}
                                                     <div>
                                                         <div style={{ fontWeight: 600, color: 'white', fontSize: '0.95rem' }}>{user.name}</div>
                                                         <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{user.email}</div>
@@ -641,13 +655,25 @@ export default function UsersPage() {
                                 ) : (
                                     <div className={styles.modalBody}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
-                                            <div style={{
-                                                width: '80px', height: '80px', borderRadius: '50%',
-                                                background: '#334155', color: 'white', display: 'flex',
-                                                alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700
-                                            }}>
-                                                {selectedUser.avatarInitials}
-                                            </div>
+                                            {selectedUser.profileImage ? (
+                                                <img
+                                                    src={selectedUser.profileImage}
+                                                    alt={selectedUser.name}
+                                                    style={{
+                                                        width: '80px', height: '80px', borderRadius: '50%',
+                                                        objectFit: 'cover',
+                                                        border: `2px solid ${selectedUser.role === 'student' ? '#60a5fa' : selectedUser.role === 'faculty' ? '#a78bfa' : '#34d399'}`
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div style={{
+                                                    width: '80px', height: '80px', borderRadius: '50%',
+                                                    background: '#334155', color: 'white', display: 'flex',
+                                                    alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700
+                                                }}>
+                                                    {selectedUser.avatarInitials}
+                                                </div>
+                                            )}
                                             <div>
                                                 <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{selectedUser.name}</h3>
                                                 <div style={{ color: '#94a3b8', display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>

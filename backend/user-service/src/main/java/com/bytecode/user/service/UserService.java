@@ -39,6 +39,9 @@ public class UserService {
             if (tempUser.getPhoneNumber() != null && !tempUser.getPhoneNumber().isEmpty()) {
                 user.setPhoneNumber(tempUser.getPhoneNumber());
             }
+            if (tempUser.getProfileImage() != null && !tempUser.getProfileImage().isEmpty()) {
+                user.setProfileImage(tempUser.getProfileImage());
+            }
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }

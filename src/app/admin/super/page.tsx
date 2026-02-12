@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import styles from './SuperAdmin.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import api from '@/lib/api';
 import {
     Users,
     Building2,
@@ -37,12 +39,6 @@ import {
     BarChart, Bar, Cell, Pie
 } from 'recharts';
 
-const REVENUE_DATA = [
-    { name: 'Jan', revenue: 45 }, { name: 'Feb', revenue: 52 }, { name: 'Mar', revenue: 48 },
-    { name: 'Apr', revenue: 61 }, { name: 'May', revenue: 55 }, { name: 'Jun', revenue: 67 },
-    { name: 'Jul', revenue: 72 }, { name: 'Aug', revenue: 85 }, { name: 'Sep', revenue: 92 },
-];
-
 const PLATFORM_HEALTH = [
     { label: "Core Services", status: "Healthy", uptime: "99.99%", latency: "12ms" },
     { label: "LMS Database", status: "Healthy", uptime: "99.95%", latency: "24ms" },
@@ -50,6 +46,17 @@ const PLATFORM_HEALTH = [
 ];
 
 export default function SuperAdminMasterDashboard() {
+    // State Definitions
+    const [statsData, setStatsData] = useState({
+        institutes: 0,
+        tempUsers: 0,
+        placements: 0,
+        staff: 0,
+        revenue: 0
+    });
+    const [chartData, setChartData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
     // Advanced Animations Variants
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -67,23 +74,71 @@ export default function SuperAdminMasterDashboard() {
         visible: {
             y: 0, opacity: 1,
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 100
             }
         }
     };
 
-    const shimmerEffect = {
-        initial: { backgroundPosition: "-200% 0" },
-        animate: {
-            backgroundPosition: "200% 0",
-            transition: {
-                repeat: Infinity,
-                duration: 3,
-                ease: "linear"
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [usersRes, placementsRes, feesRes] = await Promise.all([
+                    api.get('/users'),
+                    api.get('/placements/records'),
+                    api.get('/finance/fees')
+                ]);
+
+                const users: any[] = usersRes.data;
+                const placements: any[] = placementsRes.data;
+                const fees: any[] = feesRes.data;
+
+                // Process Stats
+                const activeUsers = users.filter(u => u.active).length;
+                const staffCount = users.filter(u => u.role === 'TRAINER' || u.role === 'ADMIN').length;
+                const uniqueBranches = new Set(users.map(u => u.branch).filter(b => b)).size;
+                const totalRevenue = fees.reduce((acc, curr) => acc + (curr.paidAmount || 0), 0);
+
+                setStatsData({
+                    institutes: uniqueBranches || 1, // Default to 1 (HQ) if 0
+                    tempUsers: activeUsers,
+                    placements: placements.length,
+                    staff: staffCount,
+                    revenue: totalRevenue
+                });
+
+                // Process Chart Data
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const revenueMap = new Array(12).fill(0);
+                fees.forEach((fee: any) => {
+                    if (fee.lastPaymentDate) {
+                        const month = new Date(fee.lastPaymentDate).getMonth();
+                        revenueMap[month] += (fee.paidAmount || 0);
+                    }
+                });
+                setChartData(monthNames.map((name, index) => ({ name, revenue: revenueMap[index] / 100000 })));
+                setLoading(false);
+            } catch (error) {
+                console.error("Dashboard Data Fetch Failed:", error);
+                setLoading(false);
             }
-        }
+        };
+        fetchData();
+    }, []);
+
+    const formatRevenue = (amount: number) => {
+        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
+        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
+        return `₹${amount.toLocaleString()}`;
     };
+
+    const statsConfig = [
+        { label: "Total Institutes", value: statsData.institutes.toString(), trend: "+ New", icon: Building2, color: "text-[#22d3ee]", bg: "from-cyan-500/10 to-blue-500/5", border: "border-cyan-500/20" },
+        { label: "Active Users", value: statsData.tempUsers.toLocaleString(), trend: "Live", icon: Users, color: "text-[#7c3aed]", bg: "from-violet-500/10 to-purple-500/5", border: "border-violet-500/20" },
+        { label: "Total Placements", value: statsData.placements.toString(), trend: "Top Tier", icon: Briefcase, color: "text-[#d946ef]", bg: "from-fuchsia-500/10 to-pink-500/5", border: "border-fuchsia-500/20" },
+        { label: "Staff Strength", value: statsData.staff.toString(), trend: "Full Cap", icon: UserCheck, color: "text-amber-400", bg: "from-amber-500/10 to-orange-500/5", border: "border-amber-500/20" },
+        { label: "Total Revenue", value: formatRevenue(statsData.revenue), trend: "+12.5%", icon: DollarSign, color: "text-emerald-400", bg: "from-emerald-500/10 to-teal-500/5", border: "border-emerald-500/20" },
+    ];
 
     return (
         <DashboardLayout role="super_admin">
@@ -93,14 +148,11 @@ export default function SuperAdminMasterDashboard() {
                 animate="visible"
                 className="flex flex-col gap-6"
             >
-                {/* Master Control Header - Premium Gradient & Glass */}
+                {/* Master Control Header */}
                 <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl p-1 bg-gradient-to-r from-[rgba(124,58,237,0.5)] via-[rgba(34,211,238,0.5)] to-[rgba(217,70,239,0.5)]">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-3xl z-0" />
                     <div className="relative z-10 bg-[#030014]/90 rounded-[22px] p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 overflow-hidden">
-
-                        {/* Animated Background Mesh */}
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#7c3aed]/20 to-transparent rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 <span className="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
@@ -116,7 +168,6 @@ export default function SuperAdminMasterDashboard() {
                             </h1>
                             <p className="text-[var(--text-dim)] mt-2 font-light text-sm">Orchestrating multi-tenant architecture across 12 institutes.</p>
                         </div>
-
                         <div className="flex gap-3">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -126,7 +177,6 @@ export default function SuperAdminMasterDashboard() {
                                 <Download className="w-4 h-4 text-[var(--text-dim)] group-hover:text-white transition-colors" />
                                 <span className="text-xs">Export Report</span>
                             </motion.button>
-
                             <motion.button
                                 whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(124,58,237,0.5)" }}
                                 whileTap={{ scale: 0.95 }}
@@ -140,15 +190,8 @@ export default function SuperAdminMasterDashboard() {
                     </div>
                 </motion.div>
 
-                {/* Master KPI Grid - 3D Cards with Hover Lift */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-                    {[
-                        { label: "Total Institutes", value: "12", trend: "+2 New", icon: Building2, color: "text-[#22d3ee]", bg: "from-cyan-500/10 to-blue-500/5", border: "border-cyan-500/20" },
-                        { label: "Active Users", value: "12,450", trend: "+8.2%", icon: Users, color: "text-[#7c3aed]", bg: "from-violet-500/10 to-purple-500/5", border: "border-violet-500/20" },
-                        { label: "Total Placements", value: "842", trend: "Top Tier", icon: Briefcase, color: "text-[#d946ef]", bg: "from-fuchsia-500/10 to-pink-500/5", border: "border-fuchsia-500/20" },
-                        { label: "Staff Strength", value: "156", trend: "Full Cap", icon: UserCheck, color: "text-amber-400", bg: "from-amber-500/10 to-orange-500/5", border: "border-amber-500/20" },
-                        { label: "Total Revenue", value: "₹8.42 Cr", trend: "+12.5%", icon: DollarSign, color: "text-emerald-400", bg: "from-emerald-500/10 to-teal-500/5", border: "border-emerald-500/20" },
-                    ].map((stat, idx) => (
+                    {statsConfig.map((stat, idx) => (
                         <motion.div
                             key={idx}
                             variants={itemVariants}
@@ -172,7 +215,7 @@ export default function SuperAdminMasterDashboard() {
                             </div>
                         </motion.div>
                     ))}
-                </div>
+                </div >
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Revenue Multi-Analysis - Glassmorphic Panel */}
@@ -201,7 +244,7 @@ export default function SuperAdminMasterDashboard() {
                             </div>
                             <div className="h-[280px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={REVENUE_DATA}>
+                                    <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.4} />
@@ -344,7 +387,7 @@ export default function SuperAdminMasterDashboard() {
                         </motion.div>
                     </div>
                 </div>
-            </motion.div>
-        </DashboardLayout>
+            </motion.div >
+        </DashboardLayout >
     );
 }

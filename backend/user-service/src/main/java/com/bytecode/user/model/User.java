@@ -23,6 +23,7 @@ public class User {
     private String branch; // For Multi-branch management
     private String password;
     private String phoneNumber;
+    private String profileImage; // URL or Base64
     private boolean active;
     private Date createdAt;
 }

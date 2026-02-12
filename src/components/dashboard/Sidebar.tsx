@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { DASHBOARD_NAV, Role } from '@/lib/dashboard-config';
-import { LogOut, Hexagon, User, Settings, Shield, Bell, X, CheckCircle, Zap, CreditCard, Edit2, Save, Phone, Lock, Mail } from 'lucide-react';
+import { LogOut, Hexagon, User, Settings, Shield, Bell, X, CheckCircle, Zap, CreditCard, Edit2, Save, Phone, Lock, Mail, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import Toast from '@/components/ui/Toast';
 
 interface SidebarProps {
     role: Role;
@@ -20,19 +21,38 @@ export default function Sidebar({ role }: SidebarProps) {
     const [profileData, setProfileData] = useState<any>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [tempProfile, setTempProfile] = useState<any>({});
+    const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
+
+    // Fetch user profile data on mount
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (user?.email) {
+                try {
+                    const response = await api.get(`/users/${user.email}`);
+                    setProfileData(response.data);
+                } catch (error) {
+                    console.error("Failed to fetch profile on mount", error);
+                    // Keep profileData as null, will fall back to user from context
+                }
+            }
+        };
+        fetchUserProfile();
+    }, [user?.email]);
 
     const handleOpenProfile = async () => {
         setIsProfileOpen(true);
-        if (user?.email) {
+        if (user?.email && !profileData) {
             try {
                 const response = await api.get(`/users/${user.email}`);
                 setProfileData(response.data);
-                setTempProfile(response.data); // Initialize temp profile
+                setTempProfile(response.data);
             } catch (error) {
                 console.error("Failed to fetch profile", error);
                 setProfileData(user);
                 setTempProfile(user);
             }
+        } else {
+            setTempProfile(profileData || user);
         }
     };
 
@@ -43,16 +63,19 @@ export default function Sidebar({ role }: SidebarProps) {
                 ...tempProfile,
                 // Ensure password is sent only if changed (handled by backend check)
                 password: tempProfile.password || "",
-                phoneNumber: tempProfile.phoneNumber || ""
+                phoneNumber: tempProfile.phoneNumber || "",
+                profileImage: tempProfile.profileImage || ""
             };
 
             await api.put(`/users/${tempProfile.id}`, updatedData);
             setProfileData(updatedData);
             setIsEditing(false);
-            alert("Profile updated successfully!");
+            setStatus({ type: 'success', msg: 'Profile updated successfully!' });
+            setTimeout(() => setStatus(null), 3000);
         } catch (error) {
             console.error("Failed to update profile", error);
-            alert("Failed to update profile.");
+            setStatus({ type: 'error', msg: 'Failed to update profile.' });
+            setTimeout(() => setStatus(null), 3000);
         }
     };
 
@@ -69,7 +92,17 @@ export default function Sidebar({ role }: SidebarProps) {
                         <div className="font-[Rajdhani] text-2xl font-bold text-white tracking-wide leading-none">
                             BYTE<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">CODE</span>
                         </div>
-                        <div className="text-[10px] text-slate-400 tracking-[0.2em] uppercase font-bold mt-1">Admin Console</div>
+                        <div className="text-[10px] text-slate-400 tracking-[0.2em] uppercase font-bold mt-1">
+                            {{
+                                super_admin: 'Global Command',
+                                admin: 'Admin Console',
+                                trainer: 'Faculty Portal',
+                                hr: 'Placement Cell',
+                                counselor: 'Counselor Desk',
+                                finance: 'Finance Dept',
+                                student: 'Student Hub'
+                            }[role] || 'Portal'}
+                        </div>
                     </div>
                 </div>
 
@@ -140,7 +173,11 @@ export default function Sidebar({ role }: SidebarProps) {
                                 <div className="relative">
                                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 p-[2px]">
                                         <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-xs font-bold text-white relative overflow-hidden">
-                                            {user?.id ? user.fullName.slice(0, 2).toUpperCase() : role.slice(0, 2).toUpperCase()}
+                                            {(profileData?.profileImage || user?.profileImage) ? (
+                                                <img src={profileData?.profileImage || user?.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                                            ) : (
+                                                user?.id ? user.fullName.slice(0, 2).toUpperCase() : role.slice(0, 2).toUpperCase()
+                                            )}
                                             {/* Shine effect */}
                                             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                                         </div>
@@ -151,7 +188,7 @@ export default function Sidebar({ role }: SidebarProps) {
                                 <div className="flex-1 min-w-0">
                                     <div className="text-[10px] text-slate-400 font-medium mb-0.5 uppercase tracking-tighter">Authorized User</div>
                                     <div className="text-sm font-bold text-white truncate capitalize bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 group-hover:from-violet-200 group-hover:to-white transition-all">
-                                        {user?.fullName || role.replace('_', ' ')}
+                                        {profileData?.fullName || user?.fullName || role.replace('_', ' ')}
                                     </div>
                                 </div>
                             </div>
@@ -163,6 +200,11 @@ export default function Sidebar({ role }: SidebarProps) {
                     </motion.div>
                 </div>
             </aside>
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {status && <Toast status={status} onClose={() => setStatus(null)} />}
+            </AnimatePresence>
 
             {/* Profile Modal */}
             <AnimatePresence>
@@ -205,27 +247,68 @@ export default function Sidebar({ role }: SidebarProps) {
 
                                     <motion.div
                                         initial={{ scale: 0 }} animate={{ scale: 1 }}
-                                        className="w-28 h-28 rounded-full bg-gradient-to-tr from-violet-500 via-fuchsia-500 to-blue-500 p-1 mb-4 shadow-xl shadow-violet-500/20"
+                                        className="w-28 h-28 rounded-full bg-gradient-to-tr from-violet-500 via-fuchsia-500 to-blue-500 p-1 mb-4 shadow-xl shadow-violet-500/20 relative group/avatar"
                                     >
-                                        <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center text-4xl font-bold text-white relative overflow-hidden group">
-                                            {tempProfile?.fullName ? tempProfile.fullName.slice(0, 2).toUpperCase() : user?.fullName?.slice(0, 2).toUpperCase() || 'US'}
-                                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                        <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center text-4xl font-bold text-white relative overflow-hidden">
+                                            {/* Show uploaded image or initials */}
+                                            {(tempProfile.profileImage || profileData?.profileImage || user?.profileImage) ? (
+                                                <img
+                                                    src={tempProfile.profileImage || profileData?.profileImage || user?.profileImage}
+                                                    alt="Profile"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                (tempProfile?.fullName || user?.fullName || 'US').slice(0, 2).toUpperCase()
+                                            )}
                                         </div>
                                     </motion.div>
 
                                     {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={tempProfile.fullName || ''}
-                                            onChange={(e) => setTempProfile({ ...tempProfile, fullName: e.target.value })}
-                                            className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-1 text-white text-center font-bold mb-1 w-full max-w-[200px]"
-                                            placeholder="Full Name"
-                                        />
+                                        <div className="flex flex-col gap-2 w-full max-w-[240px] mb-2 items-center">
+                                            <input
+                                                type="text"
+                                                value={tempProfile.fullName || ''}
+                                                onChange={(e) => setTempProfile({ ...tempProfile, fullName: e.target.value })}
+                                                className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-1 text-white text-center font-bold w-full"
+                                                placeholder="Full Name"
+                                            />
+                                            {/* Profile Image Upload */}
+                                            <div className="relative w-full">
+                                                <input
+                                                    type="file"
+                                                    id="profile-upload"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            if (file.size > 2 * 1024 * 1024) {
+                                                                setStatus({ type: 'error', msg: 'Image size must be less than 2MB' });
+                                                                setTimeout(() => setStatus(null), 3000);
+                                                                return;
+                                                            }
+                                                            const reader = new FileReader();
+                                                            reader.onloadend = () => {
+                                                                setTempProfile({ ...tempProfile, profileImage: reader.result as string });
+                                                            };
+                                                            reader.readAsDataURL(file);
+                                                        }
+                                                    }}
+                                                />
+                                                <label
+                                                    htmlFor="profile-upload"
+                                                    className="flex items-center justify-center gap-2 w-full py-1.5 px-3 bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/20 rounded-lg text-xs text-violet-300 cursor-pointer transition-colors"
+                                                >
+                                                    <ImageIcon size={14} />
+                                                    {tempProfile.profileImage ? 'Change Photo' : 'Upload Photo'}
+                                                </label>
+                                            </div>
+                                        </div>
                                     ) : (
                                         <h3 className="text-2xl font-bold text-white text-center mb-1">{profileData?.fullName || user?.fullName || 'User'}</h3>
                                     )}
 
-                                    <div className="flex items-center gap-2 mt-2">
+                                    <div className="flex items-center gap-2 mt-1">
                                         <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-wider">
                                             {profileData?.role || user?.role || 'Role'}
                                         </span>
