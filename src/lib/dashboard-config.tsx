@@ -44,18 +44,28 @@ export const ROLE_CONFIG: Record<Role, { label: string; dashUrl: string }> = {
 
 export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     super_admin: [
-        { label: 'Overview', href: '/admin/super', icon: LayoutDashboard },
-        { label: 'Academics', href: '/admin/super/academics', icon: BookOpen },
-        { label: 'Course Management', href: '/admin/super/courses', icon: Layers },
+        // 1. DASHBOARD & OVERVIEW
+        { label: 'Dashboard Overview', href: '/admin/super', icon: LayoutDashboard },
+
+        // 2. ACADEMIC OPERATIONS
+        { label: 'Course & Academics', href: '/admin/super/courses', icon: Layers },
         { label: 'Online Exam Engine', href: '/admin/super/exams', icon: FileText },
+
+        // 3. STUDENT LIFECYCLE MANAGEMENT
         { label: 'Admissions & CRM', href: '/admin/super/admissions', icon: UserCheck },
-        { label: 'Business & Employees', href: '/admin/super/business', icon: Building2 },
         { label: 'User Management', href: '/admin/super/users', icon: Users },
-        { label: 'Financials', href: '/admin/super/finance', icon: DollarSign },
-        { label: 'Placements', href: '/admin/super/placements', icon: Briefcase },
-        { label: 'Assets & Inventory', href: '/admin/super/assets', icon: Building2 },
-        { label: 'Reports & Analytics', href: '/admin/super/reports', icon: BarChart3 },
+        { label: 'Placements & Career', href: '/admin/super/placements', icon: Briefcase },
+
+        // 4. BUSINESS OPERATIONS
+        { label: 'Business & Employees', href: '/admin/super/business', icon: Building2 },
+        { label: 'Financial Management', href: '/admin/super/finance', icon: DollarSign },
+        { label: 'Assets & Inventory', href: '/admin/super/assets', icon: Award },
+
+        // 5. COMMUNICATION & INSIGHTS
         { label: 'Notice Board', href: '/admin/super/notices', icon: Bell },
+        { label: 'Reports & Analytics', href: '/admin/super/reports', icon: BarChart3 },
+
+        // 6. SYSTEM ADMINISTRATION
         { label: 'Platform Settings', href: '/admin/super/settings', icon: Settings },
     ],
     admin: [

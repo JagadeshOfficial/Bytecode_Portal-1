@@ -84,9 +84,9 @@ export default function SuperAdminMasterDashboard() {
         const fetchData = async () => {
             try {
                 const [usersRes, placementsRes, feesRes] = await Promise.all([
-                    api.get('/users'),
-                    api.get('/placements/records'),
-                    api.get('/finance/fees')
+                    api.get('users'),
+                    api.get('placements/records'),
+                    api.get('finance/fees')
                 ]);
 
                 const users: any[] = usersRes.data;

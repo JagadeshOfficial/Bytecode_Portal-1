@@ -1,1207 +1,1085 @@
 "use client";
 
-import { useState, Fragment } from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { useState, useEffect, useMemo } from 'react';
+import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    BookOpen, Layers, Users, DollarSign,
-    Plus, Search, Filter, MoreVertical,
-    CheckCircle, XCircle, Clock, Star,
-    Edit, Trash2, ChevronDown, ChevronUp,
-    FileText, Video, PenTool, Layout, Upload, Calendar, Link, MoreHorizontal, Download, File, Folder, ChevronRight, CornerUpLeft, Lock, Unlock, Eye
+    GraduationCap,
+    BookOpen,
+    Users,
+    TrendingUp,
+    CheckCircle,
+    Calendar,
+    Clock,
+    FileText,
+    PieChart,
+    Layers,
+    PlayCircle,
+    MoreVertical,
+    Plus,
+    Search,
+    Settings,
+    Video,
+    Award,
+    Bell,
+    AlertCircle,
+    Edit,
+    Trash2,
+    Eye,
+    Download,
+    Upload,
+    Filter,
+    BarChart3,
+    Target,
+    Zap,
+    Star,
+    TrendingDown,
+    Activity,
+    DollarSign,
+    X,
+    Save,
+    UserPlus,
+    UserMinus,
+    FolderOpen,
+    File,
+    Lock,
+    Unlock,
+    ChevronRight,
+    ArrowLeft,
+    Link as LinkIcon
 } from 'lucide-react';
-import styles from '../SuperAdmin.module.css';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import api from '@/lib/api';
 
-// -- Types --
-type CourseStatus = 'Active' | 'Draft' | 'Archived';
-type CourseCategory = 'Development' | 'Data Science' | 'Design' | 'Cloud' | 'Cyber Security';
-type ResourceType = 'Video' | 'File' | 'Link' | 'Folder';
-type AccessStatus = 'Granted' | 'Revoked';
-
-interface Module {
-    id: number;
+// ========== INTERFACES ==========
+interface Course {
+    id: string;
     title: string;
-    topics: number;
+    description: string;
+    category: string;
+    level: string;
     duration: string;
-}
-
-interface BatchResource {
-    id: string;
-    title: string;
-    type: ResourceType;
-    url?: string;
-    date: string;
-    uploadedBy: string; // Tutor Name
-    parentId: string | null; // For nested folders
-    accessList: string[]; // List of Student IDs who have access. Empty = All
-}
-
-interface BatchStudent {
-    id: string;
-    name: string;
-    email: string;
-    status: AccessStatus;
-    joinDate: string;
-    lastActive: string;
-    progress: number; // %
-}
-
-interface BatchTutor {
-    id: string;
-    name: string;
-    email: string;
-    status: AccessStatus;
-}
-
-interface ActivityLog {
-    id: string;
-    studentId: string;
-    resourceName: string;
-    action: 'Opened' | 'Completed' | 'Downloaded';
-    timestamp: string;
-    duration?: string; // e.g., "15m 20s"
+    price: number;
+    instructor: string;
+    rating: number;
+    enrolledStudents: number;
+    thumbnail: string;
+    status: string;
 }
 
 interface Batch {
     id: string;
-    name: string;
+    batchCode: string;
+    batchName: string;
+    courseId: string;
+    courseName: string;
+    trainerId: string;
+    trainerName: string;
     startDate: string;
-    time: string;
-    students: BatchStudent[];
-    tutors: BatchTutor[];
-    resources: BatchResource[];
+    endDate: string;
+    status: string;
+    totalStudents: number;
+    studentIds: string[];
+    schedule: string;
+    mode: string;
+    branch: string;
+    maxCapacity: number;
 }
 
-interface Course {
+interface LiveSession {
     id: string;
     title: string;
-    category: CourseCategory;
     description: string;
-    duration: string;
-    fee: number;
-    status: CourseStatus;
-    students: number;
-    rating: number;
-    modules: Module[];
-    batches: Batch[];
-    lastUpdated: string;
-    thumbnail: string;
+    mentorName: string;
+    courseName: string;
+    batchId: string;
+    batchName: string;
+    startTime: string;
+    endTime: string;
+    duration: number;
+    meetingLink: string;
+    status: string;
+    platform: string;
+    totalParticipants: number;
 }
 
-// -- Mock Helpers --
-const generateMockStudents = (count: number): BatchStudent[] => {
-    return Array.from({ length: count }).map((_, i) => ({
-        id: `S-2024-${1000 + i}`,
-        name: `Student ${i + 1}`,
-        email: `student${i + 1}@example.com`,
-        status: i % 10 === 0 ? 'Revoked' : 'Granted',
-        joinDate: '2024-03-01',
-        lastActive: '2024-03-05 10:30 AM',
-        progress: Math.floor(Math.random() * 100)
-    }));
-};
+interface Assignment {
+    id: string;
+    title: string;
+    description: string;
+    courseName: string;
+    batchId: string;
+    batchName: string;
+    trainerName: string;
+    assignedDate: string;
+    dueDate: string;
+    totalMarks: number;
+    difficulty: string;
+    status: string;
+    submissions?: any[];
+}
 
-const generateMockActivity = (studentId: string): ActivityLog[] => {
-    return [
-        { id: 'ACT-1', studentId, resourceName: 'Java Installation Guide', action: 'Downloaded', timestamp: '2024-03-01 10:05 AM' },
-        { id: 'ACT-2', studentId, resourceName: 'Week 1 Recording', action: 'Opened', timestamp: '2024-03-02 02:15 PM', duration: '45m 00s' },
-        { id: 'ACT-3', studentId, resourceName: 'Week 1 Recording', action: 'Completed', timestamp: '2024-03-02 03:00 PM' },
-        { id: 'ACT-4', studentId, resourceName: 'Assignment 1', action: 'Opened', timestamp: '2024-03-03 09:30 AM', duration: '5m 12s' },
-    ];
-};
+interface LearningMaterial {
+    id: string;
+    batchId: string;
+    folderId?: string;
+    name: string;
+    type: 'FOLDER' | 'VIDEO' | 'PDF' | 'DOCUMENT' | 'IMAGE';
+    url?: string;
+    size?: number;
+    uploadedBy: string;
+    uploadedAt: string;
+    permissions: {
+        studentIds: string[];
+        accessType: 'READ' | 'WRITE' | 'FULL';
+        isPublic?: boolean;
+    };
+}
 
-// -- Mock Data --
-const INITIAL_COURSES: Course[] = [
-    {
-        id: 'C-101', title: 'Full Stack Java Development', category: 'Development',
-        description: 'Master Java, Spring Boot, and React for enterprise application development.',
-        duration: '6 Months', fee: 25000, status: 'Active', students: 120, rating: 4.8,
-        lastUpdated: '2024-02-15', thumbnail: '☕',
-        modules: [
-            { id: 1, title: 'Core Java Fundamentals', topics: 12, duration: '4 Weeks' },
-            { id: 2, title: 'Advanced Java & J2EE', topics: 8, duration: '3 Weeks' },
-            { id: 3, title: 'Spring Boot Microservices', topics: 15, duration: '6 Weeks' },
-            { id: 4, title: 'React Frontend Integration', topics: 10, duration: '4 Weeks' }
-        ],
-        batches: [
-            {
-                id: 'B-101', name: 'Java Weekend Batch', startDate: '2024-03-01', time: '10:00 AM - 01:00 PM',
-                students: generateMockStudents(25),
-                tutors: [
-                    { id: 'T-1', name: 'Sarah Jenkins', email: 'sarah.j@academy.com', status: 'Granted' },
-                    { id: 'T-2', name: 'Mike Ross', email: 'mike.r@academy.com', status: 'Granted' }
-                ],
-                resources: [
-                    { id: 'F-1', title: 'Class Recordings', type: 'Folder', date: '2024-03-01', uploadedBy: 'System', parentId: null, accessList: [] },
-                    { id: 'R-1', title: 'Java Installation Guide', type: 'File', url: '#', date: '2024-03-01', uploadedBy: 'Sarah Jenkins', parentId: null, accessList: [] },
-                    { id: 'R-2', title: 'Week 1 Recording', type: 'Video', url: '#', date: '2024-03-02', uploadedBy: 'Mike Ross', parentId: 'F-1', accessList: [] } // Inside folder
-                ]
-            }
-        ]
-    },
-    // ... other courses (omitted for brevity, structure is identical)
-    {
-        id: 'C-102', title: 'Data Science with Python', category: 'Data Science',
-        description: 'Comprehensive data science bootcamp covering Python, ML, and AI.',
-        duration: '5 Months', fee: 30000, status: 'Active', students: 85, rating: 4.7,
-        lastUpdated: '2024-02-10', thumbnail: '🐍',
-        modules: [
-            { id: 1, title: 'Python for Data Analysis', topics: 14, duration: '5 Weeks' },
-            { id: 2, title: 'Machine Learning Algorithms', topics: 18, duration: '8 Weeks' }
-        ],
-        batches: []
-    },
-    {
-        id: 'C-103', title: 'DevOps & Cloud Engineering', category: 'Cloud',
-        description: 'Learn AWS, Docker, Kubernetes and CI/CD pipelines.',
-        duration: '4 Months', fee: 28000, status: 'Active', students: 60, rating: 4.9,
-        lastUpdated: '2024-02-20', thumbnail: '☁️',
-        modules: [],
-        batches: []
-    },
-    {
-        id: 'C-104', title: 'UI/UX Design Masterclass', category: 'Design',
-        description: 'Design beautiful user interfaces and user experiences.',
-        duration: '3 Months', fee: 18000, status: 'Draft', students: 0, rating: 0,
-        lastUpdated: '2024-02-25', thumbnail: '🎨',
-        modules: [
-            { id: 1, title: 'Design Thinking', topics: 5, duration: '2 Weeks' },
-            { id: 2, title: 'Figma Mastery', topics: 12, duration: '4 Weeks' }
-        ],
-        batches: []
-    },
-];
+interface Student {
+    id: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    enrolledCourses: string[];
+}
 
-const MiniChart = ({ color }: { color: string }) => (
-    <div style={{ height: '40px', width: '80px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={[
-                { v: 10 }, { v: 25 }, { v: 15 }, { v: 30 }, { v: 20 }, { v: 45 }, { v: 40 }
-            ]}>
-                <defs>
-                    <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-                        <stop offset="100%" stopColor={color} stopOpacity={0} />
-                    </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="v" stroke={color} strokeWidth={2} fill={`url(#grad-${color})`} />
-            </AreaChart>
-        </ResponsiveContainer>
-    </div>
-);
+interface Trainer {
+    id: string;
+    fullName: string;
+    email: string;
+    specialization: string;
+}
 
-export default function CoursesPage() {
-    const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
+export default function CourseManagementPage() {
+    const [activeTab, setActiveTab] = useState('courses');
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-    // UI State
-    const [expandedCourseId, setExpandedCourseId] = useState<string | null>(null);
-    const [expandedTab, setExpandedTab] = useState<'curriculum' | 'batches'>('curriculum');
+    // Data states
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [batches, setBatches] = useState<Batch[]>([]);
+    const [sessions, setSessions] = useState<LiveSession[]>([]);
+    const [assignments, setAssignments] = useState<Assignment[]>([]);
+    const [students, setStudents] = useState<Student[]>([]);
+    const [trainers, setTrainers] = useState<Trainer[]>([]);
+    const [materials, setMaterials] = useState<LearningMaterial[]>([]);
 
-    // Modal States
-    const [isEditOpen, setIsEditOpen] = useState(false);
-    const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
+    // View states
+    const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+    const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
+    const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
 
-    const [isBatchOpen, setIsBatchOpen] = useState(false);
-    const [currentBatch, setCurrentBatch] = useState<Batch | null>(null);
-    const [batchTab, setBatchTab] = useState<'content' | 'people' | 'tutors'>('content');
-    const [activeBatchCourseId, setActiveBatchCourseId] = useState<string | null>(null);
-    const [newStudentInput, setNewStudentInput] = useState('');
-    const [newTutorInput, setNewTutorInput] = useState('');
+    // Modal states
+    const [showBatchModal, setShowBatchModal] = useState(false);
+    const [showSessionModal, setShowSessionModal] = useState(false);
+    const [showStudentModal, setShowStudentModal] = useState(false);
+    const [showMaterialModal, setShowMaterialModal] = useState(false);
+    const [showPermissionModal, setShowPermissionModal] = useState(false);
 
-    // Folder Navigation State
-    const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+    // Form states
+    const [batchForm, setBatchForm] = useState<Partial<Batch>>({});
+    const [sessionForm, setSessionForm] = useState<Partial<LiveSession>>({});
+    const [materialForm, setMaterialForm] = useState<Partial<LearningMaterial>>({});
 
-    // Student Tracking State
-    const [selectedStudent, setSelectedStudent] = useState<BatchStudent | null>(null);
-    const [studentActivity, setStudentActivity] = useState<ActivityLog[]>([]);
+    // Fetch all data
+    useEffect(() => {
+        fetchAllData();
+    }, []);
 
-    // Resource Access Modal State
-    const [resourceAccessModal, setResourceAccessModal] = useState<{ isOpen: boolean, resourceId: string | null }>({ isOpen: false, resourceId: null });
+    const fetchAllData = async () => {
+        try {
+            setLoading(true);
+            const results = await Promise.allSettled([
+                api.get('courses'),
+                api.get('academic/batches'),
+                api.get('academic/sessions'),
+                api.get('academic/assignments'),
+                api.get('users?role=STUDENT'),
+                api.get('users?role=TRAINER'),
+                api.get('academic/materials')
+            ]);
 
-    // Filter Logic
-    const filteredCourses = courses.filter(course => {
-        const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            course.id.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
+            const [coursesRes, batchesRes, sessionsRes, assignmentsRes, studentsRes, trainersRes, materialsRes] = results;
 
-    const stats = {
-        total: courses.length,
-        active: courses.filter(c => c.status === 'Active').length,
-        students: courses.reduce((acc, curr) => acc + curr.students, 0),
-        revenue: courses.reduce((acc, curr) => acc + (curr.students * curr.fee), 0)
-    };
+            if (coursesRes.status === 'fulfilled') setCourses(coursesRes.value.data);
+            if (batchesRes.status === 'fulfilled') setBatches(batchesRes.value.data);
+            if (sessionsRes.status === 'fulfilled') setSessions(sessionsRes.value.data);
+            if (assignmentsRes.status === 'fulfilled') setAssignments(assignmentsRes.value.data);
+            if (studentsRes.status === 'fulfilled') setStudents(studentsRes.value.data);
+            if (trainersRes.status === 'fulfilled') setTrainers(trainersRes.value.data);
+            if (materialsRes.status === 'fulfilled') setMaterials(materialsRes.value.data || []);
 
-    // -- Course Actions --
-    const handleEditCourse = (course: Course | null) => {
-        setCurrentCourse(course ? { ...course } : null);
-        setIsEditOpen(true);
-    };
-
-    const handleSaveCourse = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (currentCourse) {
-            if (courses.some(c => c.id === currentCourse.id)) {
-                setCourses(courses.map(c => c.id === currentCourse.id ? currentCourse : c));
-            } else {
-                setCourses([...courses, { ...currentCourse, id: `C-${100 + courses.length + 1}` }]);
-            }
+            setLoading(false);
+        } catch (error) {
+            console.error("Dashboard data fetch failed:", error);
+            setLoading(false);
         }
-        setIsEditOpen(false);
     };
 
-    // -- Batch Actions --
-    const handleOpenBatch = (courseId: string, batch?: Batch) => {
-        setActiveBatchCourseId(courseId);
-        setCurrentBatch(batch || {
-            id: `B-${Math.floor(Math.random() * 1000)}`,
-            name: '', startDate: '', time: '', students: [], tutors: [], resources: []
-        });
-        setBatchTab('content'); // Default tab
-        setCurrentFolderId(null); // Reset to root
-        setNewStudentInput('');
-        setNewTutorInput('');
-        setIsBatchOpen(true);
-    };
+    // Get batches for selected course
+    const courseBatches = useMemo(() => {
+        if (!selectedCourse) return [];
+        return batches.filter(b => b.courseId === selectedCourse.id);
+    }, [selectedCourse, batches]);
 
-    const handleViewStudentHistory = (student: BatchStudent) => {
-        setSelectedStudent(student);
-        setStudentActivity(generateMockActivity(student.id));
-    };
+    // Get sessions for selected batch
+    const batchSessions = useMemo(() => {
+        if (!selectedBatch) return [];
+        return sessions.filter(s => s.batchId === selectedBatch.id);
+    }, [selectedBatch, sessions]);
 
-    const handleAddStudent = () => {
-        if (!currentBatch || !newStudentInput.trim()) return;
-        const newStudent: BatchStudent = {
-            id: `S-NEW-${Date.now()}`,
-            name: newStudentInput,
-            email: `${newStudentInput.toLowerCase().replace(/\s/g, '.')}@student.com`, // Mock email generation
-            status: 'Granted',
-            joinDate: new Date().toISOString().split('T')[0],
-            lastActive: 'Never',
-            progress: 0
-        };
-        setCurrentBatch({
-            ...currentBatch,
-            students: [...currentBatch.students, newStudent]
-        });
-        setNewStudentInput('');
-    };
+    // Get materials for selected batch
+    const batchMaterials = useMemo(() => {
+        if (!selectedBatch) return [];
+        return materials.filter(m =>
+            m.batchId === selectedBatch.id &&
+            (currentFolder ? m.folderId === currentFolder : !m.folderId)
+        );
+    }, [selectedBatch, materials, currentFolder]);
 
-    const handleAddTutor = () => {
-        if (!currentBatch || !newTutorInput.trim()) return;
-        const newTutor: BatchTutor = {
-            id: `T-NEW-${Date.now()}`,
-            name: newTutorInput,
-            email: `${newTutorInput.toLowerCase().replace(/\s/g, '.')}@tutor.com`, // Mock email generation
-            status: 'Granted'
-        };
-        setCurrentBatch({
-            ...currentBatch,
-            tutors: [...currentBatch.tutors, newTutor]
-        });
-        setNewTutorInput('');
-    };
-
-    const handleSaveBatch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (currentBatch && activeBatchCourseId) {
-            const courseIndex = courses.findIndex(c => c.id === activeBatchCourseId);
-            if (courseIndex > -1) {
-                const updatedCourses = [...courses];
-                const course = updatedCourses[courseIndex];
-                const batchIndex = course.batches.findIndex(b => b.id === currentBatch.id);
-
-                if (batchIndex > -1) {
-                    course.batches[batchIndex] = currentBatch;
-                } else {
-                    course.batches.push(currentBatch);
+    // Fetch materials when folder changes
+    useEffect(() => {
+        if (selectedBatch) {
+            const fetchMaterials = async () => {
+                try {
+                    const url = currentFolder
+                        ? `academic/materials/batch/${selectedBatch.id}/folder/${currentFolder}`
+                        : `academic/materials/batch/${selectedBatch.id}/root`;
+                    const res = await api.get(url);
+                    // Update the main materials state with new data
+                    setMaterials(prev => {
+                        const otherMaterials = prev.filter(m =>
+                            m.batchId !== selectedBatch.id ||
+                            (currentFolder ? m.folderId !== currentFolder : m.folderId !== null)
+                        );
+                        return [...otherMaterials, ...(res.data || [])];
+                    });
+                } catch (error) {
+                    console.error("Failed to fetch folder materials:", error);
                 }
-                setCourses(updatedCourses);
-            }
-        }
-        setIsBatchOpen(false);
-    };
-
-    const toggleRowExpand = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (expandedCourseId === id) {
-            setExpandedCourseId(null);
-        } else {
-            setExpandedCourseId(id);
-            setExpandedTab('curriculum'); // Reset to default
-        }
-    };
-
-    // -- Resource & Content Logic --
-    const getCurrentResources = () => {
-        if (!currentBatch) return [];
-        // Normalize null/undefined for comparison
-        const targetParentId = currentFolderId || null;
-        return currentBatch.resources.filter(res => (res.parentId || null) === targetParentId);
-    };
-
-    const handleCreateFolder = () => {
-        setCurrentBatch(prev => {
-            if (!prev) return null;
-            const newFolder: BatchResource = {
-                id: `F-${Date.now()}`,
-                title: 'New Folder',
-                type: 'Folder',
-                date: new Date().toISOString().split('T')[0],
-                uploadedBy: 'Admin',
-                parentId: currentFolderId || null,
-                accessList: []
             };
-            return {
-                ...prev,
-                resources: [...prev.resources, newFolder]
-            };
-        });
-    };
-
-    const handleNavigateFolder = (folderId: string | null) => {
-        setCurrentFolderId(folderId);
-    };
-
-    const getBreadcrumbs = () => {
-        if (!currentFolderId) return [{ id: null, title: 'Root' }];
-        const crumbs = [{ id: null, title: 'Root' }];
-
-        // Find current folder
-        let current = currentBatch?.resources.find(r => r.id === currentFolderId);
-        const path = [];
-
-        // Traverse up
-        while (current) {
-            path.unshift({ id: current.id, title: current.title });
-            const parentId = current.parentId;
-            if (parentId) {
-                current = currentBatch?.resources.find(r => r.id === parentId);
-            } else {
-                current = undefined;
-            }
+            fetchMaterials();
         }
-        return [...crumbs, ...path];
+    }, [currentFolder, selectedBatch]);
+
+    // Statistics
+    const stats = useMemo(() => {
+        const totalRevenue = courses.reduce((acc, c) => acc + (c.price * c.enrolledStudents), 0);
+        const avgRating = courses.length > 0 ? courses.reduce((acc, c) => acc + c.rating, 0) / courses.length : 0;
+
+        return [
+            {
+                label: "Total Courses",
+                value: courses.length.toString(),
+                icon: BookOpen,
+                color: "#3b82f6",
+                trend: `${courses.filter(c => c.status === 'ACTIVE').length} Active`
+            },
+            {
+                label: "Active Batches",
+                value: batches.filter(b => b.status === 'ONGOING').length.toString(),
+                icon: Users,
+                color: "#8b5cf6",
+                trend: `${batches.reduce((acc, b) => acc + b.totalStudents, 0)} Students`
+            },
+            {
+                label: "Live Sessions",
+                value: sessions.filter(s => s.status === 'ONGOING' || s.status === 'UPCOMING').length.toString(),
+                icon: Video,
+                color: "#10b981",
+                trend: "Today"
+            },
+            {
+                label: "Course Revenue",
+                value: `₹${(totalRevenue / 100000).toFixed(1)}L`,
+                icon: DollarSign,
+                color: "#f59e0b",
+                trend: `${avgRating.toFixed(1)}★ Avg Rating`
+            },
+        ];
+    }, [courses, batches, sessions]);
+
+    // Helper functions
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
 
-    // -- Drag & Drop Helpers --
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (currentBatch) {
-            const newResources: BatchResource[] = Array.from(e.dataTransfer.files).map((f, i) => ({
-                id: `R-DROP-${Date.now()}-${i}`,
-                title: f.name,
-                type: f.type.includes('video') ? 'Video' : 'File',
-                url: '#',
-                date: new Date().toISOString().split('T')[0],
-                uploadedBy: 'Admin (Drag & Drop)',
-                parentId: currentFolderId || null, // Drop into current folder
-                accessList: []
-            }));
-            setCurrentBatch(prev => prev ? { ...prev, resources: [...prev.resources, ...newResources] } : null);
-        }
+    const formatTime = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     };
 
-    // -- Access Control Logic --
-    const toggleResourceAccess = (resourceId: string, studentId: string) => {
-        setCurrentBatch(prev => {
-            if (!prev) return null;
-            const resIndex = prev.resources.findIndex(r => r.id === resourceId);
-            if (resIndex === -1) return prev;
-
-            const updatedResources = [...prev.resources];
-            const currentAccessList = updatedResources[resIndex].accessList || [];
-
-            let newAccessList;
-            if (currentAccessList.includes(studentId)) {
-                newAccessList = currentAccessList.filter(id => id !== studentId);
-            } else {
-                newAccessList = [...currentAccessList, studentId];
-            }
-
-            updatedResources[resIndex] = { ...updatedResources[resIndex], accessList: newAccessList };
-            return { ...prev, resources: updatedResources };
-        });
+    const getStatusColor = (status: string) => {
+        const colors: Record<string, string> = {
+            'ONGOING': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+            'UPCOMING': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+            'COMPLETED': 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+            'ACTIVE': 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+        };
+        return colors[status] || 'bg-amber-500/10 text-amber-400 border-amber-500/20';
     };
 
-    const getResourceIcon = (type: ResourceType) => {
-        switch (type) {
-            case 'Video': return <Video size={18} />;
-            case 'File': return <FileText size={18} />;
-            case 'Folder': return <Folder size={18} fill="#60a5fa" color="#60a5fa" />;
-            default: return <Link size={18} />;
+    // CRUD Operations
+    const handleCreateBatch = async () => {
+        try {
+            await api.post('academic/batches', { ...batchForm, courseId: selectedCourse?.id });
+            fetchAllData();
+            setShowBatchModal(false);
+            setBatchForm({});
+        } catch (error) {
+            console.error("Failed to create batch:", error);
         }
     };
 
-    const getResourceColor = (type: ResourceType) => {
-        switch (type) {
-            case 'Video': return { bg: 'rgba(239, 68, 68, 0.2)', text: '#f87171' };
-            case 'Folder': return { bg: 'rgba(59, 130, 246, 0.2)', text: '#60a5fa' };
-            default: return { bg: 'rgba(16, 185, 129, 0.2)', text: '#34d399' };
+    const handleUpdateBatch = async () => {
+        if (!selectedBatch) return;
+        try {
+            await api.put(`academic/batches/${selectedBatch.id}`, batchForm);
+            fetchAllData();
+            setShowBatchModal(false);
+            setBatchForm({});
+        } catch (error) {
+            console.error("Failed to update batch:", error);
         }
     };
+
+    const handleAssignStudent = async (studentId: string) => {
+        if (!selectedBatch) return;
+        try {
+            const updatedStudents = [...(selectedBatch.studentIds || []), studentId];
+            await api.put(`academic/batches/${selectedBatch.id}`, {
+                ...selectedBatch,
+                studentIds: updatedStudents,
+                totalStudents: updatedStudents.length
+            });
+            fetchAllData();
+        } catch (error) {
+            console.error("Failed to assign student:", error);
+        }
+    };
+
+    const handleRemoveStudent = async (studentId: string) => {
+        if (!selectedBatch) return;
+        try {
+            const updatedStudents = selectedBatch.studentIds.filter(id => id !== studentId);
+            await api.put(`academic/batches/${selectedBatch.id}`, {
+                ...selectedBatch,
+                studentIds: updatedStudents,
+                totalStudents: updatedStudents.length
+            });
+            fetchAllData();
+        } catch (error) {
+            console.error("Failed to remove student:", error);
+        }
+    };
+
+    const handleCreateSession = async () => {
+        try {
+            await api.post('academic/sessions', { ...sessionForm, batchId: selectedBatch?.id });
+            fetchAllData();
+            setShowSessionModal(false);
+            setSessionForm({});
+        } catch (error) {
+            console.error("Failed to create session:", error);
+        }
+    };
+
+    const handleUploadMaterial = async () => {
+        try {
+            await api.post('academic/materials', { ...materialForm, batchId: selectedBatch?.id, folderId: currentFolder });
+            fetchAllData();
+            setShowMaterialModal(false);
+            setMaterialForm({});
+        } catch (error) {
+            console.error("Failed to upload material:", error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <AdvancedModuleLayout
+                title="Course & Academic Management"
+                subtitle="Comprehensive course, batch, and curriculum management system"
+                stats={stats}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                tabs={[
+                    { id: 'courses', label: 'Courses', icon: BookOpen },
+                    { id: 'batches', label: 'Batches', icon: Users },
+                    { id: 'sessions', label: 'Sessions', icon: Video },
+                    { id: 'materials', label: 'Materials', icon: FolderOpen },
+                ]}
+            >
+                <div className="flex items-center justify-center h-64">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="text-white font-bold">Loading...</div>
+                    </div>
+                </div>
+            </AdvancedModuleLayout>
+        );
+    }
 
     return (
-        <DashboardLayout role="super_admin">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={styles.container}>
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
-                    <div>
-                        <div className={styles.textLabel} style={{ marginBottom: '0.25rem' }}>Academic Administration</div>
-                        <h1 className={styles.textH1}>Course Management</h1>
-                    </div>
-                </div>
-
-                {/* KPI Stats */}
-                <div className={styles.advStatsGrid}>
-                    <div className={styles.advCard}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <div className={styles.advCardIconBox} style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' }}><BookOpen size={24} /></div>
-                            <MiniChart color="#8b5cf6" />
-                        </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'white', fontFamily: 'Rajdhani', marginTop: '0.5rem' }}>{stats.total}</div>
-                        <div className={styles.textSub}>Total Courses</div>
-                    </div>
-                    <div className={styles.advCard}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <div className={styles.advCardIconBox} style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}><CheckCircle size={24} /></div>
-                            <MiniChart color="#34d399" />
-                        </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'white', fontFamily: 'Rajdhani', marginTop: '0.5rem' }}>{stats.active}</div>
-                        <div className={styles.textSub}>Active Catalogs</div>
-                    </div>
-                    <div className={styles.advCard}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <div className={styles.advCardIconBox} style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}><Users size={24} /></div>
-                            <MiniChart color="#60a5fa" />
-                        </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'white', fontFamily: 'Rajdhani', marginTop: '0.5rem' }}>{stats.students}</div>
-                        <div className={styles.textSub}>Total Enrolled</div>
-                    </div>
-                    <div className={styles.advCard}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <div className={styles.advCardIconBox} style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}><DollarSign size={24} /></div>
-                            <MiniChart color="#fbbf24" />
-                        </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'white', fontFamily: 'Rajdhani', marginTop: '0.5rem' }}>₹{(stats.revenue / 100000).toFixed(1)}L</div>
-                        <div className={styles.textSub}>Revenue Est.</div>
-                    </div>
-                </div>
-
-                {/* Filters */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-                    {['All', 'Development', 'Data Science', 'Cloud', 'Design', 'Cyber Security'].map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            style={{
-                                padding: '0.5rem 1.25rem',
-                                borderRadius: '8px',
-                                background: selectedCategory === cat ? 'rgba(124, 58, 237, 0.2)' : 'rgba(30, 41, 59, 0.5)',
-                                color: selectedCategory === cat ? '#c4b5fd' : '#94a3b8',
-                                border: selectedCategory === cat ? '1px solid rgba(124, 58, 237, 0.5)' : '1px solid rgba(71, 85, 105, 0.5)',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                fontWeight: 500,
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Courses Table */}
-                <div className={styles.card}>
-                    <div className={styles.tableContainer}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th style={{ paddingLeft: '1.5rem' }}>Course Name</th>
-                                    <th>Category</th>
-                                    <th>Fee Structure</th>
-                                    <th>Last Updated</th>
-                                    <th>Status</th>
-                                    <th>Performance</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredCourses.map(course => (
-                                    <Fragment key={course.id}>
-                                        <tr className={styles.interactiveRow} onClick={(e) => toggleRowExpand(course.id, e)}>
-                                            <td style={{ paddingLeft: '1.5rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                    <div style={{
-                                                        width: '40px', height: '40px', borderRadius: '8px',
-                                                        background: 'rgba(30, 41, 59, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        fontSize: '1.2rem', border: '1px solid rgba(51, 65, 85, 0.5)'
-                                                    }}>
-                                                        {course.thumbnail}
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontWeight: 600, color: 'white', fontSize: '0.95rem' }}>{course.title}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{course.id} • {course.duration}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{course.category}</span></td>
-                                            <td><div style={{ color: 'white', fontWeight: 500 }}>₹{course.fee.toLocaleString()}</div></td>
-                                            <td><div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{course.lastUpdated}</div></td>
-                                            <td>
-                                                <span className={styles.statusBadge} style={{
-                                                    background: course.status === 'Active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(148, 163, 184, 0.1)',
-                                                    color: course.status === 'Active' ? '#10b981' : '#94a3b8'
-                                                }}>{course.status}</span>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', color: '#facc15', fontSize: '0.85rem', fontWeight: 600 }}>
-                                                        <Star size={12} fill="#facc15" style={{ marginRight: '4px' }} /> {course.rating}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>({course.students} students)</div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button onClick={(e) => { e.stopPropagation(); handleEditCourse(course); }} className={styles.btnSecondary} style={{ padding: '6px', height: 'auto', color: '#60a5fa' }}><Edit size={14} /></button>
-                                                    <button onClick={(e) => { e.stopPropagation(); /* Delete */ }} className={styles.btnSecondary} style={{ padding: '6px', height: 'auto', color: '#ef4444' }}><Trash2 size={14} /></button>
-                                                    {expandedCourseId === course.id ? <ChevronUp size={16} color="#94a3b8" /> : <ChevronDown size={16} color="#94a3b8" />}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {/* Expanded Row */}
-                                        <AnimatePresence>
-                                            {expandedCourseId === course.id && (
-                                                <motion.tr initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                                                    <td colSpan={7} style={{ padding: 0, borderBottom: '1px solid rgba(51, 65, 85, 0.3)' }}>
-                                                        <div style={{ background: 'rgba(15, 23, 42, 0.3)', padding: '1.5rem', paddingLeft: '4rem' }}>
-                                                            {/* Advanced Tabs for Expanded View */}
-                                                            <div style={{
-                                                                display: 'flex',
-                                                                padding: '0.25rem',
-                                                                background: 'rgba(15, 23, 42, 0.4)',
-                                                                borderRadius: '8px',
-                                                                border: '1px solid rgba(51, 65, 85, 0.3)',
-                                                                width: 'fit-content',
-                                                                marginBottom: '1.5rem',
-                                                                gap: '0.5rem'
-                                                            }}>
-                                                                {[
-                                                                    { id: 'curriculum', label: 'Curriculum & Modules', icon: Layers },
-                                                                    { id: 'batches', label: 'Active Batches', icon: Users }
-                                                                ].map(tab => (
-                                                                    <button
-                                                                        key={tab.id}
-                                                                        onClick={() => setExpandedTab(tab.id as any)}
-                                                                        style={{
-                                                                            position: 'relative',
-                                                                            padding: '0.5rem 1rem',
-                                                                            borderRadius: '6px',
-                                                                            border: 'none',
-                                                                            background: 'transparent',
-                                                                            color: expandedTab === tab.id ? '#ffffff' : '#94a3b8',
-                                                                            fontWeight: expandedTab === tab.id ? 600 : 500,
-                                                                            fontSize: '0.85rem',
-                                                                            cursor: 'pointer',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            gap: '0.5rem',
-                                                                            outline: 'none',
-                                                                            zIndex: 1
-                                                                        }}
-                                                                    >
-                                                                        {expandedTab === tab.id && (
-                                                                            <motion.div
-                                                                                layoutId="activeTabCourse"
-                                                                                style={{
-                                                                                    position: 'absolute',
-                                                                                    inset: 0,
-                                                                                    background: 'rgba(124, 58, 237, 0.2)',
-                                                                                    border: '1px solid rgba(139, 92, 246, 0.3)',
-                                                                                    borderRadius: '6px',
-                                                                                    zIndex: -1
-                                                                                }}
-                                                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                                                            />
-                                                                        )}
-                                                                        <tab.icon size={14} />
-                                                                        {tab.label}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-
-                                                            {expandedTab === 'curriculum' && (
-                                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
-                                                                    {course.modules.length > 0 ? course.modules.map(mod => (
-                                                                        <div key={mod.id} style={{ background: 'rgba(30, 41, 59, 0.5)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(51, 65, 85, 0.5)', display: 'flex', gap: '0.75rem' }}>
-                                                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.1)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{mod.id}</div>
-                                                                            <div>
-                                                                                <div style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>{mod.title}</div>
-                                                                                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>{mod.topics} Topics • {mod.duration}</div>
-                                                                            </div>
-                                                                        </div>
-                                                                    )) : <div style={{ color: '#64748b' }}>No curriculum modules defined.</div>}
-                                                                </motion.div>
-                                                            )}
-
-                                                            {expandedTab === 'batches' && (
-                                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                                                                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-                                                                        <button className={styles.btnPrimary} style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }} onClick={() => handleOpenBatch(course.id)}>
-                                                                            <Plus size={14} /> Create New Batch
-                                                                        </button>
-                                                                    </div>
-                                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                                                        {course.batches.length > 0 ? course.batches.map(batch => (
-                                                                            <div key={batch.id} onClick={() => handleOpenBatch(course.id, batch)} style={{
-                                                                                background: 'rgba(30, 41, 59, 0.4)', padding: '1.25rem', borderRadius: '0.75rem',
-                                                                                border: '1px solid rgba(51, 65, 85, 0.5)', cursor: 'pointer', transition: 'all 0.2s',
-                                                                                position: 'relative', overflow: 'hidden'
-                                                                            }} className={styles.hoverScale}>
-                                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                                                    <div>
-                                                                                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>{batch.name}</div>
-                                                                                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{batch.id}</div>
-                                                                                    </div>
-                                                                                    <div style={{ padding: '0.25rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '999px', fontSize: '0.75rem', height: 'fit-content' }}>Active</div>
-                                                                                </div>
-                                                                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1rem' }}>
-                                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={14} /> {batch.startDate}</div>
-                                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={14} /> {batch.time}</div>
-                                                                                </div>
-                                                                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                                                                                    <div style={{ display: 'flex', gap: '-0.5rem' }}>{batch.tutors.length} Tutors</div>
-                                                                                    <div style={{ color: '#a78bfa' }}>{batch.students.length} Students</div>
-                                                                                </div>
-                                                                            </div>
-                                                                        )) : <div style={{ color: '#64748b' }}>No active batches for this course.</div>}
-                                                                    </div>
-                                                                </motion.div>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </motion.tr>
-                                            )}
-                                        </AnimatePresence>
-                                    </Fragment>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Batch Management Modal (Enhanced with Folder System and Access Control) */}
-                <AnimatePresence>
-                    {isBatchOpen && currentBatch && (
-                        <div className={styles.modalOverlay}>
-                            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className={`${styles.modalContent} ${styles.modalContentLarge}`} style={{ maxHeight: '95vh', overflowY: 'auto', maxWidth: '1000px' }}>
-                                <div className={styles.modalHeader} style={{ background: 'rgba(30, 41, 59, 0.95)', position: 'sticky', top: 0, zIndex: 10 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                                        <div>
-                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>BATCH MANAGEMENT</div>
-                                            <h2 className={styles.modalTitle} style={{ fontSize: '1.4rem' }}>{currentBatch.name || 'New Batch Configuration'}</h2>
-                                        </div>
-                                        <button onClick={() => setIsBatchOpen(false)} className={styles.closeBtn}>✕</button>
-                                    </div>
-
-                                    {/* Advanced Tabs */}
-                                    <div style={{
-                                        display: 'flex',
-                                        padding: '0.35rem',
-                                        background: 'rgba(15, 23, 42, 0.6)',
-                                        borderRadius: '12px',
-                                        border: '1px solid rgba(51, 65, 85, 0.5)',
-                                        width: 'fit-content',
-                                        marginTop: '1.5rem',
-                                        gap: '0.25rem'
-                                    }}>
-                                        {[
-                                            { id: 'content', label: 'Resources & Content', icon: Upload },
-                                            { id: 'people', label: 'Students & Progress', icon: Users },
-                                            { id: 'tutors', label: 'Tutors & Access', icon: CheckCircle }
-                                        ].map(tab => (
-                                            <button
-                                                key={tab.id}
-                                                type="button"
-                                                onClick={() => setBatchTab(tab.id as any)}
-                                                style={{
-                                                    position: 'relative',
-                                                    padding: '0.6rem 1.2rem',
-                                                    borderRadius: '8px',
-                                                    border: 'none',
-                                                    background: 'transparent',
-                                                    color: batchTab === tab.id ? '#ffffff' : '#94a3b8',
-                                                    fontWeight: batchTab === tab.id ? 600 : 500,
-                                                    fontSize: '0.85rem',
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '0.6rem',
-                                                    zIndex: 1,
-                                                    transition: 'color 0.2s ease',
-                                                    outline: 'none'
-                                                }}
-                                            >
-                                                {batchTab === tab.id && (
-                                                    <motion.div
-                                                        layoutId="activeTabBatch"
-                                                        style={{
-                                                            position: 'absolute',
-                                                            inset: 0,
-                                                            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)',
-                                                            borderRadius: '8px',
-                                                            zIndex: -1,
-                                                            boxShadow: '0 4px 15px rgba(124, 58, 237, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2)'
-                                                        }}
-                                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                                    />
-                                                )}
-                                                <tab.icon size={15} style={{ opacity: batchTab === tab.id ? 1 : 0.7 }} />
-                                                {tab.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <form onSubmit={handleSaveBatch}>
-                                    <div className={styles.modalBody} style={{ minHeight: '400px' }}>
-                                        {/* Configuration Section */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem', background: 'rgba(15, 23, 42, 0.3)', padding: '1rem', borderRadius: '0.5rem' }}>
-                                            <div className={styles.formGroup}><label className={styles.formLabel}>Batch Name</label><input className={styles.formInput} value={currentBatch.name} onChange={e => setCurrentBatch({ ...currentBatch, name: e.target.value })} placeholder="e.g. Java Weekend B1" required /></div>
-                                            <div className={styles.formGroup}><label className={styles.formLabel}>Start Date</label><input type="date" className={styles.formInput} value={currentBatch.startDate} onChange={e => setCurrentBatch({ ...currentBatch, startDate: e.target.value })} /></div>
-                                            <div className={styles.formGroup}><label className={styles.formLabel}>Timing</label><input className={styles.formInput} value={currentBatch.time} onChange={e => setCurrentBatch({ ...currentBatch, time: e.target.value })} placeholder="e.g. 10:00 AM" /></div>
-                                        </div>
-
-                                        {/* Content Tab (FileSystem & Uploads) */}
-                                        {batchTab === 'content' && (
-                                            <div className={styles.fadeIn}>
-                                                {/* Navigation Bar */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>
-                                                        {getBreadcrumbs().map((crumb, index) => (
-                                                            <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <span
-                                                                    onClick={() => handleNavigateFolder(crumb.id as string | null)}
-                                                                    style={{ cursor: 'pointer', fontWeight: index === getBreadcrumbs().length - 1 ? 700 : 400, color: index === getBreadcrumbs().length - 1 ? 'white' : 'inherit' }}
-                                                                >
-                                                                    {crumb.title}
-                                                                </span>
-                                                                {index < getBreadcrumbs().length - 1 && <ChevronRight size={14} style={{ margin: '0 0.25rem' }} />}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        {currentFolderId && (
-                                                            <button type="button" onClick={() => {
-                                                                const curr = currentBatch.resources.find(r => r.id === currentFolderId);
-                                                                handleNavigateFolder(curr?.parentId || null);
-                                                            }} className={styles.btnSecondary} style={{ padding: '0.5rem' }}>
-                                                                <CornerUpLeft size={16} /> Up
-                                                            </button>
-                                                        )}
-                                                        <button type="button" className={styles.btnSecondary} onClick={handleCreateFolder}>
-                                                            <Plus size={16} style={{ marginRight: '0.25rem' }} /> New Folder
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#a78bfa'; e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)'; }}
-                                                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.5)'; e.currentTarget.style.background = 'transparent'; }}
-                                                    onDrop={handleDrop}
-                                                    style={{
-                                                        border: '2px dashed rgba(51, 65, 85, 0.5)', borderRadius: '1rem', padding: '2rem',
-                                                        textAlign: 'center', marginBottom: '1.5rem', transition: 'all 0.2s', cursor: 'pointer', position: 'relative'
-                                                    }}
-                                                >
-                                                    <input
-                                                        type="file" multiple
-                                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
-                                                        onChange={(e) => {
-                                                            if (e.target.files && currentBatch) {
-                                                                const newResources: BatchResource[] = Array.from(e.target.files).map((f, i) => ({
-                                                                    id: `R-UP-${Date.now()}-${i}`,
-                                                                    title: f.name,
-                                                                    type: f.type.includes('video') ? 'Video' : 'File',
-                                                                    url: '#',
-                                                                    date: new Date().toISOString().split('T')[0],
-                                                                    uploadedBy: 'Admin (Manual)',
-                                                                    parentId: currentFolderId || null,
-                                                                    accessList: []
-                                                                }));
-                                                                setCurrentBatch({ ...currentBatch, resources: [...currentBatch.resources, ...newResources] });
-                                                            }
-                                                        }}
-                                                    />
-                                                    <Upload size={32} color="#a78bfa" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
-                                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Drag files or click to upload to <b>{currentFolderId ? 'this folder' : 'root'}</b></p>
-                                                </div>
-
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                    {getCurrentResources().length > 0 ? getCurrentResources().map((res, idx) => {
-                                                        const colors = getResourceColor(res.type);
-                                                        return (
-                                                            <div
-                                                                key={res.id}
-                                                                onClick={() => res.type === 'Folder' && handleNavigateFolder(res.id)}
-                                                                style={{
-                                                                    display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem',
-                                                                    background: 'rgba(30, 41, 59, 0.5)', borderRadius: '0.5rem', border: '1px solid rgba(51, 65, 85, 0.5)',
-                                                                    cursor: res.type === 'Folder' ? 'pointer' : 'default'
-                                                                }}
-                                                            >
-                                                                <div style={{ padding: '0.5rem', background: colors.bg, borderRadius: '0.3rem', color: colors.text }}>
-                                                                    {getResourceIcon(res.type)}
-                                                                </div>
-                                                                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 0.5fr', gap: '1rem', alignItems: 'center' }}>
-                                                                    {res.type === 'Folder' ? (
-                                                                        <input className={styles.searchInput} value={res.title} onClick={e => e.stopPropagation()} onChange={(e) => {
-                                                                            const allRes = [...currentBatch.resources];
-                                                                            const target = allRes.find(r => r.id === res.id);
-                                                                            if (target) target.title = e.target.value;
-                                                                            setCurrentBatch(prev => prev ? { ...prev, resources: allRes } : null);
-                                                                        }} style={{ padding: '0.25rem', fontSize: '0.9rem', fontWeight: 600, color: 'white' }} />
-                                                                    ) : (
-                                                                        <input className={styles.searchInput} value={res.title} onClick={e => e.stopPropagation()} onChange={(e) => {
-                                                                            const allRes = [...currentBatch.resources];
-                                                                            const target = allRes.find(r => r.id === res.id);
-                                                                            if (target) target.title = e.target.value;
-                                                                            setCurrentBatch(prev => prev ? { ...prev, resources: allRes } : null);
-                                                                        }} style={{ padding: '0.25rem', fontSize: '0.9rem' }} />
-                                                                    )}
-
-                                                                    <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{res.uploadedBy}</div>
-                                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{res.date}</div>
-                                                                    <button type="button" onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setResourceAccessModal({ isOpen: true, resourceId: res.id });
-                                                                    }} className={styles.btnSecondary} style={{ color: res.accessList?.length ? '#fbbf24' : '#94a3b8' }} title="Manage Access">
-                                                                        {res.accessList?.length ? <Lock size={16} /> : <Unlock size={16} />}
-                                                                    </button>
-
-                                                                </div>
-                                                                <button type="button" onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const allRes = currentBatch.resources.filter(r => r.id !== res.id);
-                                                                    setCurrentBatch(prev => prev ? { ...prev, resources: allRes } : null);
-                                                                }} className={styles.btnSecondary} style={{ color: '#ef4444' }}><Trash2 size={16} /></button>
-                                                            </div>
-                                                        );
-                                                    }) : <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>This folder is empty.</div>}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Students Tab */}
-                                        {batchTab === 'people' && (
-                                            <div className={styles.fadeIn}>
-                                                <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-                                                    <input
-                                                        className={styles.searchInput}
-                                                        placeholder="Add student by name..."
-                                                        value={newStudentInput}
-                                                        onChange={(e) => setNewStudentInput(e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddStudent())}
-                                                    />
-                                                    <button type="button" onClick={handleAddStudent} className={styles.btnPrimary} style={{ width: 'auto', whiteSpace: 'nowrap' }}>
-                                                        <Plus size={16} style={{ marginRight: '0.5rem' }} /> Add Student
-                                                    </button>
-                                                </div>
-                                                <div style={{ overflowX: 'auto' }}>
-                                                    <table className={styles.table} style={{ fontSize: '0.9rem' }}>
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Student Name</th>
-                                                                <th>Email</th>
-                                                                <th>Access Status</th>
-                                                                <th>Progress</th>
-                                                                <th>Last Active</th>
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {currentBatch.students.map((student, idx) => (
-                                                                <tr key={student.id}>
-                                                                    <td onClick={() => handleViewStudentHistory(student)} style={{ cursor: 'pointer' }}>
-                                                                        <span style={{ color: 'white', fontWeight: 500, textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)', textUnderlineOffset: '4px' }}>{student.name}</span>
-                                                                    </td>
-                                                                    <td>{student.email}</td>
-                                                                    <td>
-                                                                        <button type="button" onClick={() => {
-                                                                            const newStudents = [...currentBatch.students];
-                                                                            newStudents[idx].status = student.status === 'Granted' ? 'Revoked' : 'Granted';
-                                                                            setCurrentBatch({ ...currentBatch, students: newStudents });
-                                                                        }} style={{
-                                                                            padding: '2px 8px', borderRadius: '4px', border: 'none', cursor: 'pointer',
-                                                                            background: student.status === 'Granted' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                                                            color: student.status === 'Granted' ? '#34d399' : '#f87171', fontWeight: 600
-                                                                        }}>
-                                                                            {student.status}
-                                                                        </button>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-                                                                            <div style={{ width: `${student.progress}%`, height: '100%', background: '#a78bfa' }}></div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td style={{ color: '#94a3b8' }}>{student.lastActive}</td>
-                                                                    <td>
-                                                                        <button type="button" onClick={() => handleViewStudentHistory(student)} className={styles.btnSecondary} style={{ padding: '4px 8px', fontSize: '0.75rem' }}>
-                                                                            View History
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Tutors Tab */}
-                                        {batchTab === 'tutors' && (
-                                            <div className={styles.fadeIn}>
-                                                <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-                                                    <input
-                                                        className={styles.searchInput}
-                                                        placeholder="Add tutor by name..."
-                                                        value={newTutorInput}
-                                                        onChange={(e) => setNewTutorInput(e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTutor())}
-                                                    />
-                                                    <button type="button" onClick={handleAddTutor} className={styles.btnPrimary} style={{ width: 'auto', whiteSpace: 'nowrap' }}>
-                                                        <Plus size={16} style={{ marginRight: '0.5rem' }} /> Add Tutor
-                                                    </button>
-                                                </div>
-                                                <table className={styles.table}>
-                                                    <thead><tr><th>Tutor Name</th><th>Email</th><th>Access Status</th><th>Actions</th></tr></thead>
-                                                    <tbody>
-                                                        {currentBatch.tutors.map((tutor, idx) => (
-                                                            <tr key={tutor.id}>
-                                                                <td style={{ color: 'white' }}>{tutor.name}</td>
-                                                                <td>{tutor.email}</td>
-                                                                <td>
-                                                                    <button type="button" onClick={() => {
-                                                                        const newTutors = [...currentBatch.tutors];
-                                                                        newTutors[idx].status = tutor.status === 'Granted' ? 'Revoked' : 'Granted';
-                                                                        setCurrentBatch({ ...currentBatch, tutors: newTutors });
-                                                                    }} style={{
-                                                                        padding: '2px 8px', borderRadius: '4px', border: 'none', cursor: 'pointer',
-                                                                        background: tutor.status === 'Granted' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                                                        color: tutor.status === 'Granted' ? '#34d399' : '#f87171', fontWeight: 600
-                                                                    }}>
-                                                                        {tutor.status}
-                                                                    </button>
-                                                                </td>
-                                                                <td><button type="button" className={styles.btnSecondary} style={{ color: '#ef4444' }}><Trash2 size={14} /></button></td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className={styles.formActions} style={{ padding: '1.5rem', borderTop: '1px solid rgba(51, 65, 85, 0.5)' }}>
-                                        <button type="button" onClick={() => setIsBatchOpen(false)} className={styles.btnSecondary} style={{ flex: 1, justifyContent: 'center' }}>Discard Changes</button>
-                                        <button type="submit" className={styles.btnPrimary} style={{ flex: 1, justifyContent: 'center' }}>Save Batch Configuration</button>
-                                    </div>
-                                </form>
-                            </motion.div>
+        <AdvancedModuleLayout
+            title="Course & Academic Management"
+            subtitle="Comprehensive course, batch, and curriculum management system"
+            stats={stats}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            tabs={[
+                { id: 'courses', label: 'Courses', icon: BookOpen },
+                { id: 'batches', label: 'Batches', icon: Users },
+                { id: 'sessions', label: 'Sessions', icon: Video },
+                { id: 'materials', label: 'Materials', icon: FolderOpen },
+            ]}
+        >
+            {/* ========== COURSES TAB ========== */}
+            {activeTab === 'courses' && (
+                <div className="space-y-6">
+                    {/* Breadcrumb */}
+                    {selectedCourse && (
+                        <div className="flex items-center gap-2 text-sm">
+                            <button onClick={() => setSelectedCourse(null)} className="text-blue-400 hover:underline">
+                                Courses
+                            </button>
+                            <ChevronRight size={16} className="text-slate-600" />
+                            <span className="text-white font-bold">{selectedCourse.title}</span>
                         </div>
                     )}
-                </AnimatePresence>
 
-                {/* Resource Access Control Modal */}
-                <AnimatePresence>
-                    {resourceAccessModal.isOpen && resourceAccessModal.resourceId && currentBatch && (
-                        <div className={styles.modalOverlay} style={{ zIndex: 70 }}>
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={styles.modalContent} style={{ maxWidth: '500px' }}>
-                                <div className={styles.modalHeader}>
-                                    <h2 className={styles.modalTitle} style={{ fontSize: '1.1rem' }}>
-                                        Manage Access: {currentBatch.resources.find(r => r.id === resourceAccessModal.resourceId)?.title}
-                                    </h2>
-                                    <button onClick={() => setResourceAccessModal({ isOpen: false, resourceId: null })} className={styles.closeBtn}>✕</button>
-                                </div>
-                                <div className={styles.modalBody}>
-                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                                        Select students who can view this resource. Deselecting all grants access to everyone.
-                                    </p>
-                                    <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        {currentBatch.students.map(student => {
-                                            const resource = currentBatch.resources.find(r => r.id === resourceAccessModal.resourceId);
-                                            const hasAccess = resource?.accessList?.includes(student.id);
-                                            return (
-                                                <div key={student.id}
-                                                    onClick={() => toggleResourceAccess(resourceAccessModal.resourceId!, student.id)}
-                                                    style={{
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                                        padding: '0.75rem', borderRadius: '0.5rem',
-                                                        background: hasAccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(30, 41, 59, 0.5)',
-                                                        border: hasAccess ? '1px solid #34d399' : '1px solid transparent',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    <span style={{ color: 'white' }}>{student.name}</span>
-                                                    {hasAccess ? <CheckCircle size={16} color="#34d399" /> : <div style={{ width: 16, height: 16, border: '1px solid #64748b', borderRadius: '50%' }}></div>}
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
-
-                {/* Student Profile Side Drawer (Advanced) */}
-                <AnimatePresence>
-                    {selectedStudent && (
+                    {!selectedCourse ? (
+                        // Course List View
                         <>
-                            {/* Backdrop */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setSelectedStudent(null)}
-                                style={{
-                                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 60
-                                }}
-                            />
-
-                            {/* Drawer */}
-                            <motion.div
-                                initial={{ x: '100%', opacity: 0.5 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: '100%', opacity: 0 }}
-                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                style={{
-                                    position: 'fixed',
-                                    top: 0,
-                                    right: 0,
-                                    height: '100vh',
-                                    width: '480px',
-                                    background: 'rgba(15, 23, 42, 0.95)',
-                                    borderLeft: '1px solid rgba(124, 58, 237, 0.2)',
-                                    boxShadow: '-10px 0 40px rgba(0,0,0,0.5)',
-                                    zIndex: 70,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    overflow: 'hidden'
-                                }}
-                            >
-                                {/* Drawer Header */}
-                                <div style={{
-                                    padding: '2rem',
-                                    background: 'linear-gradient(180deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 0) 100%)',
-                                    borderBottom: '1px solid rgba(51, 65, 85, 0.5)',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    position: 'relative'
-                                }}>
-                                    <button
-                                        onClick={() => setSelectedStudent(null)}
-                                        style={{
-                                            position: 'absolute', top: '1.5rem', right: '1.5rem',
-                                            background: 'rgba(51, 65, 85, 0.5)', border: 'none', borderRadius: '50%',
-                                            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            color: '#cbd5e1', cursor: 'pointer', transition: 'all 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(51, 65, 85, 0.5)'}
-                                    >
-                                        <XCircle size={18} />
-                                    </button>
-
-                                    <div style={{
-                                        width: '96px', height: '96px', borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '2.5rem', fontWeight: 700, color: 'white',
-                                        marginBottom: '1rem', boxShadow: '0 8px 32px rgba(124, 58, 237, 0.3)'
-                                    }}>
-                                        {selectedStudent.name.charAt(0)}
-                                    </div>
-                                    <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{selectedStudent.name}</h2>
-                                    <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>{selectedStudent.email}</div>
-                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                                        <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(124, 58, 237, 0.15)', color: '#a78bfa', borderRadius: '999px', fontSize: '0.75rem', border: '1px solid rgba(124, 58, 237, 0.3)' }}>
-                                            Student ID: {selectedStudent.id}
-                                        </span>
-                                        <span style={{ padding: '0.25rem 0.75rem', background: selectedStudent.status === 'Granted' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: selectedStudent.status === 'Granted' ? '#34d399' : '#f87171', borderRadius: '999px', fontSize: '0.75rem', border: `1px solid ${selectedStudent.status === 'Granted' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}` }}>
-                                            {selectedStudent.status}
-                                        </span>
-                                    </div>
+                            <div className="flex justify-between items-center">
+                                <div className="relative w-96">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search courses..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500"
+                                    />
                                 </div>
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                                    <Plus size={16} /> Add Course
+                                </button>
+                            </div>
 
-                                {/* Drawer Content (Scrollable) */}
-                                <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-
-                                    {/* Stats Grid */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-                                        <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid rgba(51, 65, 85, 0.5)' }}>
-                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={14} /> Last Active</div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 600, color: 'white' }}>{selectedStudent.lastActive}</div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {courses.map((course, i) => (
+                                    <motion.div
+                                        key={course.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        onClick={() => setSelectedCourse(course)}
+                                        className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all group cursor-pointer"
+                                    >
+                                        <div className="relative h-40 bg-gradient-to-br from-blue-500/20 to-violet-600/20">
+                                            {course.thumbnail ? (
+                                                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <BookOpen size={48} className="text-white/20" />
+                                                </div>
+                                            )}
                                         </div>
-                                        <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid rgba(51, 65, 85, 0.5)' }}>
-                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={14} /> Course Progress</div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 600, color: '#a78bfa' }}>{selectedStudent.progress}% Completed</div>
-                                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', marginTop: '0.5rem', borderRadius: '2px' }}>
-                                                <div style={{ width: `${selectedStudent.progress}%`, height: '100%', background: '#a78bfa', borderRadius: '2px' }} />
+                                        <div className="p-5">
+                                            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
+                                                {course.title}
+                                            </h3>
+                                            <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
+                                            <div className="flex items-center justify-between text-xs text-slate-400 border-t border-white/5 pt-4">
+                                                <div className="flex items-center gap-1">
+                                                    <Users size={12} />
+                                                    {course.enrolledStudents}
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                                                    {course.rating}
+                                                </div>
                                             </div>
                                         </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        // Course Detail View - Show Batches
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white">{selectedCourse.title}</h2>
+                                    <p className="text-slate-400">{courseBatches.length} Batches</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setBatchForm({ courseId: selectedCourse.id, courseName: selectedCourse.title });
+                                        setShowBatchModal(true);
+                                    }}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                                >
+                                    <Plus size={16} /> Create Batch
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {courseBatches.map((batch) => (
+                                    <motion.div
+                                        key={batch.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        onClick={() => {
+                                            setSelectedBatch(batch);
+                                            setActiveTab('batches');
+                                        }}
+                                        className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-blue-500/50 transition-all group cursor-pointer"
+                                    >
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white">
+                                                <Users size={24} />
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusColor(batch.status)}`}>
+                                                {batch.status}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-400">{batch.batchName}</h3>
+                                        <div className="text-sm text-slate-400 mb-3">{batch.trainerName}</div>
+                                        <div className="space-y-2 text-xs text-slate-400 border-t border-white/5 pt-4">
+                                            <div className="flex justify-between">
+                                                <span>Students:</span>
+                                                <span className="text-white font-bold">{batch.totalStudents}/{batch.maxCapacity}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Mode:</span>
+                                                <span className="text-white font-bold">{batch.mode}</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ========== BATCHES TAB ========== */}
+            {activeTab === 'batches' && selectedBatch && (
+                <div className="space-y-6">
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm">
+                        <button onClick={() => { setSelectedBatch(null); setActiveTab('courses'); }} className="text-blue-400 hover:underline">
+                            Batches
+                        </button>
+                        <ChevronRight size={16} className="text-slate-600" />
+                        <span className="text-white font-bold">{selectedBatch.batchName}</span>
+                    </div>
+
+                    {/* Batch Header */}
+                    <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white mb-2">{selectedBatch.batchName}</h2>
+                                <div className="flex items-center gap-4 text-sm text-slate-400">
+                                    <span>{selectedBatch.courseName}</span>
+                                    <span>•</span>
+                                    <span>{selectedBatch.trainerName}</span>
+                                    <span>•</span>
+                                    <span>{selectedBatch.schedule}</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setBatchForm(selectedBatch);
+                                    setShowBatchModal(true);
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                            >
+                                <Edit size={16} /> Edit Batch
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Batch Management Sections */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Students Section */}
+                        <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <Users className="text-blue-400" size={20} />
+                                    Students ({selectedBatch.totalStudents}/{selectedBatch.maxCapacity})
+                                </h3>
+                                <button
+                                    onClick={() => setShowStudentModal(true)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                >
+                                    <UserPlus size={14} /> Assign
+                                </button>
+                            </div>
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
+                                {students.filter(s => selectedBatch.studentIds?.includes(s.id)).map((student) => (
+                                    <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                        <div>
+                                            <div className="text-sm font-bold text-white">{student.fullName}</div>
+                                            <div className="text-xs text-slate-400">{student.email}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleRemoveStudent(student.id)}
+                                            className="p-1.5 hover:bg-red-500/10 rounded text-red-400"
+                                        >
+                                            <UserMinus size={14} />
+                                        </button>
                                     </div>
+                                ))}
+                            </div>
+                        </div>
 
-                                    {/* Activity Timeline */}
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'white', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{ width: '4px', height: '16px', background: '#38bdf8', borderRadius: '2px' }} />
-                                            Recent Activity
-                                        </h3>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                            {studentActivity.map((log, index) => (
-                                                <div key={log.id} style={{
-                                                    display: 'flex', gap: '1rem', position: 'relative', paddingBottom: index === studentActivity.length - 1 ? 0 : '1rem'
-                                                }}>
-                                                    {/* Timeline Line */}
-                                                    {index !== studentActivity.length - 1 && (
-                                                        <div style={{ position: 'absolute', left: '15px', top: '30px', bottom: 0, width: '2px', background: 'rgba(51, 65, 85, 0.5)' }} />
-                                                    )}
+                        {/* Sessions Section */}
+                        <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <Video className="text-violet-400" size={20} />
+                                    Sessions ({batchSessions.length})
+                                </h3>
+                                <button
+                                    onClick={() => {
+                                        setSessionForm({ batchId: selectedBatch.id, batchName: selectedBatch.batchName });
+                                        setShowSessionModal(true);
+                                    }}
+                                    className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                >
+                                    <Plus size={14} /> Schedule
+                                </button>
+                            </div>
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
+                                {batchSessions.map((session) => (
+                                    <div key={session.id} className="p-3 bg-white/5 rounded-lg">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="text-sm font-bold text-white">{session.title}</div>
+                                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(session.status)}`}>
+                                                {session.status}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-slate-400">
+                                            {formatDate(session.startTime)} • {formatTime(session.startTime)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
 
-                                                    <div style={{
-                                                        width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-                                                        background: log.action === 'Opened' ? 'rgba(59, 130, 246, 0.2)' : log.action === 'Completed' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(251, 191, 36, 0.2)',
-                                                        color: log.action === 'Opened' ? '#60a5fa' : log.action === 'Completed' ? '#34d399' : '#fbbf24',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(15, 23, 42, 1)'
-                                                    }}>
-                                                        {log.action === 'Opened' ? <Eye size={14} /> : log.action === 'Completed' ? <CheckCircle size={14} /> : <Download size={14} />}
-                                                    </div>
+                    {/* Learning Materials Section */}
+                    <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                <FolderOpen className="text-amber-400" size={20} />
+                                Learning Materials
+                            </h3>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowMaterialModal(true)}
+                                    className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                >
+                                    <Upload size={14} /> Upload
+                                </button>
+                                <button
+                                    onClick={() => setShowPermissionModal(true)}
+                                    className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                >
+                                    <Lock size={14} /> Permissions
+                                </button>
+                            </div>
+                        </div>
 
-                                                    <div style={{ flex: 1, background: 'rgba(30, 41, 59, 0.3)', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(51, 65, 85, 0.3)' }}>
-                                                        <div style={{ fontSize: '0.9rem', color: 'white', marginBottom: '0.25rem' }}>
-                                                            {log.action === 'Opened' ? 'Viewed' : log.action} <span style={{ fontWeight: 600, color: '#e2e8f0' }}>{log.resourceName}</span>
-                                                        </div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
-                                                            <span>{log.timestamp}</span>
-                                                            {log.duration && <span>{log.duration}</span>}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
+                        {/* Breadcrumb for folders */}
+                        {currentFolder && (
+                            <div className="flex items-center gap-2 mb-4 text-sm">
+                                <button onClick={() => setCurrentFolder(null)} className="text-blue-400 hover:underline">
+                                    Root
+                                </button>
+                                <ChevronRight size={14} className="text-slate-600" />
+                                <span className="text-white">Current Folder</span>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {batchMaterials.map((material) => (
+                                <div
+                                    key={material.id}
+                                    onClick={() => material.type === 'FOLDER' ? setCurrentFolder(material.id) : null}
+                                    className={`bg-white/5 border border-white/5 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-pointer group relative`}
+                                >
+                                    <div className="absolute top-2 right-2">
+                                        {material.permissions?.isPublic ? (
+                                            <Unlock size={12} className="text-emerald-400 opacity-50" />
+                                        ) : (
+                                            <Lock size={12} className="text-amber-400 opacity-50" />
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col items-center text-center">
+                                        {material.type === 'FOLDER' ? (
+                                            <FolderOpen size={48} className="text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+                                        ) : material.type === 'VIDEO' ? (
+                                            <PlayCircle size={48} className="text-violet-400 mb-2 group-hover:scale-110 transition-transform" />
+                                        ) : (
+                                            <FileText size={48} className="text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
+                                        )}
+                                        <div className="text-sm font-bold text-white mb-1 line-clamp-1">{material.name}</div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-400">
+                                                {material.permissions?.accessType || 'READ'}
+                                            </span>
+                                            {!material.permissions?.isPublic && (
+                                                <span className="text-[10px] text-amber-500 font-bold">RESTR</span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-                            </motion.div>
-                        </>
-                    )}
-                </AnimatePresence>
+                            ))}
+                            {batchMaterials.length === 0 && (
+                                <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-2xl">
+                                    <FolderOpen size={40} className="mb-2 opacity-20" />
+                                    <p className="text-sm">No items in this folder</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
-            </motion.div>
-        </DashboardLayout>
+            {/* ========== MODALS ========== */}
+
+            {/* Batch Modal */}
+            <AnimatePresence>
+                {showBatchModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowBatchModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">
+                                    {batchForm.id ? 'Edit Batch' : 'Create New Batch'}
+                                </h3>
+                                <button onClick={() => setShowBatchModal(false)} className="text-slate-400 hover:text-white">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Batch Name</label>
+                                    <input
+                                        type="text"
+                                        value={batchForm.batchName || ''}
+                                        onChange={(e) => setBatchForm({ ...batchForm, batchName: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        placeholder="e.g., Full Stack Winter 2024"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={batchForm.startDate || ''}
+                                            onChange={(e) => setBatchForm({ ...batchForm, startDate: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">End Date</label>
+                                        <input
+                                            type="date"
+                                            value={batchForm.endDate || ''}
+                                            onChange={(e) => setBatchForm({ ...batchForm, endDate: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Schedule</label>
+                                    <input
+                                        type="text"
+                                        value={batchForm.schedule || ''}
+                                        onChange={(e) => setBatchForm({ ...batchForm, schedule: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        placeholder="e.g., Mon-Fri 10:00 AM - 12:00 PM"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Mode</label>
+                                        <select
+                                            value={batchForm.mode || 'ONLINE'}
+                                            onChange={(e) => setBatchForm({ ...batchForm, mode: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="ONLINE">Online</option>
+                                            <option value="OFFLINE">Offline</option>
+                                            <option value="HYBRID">Hybrid</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Max Capacity</label>
+                                        <input
+                                            type="number"
+                                            value={batchForm.maxCapacity || ''}
+                                            onChange={(e) => setBatchForm({ ...batchForm, maxCapacity: parseInt(e.target.value) })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        onClick={() => setShowBatchModal(false)}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={batchForm.id ? handleUpdateBatch : handleCreateBatch}
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
+                                    >
+                                        <Save size={16} /> {batchForm.id ? 'Update' : 'Create'}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Student Assignment Modal */}
+            <AnimatePresence>
+                {showStudentModal && selectedBatch && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowStudentModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">Assign Students</h3>
+                                <button onClick={() => setShowStudentModal(false)} className="text-slate-400 hover:text-white">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {students.filter(s => !selectedBatch.studentIds?.includes(s.id)).map((student) => (
+                                    <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10">
+                                        <div>
+                                            <div className="text-sm font-bold text-white">{student.fullName}</div>
+                                            <div className="text-xs text-slate-400">{student.email}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                handleAssignStudent(student.id);
+                                                setShowStudentModal(false);
+                                            }}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-bold"
+                                        >
+                                            Assign
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Session Modal */}
+            <AnimatePresence>
+                {showSessionModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowSessionModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">Schedule Session</h3>
+                                <button onClick={() => setShowSessionModal(false)} className="text-slate-400 hover:text-white">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Session Title</label>
+                                    <input
+                                        type="text"
+                                        value={sessionForm.title || ''}
+                                        onChange={(e) => setSessionForm({ ...sessionForm, title: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Start Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={sessionForm.startTime || ''}
+                                            onChange={(e) => setSessionForm({ ...sessionForm, startTime: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Duration (mins)</label>
+                                        <input
+                                            type="number"
+                                            value={sessionForm.duration || ''}
+                                            onChange={(e) => setSessionForm({ ...sessionForm, duration: parseInt(e.target.value) })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Meeting Link</label>
+                                    <input
+                                        type="url"
+                                        value={sessionForm.meetingLink || ''}
+                                        onChange={(e) => setSessionForm({ ...sessionForm, meetingLink: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        onClick={() => setShowSessionModal(false)}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleCreateSession}
+                                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
+                                    >
+                                        <Save size={16} /> Schedule
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Material Upload Modal */}
+            <AnimatePresence>
+                {showMaterialModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowMaterialModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-md"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">Upload Material</h3>
+                                <button onClick={() => setShowMaterialModal(false)} className="text-slate-400 hover:text-white">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Material Name</label>
+                                    <input
+                                        type="text"
+                                        value={materialForm.name || ''}
+                                        onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Type</label>
+                                    <select
+                                        value={materialForm.type || 'DOCUMENT'}
+                                        onChange={(e) => setMaterialForm({ ...materialForm, type: e.target.value as any })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    >
+                                        <option value="FOLDER">Folder</option>
+                                        <option value="VIDEO">Video</option>
+                                        <option value="PDF">PDF</option>
+                                        <option value="DOCUMENT">Document</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">File URL</label>
+                                    <input
+                                        type="url"
+                                        value={materialForm.url || ''}
+                                        onChange={(e) => setMaterialForm({ ...materialForm, url: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        onClick={() => setShowMaterialModal(false)}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleUploadMaterial}
+                                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
+                                    >
+                                        <Upload size={16} /> Upload
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </AdvancedModuleLayout>
     );
 }

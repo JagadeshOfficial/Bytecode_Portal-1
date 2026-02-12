@@ -76,11 +76,11 @@ export default function AdminOperationsDashboard() {
         const fetchDashboardData = async () => {
             try {
                 // Fetch Live Sessions
-                const sessionsRes = await api.get('/academic/sessions');
+                const sessionsRes = await api.get('academic/sessions');
                 setLiveSessions(sessionsRes.data);
 
                 // Fetch Courses to update stats
-                const coursesRes = await api.get('/courses');
+                const coursesRes = await api.get('courses');
                 const courseCount = (coursesRes.data || []).length;
 
                 const updatedStats = [...STATS];
