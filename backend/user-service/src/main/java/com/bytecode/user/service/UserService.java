@@ -25,4 +25,15 @@ public class UserService {
     public User saveUser(User user) {
         return userRepository.save(user);
     }
+
+    public User updateUser(String id, User tempUser) {
+        return userRepository.findById(id).map(user -> {
+            user.setFullName(tempUser.getFullName());
+            user.setEmail(tempUser.getEmail());
+            user.setRole(tempUser.getRole());
+            user.setBranch(tempUser.getBranch());
+            user.setActive(tempUser.isActive());
+            return userRepository.save(user);
+        }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
+    }
 }

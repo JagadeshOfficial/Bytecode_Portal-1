@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Key, UserCircle, ChevronRight, AlertCircle, Scan, Globe, CheckCircle, Eye, EyeOff, Code, Users, Briefcase } from 'lucide-react';
 import { Role, ROLE_CONFIG } from '@/lib/dashboard-config';
+import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import styles from './Login.module.css';
@@ -47,28 +49,43 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'error' | 'success', msg: string } | null>(null);
 
+    const { login: authLogin } = useAuth();
+
     const handleLogin = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         setLoading(true);
         setStatus(null);
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const response = await api.post('/auth/login', { email, password });
+            const data = response.data;
 
-        const matchedRoleEntry = Object.entries(DEMO_CREDENTIALS).find(
-            ([_, creds]) => creds.u === email && creds.p === password
-        );
+            if (data.status === 'SUCCESS') {
+                authLogin(data);
+                setStatus({ type: 'success', msg: 'Authentication successful! Redirecting...' });
 
-        if (matchedRoleEntry) {
-            const role = matchedRoleEntry[0] as Role;
-            setStatus({ type: 'success', msg: 'Redirecting to Dashboard...' });
-            setTimeout(() => {
-                router.push(ROLE_CONFIG[role].dashUrl);
-            }, 1000);
-        } else {
-            setStatus({ type: 'error', msg: 'Invalid Credentials.' });
+                const backendRoleToFrontend: Record<string, Role> = {
+                    'SUPER_ADMIN': 'super_admin',
+                    'ADMIN': 'admin',
+                    'TRAINER': 'trainer',
+                    'HR': 'hr',
+                    'COUNSELOR': 'counselor',
+                    'FINANCE': 'finance',
+                    'STUDENT': 'student'
+                };
+                const mappedRole = backendRoleToFrontend[data.role] || (data.role.toLowerCase() as Role);
+
+                setTimeout(() => {
+                    router.push(ROLE_CONFIG[mappedRole].dashUrl);
+                }, 1000);
+            } else {
+                setStatus({ type: 'error', msg: 'Invalid Credentials.' });
+                setLoading(false);
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            setStatus({ type: 'error', msg: 'Connection failed. Ensure backend is running.' });
             setLoading(false);
-            setTimeout(() => setStatus(null), 3000);
         }
     };
 

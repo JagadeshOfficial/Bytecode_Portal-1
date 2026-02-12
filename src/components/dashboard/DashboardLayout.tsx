@@ -1,6 +1,6 @@
-
-"use client";
-
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { Role } from '@/lib/dashboard-config';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
@@ -11,6 +11,19 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
+    const { token, isLoading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading && !token) {
+            router.push('/login');
+        }
+    }, [token, isLoading, router]);
+
+    if (isLoading || !token) {
+        return <div className="h-screen w-screen bg-[#030014] flex items-center justify-center text-white">Loading...</div>;
+    }
+
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#030014', color: 'white' }}>
             <Sidebar role={role} />

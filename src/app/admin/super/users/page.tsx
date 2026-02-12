@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,6 +10,7 @@ import {
     CheckCircle, XCircle, Trash2, Edit, Lock, FileText, ChevronRight
 } from 'lucide-react';
 import styles from '../SuperAdmin.module.css';
+import api from '@/lib/api';
 
 // -- Types --
 type UserRole = 'student' | 'faculty' | 'staff';
@@ -44,18 +45,6 @@ interface LeaveRequest {
     requestDate: string;
 }
 
-// -- Mock Data --
-const INITIAL_USERS: User[] = [
-    { id: 'ST-001', name: 'Arjun Reddy', role: 'student', department: 'Java Full Stack', email: 'arjun.r@std.com', phone: '9876543210', status: 'Present', checkInTime: '08:45 AM', avatarInitials: 'AR', joinDate: '2023-08-15', attendanceRate: 92 },
-    { id: 'ST-002', name: 'Priya Sharma', role: 'student', department: 'Data Science', email: 'priya.s@std.com', phone: '9876543211', status: 'Present', checkInTime: '09:00 AM', avatarInitials: 'PS', joinDate: '2023-09-01', attendanceRate: 88 },
-    { id: 'EMP-101', name: 'Dr. Rao', role: 'faculty', department: 'AI Research', email: 'rao@inst.com', phone: '9876543212', status: 'Present', checkInTime: '08:30 AM', avatarInitials: 'DR', joinDate: '2021-03-10', attendanceRate: 98 },
-    { id: 'EMP-102', name: 'Sarah Jenkins', role: 'faculty', department: 'Web Dev', email: 'sarah.j@inst.com', phone: '9876543213', status: 'Remote', checkInTime: '09:15 AM', avatarInitials: 'SJ', joinDate: '2022-01-20', attendanceRate: 95 },
-    { id: 'ST-003', name: 'Mike Chen', role: 'student', department: 'DevOps', email: 'mike.c@std.com', phone: '9876543214', status: 'Absent', avatarInitials: 'MC', joinDate: '2023-11-05', attendanceRate: 78 },
-    { id: 'ADM-005', name: 'Karen Smith', role: 'staff', department: 'Admissions', email: 'karen@inst.com', phone: '9876543215', status: 'On Leave', avatarInitials: 'KS', joinDate: '2020-05-15', attendanceRate: 90 },
-    { id: 'ST-004', name: 'Rahul V.', role: 'student', department: 'Java Full Stack', email: 'rahul@std.com', phone: '9876543216', status: 'Present', checkInTime: '08:50 AM', avatarInitials: 'RV', joinDate: '2024-01-10', attendanceRate: 85 },
-    { id: 'EMP-103', name: 'Karthik M.', role: 'faculty', department: 'Cloud Computing', email: 'karthik@inst.com', phone: '9876543217', status: 'Present', checkInTime: '10:00 AM', avatarInitials: 'KM', joinDate: '2023-06-20', attendanceRate: 96 },
-];
-
 const INITIAL_LEAVE_REQUESTS: LeaveRequest[] = [
     {
         id: 1, userId: 'EMP-101', name: 'Dr. Rao', role: 'Faculty', department: 'AI Research',
@@ -78,7 +67,8 @@ const INITIAL_LEAVE_REQUESTS: LeaveRequest[] = [
 ];
 
 export default function UsersPage() {
-    const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
     const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(INITIAL_LEAVE_REQUESTS);
     const [activeTab, setActiveTab] = useState<'all' | 'student' | 'faculty' | 'staff'>('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -88,6 +78,44 @@ export default function UsersPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
     const [isEditing, setIsEditing] = useState(false);
+
+    // Fetch Users from API
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await api.get('/users');
+                const backendUsers = response.data;
+
+                const mappedUsers: User[] = backendUsers.map((u: any) => {
+                    let mapRole: UserRole = 'staff';
+                    if (u.role === 'STUDENT') mapRole = 'student';
+                    else if (u.role === 'TRAINER') mapRole = 'faculty';
+
+                    return {
+                        id: u.id || u._id, // Handle Mongo ID
+                        name: u.fullName || 'Unknown',
+                        role: mapRole,
+                        department: u.branch || 'General',
+                        email: u.email || '',
+                        phone: 'N/A', // Not in DB yet
+                        status: u.active ? 'Present' : 'Absent',
+                        checkInTime: u.active ? '09:00 AM' : undefined,
+                        avatarInitials: (u.fullName || 'U').substring(0, 2).toUpperCase(),
+                        joinDate: u.createdAt ? u.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
+                        attendanceRate: 0 // Default
+                    };
+                });
+
+                setUsers(mappedUsers);
+                setLoading(false);
+            } catch (error) {
+                console.error("Failed to fetch users:", error);
+                setLoading(false);
+                // Optionally keep empty or show error
+            }
+        };
+        fetchUsers();
+    }, []);
 
     // Filter Logic
     const filteredUsers = users.filter(user => {
@@ -132,23 +160,43 @@ export default function UsersPage() {
         setSelectedLeave(null); // Close modal
     };
 
-    const handleUpdateUser = (e: React.FormEvent) => {
+    const handleUpdateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedUser) return;
         const form = e.target as HTMLFormElement;
 
-        const updatedUser: User = {
-            ...selectedUser,
-            name: (form.elements.namedItem('edit_name') as HTMLInputElement).value,
-            role: (form.elements.namedItem('edit_role') as HTMLSelectElement).value as UserRole,
-            department: (form.elements.namedItem('edit_dept') as HTMLInputElement).value,
-            status: (form.elements.namedItem('edit_status') as HTMLSelectElement).value as Status,
+        const roleValue = (form.elements.namedItem('edit_role') as HTMLSelectElement).value as UserRole;
+        let backendRole = 'STUDENT';
+        if (roleValue === 'faculty') backendRole = 'TRAINER';
+        else if (roleValue === 'staff') backendRole = 'ADMIN';
+
+        const updatedUserPayload = {
+            fullName: (form.elements.namedItem('edit_name') as HTMLInputElement).value,
             email: (form.elements.namedItem('edit_email') as HTMLInputElement).value,
+            branch: (form.elements.namedItem('edit_dept') as HTMLInputElement).value,
+            role: backendRole,
+            active: (form.elements.namedItem('edit_status') as HTMLSelectElement).value === 'Present' || (form.elements.namedItem('edit_status') as HTMLSelectElement).value === 'Remote'
         };
 
-        setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
-        setSelectedUser(updatedUser);
-        setIsEditing(false);
+        try {
+            await api.put(`/users/${selectedUser.id}`, updatedUserPayload);
+
+            const updatedUser: User = {
+                ...selectedUser,
+                name: updatedUserPayload.fullName,
+                email: updatedUserPayload.email,
+                department: updatedUserPayload.branch,
+                role: roleValue,
+                status: (form.elements.namedItem('edit_status') as HTMLSelectElement).value as Status,
+            };
+
+            setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+            setSelectedUser(updatedUser);
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Failed to update user:", error);
+            alert("Failed to update user. Please try again.");
+        }
     };
 
     return (

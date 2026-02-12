@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/placements")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class PlacementController {
 

@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor; // Added import for RequiredArgsConstruct
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor // Added RequiredArgsConstructor
 public class AuthController {
 

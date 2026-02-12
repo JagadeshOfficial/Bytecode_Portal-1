@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { DASHBOARD_NAV, Role } from '@/lib/dashboard-config';
 import { LogOut, Hexagon, User, Settings, Shield, Bell, X, CheckCircle, Zap, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 interface SidebarProps {
     role: Role;
@@ -14,6 +16,24 @@ export default function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
     const navItems = DASHBOARD_NAV[role] || [];
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+    const { user, logout } = useAuth();
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [profileData, setProfileData] = useState<any>(null);
+
+    const handleOpenProfile = async () => {
+        setIsProfileOpen(true);
+        if (user?.email) {
+            try {
+                // Determine API endpoint based on role or just use generic /users/email
+                // backend/user-service/.../UserController.java has @GetMapping("/{email}")
+                const response = await api.get(`/users/${user.email}`);
+                setProfileData(response.data);
+            } catch (error) {
+                console.error("Failed to fetch profile", error);
+                setProfileData(user); // Fallback to context user
+            }
+        }
+    };
 
     return (
         <aside className="fixed left-0 top-0 h-screen w-[280px] z-50 flex flex-col bg-[#030014]/90 backdrop-blur-xl border-r border-white/5 shadow-2xl shadow-violet-500/10 transition-all duration-300">
@@ -94,11 +114,11 @@ export default function Sidebar({ role }: SidebarProps) {
                     className="relative group p-3 rounded-2xl bg-gradient-to-b from-white/5 to-white/0 border border-white/5 hover:border-violet-500/30 transition-all duration-300"
                 >
                     <div className="flex items-center gap-3">
-                        <Link href={role === 'super_admin' ? "/admin/super/profile" : "/admin/dashboard/profile"} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                        <div className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
                             <div className="relative">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 p-[2px]">
                                     <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-xs font-bold text-white relative overflow-hidden">
-                                        {role.slice(0, 2).toUpperCase()}
+                                        {user?.id ? user.fullName.slice(0, 2).toUpperCase() : role.slice(0, 2).toUpperCase()}
                                         {/* Shine effect */}
                                         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                                     </div>
@@ -107,16 +127,16 @@ export default function Sidebar({ role }: SidebarProps) {
                             </div>
 
                             <div className="flex-1 min-w-0">
-                                <div className="text-xs text-slate-400 font-medium mb-0.5">Logged in as</div>
+                                <div className="text-[10px] text-slate-400 font-medium mb-0.5 uppercase tracking-tighter">Authorized User</div>
                                 <div className="text-sm font-bold text-white truncate capitalize bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 group-hover:from-violet-200 group-hover:to-white transition-all">
-                                    {role.replace('_', ' ')}
+                                    {user?.fullName || role.replace('_', ' ')}
                                 </div>
                             </div>
-                        </Link>
+                        </div>
 
-                        <Link href="/login" className="p-2 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors pointer-events-auto relative z-20">
+                        <button onClick={logout} className="p-2 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors pointer-events-auto relative z-20">
                             <LogOut size={18} />
-                        </Link>
+                        </button>
                     </div>
                 </motion.div>
             </div>

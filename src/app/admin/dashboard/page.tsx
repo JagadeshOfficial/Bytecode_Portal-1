@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import api from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -27,6 +28,25 @@ import {
     CheckCircle
 } from 'lucide-react';
 
+interface Stat {
+    label: string;
+    value: string;
+    trend: string;
+    icon: any;
+    color: string;
+    subtext: string;
+}
+
+interface LiveSession {
+    id: string;
+    title: string;
+    mentorName: string;
+    courseId: string;
+    startTime: string;
+    meetingLink: string;
+    status: string;
+}
+
 const STATS = [
     { label: "Active Batches", value: "24", trend: "+3 this week", icon: BookOpen, color: "#7c3aed", subtext: "03 starting today" },
     { label: "Total Students", value: "1,248", trend: "+12%", icon: GraduationCap, color: "#22d3ee", subtext: "42 new enrollments" },
@@ -48,6 +68,34 @@ const TASKS = [
 
 export default function AdminOperationsDashboard() {
     const [activeTab, setActiveTab] = useState('overview');
+    const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
+    const [stats, setStats] = useState<Stat[]>(STATS);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                // Fetch Live Sessions
+                const sessionsRes = await api.get('/academic/sessions');
+                setLiveSessions(sessionsRes.data);
+
+                // Fetch Courses to update stats
+                const coursesRes = await api.get('/courses');
+                const courseCount = (coursesRes.data || []).length;
+
+                const updatedStats = [...STATS];
+                updatedStats[0] = { ...updatedStats[0], value: courseCount.toString() };
+                setStats(updatedStats);
+
+                setLoading(false);
+            } catch (err) {
+                console.error("Error fetching dashboard data:", err);
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
 
     return (
         <DashboardLayout role="admin">
@@ -76,7 +124,7 @@ export default function AdminOperationsDashboard() {
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex -space-x-3">
-                                {[1, 2, 3, 4].map(i => (
+                                {[1, 2, 3, 4].map((i: number) => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-[#030014] bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white">
                                         JD
                                     </div>
@@ -95,7 +143,7 @@ export default function AdminOperationsDashboard() {
 
                 {/* Advanced Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {STATS.map((stat, idx) => (
+                    {stats.map((stat: Stat, idx: number) => (
                         <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 20 }}
@@ -134,62 +182,73 @@ export default function AdminOperationsDashboard() {
                     {/* Live academic pulse */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-[#0a0a1a]/60 border border-white/5 rounded-3xl backdrop-blur-md overflow-hidden shadow-2xl">
-                            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/20">
+                            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
                                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
                                     Academic Pulse Today
                                 </h3>
                                 <div className="flex gap-2 text-[10px] font-bold uppercase tracking-widest">
-                                    <button className="text-slate-400 hover:text-white transition-colors">List View</button>
-                                    <span className="text-slate-700">|</span>
-                                    <button className="text-violet-400 transition-colors">Grid View</button>
+                                    <span className="text-violet-400">{liveSessions.length} SESSIONS ACTIVE</span>
                                 </div>
                             </div>
 
                             <div className="p-6 space-y-4">
-                                {TODAY_CLASSES.map((session, i) => (
-                                    <motion.div
-                                        key={session.id}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: i * 0.1 }}
-                                        className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all group flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 border border-white/10 flex flex-col items-center justify-center font-[Rajdhani] relative shadow-inner">
-                                                <span className="text-[10px] text-slate-400 -mb-1">{session.time.split(' ')[1]}</span>
-                                                <span className="text-xl font-bold text-white">{session.time.split(' ')[0]}</span>
-                                                {session.status === 'Live' && (
-                                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#030014] animate-pulse" />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <div className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors">{session.title}</div>
-                                                <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                                                    <span className="flex items-center gap-1"><Users size={12} /> {session.students} Attending</span>
-                                                    <span className="w-1 h-1 bg-slate-700 rounded-full" />
-                                                    <span className="flex items-center gap-1 font-bold text-slate-300 underline decoration-violet-500/50 underline-offset-4">{session.tutor}</span>
-                                                    <span className="w-1 h-1 bg-slate-700 rounded-full" />
-                                                    <span className="px-2 py-0.5 bg-white/5 rounded-md font-mono text-[10px]">{session.batch}</span>
+                                {loading ? (
+                                    <div className="text-center py-10 text-slate-500">Loading sessions...</div>
+                                ) : liveSessions.length > 0 ? (
+                                    liveSessions.map((session: LiveSession, i: number) => {
+                                        const startTime = new Date(session.startTime);
+                                        const timeStr = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                        const dateStr = startTime.toLocaleDateString([], { day: '2-digit', month: 'short' });
+                                        const isLive = session.status === 'LIVE';
+
+                                        return (
+                                            <motion.div
+                                                key={session.id || i}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: i * 0.1 }}
+                                                className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all group flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 border border-white/10 flex flex-col items-center justify-center font-[Rajdhani] relative shadow-inner">
+                                                        <span className="text-[10px] text-slate-400 -mb-1">{dateStr}</span>
+                                                        <span className="text-xl font-bold text-white">{timeStr}</span>
+                                                        {isLive && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#030014] animate-pulse" />}
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors uppercase tracking-tight">{session.title}</div>
+                                                        <div className="flex items-center gap-3 text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">
+                                                            <span className="flex items-center gap-1 text-violet-300"><Users size={12} /> {session.mentorName}</span>
+                                                            <span className="w-1 h-1 bg-slate-700 rounded-full" />
+                                                            <span className="px-2 py-0.5 bg-white/5 rounded-md text-slate-300">{session.status}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3 w-full md:w-auto">
-                                            <button className="flex-1 md:flex-none px-4 py-2 bg-violet-600/10 border border-violet-500/20 rounded-xl text-violet-400 text-xs font-bold hover:bg-violet-600 hover:text-white transition-all">
-                                                MODERATE
-                                            </button>
-                                            <button className="flex-1 md:flex-none px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-300 text-xs font-bold hover:bg-white/10 transition-all">
-                                                REPORTS
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                ))}
-
-                                <button className="w-full py-4 border border-dashed border-white/10 rounded-2xl text-slate-500 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/5 transition-all font-bold text-sm tracking-widest uppercase">
-                                    View Full Academic Calendar
-                                </button>
+                                                <div className="flex gap-3">
+                                                    {session.meetingLink && (
+                                                        <a
+                                                            href={session.meetingLink}
+                                                            target="_blank"
+                                                            className="px-4 py-2 rounded-xl bg-violet-600 text-white text-[10px] font-black hover:bg-violet-500 transition-all uppercase tracking-widest shadow-lg shadow-violet-600/20"
+                                                        >
+                                                            JOIN
+                                                        </a>
+                                                    )}
+                                                    <button className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-slate-400 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest">
+                                                        MODERATE
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="text-center py-10 text-slate-500 italic">No active sessions scheduled for today.</div>
+                                )}
                             </div>
+                            <button className="w-full py-4 border border-dashed border-white/10 rounded-2xl text-slate-500 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/5 transition-all font-bold text-sm tracking-widest uppercase">
+                                View Full Academic Calendar
+                            </button>
                         </div>
 
                         {/* Middle Row with tasks and collection */}
@@ -245,7 +304,7 @@ export default function AdminOperationsDashboard() {
                                     <button className="text-[10px] text-violet-400 font-bold hover:underline">NEW TASK</button>
                                 </div>
                                 <div className="p-6 space-y-3">
-                                    {TASKS.map((task, i) => (
+                                    {TASKS.map((task: { task: string; priority: string; due: string; category: string }, i: number) => (
                                         <div key={i} className="flex flex-col gap-2 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-violet-500/30 transition-all cursor-pointer group">
                                             <div className="flex justify-between items-start">
                                                 <span className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors">{task.task}</span>
@@ -279,7 +338,7 @@ export default function AdminOperationsDashboard() {
                                     { label: "Faculty Presence", val: 12, tot: 14, color: "#7c3aed" },
                                     { label: "Student Turnout", val: 840, tot: 1248, color: "#22d3ee" },
                                     { label: "Infrastructure Ready", val: 95, tot: 100, color: "#d946ef" },
-                                ].map((item, i) => (
+                                ].map((item: { label: string; val: number; tot: number; color: string }, i: number) => (
                                     <div key={i}>
                                         <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">
                                             {item.label} <span className="text-white">{Math.round((item.val / item.tot) * 100)}%</span>
@@ -310,7 +369,7 @@ export default function AdminOperationsDashboard() {
                                     { msg: "Batch SYS-P5 attendance dropped below 40%", tag: "Urgent" },
                                     { msg: "Dr. Alan requested schedule change", tag: "Staffing" },
                                     { msg: "AWS Server reaching 90% storage capacity", tag: "IT" },
-                                ].map((alert, i) => (
+                                ].map((alert: { msg: string; tag: string }, i: number) => (
                                     <div key={i} className="p-3 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-1 items-start group hover:bg-white/10 transition-colors cursor-pointer">
                                         <span className="text-[9px] font-bold uppercase tracking-widest text-red-500">{alert.tag}</span>
                                         <span className="text-[11px] text-slate-300 leading-tight group-hover:text-white transition-colors">{alert.msg}</span>
@@ -331,7 +390,7 @@ export default function AdminOperationsDashboard() {
                                     { name: "Executive Summary.pdf", date: "2h ago", icon: FileText },
                                     { name: "Q1 Financial Audit.csv", date: "Yesterday", icon: TrendingUp },
                                     { name: "Student Performance.json", date: "Nov 24", icon: Activity },
-                                ].map((report, i) => (
+                                ].map((report: { name: string; date: string; icon: any }, i: number) => (
                                     <button key={i} className="w-full text-left flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group/btn">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 rounded-lg bg-white/5 text-slate-500 group-hover/btn:text-violet-400 transition-colors">
@@ -350,6 +409,6 @@ export default function AdminOperationsDashboard() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 }
