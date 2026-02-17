@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     GraduationCap,
     BookOpen,
@@ -22,7 +22,9 @@ import {
     Video,
     Award,
     Bell,
-    AlertCircle
+    AlertCircle,
+    Play,
+    X
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -94,6 +96,9 @@ export default function AcademicsPage() {
     const [sessions, setSessions] = useState<LiveSession[]>([]);
     const [assignments, setAssignments] = useState<Assignment[]>([]);
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [archivedRecordings, setArchivedRecordings] = useState<any[]>([]);
+    const [showVideoModal, setShowVideoModal] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState<any>(null);
 
     // Fetch all academic data
     useEffect(() => {
@@ -111,6 +116,14 @@ export default function AcademicsPage() {
                 setSessions(sessionsRes.data);
                 setAssignments(assignmentsRes.data);
                 setAnnouncements(announcementsRes.data);
+
+                // Load recordings from shared localStorage
+                if (typeof window !== 'undefined') {
+                    const stored = localStorage.getItem('bytecode_recordings');
+                    if (stored) {
+                        setArchivedRecordings(JSON.parse(stored));
+                    }
+                }
                 setLoading(false);
             } catch (error) {
                 console.error("Failed to fetch academic data:", error);
@@ -213,6 +226,7 @@ export default function AcademicsPage() {
                     { id: 'overview', label: 'Overview', icon: PieChart },
                     { id: 'batches', label: 'Batches', icon: Users },
                     { id: 'sessions', label: 'Live Sessions', icon: Video },
+                    { id: 'recordings', label: 'Recordings', icon: PlayCircle },
                     { id: 'assignments', label: 'Assignments', icon: FileText },
                 ]}
             >
@@ -234,6 +248,7 @@ export default function AcademicsPage() {
                 { id: 'overview', label: 'Overview', icon: PieChart },
                 { id: 'batches', label: 'Batches', icon: Users },
                 { id: 'sessions', label: 'Live Sessions', icon: Video },
+                { id: 'recordings', label: 'Recordings', icon: PlayCircle },
                 { id: 'assignments', label: 'Assignments', icon: FileText },
             ]}
         >
@@ -528,6 +543,141 @@ export default function AcademicsPage() {
                     </div>
                 </div>
             )}
+            {activeTab === 'recordings' && (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center bg-slate-900/40 border border-white/5 p-6 rounded-2xl">
+                        <div className="relative w-96">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search all recordings by topic or batch..."
+                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-red-500 transition-all font-bold"
+                            />
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest">
+                                <Clock size={14} /> {archivedRecordings.length} Total Archives
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {archivedRecordings.length === 0 ? (
+                            <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                                <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                                    <Video className="text-slate-600" size={32} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2 uppercase font-[Rajdhani]">No Recordings Yet</h3>
+                                <p className="text-sm text-slate-500">Recordings started in the live room will appear here automatically.</p>
+                            </div>
+                        ) : archivedRecordings.map((rec, i) => (
+                            <motion.div
+                                key={rec.id || i}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: i * 0.1 }}
+                                onClick={() => {
+                                    setSelectedVideo(rec);
+                                    setShowVideoModal(true);
+                                }}
+                                className="group bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-red-500/30 transition-all cursor-pointer relative overflow-hidden"
+                            >
+                                <div className="aspect-video bg-black rounded-xl mb-4 relative overflow-hidden border border-white/5 group-hover:border-red-500/20 transition-all shadow-2xl">
+                                    <img
+                                        src={rec.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'}
+                                        alt={rec.title}
+                                        className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/40">
+                                            <Play size={24} fill="currentColor" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-md rounded text-[9px] font-black text-white border border-white/10">
+                                        {rec.duration}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-tighter">{rec.batchName}</span>
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> {rec.date}</span>
+                                </div>
+
+                                <h4 className="text-base font-bold text-white mb-4 tracking-tight group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
+
+                                <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] text-slate-500 uppercase font-black mb-0.5">MENTOR</span>
+                                        <span className="text-[11px] font-bold text-slate-300">{rec.mentorName}</span>
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedVideo(rec);
+                                            setShowVideoModal(true);
+                                        }}
+                                        className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-500 transition-all font-[Rajdhani]"
+                                    >
+                                        PLAY <Play size={14} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Video Player Modal */}
+            <AnimatePresence>
+                {showVideoModal && selectedVideo && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
+                        onClick={() => setShowVideoModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowVideoModal(false)}
+                                className="absolute top-6 right-6 z-50 p-3 bg-black/50 hover:bg-red-600 text-white rounded-full transition-all border border-white/10"
+                            >
+                                <X size={24} />
+                            </button>
+
+                            {/* Video Title & Info Overlay */}
+                            <div className="absolute top-0 left-0 right-0 p-8 bg-gradient-to-b from-black/80 to-transparent z-40 pointer-events-none">
+                                <h3 className="text-2xl font-bold text-white mb-1 uppercase font-[Rajdhani] tracking-tight">{selectedVideo.title}</h3>
+                                <div className="flex items-center gap-4 text-slate-300 text-sm">
+                                    <span className="flex items-center gap-1.5"><Users size={14} className="text-red-500" /> {selectedVideo.batchName}</span>
+                                    <span className="flex items-center gap-1.5"><Clock size={14} className="text-red-400" /> {selectedVideo.duration}</span>
+                                    <span className="flex items-center gap-1.5"><Calendar size={14} className="text-red-400" /> {selectedVideo.date}</span>
+                                </div>
+                            </div>
+
+                            {/* Video Element */}
+                            <video
+                                src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-his-computer-34446-large.mp4"
+                                className="w-full h-full object-contain"
+                                controls
+                                autoPlay
+                            />
+
+                            {/* Bottom Controls Legend */}
+                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 opacity-0 hover:opacity-100 transition-opacity">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Bytecode Archive Player v1.0 • {selectedVideo.mentorName}</p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AdvancedModuleLayout>
     );
 }

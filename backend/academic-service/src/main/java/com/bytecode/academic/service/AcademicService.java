@@ -61,6 +61,10 @@ public class AcademicService {
         return liveSessionRepository.findByStatus(status);
     }
 
+    public void deleteSession(String id) {
+        liveSessionRepository.deleteById(id);
+    }
+
     // ========== ATTENDANCE ==========
     public Attendance markAttendance(Attendance attendance) {
         attendance.setMarkedAt(new Date());
@@ -105,6 +109,10 @@ public class AcademicService {
 
     public List<Batch> getBatchesByStatus(String status) {
         return batchRepository.findByStatus(status);
+    }
+
+    public void deleteBatch(String id) {
+        batchRepository.deleteById(id);
     }
 
     // ========== ASSIGNMENTS ==========

@@ -21,7 +21,7 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Course> getCourse(@PathVariable String id) {
+    public ResponseEntity<Course> getCourse(@PathVariable("id") String id) {
         return courseService.getCourseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -33,18 +33,20 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCourse(@PathVariable String id, @RequestBody Course course) {
+    public ResponseEntity<?> updateCourse(@PathVariable("id") String id, @RequestBody Course course) {
         try {
             return ResponseEntity.ok(courseService.updateCourse(id, course));
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Error updating course: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
+    public ResponseEntity<Void> deleteCourse(@PathVariable("id") String id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }

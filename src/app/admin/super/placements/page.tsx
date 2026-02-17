@@ -24,7 +24,10 @@ import {
     Edit,
     X,
     Save,
-    Eye
+    Eye,
+    Quote,
+    List as ListIcon,
+    ChevronRight
 } from 'lucide-react';
 
 import api from '@/lib/api';
@@ -47,6 +50,7 @@ export default function PlacementsPage() {
         heights: [0, 0, 0, 0, 0]
     });
     const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
     useEffect(() => {
         setSearchTerm('');
@@ -354,7 +358,21 @@ export default function PlacementsPage() {
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-bold text-white">Placed Students ({placements.length})</h2>
-                        <div className="flex gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex bg-slate-900/50 border border-white/10 rounded-xl p-1">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                >
+                                    <LayoutGrid size={18} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('table')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                >
+                                    <ListIcon size={18} />
+                                </button>
+                            </div>
                             <div className="relative w-72">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                                 <input type="text" placeholder="Search students..."
@@ -367,59 +385,129 @@ export default function PlacementsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm">
-                        <table className="w-full text-left text-sm text-slate-400">
-                            <thead className="bg-white/5 text-white font-bold uppercase text-xs">
-                                <tr>
-                                    <th className="px-6 py-4">Student Name</th>
-                                    <th className="px-6 py-4">Company</th>
-                                    <th className="px-6 py-4">Role</th>
-                                    <th className="px-6 py-4">Package (LPA)</th>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {filteredPlacements.map((p, i) => (
-                                    <tr key={p.id || i} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
-                                                {p.studentName ? p.studentName.charAt(0) : '?'}
+                    {viewMode === 'grid' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredPlacements.map((p, i) => (
+                                <motion.div
+                                    key={p.id || i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 hover:border-blue-500/30 transition-all group relative overflow-hidden"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-600/20 transition-all"></div>
+
+                                    <div className="flex items-start justify-between mb-6 relative z-10">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-blue-500/20 shadow-xl group-hover:border-blue-500/50 transition-all">
+                                                {p.image ? (
+                                                    <img src={p.image} alt={p.studentName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-xl font-bold text-white">
+                                                        {p.studentName ? p.studentName.charAt(0) : '?'}
+                                                    </div>
+                                                )}
                                             </div>
-                                            {p.studentName}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="flex items-center gap-2">
-                                                <Building2 size={14} className="text-slate-500" /> {p.companyName}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">{p.role}</td>
-                                        <td className="px-6 py-4 text-emerald-400 font-bold">₹{p.packageLPA} LPA</td>
-                                        <td className="px-6 py-4 text-slate-500">
-                                            {p.placementDate ? new Date(p.placementDate).toLocaleDateString() : 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => openPlacementModal(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400 transition-colors" title="Edit">
-                                                    <Edit size={16} />
+                                            <div>
+                                                <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">{p.studentName}</h3>
+                                                <p className="text-sm text-slate-400 font-medium">{p.role}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-2">
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => openPlacementModal(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400">
+                                                    <Edit size={14} />
                                                 </button>
-                                                <button onClick={() => handleDelete('placement', p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400 transition-colors" title="Delete">
-                                                    <Trash2 size={16} />
+                                                <button onClick={() => handleDelete('placement', p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400">
+                                                    <Trash2 size={14} />
                                                 </button>
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {placements.length === 0 && (
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4 mb-6 relative z-10">
+                                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5">
+                                            <div className="flex items-center gap-2">
+                                                <Building2 size={16} className="text-blue-400" />
+                                                <span className="text-sm font-bold text-slate-200">{p.companyName}</span>
+                                            </div>
+                                            <div className="text-lg font-black text-emerald-400">₹{p.packageLPA} <span className="text-[10px] text-slate-500 uppercase">LPA</span></div>
+                                        </div>
+
+                                        {p.quote && (
+                                            <div className="relative p-4 italic text-sm text-slate-400 bg-blue-500/5 rounded-xl border-l-4 border-blue-500/30">
+                                                <Quote size={12} className="absolute -top-2 -left-1 text-blue-500/50" />
+                                                "{p.quote}"
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 border-t border-white/5 pt-4 relative z-10">
+                                        <div className="flex items-center gap-1.5">
+                                            <Calendar size={12} />
+                                            {p.placementDate ? new Date(p.placementDate).toLocaleDateString() : 'Recent'}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-blue-400">
+                                            <Award size={12} /> Verification Success
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm">
+                            <table className="w-full text-left text-sm text-slate-400">
+                                <thead className="bg-white/5 text-white font-bold uppercase text-xs">
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                                            No placement records found.
-                                        </td>
+                                        <th className="px-6 py-4">Student Name</th>
+                                        <th className="px-6 py-4">Company</th>
+                                        <th className="px-6 py-4">Role</th>
+                                        <th className="px-6 py-4">Package (LPA)</th>
+                                        <th className="px-6 py-4">Date</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {filteredPlacements.map((p, i) => (
+                                        <tr key={p.id || i} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                                                    {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : (p.studentName ? p.studentName.charAt(0) : '?')}
+                                                </div>
+                                                {p.studentName}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="flex items-center gap-2">
+                                                    <Building2 size={14} className="text-slate-500" /> {p.companyName}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">{p.role}</td>
+                                            <td className="px-6 py-4 text-emerald-400 font-bold">₹{p.packageLPA} LPA</td>
+                                            <td className="px-6 py-4 text-slate-500">
+                                                {p.placementDate ? new Date(p.placementDate).toLocaleDateString() : 'N/A'}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button onClick={() => openPlacementModal(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400 transition-colors" title="Edit">
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleDelete('placement', p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400 transition-colors" title="Delete">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {placements.length === 0 && (
+                        <div className="bg-slate-900/50 border border-white/5 rounded-3xl py-12 text-center text-slate-500">
+                            No placement records found.
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -476,293 +564,306 @@ export default function PlacementsPage() {
                         )}
                     </div>
                 </div>
-            )}
+            )
+            }
 
-            {activeTab === 'candidates' && (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-white">Candidate Pool ({candidates.length})</h2>
-                        <div className="flex gap-4">
-                            <div className="relative w-72">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                                <input type="text" placeholder="Search candidates..."
-                                    value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" />
+            {
+                activeTab === 'candidates' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white">Candidate Pool ({candidates.length})</h2>
+                            <div className="flex gap-4">
+                                <div className="relative w-72">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                    <input type="text" placeholder="Search candidates..."
+                                        value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" />
+                                </div>
+                                <button onClick={() => openCandidateModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
+                                    <Plus size={16} /> Add Candidate
+                                </button>
                             </div>
-                            <button onClick={() => openCandidateModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                                <Plus size={16} /> Add Candidate
-                            </button>
                         </div>
-                    </div>
-                    <div className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm">
-                        <table className="w-full text-left text-sm text-slate-400">
-                            <thead className="bg-white/5 text-white font-bold uppercase text-xs">
-                                <tr>
-                                    <th className="px-6 py-4">Name</th>
-                                    <th className="px-6 py-4">Email</th>
-                                    <th className="px-6 py-4">Branch</th>
-                                    <th className="px-6 py-4">Role</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {filteredCandidates.map((c, i) => (
-                                    <tr key={c.id || i} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white uppercase">
-                                                {c.fullName ? c.fullName.charAt(0) : '?'}
-                                            </div>
-                                            {c.fullName}
-                                        </td>
-                                        <td className="px-6 py-4">{c.email}</td>
-                                        <td className="px-6 py-4">{c.branch || 'N/A'}</td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs font-bold uppercase">
-                                                {c.role}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => openViewCandidateModal(c)} className="p-2 hover:bg-white/10 rounded-lg text-emerald-400 transition-colors" title="View">
-                                                    <Eye size={16} />
-                                                </button>
-                                                <button onClick={() => openCandidateModal(c)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400 transition-colors" title="Edit">
-                                                    <Edit size={16} />
-                                                </button>
-                                                <button onClick={() => handleDelete('candidate', c.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400 transition-colors" title="Delete">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {candidates.length === 0 && (
+                        <div className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm">
+                            <table className="w-full text-left text-sm text-slate-400">
+                                <thead className="bg-white/5 text-white font-bold uppercase text-xs">
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                            No candidates found.
-                                        </td>
+                                        <th className="px-6 py-4">Name</th>
+                                        <th className="px-6 py-4">Email</th>
+                                        <th className="px-6 py-4">Branch</th>
+                                        <th className="px-6 py-4">Role</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'drives' && (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-white">Active Hiring Drives ({filteredJobs.length})</h2>
-                        <div className="flex gap-4">
-                            <div className="relative w-72">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                                <input type="text" placeholder="Search drives..."
-                                    value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" />
-                            </div>
-                            <button onClick={() => openJobModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                                <Plus size={16} /> Add Drive
-                            </button>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {filteredCandidates.map((c, i) => (
+                                        <tr key={c.id || i} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white uppercase">
+                                                    {c.fullName ? c.fullName.charAt(0) : '?'}
+                                                </div>
+                                                {c.fullName}
+                                            </td>
+                                            <td className="px-6 py-4">{c.email}</td>
+                                            <td className="px-6 py-4">{c.branch || 'N/A'}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${placements.some(p => p.studentEmail === c.email) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/10'}`}>
+                                                        {placements.some(p => p.studentEmail === c.email) ? 'PLACED' : 'READY'}
+                                                    </span>
+                                                    {placements.find(p => p.studentEmail === c.email) && (
+                                                        <span className="text-[10px] text-slate-500 font-mono">
+                                                            @{placements.find(p => p.studentEmail === c.email)?.companyName}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button onClick={() => openViewCandidateModal(c)} className="p-2 hover:bg-white/10 rounded-lg text-emerald-400 transition-colors" title="View">
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    <button onClick={() => openCandidateModal(c)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400 transition-colors" title="Edit">
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleDelete('candidate', c.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400 transition-colors" title="Delete">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {candidates.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                                                No candidates found.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div className="space-y-4">
-                        {filteredJobs.map((drive, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all cursor-pointer group">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg bg-slate-800`}>
-                                        {drive.companyName.charAt(0)}
+                )
+            }
+
+            {
+                activeTab === 'drives' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white">Active Hiring Drives ({filteredJobs.length})</h2>
+                            <div className="flex gap-4">
+                                <div className="relative w-72">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                    <input type="text" placeholder="Search drives..."
+                                        value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" />
+                                </div>
+                                <button onClick={() => openJobModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
+                                    <Plus size={16} /> Add Drive
+                                </button>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            {filteredJobs.map((drive, i) => (
+                                <div key={i} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all cursor-pointer group">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg bg-slate-800`}>
+                                            {drive.companyName.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">{drive.companyName}</div>
+                                            <div className="text-sm text-slate-400 font-medium">{drive.jobTitle}</div>
+                                            <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                                <Clock size={12} /> {drive.driveDate ? new Date(drive.driveDate).toLocaleDateString() : 'TBD'}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">{drive.companyName}</div>
-                                        <div className="text-sm text-slate-400 font-medium">{drive.jobTitle}</div>
-                                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                                            <Clock size={12} /> {drive.driveDate ? new Date(drive.driveDate).toLocaleDateString() : 'TBD'}
+                                    <div className="text-right flex items-center gap-4">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border ${drive.location === 'Remote' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
+                                            {drive.location}
+                                        </span>
+                                        <div className="flex gap-2">
+                                            <button onClick={(e) => { e.stopPropagation(); openJobModal(drive); }} className="p-2 hover:bg-white/10 rounded-lg text-blue-400" title="Edit">
+                                                <Edit size={16} />
+                                            </button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleDelete('job', drive.id); }} className="p-2 hover:bg-white/10 rounded-lg text-red-400" title="Delete">
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="text-right flex items-center gap-4">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border ${drive.location === 'Remote' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
-                                        {drive.location}
-                                    </span>
-                                    <div className="flex gap-2">
-                                        <button onClick={(e) => { e.stopPropagation(); openJobModal(drive); }} className="p-2 hover:bg-white/10 rounded-lg text-blue-400" title="Edit">
-                                            <Edit size={16} />
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete('job', drive.id); }} className="p-2 hover:bg-white/10 rounded-lg text-red-400" title="Delete">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
+                            ))}
+                            {jobs.length === 0 && (
+                                <div className="text-center text-slate-500 py-12">
+                                    No active hiring drives found.
                                 </div>
-                            </div>
-                        ))}
-                        {jobs.length === 0 && (
-                            <div className="text-center text-slate-500 py-12">
-                                No active hiring drives found.
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
-                    >
-                        <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                            <h3 className="text-xl font-bold text-white">
-                                {modalType === 'placement' && (formData.id ? 'Edit Placement' : 'Add New Placement')}
-                                {modalType === 'job' && (formData.id ? 'Edit Hiring Drive' : 'Add Hiring Drive')}
-                                {modalType === 'candidate' && (formData.id ? 'Edit Candidate' : 'Add Candidate')}
-                                {modalType === 'view_candidate' && 'Candidate Profile'}
-                            </h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        {modalType === 'view_candidate' ? (
-                            <div className="p-6 space-y-4">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-2xl font-bold text-white uppercase">
-                                        {formData.fullName?.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-bold text-white">{formData.fullName}</h4>
-                                        <p className="text-slate-400">{formData.email}</p>
-                                        <span className="mt-2 inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-bold uppercase">
-                                            {formData.role}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div className="p-4 bg-slate-800/50 rounded-xl">
-                                        <label className="block text-xs text-slate-500 uppercase font-bold mb-1">Branch</label>
-                                        <div className="text-white font-medium">{formData.branch || 'N/A'}</div>
-                                    </div>
-                                    <div className="p-4 bg-slate-800/50 rounded-xl">
-                                        <label className="block text-xs text-slate-500 uppercase font-bold mb-1">Phone</label>
-                                        <div className="text-white font-medium">{formData.phoneNumber || 'N/A'}</div>
-                                    </div>
-                                </div>
+            {
+                isModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-white">
+                                    {modalType === 'placement' && (formData.id ? 'Edit Placement' : 'Add New Placement')}
+                                    {modalType === 'job' && (formData.id ? 'Edit Hiring Drive' : 'Add Hiring Drive')}
+                                    {modalType === 'candidate' && (formData.id ? 'Edit Candidate' : 'Add Candidate')}
+                                    {modalType === 'view_candidate' && 'Candidate Profile'}
+                                </h3>
+                                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
                             </div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                                {modalType === 'placement' && (
-                                    <>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Student Name</label>
-                                            <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.studentName} onChange={(e) => setFormData({ ...formData, studentName: e.target.value })} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Company</label>
-                                            <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Role</label>
-                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Pkg (LPA)</label>
-                                                <input type="number" step="0.1" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.packageLPA || ''} onChange={(e) => setFormData({ ...formData, packageLPA: e.target.value })} />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Date</label>
-                                            <input type="date" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.placementDate || ''} onChange={(e) => setFormData({ ...formData, placementDate: e.target.value })} />
-                                        </div>
-                                    </>
-                                )}
 
-                                {modalType === 'job' && (
-                                    <>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Company</label>
-                                            <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.companyName || ''} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
+                            {modalType === 'view_candidate' ? (
+                                <div className="p-6 space-y-4">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-2xl font-bold text-white uppercase">
+                                            {formData.fullName?.charAt(0)}
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Job Title</label>
-                                            <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.jobTitle || ''} onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })} />
+                                            <h4 className="text-xl font-bold text-white">{formData.fullName}</h4>
+                                            <p className="text-slate-400">{formData.email}</p>
+                                            <span className="mt-2 inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-bold uppercase">
+                                                {formData.role}
+                                            </span>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Location</label>
-                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.location || ''} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Salary</label>
-                                                <input type="number" step="0.1" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.salaryPackage || ''} onChange={(e) => setFormData({ ...formData, salaryPackage: e.target.value })} />
-                                            </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        <div className="p-4 bg-slate-800/50 rounded-xl">
+                                            <label className="block text-xs text-slate-500 uppercase font-bold mb-1">Branch</label>
+                                            <div className="text-white font-medium">{formData.branch || 'N/A'}</div>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Skills (comma separated)</label>
-                                            <input type="text" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={Array.isArray(formData.skillsRequired) ? formData.skillsRequired.join(', ') : (formData.skillsRequired || '')}
-                                                onChange={(e) => setFormData({ ...formData, skillsRequired: e.target.value })} />
+                                        <div className="p-4 bg-slate-800/50 rounded-xl">
+                                            <label className="block text-xs text-slate-500 uppercase font-bold mb-1">Phone</label>
+                                            <div className="text-white font-medium">{formData.phoneNumber || 'N/A'}</div>
                                         </div>
-                                    </>
-                                )}
-
-                                {modalType === 'candidate' && (
-                                    <>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name</label>
-                                            <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.fullName || ''} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Email</label>
-                                            <input type="email" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                                        </div>
-                                        {!formData.id && (
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Password</label>
-                                                <input type="password" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.password || ''} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
-                                            </div>
-                                        )}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Branch</label>
-                                                <input type="text" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.branch || ''} onChange={(e) => setFormData({ ...formData, branch: e.target.value })} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Phone</label>
-                                                <input type="text" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
-                                                    value={formData.phoneNumber || ''} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} />
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-
-                                <div className="pt-4 flex gap-3">
-                                    <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold transition-colors">
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-                                        <Save size={18} /> Save
-                                    </button>
+                                    </div>
                                 </div>
-                            </form>
-                        )}
-                    </motion.div>
-                </div>
-            )}
+                            ) : (
+                                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                                    {modalType === 'placement' && (
+                                        <>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Student Name</label>
+                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.studentName} onChange={(e) => setFormData({ ...formData, studentName: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Company</label>
+                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Role</label>
+                                                    <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Pkg (LPA)</label>
+                                                    <input type="number" step="0.1" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.packageLPA || ''} onChange={(e) => setFormData({ ...formData, packageLPA: e.target.value })} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Date</label>
+                                                <input type="date" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.placementDate || ''} onChange={(e) => setFormData({ ...formData, placementDate: e.target.value })} />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {modalType === 'job' && (
+                                        <>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Company</label>
+                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.companyName || ''} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Job Title</label>
+                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.jobTitle || ''} onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })} />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Location</label>
+                                                    <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.location || ''} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Salary</label>
+                                                    <input type="number" step="0.1" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.salaryPackage || ''} onChange={(e) => setFormData({ ...formData, salaryPackage: e.target.value })} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Skills (comma separated)</label>
+                                                <input type="text" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={Array.isArray(formData.skillsRequired) ? formData.skillsRequired.join(', ') : (formData.skillsRequired || '')}
+                                                    onChange={(e) => setFormData({ ...formData, skillsRequired: e.target.value })} />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {modalType === 'candidate' && (
+                                        <>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name</label>
+                                                <input type="text" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.fullName || ''} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Email</label>
+                                                <input type="email" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                    value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                                            </div>
+                                            {!formData.id && (
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Password</label>
+                                                    <input type="password" required className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.password || ''} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                                                </div>
+                                            )}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Branch</label>
+                                                    <input type="text" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.branch || ''} onChange={(e) => setFormData({ ...formData, branch: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Phone</label>
+                                                    <input type="text" className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500"
+                                                        value={formData.phoneNumber || ''} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="pt-4 flex gap-3">
+                                        <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold transition-colors">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+                                            <Save size={18} /> Save
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
         </AdvancedModuleLayout>
     );
 }

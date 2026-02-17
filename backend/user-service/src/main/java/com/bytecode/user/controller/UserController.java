@@ -18,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<User> getAllUsers(@RequestParam(required = false) String role) {
+    public List<User> getAllUsers(@RequestParam(name = "role", required = false) String role) {
         if (role != null && !role.isEmpty()) {
             return userService.getUsersByRole(role);
         }
@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<User> getUserByEmail(@PathVariable("email") String email) {
         return userService.getUserByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable("id") String id, @RequestBody User user) {
         try {
             return ResponseEntity.ok(userService.updateUser(id, user));
         } catch (RuntimeException e) {
@@ -46,7 +46,7 @@ public class UserController {
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") String id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }

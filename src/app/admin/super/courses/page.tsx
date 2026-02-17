@@ -16,6 +16,7 @@ import {
     PieChart,
     Layers,
     PlayCircle,
+    Play,
     MoreVertical,
     Plus,
     Search,
@@ -50,6 +51,7 @@ import {
     Link as LinkIcon,
     FolderPlus,
     FilePlus,
+    RefreshCw,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -172,6 +174,7 @@ export default function CourseManagementPage() {
     const [students, setStudents] = useState<Student[]>([]);
     const [trainers, setTrainers] = useState<Trainer[]>([]);
     const [materials, setMaterials] = useState<LearningMaterial[]>([]);
+    const [archivedRecordings, setArchivedRecordings] = useState<any[]>([]);
 
     // View states
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -186,6 +189,8 @@ export default function CourseManagementPage() {
     const [showMaterialModal, setShowMaterialModal] = useState(false);
     const [showPermissionModal, setShowPermissionModal] = useState(false);
     const [showCourseModal, setShowCourseModal] = useState(false);
+    const [showVideoModal, setShowVideoModal] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState<any>(null);
     const [toastStatus, setToastStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error') => {
@@ -224,12 +229,33 @@ export default function CourseManagementPage() {
             const [coursesRes, batchesRes, sessionsRes, assignmentsRes, studentsRes, trainersRes, materialsRes] = results;
 
             if (coursesRes.status === 'fulfilled') setCourses(coursesRes.value.data);
+            else console.error("Courses fetch failed:", coursesRes.reason);
+
             if (batchesRes.status === 'fulfilled') setBatches(batchesRes.value.data);
+            else console.error("Batches fetch failed:", batchesRes.reason);
+
             if (sessionsRes.status === 'fulfilled') setSessions(sessionsRes.value.data);
+            else console.error("Sessions fetch failed:", sessionsRes.reason);
+
             if (assignmentsRes.status === 'fulfilled') setAssignments(assignmentsRes.value.data);
+            else console.error("Assignments fetch failed:", assignmentsRes.reason);
+
             if (studentsRes.status === 'fulfilled') setStudents(studentsRes.value.data);
+            else console.error("Students fetch failed:", studentsRes.reason);
+
             if (trainersRes.status === 'fulfilled') setTrainers(trainersRes.value.data);
+            else console.error("Trainers fetch failed:", trainersRes.reason);
+
             if (materialsRes.status === 'fulfilled') setMaterials(materialsRes.value.data || []);
+            else console.error("Materials fetch failed:", materialsRes.reason);
+
+            // Load recordings from shared localStorage
+            if (typeof window !== 'undefined') {
+                const stored = localStorage.getItem('bytecode_recordings');
+                if (stored) {
+                    setArchivedRecordings(JSON.parse(stored));
+                }
+            }
 
             setLoading(false);
         } catch (error) {
@@ -286,8 +312,10 @@ export default function CourseManagementPage() {
 
     // Statistics
     const stats = useMemo(() => {
-        const totalRevenue = courses.reduce((acc, c) => acc + (c.price * c.enrolledStudents), 0);
-        const avgRating = courses.length > 0 ? courses.reduce((acc, c) => acc + c.rating, 0) / courses.length : 0;
+        const totalRevenue = courses.reduce((acc, c) => acc + ((c.price || 0) * (c.enrolledStudents || 0)), 0);
+        const avgRating = courses.length > 0
+            ? courses.reduce((acc, c) => acc + (c.rating || 0), 0) / courses.length
+            : 0;
 
         return [
             {
@@ -323,13 +351,38 @@ export default function CourseManagementPage() {
 
     // Helper functions
     const formatDate = (dateString: string) => {
+        if (!dateString) return 'N/A';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+    const formatDateForInput = (dateString: string) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        } catch (e) {
+            return '';
+        }
     };
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const generateMeetingLink = (platform: string) => {
+        const id = Math.random().toString(36).substring(2, 12);
+        if (platform === 'BYTECODE_LIVE') return `${window.location.origin}/live/${id}`;
+        if (platform === 'ZOOM') return `https://zoom.us/j/${id.replace(/[^0-9]/g, '').substring(0, 10)}`;
+        if (platform === 'GOOGLE_MEET') {
+            const part1 = Math.random().toString(36).substring(2, 5);
+            const part2 = Math.random().toString(36).substring(2, 6);
+            const part3 = Math.random().toString(36).substring(2, 5);
+            return `https://meet.google.com/${part1}-${part2}-${part3}`;
+        }
+        return '';
     };
 
     const getStatusColor = (status: string) => {
@@ -354,7 +407,7 @@ export default function CourseManagementPage() {
             };
 
             if (!payload.courseId) {
-                alert("Please select a course for this batch.");
+                showToast("Please select a course for this batch.", 'error');
                 return;
             }
 
@@ -362,21 +415,42 @@ export default function CourseManagementPage() {
             fetchAllData();
             setShowBatchModal(false);
             setBatchForm({});
-        } catch (error) {
+            showToast("Batch created successfully!", 'success');
+        } catch (error: any) {
             console.error("Failed to create batch:", error);
-            alert("Error creating batch. This might be a connection issue.");
+            const errMsg = error.response?.data || "Failed to create batch.";
+            showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
         }
     };
 
     const handleUpdateBatch = async () => {
-        if (!selectedBatch) return;
+        if (!batchForm.id) return;
         try {
-            await api.put(`academic/batches/${selectedBatch.id}`, batchForm);
+            await api.put(`academic/batches/${batchForm.id}`, batchForm);
             fetchAllData();
             setShowBatchModal(false);
             setBatchForm({});
-        } catch (error) {
+            showToast("Batch updated successfully!", 'success');
+        } catch (error: any) {
             console.error("Failed to update batch:", error);
+            const errMsg = error.response?.data || "Failed to update batch.";
+            showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+        }
+    };
+
+    const handleDeleteBatch = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm("Are you sure you want to delete this batch? All sessions and student assignments for this batch will be lost.")) {
+            try {
+                await api.delete(`academic/batches/${id}`);
+                fetchAllData();
+                if (selectedBatch?.id === id) setSelectedBatch(null);
+                showToast("Batch deleted successfully!", 'success');
+            } catch (error: any) {
+                console.error("Failed to delete batch:", error);
+                const errMsg = error.response?.data || "Failed to delete batch.";
+                showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+            }
         }
     };
 
@@ -384,14 +458,18 @@ export default function CourseManagementPage() {
         if (!selectedBatch) return;
         try {
             const updatedStudents = [...(selectedBatch.studentIds || []), studentId];
-            await api.put(`academic/batches/${selectedBatch.id}`, {
+            const updatedBatch = {
                 ...selectedBatch,
                 studentIds: updatedStudents,
                 totalStudents: updatedStudents.length
-            });
+            };
+            await api.put(`academic/batches/${selectedBatch.id}`, updatedBatch);
+            setSelectedBatch(updatedBatch);
             fetchAllData();
+            showToast("Student assigned successfully!", 'success');
         } catch (error) {
             console.error("Failed to assign student:", error);
+            showToast("Failed to assign student.", 'error');
         }
     };
 
@@ -399,25 +477,42 @@ export default function CourseManagementPage() {
         if (!selectedBatch) return;
         try {
             const updatedStudents = selectedBatch.studentIds.filter(id => id !== studentId);
-            await api.put(`academic/batches/${selectedBatch.id}`, {
+            const updatedBatch = {
                 ...selectedBatch,
                 studentIds: updatedStudents,
                 totalStudents: updatedStudents.length
-            });
+            };
+            await api.put(`academic/batches/${selectedBatch.id}`, updatedBatch);
+            setSelectedBatch(updatedBatch);
             fetchAllData();
+            showToast("Student removed successfully!", 'success');
         } catch (error) {
             console.error("Failed to remove student:", error);
+            showToast("Failed to remove student.", 'error');
         }
     };
 
     const handleCreateSession = async () => {
         try {
-            await api.post('academic/sessions', { ...sessionForm, batchId: selectedBatch?.id });
+            const res = await api.post('academic/sessions', { ...sessionForm, batchId: selectedBatch?.id });
+            const createdSession = res.data;
+
+            // If it's a Bytecode Live session, update the link with the real ID from the DB
+            if (sessionForm.platform === 'BYTECODE_LIVE') {
+                const updatedSession = {
+                    ...createdSession,
+                    meetingLink: `${window.location.origin}/live/${createdSession.id}`
+                };
+                await api.put(`academic/sessions/${createdSession.id}`, updatedSession);
+            }
+
             fetchAllData();
             setShowSessionModal(false);
             setSessionForm({});
+            showToast("Session scheduled successfully!", 'success');
         } catch (error) {
             console.error("Failed to create session:", error);
+            showToast("Failed to schedule session.", 'error');
         }
     };
 
@@ -459,9 +554,10 @@ export default function CourseManagementPage() {
             setShowCourseModal(false);
             setCourseForm({});
             showToast(courseForm.id ? "Course updated successfully!" : "Course created successfully!", 'success');
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to save course:", error);
-            showToast("Failed to save course.", 'error');
+            const errMsg = error.response?.data || "Failed to save course.";
+            showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
         }
     };
 
@@ -472,9 +568,10 @@ export default function CourseManagementPage() {
                 await api.delete(`courses/${id}`);
                 fetchAllData();
                 showToast("Course deleted successfully!", 'success');
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Failed to delete course:", error);
-                showToast("Failed to delete course.", 'error');
+                const errMsg = error.response?.data || "Failed to delete course.";
+                showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
             }
         }
     };
@@ -521,6 +618,7 @@ export default function CourseManagementPage() {
                     { id: 'courses', label: 'Courses', icon: BookOpen },
                     { id: 'batches', label: 'Batches', icon: Users },
                     { id: 'sessions', label: 'Sessions', icon: Video },
+                    { id: 'recordings', label: 'Recordings', icon: PlayCircle },
                     { id: 'materials', label: 'Materials', icon: FolderOpen },
                 ]}
             >
@@ -545,6 +643,7 @@ export default function CourseManagementPage() {
                 { id: 'courses', label: 'Courses', icon: BookOpen },
                 { id: 'batches', label: 'Batches', icon: Users },
                 { id: 'sessions', label: 'Sessions', icon: Video },
+                { id: 'recordings', label: 'Recordings', icon: PlayCircle },
                 { id: 'materials', label: 'Materials', icon: FolderOpen },
             ]}
         >
@@ -679,9 +778,33 @@ export default function CourseManagementPage() {
                                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white">
                                                 <Users size={24} />
                                             </div>
-                                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusColor(batch.status)}`}>
-                                                {batch.status}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setBatchForm({
+                                                                ...batch,
+                                                                startDate: formatDateForInput(batch.startDate),
+                                                                endDate: formatDateForInput(batch.endDate)
+                                                            });
+                                                            setShowBatchModal(true);
+                                                        }}
+                                                        className="p-1.5 hover:bg-blue-500/20 rounded text-blue-400 border border-transparent hover:border-blue-500/20"
+                                                    >
+                                                        <Edit size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeleteBatch(batch.id, e)}
+                                                        className="p-1.5 hover:bg-red-500/20 rounded text-red-400 border border-transparent hover:border-red-500/20"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusColor(batch.status)}`}>
+                                                    {batch.status}
+                                                </span>
+                                            </div>
                                         </div>
                                         <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-400">{batch.batchName}</h3>
                                         <div className="text-sm text-slate-400 mb-3">{batch.trainerName}</div>
@@ -747,9 +870,33 @@ export default function CourseManagementPage() {
                                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white">
                                                 <Users size={24} />
                                             </div>
-                                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusColor(batch.status)}`}>
-                                                {batch.status}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setBatchForm({
+                                                                ...batch,
+                                                                startDate: formatDateForInput(batch.startDate),
+                                                                endDate: formatDateForInput(batch.endDate)
+                                                            });
+                                                            setShowBatchModal(true);
+                                                        }}
+                                                        className="p-1.5 hover:bg-blue-500/20 rounded text-blue-400 border border-transparent hover:border-blue-500/20"
+                                                    >
+                                                        <Edit size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeleteBatch(batch.id, e)}
+                                                        className="p-1.5 hover:bg-red-500/20 rounded text-red-400 border border-transparent hover:border-red-500/20"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusColor(batch.status)}`}>
+                                                    {batch.status}
+                                                </span>
+                                            </div>
                                         </div>
                                         <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-400">{batch.batchName}</h3>
                                         <div className="text-sm text-slate-400 mb-2">{batch.courseName}</div>
@@ -797,15 +944,27 @@ export default function CourseManagementPage() {
                                             <span>{selectedBatch.schedule}</span>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => {
-                                            setBatchForm(selectedBatch);
-                                            setShowBatchModal(true);
-                                        }}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-                                    >
-                                        <Edit size={16} /> Edit Batch
-                                    </button>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => {
+                                                setBatchForm({
+                                                    ...selectedBatch,
+                                                    startDate: formatDateForInput(selectedBatch.startDate),
+                                                    endDate: formatDateForInput(selectedBatch.endDate)
+                                                });
+                                                setShowBatchModal(true);
+                                            }}
+                                            className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/20 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                                        >
+                                            <Edit size={16} /> Edit Batch
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDeleteBatch(selectedBatch.id, e)}
+                                            className="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                                        >
+                                            <Trash2 size={16} /> Delete
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1021,7 +1180,7 @@ export default function CourseManagementPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Users size={14} />
-                                        <span>Mentor: {session.mentorName}</span>
+                                        <span>Mentor: {session.mentorName || 'Not Assigned'}</span>
                                     </div>
                                 </div>
 
@@ -1065,7 +1224,19 @@ export default function CourseManagementPage() {
                                 key={material.id}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 hover:border-amber-500/50 transition-all group text-center"
+                                onClick={() => {
+                                    if (material.type === 'VIDEO') {
+                                        setSelectedVideo({
+                                            title: material.name,
+                                            batchName: 'Resource Library',
+                                            duration: 'Resource',
+                                            date: 'Added Recently',
+                                            mentorName: 'Bytecode Intelligence'
+                                        });
+                                        setShowVideoModal(true);
+                                    }
+                                }}
+                                className={`bg-slate-900/50 border border-white/5 rounded-2xl p-4 hover:border-amber-500/50 transition-all group text-center ${material.type === 'VIDEO' ? 'cursor-pointer' : 'cursor-default'}`}
                             >
                                 <div className="mb-3 flex justify-center">
                                     {material.type === 'FOLDER' ? (
@@ -1078,6 +1249,99 @@ export default function CourseManagementPage() {
                                 </div>
                                 <div className="text-xs font-bold text-white mb-1 line-clamp-1">{material.name}</div>
                                 <div className="text-[10px] text-slate-500">{material.type}</div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* ========== RECORDINGS TAB ========== */}
+            {activeTab === 'recordings' && (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center bg-slate-900/40 border border-white/5 p-6 rounded-2xl">
+                        <div className="relative w-96">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search recordings by topic or batch..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-red-500 transition-all font-bold"
+                            />
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest">
+                                <Clock size={14} /> {archivedRecordings.length} Total Archives
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {archivedRecordings.filter(rec =>
+                            rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            rec.batchName.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).length === 0 ? (
+                            <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                                <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                                    <Video className="text-slate-600" size={32} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2 uppercase font-[Rajdhani]">No Recordings Found</h3>
+                                <p className="text-sm text-slate-500">Recordings started in the live room will appear here automatically.</p>
+                            </div>
+                        ) : archivedRecordings.filter(rec =>
+                            rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            rec.batchName.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).map((rec, i) => (
+                            <motion.div
+                                key={rec.id || i}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: i * 0.1 }}
+                                onClick={() => {
+                                    setSelectedVideo(rec);
+                                    setShowVideoModal(true);
+                                }}
+                                className="group bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-red-500/30 transition-all cursor-pointer relative overflow-hidden flex flex-col"
+                            >
+                                <div className="aspect-video bg-black rounded-xl mb-4 relative overflow-hidden border border-white/5 group-hover:border-red-500/20 transition-all shadow-2xl">
+                                    <img
+                                        src={rec.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'}
+                                        alt={rec.title}
+                                        className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/40">
+                                            <PlayCircle size={24} fill="currentColor" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-md rounded text-[9px] font-black text-white border border-white/10">
+                                        {rec.duration}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-tighter">{rec.batchName}</span>
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> {rec.date}</span>
+                                </div>
+
+                                <h4 className="text-base font-bold text-white mb-4 tracking-tight group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
+
+                                <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] text-slate-500 uppercase font-black mb-0.5">MENTOR</span>
+                                        <span className="text-[11px] font-bold text-slate-300">{rec.mentorName}</span>
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedVideo(rec);
+                                            setShowVideoModal(true);
+                                        }}
+                                        className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-500 transition-all font-[Rajdhani]"
+                                    >
+                                        PLAY <Play size={14} />
+                                    </button>
+                                </div>
                             </motion.div>
                         ))}
                     </div>
@@ -1326,14 +1590,67 @@ export default function CourseManagementPage() {
                                     </div>
                                 </div>
 
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Platform</label>
+                                        <select
+                                            value={sessionForm.platform || 'BYTECODE_LIVE'}
+                                            onChange={(e) => {
+                                                const platform = e.target.value;
+                                                setSessionForm({
+                                                    ...sessionForm,
+                                                    platform,
+                                                    meetingLink: generateMeetingLink(platform)
+                                                });
+                                            }}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="BYTECODE_LIVE">Bytecode Live (Internal)</option>
+                                            <option value="GOOGLE_MEET">Google Meet</option>
+                                            <option value="ZOOM">Zoom</option>
+                                            <option value="TEAMS">Microsoft Teams</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Meeting Link</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="url"
+                                                value={sessionForm.meetingLink || ''}
+                                                onChange={(e) => setSessionForm({ ...sessionForm, meetingLink: e.target.value })}
+                                                className="flex-1 bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white text-sm"
+                                                placeholder="Link will be auto-generated..."
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setSessionForm({
+                                                    ...sessionForm,
+                                                    meetingLink: generateMeetingLink(sessionForm.platform || 'BYTECODE_LIVE')
+                                                })}
+                                                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white px-3 rounded-lg transition-colors"
+                                                title="Re-generate link"
+                                            >
+                                                <RefreshCw size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-2">Meeting Link</label>
-                                    <input
-                                        type="url"
-                                        value={sessionForm.meetingLink || ''}
-                                        onChange={(e) => setSessionForm({ ...sessionForm, meetingLink: e.target.value })}
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Mentor / Instructor</label>
+                                    <select
+                                        value={sessionForm.mentorName || ''}
+                                        onChange={(e) => setSessionForm({ ...sessionForm, mentorName: e.target.value })}
                                         className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                    />
+                                    >
+                                        <option value="">Select a Mentor</option>
+                                        <option value="Koushik Krishna">Koushik Krishna (Me)</option>
+                                        {trainers.map((trainer, i) => (
+                                            <option key={trainer.id || i} value={trainer.fullName}>
+                                                {trainer.fullName}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className="flex gap-3 pt-4">
@@ -1645,6 +1962,58 @@ export default function CourseManagementPage() {
                                             <Save size={16} /> {courseForm.id ? 'Update Course' : 'Create Course'}
                                         </button>
                                     </div>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Video Player Modal */}
+                <AnimatePresence>
+                    {showVideoModal && selectedVideo && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
+                            onClick={() => setShowVideoModal(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setShowVideoModal(false)}
+                                    className="absolute top-6 right-6 z-50 p-3 bg-black/50 hover:bg-red-600 text-white rounded-full transition-all border border-white/10"
+                                >
+                                    <X size={24} />
+                                </button>
+
+                                {/* Video Title & Info Overlay */}
+                                <div className="absolute top-0 left-0 right-0 p-8 bg-gradient-to-b from-black/80 to-transparent z-40 pointer-events-none">
+                                    <h3 className="text-2xl font-bold text-white mb-1 uppercase font-[Rajdhani] tracking-tight">{selectedVideo.title}</h3>
+                                    <div className="flex items-center gap-4 text-slate-300 text-sm">
+                                        <span className="flex items-center gap-1.5"><Users size={14} className="text-red-500" /> {selectedVideo.batchName}</span>
+                                        <span className="flex items-center gap-1.5"><Clock size={14} className="text-red-400" /> {selectedVideo.duration}</span>
+                                        <span className="flex items-center gap-1.5"><Calendar size={14} className="text-red-400" /> {selectedVideo.date}</span>
+                                    </div>
+                                </div>
+
+                                {/* Video Element */}
+                                <video
+                                    src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-his-computer-34446-large.mp4"
+                                    className="w-full h-full object-contain"
+                                    controls
+                                    autoPlay
+                                />
+
+                                {/* Bottom Controls Legend */}
+                                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 opacity-0 hover:opacity-100 transition-opacity">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Bytecode Archive Player v1.0 • {selectedVideo.mentorName}</p>
                                 </div>
                             </motion.div>
                         </motion.div>

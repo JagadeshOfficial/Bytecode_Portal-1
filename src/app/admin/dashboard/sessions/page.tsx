@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Video,
     Mic,
@@ -19,11 +19,32 @@ import {
     UserCheck,
     Settings,
     XCircle,
-    CheckCircle2
+    CheckCircle2,
+    Calendar,
+    ArrowUpRight,
+    PlayCircle
 } from 'lucide-react';
 
 export default function OnlineSessionsPage() {
     const [activeTab, setActiveTab] = useState('active');
+    const [archivedRecordings, setArchivedRecordings] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('bytecode_recordings');
+            if (stored) {
+                setArchivedRecordings(JSON.parse(stored));
+            } else {
+                // Fallback initial data
+                const initial = [
+                    { id: '1', title: 'React Context API & Hooks', batchName: 'React FE #15', mentorName: 'Dr. Alan Smith', date: 'Feb 09', duration: '1:45:12', views: 120, thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80' },
+                    { id: '2', title: 'Docker Containerization', batchName: 'Java Full Stack #21', mentorName: 'Prof. Sarah Chen', date: 'Feb 08', duration: '2:10:05', views: 95, thumbnail: 'https://images.unsplash.com/photo-1605745341112-85968b193ef5?w=800&q=80' },
+                ];
+                localStorage.setItem('bytecode_recordings', JSON.stringify(initial));
+                setArchivedRecordings(initial);
+            }
+        }
+    }, []);
 
     const stats = [
         { label: "Live Sessions", value: "05", icon: Video, color: "#ef4444", trend: "02 starting now" },
@@ -179,6 +200,76 @@ export default function OnlineSessionsPage() {
                         </motion.div>
                     ))}
                 </div>
+            )}
+            {activeTab === 'recordings' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-8"
+                >
+                    <div className="flex justify-between items-center bg-[#0a0a1a]/40 border border-white/5 p-6 rounded-[2rem]">
+                        <div className="relative w-96">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search recordings by batch or topic..."
+                                className="w-full bg-[#050510] border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-red-500 transition-all font-bold"
+                            />
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2">
+                                <Clock size={14} /> {archivedRecordings.length} ARCHIVED
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {archivedRecordings.map((rec, i) => (
+                            <motion.div
+                                key={rec.id || i}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="group bg-[#0a0a1a]/60 border border-white/5 rounded-3xl p-6 backdrop-blur-xl hover:border-red-500/30 transition-all cursor-pointer relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-3xl -mr-16 -mt-16 rounded-full group-hover:bg-red-500/10 transition-colors" />
+
+                                <div className="aspect-video bg-[#050510] rounded-2xl mb-6 relative overflow-hidden border border-white/5 group-hover:border-red-500/20 transition-all shadow-2xl">
+                                    <img
+                                        src={rec.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'}
+                                        alt={rec.title}
+                                        className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl shadow-red-500/40">
+                                            <PlayCircle size={32} fill="currentColor" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/80 backdrop-blur-md rounded-lg text-[10px] font-black text-white border border-white/10">
+                                        {rec.duration}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className="text-[10px] font-black text-red-500 bg-red-500/10 px-2 py-1 rounded-lg uppercase tracking-widest border border-red-500/20">{rec.batchName}</span>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5"><Calendar size={12} /> {rec.date}</span>
+                                </div>
+
+                                <h4 className="text-xl font-bold text-white mb-6 tracking-tight group-hover:text-red-500 transition-colors uppercase font-[Rajdhani]">{rec.title}</h4>
+
+                                <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] text-slate-500 uppercase font-black mb-0.5">MENTOR</span>
+                                        <span className="text-xs font-bold text-slate-300">{rec.mentorName}</span>
+                                    </div>
+                                    <button className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-500 transition-all">
+                                        VIEW <ArrowUpRight size={14} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
             )}
         </AdvancedModuleLayout>
     );
