@@ -192,15 +192,43 @@ const deterministicHash = (str: string) => {
     return hash;
 };
 
+import api from '@/lib/api';
+
 export default function Placements() {
     const [showModal, setShowModal] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState("");
+    const [stories, setStories] = useState<any[]>(SUCCESS_STORIES); // Fallback to static
 
     // Calculator State
     const [salary, setSalary] = useState(600000);
     const [experience, setExperience] = useState("1-3 Years");
     const [domain, setDomain] = useState("Full Stack");
     const [projected, setProjected] = useState({ hike: 185, total: 1425000 });
+
+    useEffect(() => {
+        // Fetch dynamic stories from backend
+        const fetchStories = async () => {
+            try {
+                const response = await api.get('/placements/records');
+                if (response.data && response.data.length > 0) {
+                    const mappedStories = response.data.map((r: any) => ({
+                        name: r.studentName,
+                        role: r.role,
+                        company: r.companyName,
+                        package: `${r.packageLPA} LPA`,
+                        prev: r.prevRole || 'Fresher',
+                        image: r.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.studentName)}&background=random`,
+                        quote: r.quote || "Great learning experience!",
+                        hike: r.hike || 100
+                    }));
+                    setStories(mappedStories);
+                }
+            } catch (err) {
+                console.error("Failed to fetch placement stories:", err);
+            }
+        };
+        fetchStories();
+    }, []);
 
     useEffect(() => {
         let baseMultiplier = domain === "AI / ML" ? 2.5 : domain === "DevOps" ? 2.2 : 2.0;
@@ -329,7 +357,7 @@ export default function Placements() {
                             }
                         }}
                     >
-                        {SUCCESS_STORIES.map((story, i) => (
+                        {stories.map((story, i) => (
                             <motion.div
                                 key={i}
                                 className={styles.storyCard}

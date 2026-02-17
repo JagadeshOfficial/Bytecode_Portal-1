@@ -45,4 +45,15 @@ public class UserService {
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    public List<User> getUsersByRole(String role) {
+        try {
+            return userRepository.findByRole(com.bytecode.user.model.UserRole.valueOf(role.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            return java.util.Collections.emptyList();
+        }
+    }
 }

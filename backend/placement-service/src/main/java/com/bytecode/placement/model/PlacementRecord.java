@@ -23,4 +23,8 @@ public class PlacementRecord {
     private Double packageLPA;
     private String role;
     private Date placementDate;
+    private String image;
+    private String quote;
+    private Double hike;
+    private String prevRole;
 }

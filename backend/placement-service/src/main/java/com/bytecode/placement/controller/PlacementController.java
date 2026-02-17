@@ -34,4 +34,23 @@ public class PlacementController {
     public PlacementRecord addPlacement(@RequestBody PlacementRecord record) {
         return placementService.addPlacement(record);
     }
+
+    @DeleteMapping("/records/{id}")
+    public void deletePlacement(@PathVariable String id) {
+        placementService.deletePlacement(id);
+    }
+
+    @PutMapping("/records/{id}")
+    public PlacementRecord updatePlacement(@PathVariable String id, @RequestBody PlacementRecord record) {
+        return placementService.updatePlacement(id, record);
+    }
+    @DeleteMapping("/jobs/{id}")
+    public void deleteJob(@PathVariable String id) {
+        placementService.deleteJob(id);
+    }
+
+    @PutMapping("/jobs/{id}")
+    public JobListing updateJob(@PathVariable String id, @RequestBody JobListing job) {
+        return placementService.updateJob(id, job);
+    }
 }

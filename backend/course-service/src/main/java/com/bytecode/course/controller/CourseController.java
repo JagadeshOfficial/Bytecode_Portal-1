@@ -31,4 +31,21 @@ public class CourseController {
     public Course addCourse(@RequestBody Course course) {
         return courseService.createCourse(course);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCourse(@PathVariable String id, @RequestBody Course course) {
+        try {
+            return ResponseEntity.ok(courseService.updateCourse(id, course));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error updating course: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
+        courseService.deleteCourse(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -31,4 +31,21 @@ public class PlacementService {
     public PlacementRecord addPlacement(PlacementRecord record) {
         return placementRecordRepository.save(record);
     }
+
+    public void deletePlacement(String id) {
+        placementRecordRepository.deleteById(id);
+    }
+
+    public PlacementRecord updatePlacement(String id, PlacementRecord record) {
+        record.setId(id);
+        return placementRecordRepository.save(record);
+    }
+    public void deleteJob(String id) {
+        jobRepository.deleteById(id);
+    }
+
+    public JobListing updateJob(String id, JobListing job) {
+        job.setId(id);
+        return jobRepository.save(job);
+    }
 }

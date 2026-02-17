@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
+import Toast from '@/components/ui/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     GraduationCap,
@@ -57,15 +58,21 @@ interface Course {
     id: string;
     title: string;
     description: string;
-    category: string;
+    category?: string;
+    tech?: string;
     level: string;
     duration: string;
     price: number;
-    instructor: string;
+    instructor?: string;
+    mentor?: string;
     rating: number;
     enrolledStudents: number;
-    thumbnail: string;
-    status: string;
+    thumbnail?: string;
+    image?: string;
+    status?: string;
+    active?: boolean;
+    tags?: string[];
+    modules?: string[];
 }
 
 interface Batch {
@@ -178,8 +185,16 @@ export default function CourseManagementPage() {
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [showMaterialModal, setShowMaterialModal] = useState(false);
     const [showPermissionModal, setShowPermissionModal] = useState(false);
+    const [showCourseModal, setShowCourseModal] = useState(false);
+    const [toastStatus, setToastStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+    const showToast = (msg: string, type: 'success' | 'error') => {
+        setToastStatus({ type, msg });
+        setTimeout(() => setToastStatus(null), 3000);
+    };
 
     // Form states
+    const [courseForm, setCourseForm] = useState<Partial<Course>>({});
     const [batchForm, setBatchForm] = useState<Partial<Batch>>({});
     const [sessionForm, setSessionForm] = useState<Partial<LiveSession>>({});
     const [materialForm, setMaterialForm] = useState<Partial<LearningMaterial>>({
@@ -428,6 +443,42 @@ export default function CourseManagementPage() {
         }
     };
 
+    const handleSaveCourse = async () => {
+        try {
+            if (courseForm.id) {
+                await api.put(`courses/${courseForm.id}`, courseForm);
+            } else {
+                await api.post('courses', {
+                    ...courseForm,
+                    active: true,
+                    rating: 0,
+                    enrolledStudents: 0
+                });
+            }
+            fetchAllData();
+            setShowCourseModal(false);
+            setCourseForm({});
+            showToast(courseForm.id ? "Course updated successfully!" : "Course created successfully!", 'success');
+        } catch (error) {
+            console.error("Failed to save course:", error);
+            showToast("Failed to save course.", 'error');
+        }
+    };
+
+    const handleDeleteCourse = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
+            try {
+                await api.delete(`courses/${id}`);
+                fetchAllData();
+                showToast("Course deleted successfully!", 'success');
+            } catch (error) {
+                console.error("Failed to delete course:", error);
+                showToast("Failed to delete course.", 'error');
+            }
+        }
+    };
+
     const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -524,7 +575,13 @@ export default function CourseManagementPage() {
                                         className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500"
                                     />
                                 </div>
-                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                                <button
+                                    onClick={() => {
+                                        setCourseForm({});
+                                        setShowCourseModal(true);
+                                    }}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                                >
                                     <Plus size={16} /> Add Course
                                 </button>
                             </div>
@@ -539,7 +596,7 @@ export default function CourseManagementPage() {
                                         onClick={() => setSelectedCourse(course)}
                                         className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all group cursor-pointer"
                                     >
-                                        <div className="relative h-40 bg-gradient-to-br from-blue-500/20 to-violet-600/20">
+                                        <div className="relative h-40 bg-gradient-to-br from-blue-500/20 to-violet-600/20 group">
                                             {course.thumbnail ? (
                                                 <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
                                             ) : (
@@ -547,6 +604,26 @@ export default function CourseManagementPage() {
                                                     <BookOpen size={48} className="text-white/20" />
                                                 </div>
                                             )}
+                                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setCourseForm(course);
+                                                        setShowCourseModal(true);
+                                                    }}
+                                                    className="p-1.5 bg-slate-900/80 rounded-lg text-blue-400 hover:text-white backdrop-blur-sm"
+                                                    title="Edit Course"
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeleteCourse(course.id, e)}
+                                                    className="p-1.5 bg-slate-900/80 rounded-lg text-red-400 hover:text-white backdrop-blur-sm"
+                                                    title="Delete Course"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="p-5">
                                             <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
@@ -1431,7 +1508,150 @@ export default function CourseManagementPage() {
                         </motion.div>
                     </motion.div>
                 )}
+                {/* Course Modal */}
+                <AnimatePresence>
+                    {showCourseModal && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                            onClick={() => setShowCourseModal(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.95, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                exit={{ scale: 0.95, y: 20 }}
+                                className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-white">
+                                        {courseForm.id ? 'Edit Course' : 'Add New Course'}
+                                    </h3>
+                                    <button onClick={() => setShowCourseModal(false)} className="text-slate-400 hover:text-white">
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Course Title</label>
+                                        <input
+                                            type="text"
+                                            value={courseForm.title || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                            placeholder="e.g., Python Masterclass"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-400 mb-2">Category / Tech</label>
+                                            <input
+                                                type="text"
+                                                value={courseForm.tech || ''}
+                                                onChange={(e) => setCourseForm({ ...courseForm, tech: e.target.value })}
+                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                                placeholder="e.g., Full Stack"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-400 mb-2">Level</label>
+                                            <select
+                                                value={courseForm.level || 'Beginner'}
+                                                onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value })}
+                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                            >
+                                                <option value="Beginner">Beginner</option>
+                                                <option value="Intermediate">Intermediate</option>
+                                                <option value="Advanced">Advanced</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-400 mb-2">Duration</label>
+                                            <input
+                                                type="text"
+                                                value={courseForm.duration || ''}
+                                                onChange={(e) => setCourseForm({ ...courseForm, duration: e.target.value })}
+                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                                placeholder="e.g., 6 Months"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-400 mb-2">Price (₹)</label>
+                                            <input
+                                                type="number"
+                                                value={courseForm.price || ''}
+                                                onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) })}
+                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                                placeholder="e.g., 49999"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Description</label>
+                                        <textarea
+                                            value={courseForm.description || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white h-24"
+                                            placeholder="Course description..."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Thumbnail URL</label>
+                                        <input
+                                            type="text"
+                                            value={courseForm.thumbnail || courseForm.image || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, image: e.target.value, thumbnail: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                            placeholder="https://..."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Instructor / Mentor</label>
+                                        <select
+                                            value={courseForm.mentor || courseForm.instructor || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, mentor: e.target.value, instructor: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="">Select Instructor</option>
+                                            {trainers.map((trainer, i) => (
+                                                <option key={trainer.id || i} value={trainer.fullName}>
+                                                    {trainer.fullName} {trainer.specialization ? `(${trainer.specialization})` : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4">
+                                        <button
+                                            onClick={() => setShowCourseModal(false)}
+                                            className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleSaveCourse}
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
+                                        >
+                                            <Save size={16} /> {courseForm.id ? 'Update Course' : 'Create Course'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </AnimatePresence>
-        </AdvancedModuleLayout >
+            <Toast status={toastStatus} onClose={() => setToastStatus(null)} />
+        </AdvancedModuleLayout>
     );
 }

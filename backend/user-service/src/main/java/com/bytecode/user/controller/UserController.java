@@ -1,12 +1,14 @@
 package com.bytecode.user.controller;
 
 import com.bytecode.user.model.User;
+import com.bytecode.user.model.UserRole;
 import com.bytecode.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,7 +18,10 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(@RequestParam(required = false) String role) {
+        if (role != null && !role.isEmpty()) {
+            return userService.getUsersByRole(role);
+        }
         return userService.getAllUsers();
     }
 
@@ -39,5 +44,10 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }
