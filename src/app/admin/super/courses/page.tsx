@@ -46,7 +46,9 @@ import {
     Unlock,
     ChevronRight,
     ArrowLeft,
-    Link as LinkIcon
+    Link as LinkIcon,
+    FolderPlus,
+    FilePlus,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -180,7 +182,11 @@ export default function CourseManagementPage() {
     // Form states
     const [batchForm, setBatchForm] = useState<Partial<Batch>>({});
     const [sessionForm, setSessionForm] = useState<Partial<LiveSession>>({});
-    const [materialForm, setMaterialForm] = useState<Partial<LearningMaterial>>({});
+    const [materialForm, setMaterialForm] = useState<Partial<LearningMaterial>>({
+        permissions: { studentIds: [], accessType: 'READ', isPublic: true }
+    });
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     // Fetch all data
     useEffect(() => {
@@ -324,12 +330,26 @@ export default function CourseManagementPage() {
     // CRUD Operations
     const handleCreateBatch = async () => {
         try {
-            await api.post('academic/batches', { ...batchForm, courseId: selectedCourse?.id });
+            const payload = {
+                ...batchForm,
+                courseId: batchForm.courseId || selectedCourse?.id,
+                courseName: batchForm.courseName || selectedCourse?.title,
+                studentIds: [],
+                totalStudents: 0
+            };
+
+            if (!payload.courseId) {
+                alert("Please select a course for this batch.");
+                return;
+            }
+
+            await api.post('academic/batches', payload);
             fetchAllData();
             setShowBatchModal(false);
             setBatchForm({});
         } catch (error) {
             console.error("Failed to create batch:", error);
+            alert("Error creating batch. This might be a connection issue.");
         }
     };
 
@@ -388,12 +408,53 @@ export default function CourseManagementPage() {
 
     const handleUploadMaterial = async () => {
         try {
-            await api.post('academic/materials', { ...materialForm, batchId: selectedBatch?.id, folderId: currentFolder });
+            const payload = {
+                ...materialForm,
+                batchId: selectedBatch?.id,
+                folderId: currentFolder,
+                url: materialForm.type === 'FOLDER' ? '' : (selectedFile ? `https://storage.bytecode.com/${selectedFile.name}` : materialForm.url),
+                size: selectedFile?.size || 0,
+                uploadedBy: 'Lead Java Faculty',
+                uploadedAt: new Date().toISOString(),
+            };
+
+            await api.post('academic/materials', payload);
             fetchAllData();
             setShowMaterialModal(false);
-            setMaterialForm({});
+            setMaterialForm({ permissions: { studentIds: [], accessType: 'READ', isPublic: true } });
+            setSelectedFile(null);
         } catch (error) {
-            console.error("Failed to upload material:", error);
+            console.error("Upload failed:", error);
+        }
+    };
+
+    const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            setMaterialForm(prev => ({
+                ...prev,
+                name: file.name,
+                type: file.type.includes('video') ? 'VIDEO' :
+                    file.type.includes('pdf') ? 'PDF' :
+                        file.type.includes('image') ? 'IMAGE' : 'DOCUMENT'
+            }));
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files?.[0]) {
+            const file = e.dataTransfer.files[0];
+            setSelectedFile(file);
+            setMaterialForm(prev => ({
+                ...prev,
+                name: file.name,
+                type: file.type.includes('video') ? 'VIDEO' :
+                    file.type.includes('pdf') ? 'PDF' :
+                        file.type.includes('image') ? 'IMAGE' : 'DOCUMENT'
+            }));
         }
     };
 
@@ -451,7 +512,6 @@ export default function CourseManagementPage() {
                     )}
 
                     {!selectedCourse ? (
-                        // Course List View
                         <>
                             <div className="flex justify-between items-center">
                                 <div className="relative w-96">
@@ -509,7 +569,6 @@ export default function CourseManagementPage() {
                             </div>
                         </>
                     ) : (
-                        // Course Detail View - Show Batches
                         <div className="space-y-6">
                             <div className="flex justify-between items-center">
                                 <div>
@@ -568,190 +627,385 @@ export default function CourseManagementPage() {
             )}
 
             {/* ========== BATCHES TAB ========== */}
-            {activeTab === 'batches' && selectedBatch && (
+            {activeTab === 'batches' && (
                 <div className="space-y-6">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center gap-2 text-sm">
-                        <button onClick={() => { setSelectedBatch(null); setActiveTab('courses'); }} className="text-blue-400 hover:underline">
-                            Batches
-                        </button>
-                        <ChevronRight size={16} className="text-slate-600" />
-                        <span className="text-white font-bold">{selectedBatch.batchName}</span>
-                    </div>
-
-                    {/* Batch Header */}
-                    <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <h2 className="text-2xl font-bold text-white mb-2">{selectedBatch.batchName}</h2>
-                                <div className="flex items-center gap-4 text-sm text-slate-400">
-                                    <span>{selectedBatch.courseName}</span>
-                                    <span>•</span>
-                                    <span>{selectedBatch.trainerName}</span>
-                                    <span>•</span>
-                                    <span>{selectedBatch.schedule}</span>
+                    {!selectedBatch ? (
+                        <>
+                            <div className="flex justify-between items-center">
+                                <div className="relative w-96">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search batches..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500"
+                                    />
                                 </div>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setBatchForm(selectedBatch);
-                                    setShowBatchModal(true);
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-                            >
-                                <Edit size={16} /> Edit Batch
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Batch Management Sections */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Students Section */}
-                        <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <Users className="text-blue-400" size={20} />
-                                    Students ({selectedBatch.totalStudents}/{selectedBatch.maxCapacity})
-                                </h3>
-                                <button
-                                    onClick={() => setShowStudentModal(true)}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
-                                >
-                                    <UserPlus size={14} /> Assign
-                                </button>
-                            </div>
-                            <div className="space-y-2 max-h-64 overflow-y-auto">
-                                {students.filter(s => selectedBatch.studentIds?.includes(s.id)).map((student) => (
-                                    <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                                        <div>
-                                            <div className="text-sm font-bold text-white">{student.fullName}</div>
-                                            <div className="text-xs text-slate-400">{student.email}</div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleRemoveStudent(student.id)}
-                                            className="p-1.5 hover:bg-red-500/10 rounded text-red-400"
-                                        >
-                                            <UserMinus size={14} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Sessions Section */}
-                        <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <Video className="text-violet-400" size={20} />
-                                    Sessions ({batchSessions.length})
-                                </h3>
                                 <button
                                     onClick={() => {
-                                        setSessionForm({ batchId: selectedBatch.id, batchName: selectedBatch.batchName });
-                                        setShowSessionModal(true);
+                                        setBatchForm({ status: 'UPCOMING' });
+                                        setShowBatchModal(true);
                                     }}
-                                    className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
                                 >
-                                    <Plus size={14} /> Schedule
+                                    <Plus size={16} /> Create Batch
                                 </button>
-                            </div>
-                            <div className="space-y-2 max-h-64 overflow-y-auto">
-                                {batchSessions.map((session) => (
-                                    <div key={session.id} className="p-3 bg-white/5 rounded-lg">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="text-sm font-bold text-white">{session.title}</div>
-                                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(session.status)}`}>
-                                                {session.status}
+                            </div >
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {batches.filter(b =>
+                                    b.batchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    b.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    b.batchCode.toLowerCase().includes(searchQuery.toLowerCase())
+                                ).map((batch) => (
+                                    <motion.div
+                                        key={batch.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        onClick={() => setSelectedBatch(batch)}
+                                        className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-blue-500/50 transition-all group cursor-pointer relative overflow-hidden"
+                                    >
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white">
+                                                <Users size={24} />
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusColor(batch.status)}`}>
+                                                {batch.status}
                                             </span>
                                         </div>
-                                        <div className="text-xs text-slate-400">
-                                            {formatDate(session.startTime)} • {formatTime(session.startTime)}
+                                        <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-400">{batch.batchName}</h3>
+                                        <div className="text-sm text-slate-400 mb-2">{batch.courseName}</div>
+                                        <div className="text-xs text-slate-500 mb-4 font-mono">{batch.batchCode}</div>
+
+                                        <div className="space-y-2 text-xs text-slate-400 border-t border-white/5 pt-4">
+                                            <div className="flex justify-between">
+                                                <span>Trainer:</span>
+                                                <span className="text-white font-medium">{batch.trainerName}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Students:</span>
+                                                <span className="text-white font-medium">{batch.totalStudents}/{batch.maxCapacity}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Timeline:</span>
+                                                <span className="text-white font-medium">{formatDate(batch.startDate)}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 ))}
                             </div>
+                        </>
+                    ) : (
+                        <div className="space-y-6">
+                            {/* Breadcrumb */}
+                            <div className="flex items-center gap-2 text-sm">
+                                <button onClick={() => { setSelectedBatch(null); setActiveTab('courses'); }} className="text-blue-400 hover:underline">
+                                    Batches
+                                </button>
+                                <ChevronRight size={16} className="text-slate-600" />
+                                <span className="text-white font-bold">{selectedBatch.batchName}</span>
+                            </div>
+
+                            {/* Batch Header */}
+                            <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-white mb-2">{selectedBatch.batchName}</h2>
+                                        <div className="flex items-center gap-4 text-sm text-slate-400">
+                                            <span>{selectedBatch.courseName}</span>
+                                            <span>•</span>
+                                            <span>{selectedBatch.trainerName}</span>
+                                            <span>•</span>
+                                            <span>{selectedBatch.schedule}</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setBatchForm(selectedBatch);
+                                            setShowBatchModal(true);
+                                        }}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                                    >
+                                        <Edit size={16} /> Edit Batch
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Batch Management Sections */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Students Section */}
+                                <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                            <Users className="text-blue-400" size={20} />
+                                            Students ({selectedBatch.totalStudents}/{selectedBatch.maxCapacity})
+                                        </h3>
+                                        <button
+                                            onClick={() => setShowStudentModal(true)}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                        >
+                                            <UserPlus size={14} /> Assign
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        {students.filter(s => selectedBatch.studentIds?.includes(s.id)).map((student) => (
+                                            <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                                <div>
+                                                    <div className="text-sm font-bold text-white">{student.fullName}</div>
+                                                    <div className="text-xs text-slate-400">{student.email}</div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleRemoveStudent(student.id)}
+                                                    className="p-1.5 hover:bg-red-500/10 rounded text-red-400"
+                                                >
+                                                    <UserMinus size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Sessions Section */}
+                                <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                            <Video className="text-violet-400" size={20} />
+                                            Sessions ({batchSessions.length})
+                                        </h3>
+                                        <button
+                                            onClick={() => {
+                                                setSessionForm({ batchId: selectedBatch.id, batchName: selectedBatch.batchName });
+                                                setShowSessionModal(true);
+                                            }}
+                                            className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                        >
+                                            <Plus size={14} /> Schedule
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        {batchSessions.map((session) => (
+                                            <div key={session.id} className="p-3 bg-white/5 rounded-lg">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="text-sm font-bold text-white">{session.title}</div>
+                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(session.status)}`}>
+                                                        {session.status}
+                                                    </span>
+                                                </div>
+                                                <div className="text-xs text-slate-400">
+                                                    {formatDate(session.startTime)} • {formatTime(session.startTime)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Learning Materials Section */}
+                            <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6 mt-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        <FolderOpen className="text-amber-400" size={20} />
+                                        Learning Materials
+                                    </h3>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setMaterialForm({ type: 'FOLDER', permissions: { studentIds: [], accessType: 'READ', isPublic: true } });
+                                                setShowMaterialModal(true);
+                                            }}
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
+                                        >
+                                            <FolderPlus size={14} /> New Folder
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setMaterialForm({ type: 'DOCUMENT', permissions: { studentIds: [], accessType: 'READ', isPublic: true } });
+                                                setShowMaterialModal(true);
+                                            }}
+                                            className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
+                                        >
+                                            <Upload size={14} /> Upload
+                                        </button>
+                                        <button
+                                            onClick={() => setShowPermissionModal(true)}
+                                            className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
+                                        >
+                                            <Lock size={14} /> Permissions
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Breadcrumb for folders */}
+                                {currentFolder && (
+                                    <div className="flex items-center gap-2 mb-4 text-sm">
+                                        <button onClick={() => setCurrentFolder(null)} className="text-blue-400 hover:underline">
+                                            Root
+                                        </button>
+                                        <ChevronRight size={14} className="text-slate-600" />
+                                        <span className="text-white">Current Folder</span>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    {batchMaterials.map((material) => (
+                                        <div
+                                            key={material.id}
+                                            onClick={() => material.type === 'FOLDER' ? setCurrentFolder(material.id) : null}
+                                            className={`bg-white/5 border border-white/5 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-pointer group relative`}
+                                        >
+                                            <div className="absolute top-2 right-2">
+                                                {material.permissions?.isPublic ? (
+                                                    <Unlock size={12} className="text-emerald-400 opacity-50" />
+                                                ) : (
+                                                    <Lock size={12} className="text-amber-400 opacity-50" />
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col items-center text-center">
+                                                {material.type === 'FOLDER' ? (
+                                                    <FolderOpen size={48} className="text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+                                                ) : material.type === 'VIDEO' ? (
+                                                    <PlayCircle size={48} className="text-violet-400 mb-2 group-hover:scale-110 transition-transform" />
+                                                ) : (
+                                                    <FileText size={48} className="text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
+                                                )}
+                                                <div className="text-sm font-bold text-white mb-1 line-clamp-1">{material.name}</div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-400">
+                                                        {material.permissions?.accessType || 'READ'}
+                                                    </span>
+                                                    {!material.permissions?.isPublic && (
+                                                        <span className="text-[10px] text-amber-500 font-bold">RESTR</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {batchMaterials.length === 0 && (
+                                        <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-2xl">
+                                            <FolderOpen size={40} className="mb-2 opacity-20" />
+                                            <p className="text-sm">No items in this folder</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ========== SESSIONS TAB ========== */}
+            {activeTab === 'sessions' && (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <div className="relative w-96">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search sessions..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-violet-500"
+                            />
                         </div>
                     </div>
 
-                    {/* Learning Materials Section */}
-                    <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                <FolderOpen className="text-amber-400" size={20} />
-                                Learning Materials
-                            </h3>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setShowMaterialModal(true)}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
-                                >
-                                    <Upload size={14} /> Upload
-                                </button>
-                                <button
-                                    onClick={() => setShowPermissionModal(true)}
-                                    className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
-                                >
-                                    <Lock size={14} /> Permissions
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Breadcrumb for folders */}
-                        {currentFolder && (
-                            <div className="flex items-center gap-2 mb-4 text-sm">
-                                <button onClick={() => setCurrentFolder(null)} className="text-blue-400 hover:underline">
-                                    Root
-                                </button>
-                                <ChevronRight size={14} className="text-slate-600" />
-                                <span className="text-white">Current Folder</span>
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {batchMaterials.map((material) => (
-                                <div
-                                    key={material.id}
-                                    onClick={() => material.type === 'FOLDER' ? setCurrentFolder(material.id) : null}
-                                    className={`bg-white/5 border border-white/5 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-pointer group relative`}
-                                >
-                                    <div className="absolute top-2 right-2">
-                                        {material.permissions?.isPublic ? (
-                                            <Unlock size={12} className="text-emerald-400 opacity-50" />
-                                        ) : (
-                                            <Lock size={12} className="text-amber-400 opacity-50" />
-                                        )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sessions.filter(s =>
+                            s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            s.batchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            s.mentorName.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).map((session) => (
+                            <motion.div
+                                key={session.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-violet-500/50 transition-all group"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
+                                        <Video size={20} />
                                     </div>
-                                    <div className="flex flex-col items-center text-center">
-                                        {material.type === 'FOLDER' ? (
-                                            <FolderOpen size={48} className="text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
-                                        ) : material.type === 'VIDEO' ? (
-                                            <PlayCircle size={48} className="text-violet-400 mb-2 group-hover:scale-110 transition-transform" />
-                                        ) : (
-                                            <FileText size={48} className="text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-                                        )}
-                                        <div className="text-sm font-bold text-white mb-1 line-clamp-1">{material.name}</div>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-400">
-                                                {material.permissions?.accessType || 'READ'}
-                                            </span>
-                                            {!material.permissions?.isPublic && (
-                                                <span className="text-[10px] text-amber-500 font-bold">RESTR</span>
-                                            )}
-                                        </div>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(session.status)}`}>
+                                        {session.status}
+                                    </span>
+                                </div>
+                                <h3 className="text-lg font-bold text-white mb-1">{session.title}</h3>
+                                <div className="text-sm text-slate-400 mb-4">{session.batchName}</div>
+
+                                <div className="space-y-3 text-xs text-slate-400 border-t border-white/5 pt-4">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar size={14} />
+                                        <span>{formatDate(session.startTime)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock size={14} />
+                                        <span>{formatTime(session.startTime)} ({session.duration} mins)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Users size={14} />
+                                        <span>Mentor: {session.mentorName}</span>
                                     </div>
                                 </div>
-                            ))}
-                            {batchMaterials.length === 0 && (
-                                <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-2xl">
-                                    <FolderOpen size={40} className="mb-2 opacity-20" />
-                                    <p className="text-sm">No items in this folder</p>
-                                </div>
-                            )}
-                        </div>
+
+                                {session.meetingLink && (
+                                    <a
+                                        href={session.meetingLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-4 w-full flex items-center justify-center gap-2 py-2 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white rounded-lg text-xs font-bold transition-all"
+                                    >
+                                        <LinkIcon size={14} /> Join Session
+                                    </a>
+                                )}
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             )}
 
+            {/* ========== MATERIALS TAB ========== */}
+            {activeTab === 'materials' && (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <div className="relative w-96">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search materials..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-500"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {materials.filter(m =>
+                            m.name.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).map((material) => (
+                            <motion.div
+                                key={material.id}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 hover:border-amber-500/50 transition-all group text-center"
+                            >
+                                <div className="mb-3 flex justify-center">
+                                    {material.type === 'FOLDER' ? (
+                                        <FolderOpen size={40} className="text-amber-400" />
+                                    ) : material.type === 'VIDEO' ? (
+                                        <PlayCircle size={40} className="text-violet-400" />
+                                    ) : (
+                                        <FileText size={40} className="text-blue-400" />
+                                    )}
+                                </div>
+                                <div className="text-xs font-bold text-white mb-1 line-clamp-1">{material.name}</div>
+                                <div className="text-[10px] text-slate-500">{material.type}</div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
             {/* ========== MODALS ========== */}
 
             {/* Batch Modal */}
@@ -791,6 +1045,29 @@ export default function CourseManagementPage() {
                                         placeholder="e.g., Full Stack Winter 2024"
                                     />
                                 </div>
+
+                                {!selectedCourse && !batchForm.id && (
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Select Course</label>
+                                        <select
+                                            value={batchForm.courseId || ''}
+                                            onChange={(e) => {
+                                                const course = courses.find(c => c.id === e.target.value);
+                                                setBatchForm({
+                                                    ...batchForm,
+                                                    courseId: e.target.value,
+                                                    courseName: course?.title
+                                                });
+                                            }}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="">Select a Course</option>
+                                            {courses.map(course => (
+                                                <option key={course.id} value={course.id}>{course.title}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -1010,7 +1287,10 @@ export default function CourseManagementPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-                        onClick={() => setShowMaterialModal(false)}
+                        onClick={() => {
+                            setShowMaterialModal(false);
+                            setSelectedFile(null);
+                        }}
                     >
                         <motion.div
                             initial={{ scale: 0.95, y: 20 }}
@@ -1020,59 +1300,131 @@ export default function CourseManagementPage() {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-white">Upload Material</h3>
+                                <h3 className="text-xl font-bold text-white">
+                                    {materialForm.type === 'FOLDER' ? 'Create Folder' : 'Upload Material'}
+                                </h3>
                                 <button onClick={() => setShowMaterialModal(false)} className="text-slate-400 hover:text-white">
                                     <X size={24} />
                                 </button>
                             </div>
 
                             <div className="space-y-4">
+                                {materialForm.type !== 'FOLDER' && (
+                                    <div
+                                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                        onDragLeave={() => setIsDragging(false)}
+                                        onDrop={handleDrop}
+                                        className={`border-2 border-dashed rounded-xl p-8 transition-all flex flex-col items-center justify-center gap-3 cursor-pointer
+                                            ${isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}
+                                            ${selectedFile ? 'border-emerald-500/50 bg-emerald-500/5' : ''}
+                                        `}
+                                        onClick={() => document.getElementById('fileInput')?.click()}
+                                    >
+                                        <input
+                                            type="file"
+                                            id="fileInput"
+                                            className="hidden"
+                                            onChange={onFileSelect}
+                                        />
+                                        {selectedFile ? (
+                                            <>
+                                                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                                    <CheckCircle size={24} />
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-sm font-bold text-white mb-1">{selectedFile.name}</div>
+                                                    <div className="text-xs text-slate-400">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
+                                                    <Upload size={24} />
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-sm font-bold text-white mb-1">Click or drag & drop</div>
+                                                    <div className="text-xs text-slate-400">Support all file types</div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-2">Material Name</label>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">
+                                        {materialForm.type === 'FOLDER' ? 'Folder Name' : 'Display Name'}
+                                    </label>
                                     <input
                                         type="text"
                                         value={materialForm.name || ''}
                                         onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
-                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white placeholder:text-slate-600"
+                                        placeholder={materialForm.type === 'FOLDER' ? "e.g., Assignment Solutions" : "Enter file label"}
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-2">Type</label>
+                                {materialForm.type !== 'FOLDER' && !selectedFile && (
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Type (Auto-detected if file selected)</label>
+                                        <select
+                                            value={materialForm.type || 'DOCUMENT'}
+                                            onChange={(e) => setMaterialForm({ ...materialForm, type: e.target.value as any })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="VIDEO">Video</option>
+                                            <option value="PDF">PDF</option>
+                                            <option value="DOCUMENT">Document</option>
+                                            <option value="IMAGE">Image</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <label className="text-sm font-bold text-white italic">Initial Permissions</label>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-slate-400">Public Access</span>
+                                            <input
+                                                type="checkbox"
+                                                checked={materialForm.permissions?.isPublic}
+                                                onChange={(e) => setMaterialForm({
+                                                    ...materialForm,
+                                                    permissions: { ...materialForm.permissions!, isPublic: e.target.checked }
+                                                })}
+                                                className="w-4 h-4 rounded border-white/10 bg-slate-800"
+                                            />
+                                        </div>
+                                    </div>
                                     <select
-                                        value={materialForm.type || 'DOCUMENT'}
-                                        onChange={(e) => setMaterialForm({ ...materialForm, type: e.target.value as any })}
-                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        value={materialForm.permissions?.accessType || 'READ'}
+                                        onChange={(e) => setMaterialForm({
+                                            ...materialForm,
+                                            permissions: { ...materialForm.permissions!, accessType: e.target.value as any }
+                                        })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
                                     >
-                                        <option value="FOLDER">Folder</option>
-                                        <option value="VIDEO">Video</option>
-                                        <option value="PDF">PDF</option>
-                                        <option value="DOCUMENT">Document</option>
+                                        <option value="READ">Read Only (Standard)</option>
+                                        <option value="FULL">Full Access (Edit/Manage)</option>
                                     </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-2">File URL</label>
-                                    <input
-                                        type="url"
-                                        value={materialForm.url || ''}
-                                        onChange={(e) => setMaterialForm({ ...materialForm, url: e.target.value })}
-                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                    />
                                 </div>
 
                                 <div className="flex gap-3 pt-4">
                                     <button
-                                        onClick={() => setShowMaterialModal(false)}
+                                        onClick={() => {
+                                            setShowMaterialModal(false);
+                                            setSelectedFile(null);
+                                        }}
                                         className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleUploadMaterial}
-                                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
+                                        disabled={!materialForm.name}
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
                                     >
-                                        <Upload size={16} /> Upload
+                                        {materialForm.type === 'FOLDER' ? <FolderPlus size={16} /> : <Upload size={16} />}
+                                        {materialForm.type === 'FOLDER' ? 'Create' : 'Upload'}
                                     </button>
                                 </div>
                             </div>
@@ -1080,6 +1432,6 @@ export default function CourseManagementPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </AdvancedModuleLayout>
+        </AdvancedModuleLayout >
     );
 }

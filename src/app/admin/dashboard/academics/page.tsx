@@ -26,35 +26,46 @@ import {
     GraduationCap,
     Grid,
     List,
-    Filter
+    List,
+    Filter,
+    AlertCircle
 } from 'lucide-react';
+import api from '@/lib/api';
+import { useEffect } from 'react';
 
 export default function AcademicManagementPage() {
     const [activeTab, setActiveTab] = useState('batches');
+    const [loading, setLoading] = useState(true);
+    const [batches, setBatches] = useState<any[]>([]);
+    const [courses, setCourses] = useState<any[]>([]);
+    const [materials, setMaterials] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [batchesRes, coursesRes, materialsRes] = await Promise.all([
+                    api.get('academic/batches'),
+                    api.get('courses'),
+                    api.get('academic/materials')
+                ]);
+                setBatches(batchesRes.data || []);
+                setCourses(coursesRes.data || []);
+                setMaterials(materialsRes.data || []);
+            } catch (error) {
+                console.error("Failed to fetch academic data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
 
     const stats = [
-        { label: "Active Courses", value: "18", icon: Layers, color: "#7c3aed", trend: "+2 this month" },
-        { label: "Total Batches", value: "32", icon: BookOpen, color: "#22d3ee", trend: "Normal" },
-        { label: "LMS Assets", value: "1.2K", icon: FileText, color: "#10b981", trend: "+45 new" },
+        { label: "Active Courses", value: courses.length.toString(), icon: Layers, color: "#7c3aed", trend: "Live" },
+        { label: "Total Batches", value: batches.length.toString(), icon: BookOpen, color: "#22d3ee", trend: "Syncing" },
+        { label: "LMS Assets", value: materials.length.toString(), icon: FileText, color: "#10b981", trend: "Cloud" },
         { label: "Classes Today", value: "14", icon: CalendarDays, color: "#f59e0b" },
-    ];
-
-    const batches = [
-        { id: "B22-REACT", course: "React Full Stack", tutor: "Dr. Alan Smith", schedule: "MWF 10:00 AM", students: 45, progress: 65, status: "Ongoing" },
-        { id: "B08-GO", course: "Backend GoLang", tutor: "Prof. Sarah Chen", schedule: "TTS 02:00 PM", students: 32, progress: 20, status: "New" },
-        { id: "P05-SYS", course: "System Design", tutor: "Mr. Rajesh Kumar", schedule: "Sat-Sun 04:30 PM", students: 50, progress: 90, status: "Finalizing" },
-    ];
-
-    const courses = [
-        { title: "React Architecture", modules: 12, content: "48 Videos", students: 450, rating: 4.8 },
-        { title: "Node.js Mastery", modules: 15, content: "60 Labs", students: 320, rating: 4.9 },
-        { title: "Cloud Ops with AWS", modules: 10, content: "32 Sessions", students: 280, rating: 4.7 },
-    ];
-
-    const assets = [
-        { title: "Microservices Guide.pdf", type: "Document", size: "2.4 MB", date: "2h ago" },
-        { title: "React Context API.mp4", type: "Video", size: "450 MB", date: "Yesterday" },
-        { title: "Batch-B22 Notes.zip", type: "Archive", size: "12 MB", date: "Feb 8" },
     ];
 
     return (
@@ -92,7 +103,12 @@ export default function AcademicManagementPage() {
                         </div>
 
                         <div className="grid grid-cols-1 gap-4">
-                            {batches.map((batch, i) => (
+                            {loading ? (
+                                <div className="p-12 flex flex-col items-center gap-4 text-slate-500">
+                                    <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                                    <p className="font-bold text-xs uppercase tracking-widest">Loading Batches...</p>
+                                </div>
+                            ) : batches.map((batch, i) => (
                                 <motion.div
                                     key={batch.id}
                                     initial={{ opacity: 0, x: -20 }}
@@ -108,15 +124,15 @@ export default function AcademicManagementPage() {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-3">
-                                                <h3 className="text-xl font-bold text-white group-hover:text-violet-400 transition-colors">{batch.id}</h3>
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${batch.status === 'Ongoing' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                    batch.status === 'New' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
+                                                <h3 className="text-xl font-bold text-white group-hover:text-violet-400 transition-colors">{batch.batchName}</h3>
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${batch.status === 'ONGOING' ? 'bg-emerald-500/10 text-emerald-400' :
+                                                        batch.status === 'UPCOMING' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
                                                     }`}>{batch.status}</span>
                                             </div>
-                                            <p className="text-sm text-slate-400 font-medium">{batch.course}</p>
+                                            <p className="text-sm text-slate-400 font-medium">{batch.courseName}</p>
                                             <div className="mt-2 flex flex-wrap gap-4 text-xs text-slate-500">
-                                                <span className="flex items-center gap-1.5"><Users size={12} /> {batch.students}</span>
-                                                <span className="flex items-center gap-1.5"><UserCheck size={12} /> {batch.tutor}</span>
+                                                <span className="flex items-center gap-1.5"><Users size={12} /> {batch.totalStudents}/{batch.maxCapacity}</span>
+                                                <span className="flex items-center gap-1.5"><UserCheck size={12} /> {batch.trainerName}</span>
                                                 <span className="flex items-center gap-1.5"><Clock size={12} /> {batch.schedule}</span>
                                             </div>
                                         </div>
@@ -124,13 +140,13 @@ export default function AcademicManagementPage() {
 
                                     <div className="w-full lg:w-48 space-y-2 relative z-10">
                                         <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                            <span>Batch Progress</span>
-                                            <span className="text-white">{batch.progress}%</span>
+                                            <span>Progress</span>
+                                            <span className="text-white">45%</span>
                                         </div>
                                         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
                                             <motion.div
                                                 initial={{ width: 0 }}
-                                                animate={{ width: `${batch.progress}%` }}
+                                                animate={{ width: `45%` }}
                                                 className="h-full bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-full"
                                             />
                                         </div>
@@ -203,15 +219,15 @@ export default function AcademicManagementPage() {
                             </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {assets.map((asset, i) => (
+                            {materials.map((asset, i) => (
                                 <div key={i} className="p-6 bg-[#0a0a1a]/60 border border-white/5 rounded-3xl group hover:border-emerald-500/30 transition-all flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="p-3 rounded-2xl bg-white/5 text-slate-400 group-hover:text-emerald-400 transition-colors">
-                                            {asset.type === 'Video' ? <PlayCircle size={24} /> : <FileText size={24} />}
+                                            {asset.type === 'VIDEO' ? <PlayCircle size={24} /> : <FileText size={24} />}
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-white group-hover:text-emerald-200 transition-colors">{asset.title}</div>
-                                            <div className="text-[10px] text-slate-500 font-bold">{asset.type} • {asset.size} • {asset.date}</div>
+                                            <div className="text-sm font-bold text-white group-hover:text-emerald-200 transition-colors">{asset.name}</div>
+                                            <div className="text-[10px] text-slate-500 font-bold">{asset.type} • {(asset.size / 1024 / 1024).toFixed(2)} MB</div>
                                         </div>
                                     </div>
                                     <button className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-colors"><Download size={16} /></button>
