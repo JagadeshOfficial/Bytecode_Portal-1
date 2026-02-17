@@ -664,10 +664,11 @@ export default function AcademicsPage() {
 
                             {/* Video Element */}
                             <video
-                                src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-his-computer-34446-large.mp4"
+                                src={selectedVideo.url || selectedVideo.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
                                 className="w-full h-full object-contain"
                                 controls
                                 autoPlay
+                                playsInline
                             />
 
                             {/* Bottom Controls Legend */}

@@ -52,6 +52,8 @@ import {
     FolderPlus,
     FilePlus,
     RefreshCw,
+    Share2,
+    Check
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -190,7 +192,9 @@ export default function CourseManagementPage() {
     const [showPermissionModal, setShowPermissionModal] = useState(false);
     const [showCourseModal, setShowCourseModal] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
+
     const [selectedVideo, setSelectedVideo] = useState<any>(null);
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null);
     const [toastStatus, setToastStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error') => {
@@ -207,6 +211,16 @@ export default function CourseManagementPage() {
     });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+
+    // Share Recording States
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [sharingRecording, setSharingRecording] = useState<any>(null);
+    const [shareStep, setShareStep] = useState<'COURSES' | 'BATCHES' | 'MATERIALS'>('COURSES');
+    const [shareSelectedCourse, setShareSelectedCourse] = useState<Course | null>(null);
+    const [shareSelectedBatch, setShareSelectedBatch] = useState<Batch | null>(null);
+    const [shareCurrentFolder, setShareCurrentFolder] = useState<string | null>(null);
+    const [shareNewFolderName, setShareNewFolderName] = useState('');
+    const [isCreatingFolder, setIsCreatingFolder] = useState(false);
 
     // Fetch all data
     useEffect(() => {
@@ -438,20 +452,25 @@ export default function CourseManagementPage() {
         }
     };
 
-    const handleDeleteBatch = async (id: string, e: React.MouseEvent) => {
+    const handleDeleteBatch = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (confirm("Are you sure you want to delete this batch? All sessions and student assignments for this batch will be lost.")) {
-            try {
-                await api.delete(`academic/batches/${id}`);
-                fetchAllData();
-                if (selectedBatch?.id === id) setSelectedBatch(null);
-                showToast("Batch deleted successfully!", 'success');
-            } catch (error: any) {
-                console.error("Failed to delete batch:", error);
-                const errMsg = error.response?.data || "Failed to delete batch.";
-                showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+        setConfirmModal({
+            isOpen: true,
+            title: "Delete Batch",
+            message: "Are you sure you want to delete this batch? All sessions and student assignments for this batch will be lost.",
+            onConfirm: async () => {
+                try {
+                    await api.delete(`academic/batches/${id}`);
+                    fetchAllData();
+                    if (selectedBatch?.id === id) setSelectedBatch(null);
+                    showToast("Batch deleted successfully!", 'success');
+                } catch (error: any) {
+                    console.error("Failed to delete batch:", error);
+                    const errMsg = error.response?.data || "Failed to delete batch.";
+                    showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+                }
             }
-        }
+        });
     };
 
     const handleAssignStudent = async (studentId: string) => {
@@ -561,19 +580,24 @@ export default function CourseManagementPage() {
         }
     };
 
-    const handleDeleteCourse = async (id: string, e: React.MouseEvent) => {
+    const handleDeleteCourse = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
-            try {
-                await api.delete(`courses/${id}`);
-                fetchAllData();
-                showToast("Course deleted successfully!", 'success');
-            } catch (error: any) {
-                console.error("Failed to delete course:", error);
-                const errMsg = error.response?.data || "Failed to delete course.";
-                showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+        setConfirmModal({
+            isOpen: true,
+            title: "Delete Course",
+            message: "Are you sure you want to delete this course? This action cannot be undone.",
+            onConfirm: async () => {
+                try {
+                    await api.delete(`courses/${id}`);
+                    fetchAllData();
+                    showToast("Course deleted successfully!", 'success');
+                } catch (error: any) {
+                    console.error("Failed to delete course:", error);
+                    const errMsg = error.response?.data || "Failed to delete course.";
+                    showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+                }
             }
-        }
+        });
     };
 
     const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -605,6 +629,99 @@ export default function CourseManagementPage() {
             }));
         }
     };
+
+    // Share Recording Handlers
+    const handleShareRecording = (recording: any) => {
+        setSharingRecording(recording);
+        setShareStep('COURSES');
+        setShareSelectedCourse(null);
+        setShareSelectedBatch(null);
+        setShareCurrentFolder(null);
+        setShowShareModal(true);
+    };
+
+    const handleSaveToMaterials = async () => {
+        if (!sharingRecording || !shareSelectedBatch) return;
+
+        try {
+            const payload = {
+                name: sharingRecording.title,
+                type: 'VIDEO',
+                batchId: shareSelectedBatch.id,
+                folderId: shareCurrentFolder,
+                url: sharingRecording.url || sharingRecording.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Use real URL
+                permissions: {
+                    accessType: 'READ',
+                    isPublic: true, // Default to public
+                    studentIds: []
+                },
+                size: 0,
+                uploadedBy: 'admin', // Should be dynamic
+                uploadedAt: new Date().toISOString()
+            };
+
+            const res = await api.post('academic/materials', payload);
+            if (res.data) {
+                setMaterials(prev => [...prev, res.data]);
+                showToast('Recording shared to materials successfully!', 'success');
+                setShowShareModal(false);
+            }
+        } catch (error) {
+            console.error("Failed to share recording:", error);
+            showToast('Failed to share recording', 'error');
+        }
+    };
+
+    const handleCreateShareFolder = async () => {
+        if (!shareNewFolderName || !shareSelectedBatch) return;
+        try {
+            const payload = {
+                name: shareNewFolderName,
+                type: 'FOLDER',
+                batchId: shareSelectedBatch.id,
+                folderId: shareCurrentFolder,
+                uploadedBy: 'admin',
+                uploadedAt: new Date().toISOString(),
+                permissions: {
+                    accessType: 'READ',
+                    isPublic: true,
+                    studentIds: []
+                }
+            };
+            const res = await api.post('academic/materials', payload);
+            if (res.data) {
+                setMaterials(prev => [...prev, res.data]); // Update local state
+                setShareCurrentFolder(res.data.id); // Enter new folder
+                setShareNewFolderName('');
+                setIsCreatingFolder(false);
+                showToast('Folder created!', 'success');
+            }
+        } catch (error) {
+            console.error("Failed to create folder:", error);
+            showToast('Failed to create folder', 'error');
+        }
+    };
+
+
+    const handleDeleteRecording = (recordingId: string) => {
+        setConfirmModal({
+            isOpen: true,
+            title: "Delete Recording",
+            message: "Are you sure you want to delete this recording from the archive? This will NOT remove it from any materials you've shared it to.",
+            onConfirm: () => {
+                // Remove from local state
+                const updatedRecordings = archivedRecordings.filter(r => r.id !== recordingId);
+                setArchivedRecordings(updatedRecordings);
+
+                // Update localStorage
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('bytecode_recordings', JSON.stringify(updatedRecordings));
+                }
+                showToast('Recording removed from archive', 'success');
+            }
+        });
+    };
+
 
     if (loading) {
         return (
@@ -688,7 +805,7 @@ export default function CourseManagementPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {courses.map((course, i) => (
                                     <motion.div
-                                        key={course.id}
+                                        key={course.id || i}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i * 0.05 }}
@@ -858,9 +975,9 @@ export default function CourseManagementPage() {
                                     b.batchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                     b.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                     b.batchCode.toLowerCase().includes(searchQuery.toLowerCase())
-                                ).map((batch) => (
+                                ).map((batch, i) => (
                                     <motion.div
-                                        key={batch.id}
+                                        key={batch.id || i}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         onClick={() => setSelectedBatch(batch)}
@@ -985,8 +1102,8 @@ export default function CourseManagementPage() {
                                         </button>
                                     </div>
                                     <div className="space-y-2 max-h-64 overflow-y-auto">
-                                        {students.filter(s => selectedBatch.studentIds?.includes(s.id)).map((student) => (
-                                            <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                        {students.filter(s => selectedBatch.studentIds?.includes(s.id)).map((student, i) => (
+                                            <div key={student.id || i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                                                 <div>
                                                     <div className="text-sm font-bold text-white">{student.fullName}</div>
                                                     <div className="text-xs text-slate-400">{student.email}</div>
@@ -1020,8 +1137,8 @@ export default function CourseManagementPage() {
                                         </button>
                                     </div>
                                     <div className="space-y-2 max-h-64 overflow-y-auto">
-                                        {batchSessions.map((session) => (
-                                            <div key={session.id} className="p-3 bg-white/5 rounded-lg">
+                                        {batchSessions.map((session, i) => (
+                                            <div key={session.id || i} className="p-3 bg-white/5 rounded-lg">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div className="text-sm font-bold text-white">{session.title}</div>
                                                     <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(session.status)}`}>
@@ -1084,9 +1201,9 @@ export default function CourseManagementPage() {
                                 )}
 
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    {batchMaterials.map((material) => (
+                                    {batchMaterials.map((material, i) => (
                                         <div
-                                            key={material.id}
+                                            key={material.id || i}
                                             onClick={() => material.type === 'FOLDER' ? setCurrentFolder(material.id) : null}
                                             className={`bg-white/5 border border-white/5 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-pointer group relative`}
                                         >
@@ -1151,9 +1268,9 @@ export default function CourseManagementPage() {
                             s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             s.batchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             s.mentorName.toLowerCase().includes(searchQuery.toLowerCase())
-                        ).map((session) => (
+                        ).map((session, i) => (
                             <motion.div
-                                key={session.id}
+                                key={session.id || i}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-violet-500/50 transition-all group"
@@ -1331,16 +1448,38 @@ export default function CourseManagementPage() {
                                         <span className="text-[8px] text-slate-500 uppercase font-black mb-0.5">MENTOR</span>
                                         <span className="text-[11px] font-bold text-slate-300">{rec.mentorName}</span>
                                     </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedVideo(rec);
-                                            setShowVideoModal(true);
-                                        }}
-                                        className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-500 transition-all font-[Rajdhani]"
-                                    >
-                                        PLAY <Play size={14} />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedVideo(rec);
+                                                setShowVideoModal(true);
+                                            }}
+                                            className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 hover:bg-red-600 hover:border-red-500 transition-all font-[Rajdhani]"
+                                        >
+                                            PLAY <Play size={14} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleShareRecording(rec);
+                                            }}
+                                            className="flex items-center gap-2 text-[10px] font-black text-blue-500 hover:text-white transition-colors uppercase tracking-widest bg-blue-500/5 px-3 py-2 rounded-xl border border-blue-500/10 hover:bg-blue-600 hover:border-blue-500 transition-all font-[Rajdhani]"
+                                            title="Share to Course Materials"
+                                        >
+                                            <Share2 size={14} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteRecording(rec.id);
+                                            }}
+                                            className="flex items-center gap-2 text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-widest bg-slate-500/5 px-3 py-2 rounded-xl border border-slate-500/10 hover:bg-red-600 hover:border-red-500 transition-all font-[Rajdhani]"
+                                            title="Delete from Archive"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -1511,8 +1650,8 @@ export default function CourseManagementPage() {
                             </div>
 
                             <div className="space-y-2">
-                                {students.filter(s => !selectedBatch.studentIds?.includes(s.id)).map((student) => (
-                                    <div key={student.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10">
+                                {students.filter(s => !selectedBatch.studentIds?.includes(s.id)).map((student, i) => (
+                                    <div key={student.id || i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10">
                                         <div>
                                             <div className="text-sm font-bold text-white">{student.fullName}</div>
                                             <div className="text-xs text-slate-400">{student.email}</div>
@@ -1825,202 +1964,466 @@ export default function CourseManagementPage() {
                         </motion.div>
                     </motion.div>
                 )}
-                {/* Course Modal */}
-                <AnimatePresence>
-                    {showCourseModal && (
+            </AnimatePresence>
+
+            {/* Course Modal */}
+            <AnimatePresence>
+                {showCourseModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowCourseModal(false)}
+                    >
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-                            onClick={() => setShowCourseModal(false)}
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            <motion.div
-                                initial={{ scale: 0.95, y: 20 }}
-                                animate={{ scale: 1, y: 0 }}
-                                exit={{ scale: 0.95, y: 20 }}
-                                className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-bold text-white">
-                                        {courseForm.id ? 'Edit Course' : 'Add New Course'}
-                                    </h3>
-                                    <button onClick={() => setShowCourseModal(false)} className="text-slate-400 hover:text-white">
-                                        <X size={24} />
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-400 mb-2">Course Title</label>
-                                        <input
-                                            type="text"
-                                            value={courseForm.title || ''}
-                                            onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
-                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                            placeholder="e.g., Python Masterclass"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-400 mb-2">Category / Tech</label>
-                                            <input
-                                                type="text"
-                                                value={courseForm.tech || ''}
-                                                onChange={(e) => setCourseForm({ ...courseForm, tech: e.target.value })}
-                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                                placeholder="e.g., Full Stack"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-400 mb-2">Level</label>
-                                            <select
-                                                value={courseForm.level || 'Beginner'}
-                                                onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value })}
-                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                            >
-                                                <option value="Beginner">Beginner</option>
-                                                <option value="Intermediate">Intermediate</option>
-                                                <option value="Advanced">Advanced</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-400 mb-2">Duration</label>
-                                            <input
-                                                type="text"
-                                                value={courseForm.duration || ''}
-                                                onChange={(e) => setCourseForm({ ...courseForm, duration: e.target.value })}
-                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                                placeholder="e.g., 6 Months"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-400 mb-2">Price (₹)</label>
-                                            <input
-                                                type="number"
-                                                value={courseForm.price || ''}
-                                                onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) })}
-                                                className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                                placeholder="e.g., 49999"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-400 mb-2">Description</label>
-                                        <textarea
-                                            value={courseForm.description || ''}
-                                            onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white h-24"
-                                            placeholder="Course description..."
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-400 mb-2">Thumbnail URL</label>
-                                        <input
-                                            type="text"
-                                            value={courseForm.thumbnail || courseForm.image || ''}
-                                            onChange={(e) => setCourseForm({ ...courseForm, image: e.target.value, thumbnail: e.target.value })}
-                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                            placeholder="https://..."
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-400 mb-2">Instructor / Mentor</label>
-                                        <select
-                                            value={courseForm.mentor || courseForm.instructor || ''}
-                                            onChange={(e) => setCourseForm({ ...courseForm, mentor: e.target.value, instructor: e.target.value })}
-                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                                        >
-                                            <option value="">Select Instructor</option>
-                                            {trainers.map((trainer, i) => (
-                                                <option key={trainer.id || i} value={trainer.fullName}>
-                                                    {trainer.fullName} {trainer.specialization ? `(${trainer.specialization})` : ''}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="flex gap-3 pt-4">
-                                        <button
-                                            onClick={() => setShowCourseModal(false)}
-                                            className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleSaveCourse}
-                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
-                                        >
-                                            <Save size={16} /> {courseForm.id ? 'Update Course' : 'Create Course'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Video Player Modal */}
-                <AnimatePresence>
-                    {showVideoModal && selectedVideo && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
-                            onClick={() => setShowVideoModal(false)}
-                        >
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {/* Close Button */}
-                                <button
-                                    onClick={() => setShowVideoModal(false)}
-                                    className="absolute top-6 right-6 z-50 p-3 bg-black/50 hover:bg-red-600 text-white rounded-full transition-all border border-white/10"
-                                >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-white">
+                                    {courseForm.id ? 'Edit Course' : 'Add New Course'}
+                                </h3>
+                                <button onClick={() => setShowCourseModal(false)} className="text-slate-400 hover:text-white">
                                     <X size={24} />
                                 </button>
+                            </div>
 
-                                {/* Video Title & Info Overlay */}
-                                <div className="absolute top-0 left-0 right-0 p-8 bg-gradient-to-b from-black/80 to-transparent z-40 pointer-events-none">
-                                    <h3 className="text-2xl font-bold text-white mb-1 uppercase font-[Rajdhani] tracking-tight">{selectedVideo.title}</h3>
-                                    <div className="flex items-center gap-4 text-slate-300 text-sm">
-                                        <span className="flex items-center gap-1.5"><Users size={14} className="text-red-500" /> {selectedVideo.batchName}</span>
-                                        <span className="flex items-center gap-1.5"><Clock size={14} className="text-red-400" /> {selectedVideo.duration}</span>
-                                        <span className="flex items-center gap-1.5"><Calendar size={14} className="text-red-400" /> {selectedVideo.date}</span>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Course Title</label>
+                                    <input
+                                        type="text"
+                                        value={courseForm.title || ''}
+                                        onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        placeholder="e.g., Python Masterclass"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Category / Tech</label>
+                                        <input
+                                            type="text"
+                                            value={courseForm.tech || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, tech: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                            placeholder="e.g., Full Stack"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Level</label>
+                                        <select
+                                            value={courseForm.level || 'Beginner'}
+                                            onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="Beginner">Beginner</option>
+                                            <option value="Intermediate">Intermediate</option>
+                                            <option value="Advanced">Advanced</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                {/* Video Element */}
-                                <video
-                                    src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-his-computer-34446-large.mp4"
-                                    className="w-full h-full object-contain"
-                                    controls
-                                    autoPlay
-                                />
-
-                                {/* Bottom Controls Legend */}
-                                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 opacity-0 hover:opacity-100 transition-opacity">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Bytecode Archive Player v1.0 • {selectedVideo.mentorName}</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Duration</label>
+                                        <input
+                                            type="text"
+                                            value={courseForm.duration || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, duration: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                            placeholder="e.g., 6 Months"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-400 mb-2">Price (₹)</label>
+                                        <input
+                                            type="number"
+                                            value={courseForm.price || ''}
+                                            onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                            placeholder="e.g., 49999"
+                                        />
+                                    </div>
                                 </div>
-                            </motion.div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Description</label>
+                                    <textarea
+                                        value={courseForm.description || ''}
+                                        onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white h-24"
+                                        placeholder="Course description..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Thumbnail URL</label>
+                                    <input
+                                        type="text"
+                                        value={courseForm.thumbnail || courseForm.image || ''}
+                                        onChange={(e) => setCourseForm({ ...courseForm, image: e.target.value, thumbnail: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                        placeholder="https://..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">Instructor / Mentor</label>
+                                    <select
+                                        value={courseForm.mentor || courseForm.instructor || ''}
+                                        onChange={(e) => setCourseForm({ ...courseForm, mentor: e.target.value, instructor: e.target.value })}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    >
+                                        <option value="">Select Instructor</option>
+                                        {trainers.map((trainer, i) => (
+                                            <option key={trainer.id || i} value={trainer.fullName}>
+                                                {trainer.fullName} {trainer.specialization ? `(${trainer.specialization})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        onClick={() => setShowCourseModal(false)}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleSaveCourse}
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
+                                    >
+                                        <Save size={16} /> {courseForm.id ? 'Update Course' : 'Create Course'}
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
-                    )}
-                </AnimatePresence>
+                    </motion.div>
+                )}
             </AnimatePresence>
+
+            {/* Video Player Modal */}
+            <AnimatePresence>
+                {showVideoModal && selectedVideo && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
+                        onClick={() => setShowVideoModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowVideoModal(false)}
+                                className="absolute top-6 right-6 z-50 p-3 bg-black/50 hover:bg-red-600 text-white rounded-full transition-all border border-white/10"
+                            >
+                                <X size={24} />
+                            </button>
+
+                            {/* Video Title & Info Overlay */}
+                            <div className="absolute top-0 left-0 right-0 p-8 bg-gradient-to-b from-black/80 to-transparent z-40 pointer-events-none">
+                                <h3 className="text-2xl font-bold text-white mb-1 uppercase font-[Rajdhani] tracking-tight">{selectedVideo.title}</h3>
+                                <div className="flex items-center gap-4 text-slate-300 text-sm">
+                                    <span className="flex items-center gap-1.5"><Users size={14} className="text-red-500" /> {selectedVideo.batchName}</span>
+                                    <span className="flex items-center gap-1.5"><Clock size={14} className="text-red-400" /> {selectedVideo.duration}</span>
+                                    <span className="flex items-center gap-1.5"><Calendar size={14} className="text-red-400" /> {selectedVideo.date}</span>
+                                </div>
+                            </div>
+
+                            {/* Video Element */}
+                            <video
+                                src={selectedVideo.url || selectedVideo.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+                                className="w-full h-full object-contain"
+                                controls
+                                autoPlay
+                                playsInline
+                            />
+
+                            {/* Bottom Controls Legend */}
+                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 opacity-0 hover:opacity-100 transition-opacity">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Bytecode Archive Player v1.0 • {selectedVideo.mentorName}</p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Share Recording Modal */}
+            <AnimatePresence>
+                {showShareModal && sharingRecording && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowShareModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] flex flex-col"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <Share2 className="text-blue-400" size={20} /> Share Recording
+                                    </h3>
+                                    <p className="text-sm text-slate-400 mt-1">Select destination for: <span className="text-white font-bold">{sharingRecording.title}</span></p>
+                                </div>
+                                <button onClick={() => setShowShareModal(false)} className="text-slate-400 hover:text-white"><X size={24} /></button>
+                            </div>
+
+                            {/* Breadcrumbs */}
+                            <div className="flex items-center gap-2 text-sm text-slate-400 mb-4 bg-black/20 p-2 rounded-lg">
+                                <span className={shareStep === 'COURSES' ? 'text-blue-400 font-bold' : ''}>Courses</span>
+                                {shareSelectedCourse && (
+                                    <>
+                                        <ChevronRight size={14} />
+                                        <span className={shareStep === 'BATCHES' ? 'text-blue-400 font-bold' : ''}>{shareSelectedCourse.title}</span>
+                                    </>
+                                )}
+                                {shareSelectedBatch && (
+                                    <>
+                                        <ChevronRight size={14} />
+                                        <span className={shareStep === 'MATERIALS' ? 'text-blue-400 font-bold' : ''}>{shareSelectedBatch.batchName}</span>
+                                    </>
+                                )}
+                                {shareCurrentFolder && (
+                                    <>
+                                        <ChevronRight size={14} />
+                                        <span className="text-white">Current Folder</span>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Step Content */}
+                            <div className="flex-1 overflow-y-auto min-h-[300px]">
+                                {shareStep === 'COURSES' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {courses.map(course => (
+                                            <div
+                                                key={course.id}
+                                                onClick={() => {
+                                                    setShareSelectedCourse(course);
+                                                    setShareStep('BATCHES');
+                                                }}
+                                                className="p-4 bg-white/5 hover:bg-blue-600/20 border border-white/5 hover:border-blue-500/50 rounded-xl cursor-pointer transition-all flex items-center gap-3 group"
+                                            >
+                                                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400 group-hover:text-blue-300">
+                                                    <BookOpen size={20} />
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-white group-hover:text-blue-200">{course.title}</div>
+                                                    <div className="text-xs text-slate-400">{batches.filter(b => b.courseId === course.id).length} Batches</div>
+                                                </div>
+                                                <ChevronRight className="ml-auto text-slate-600 group-hover:text-blue-400" size={16} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {shareStep === 'BATCHES' && (
+                                    <div className="space-y-3">
+                                        <button onClick={() => setShareStep('COURSES')} className="text-xs text-blue-400 hover:underline mb-2 flex items-center gap-1"><ArrowLeft size={12} /> Back to Courses</button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {batches.filter(b => b.courseId === shareSelectedCourse?.id).map(batch => (
+                                                <div
+                                                    key={batch.id}
+                                                    onClick={() => {
+                                                        setShareSelectedBatch(batch);
+                                                        setShareStep('MATERIALS');
+                                                    }}
+                                                    className="p-4 bg-white/5 hover:bg-violet-600/20 border border-white/5 hover:border-violet-500/50 rounded-xl cursor-pointer transition-all flex items-center gap-3 group"
+                                                >
+                                                    <div className="p-2 bg-violet-500/10 rounded-lg text-violet-400 group-hover:text-violet-300">
+                                                        <Users size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-white group-hover:text-violet-200">{batch.batchName}</div>
+                                                        <div className="text-xs text-slate-400">{batch.batchCode}</div>
+                                                    </div>
+                                                    <ChevronRight className="ml-auto text-slate-600 group-hover:text-violet-400" size={16} />
+                                                </div>
+                                            ))}
+                                            {batches.filter(b => b.courseId === shareSelectedCourse?.id).length === 0 && (
+                                                <div className="col-span-full py-8 text-center text-slate-500">No batches found for this course.</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {shareStep === 'MATERIALS' && (
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <button
+                                                onClick={() => {
+                                                    if (shareCurrentFolder) {
+                                                        // Go up one level (simple implementation: go to root)
+                                                        // Ideally should track history, but root is fine for MVP
+                                                        setShareCurrentFolder(null);
+                                                    } else {
+                                                        setShareStep('BATCHES');
+                                                        setShareSelectedBatch(null);
+                                                    }
+                                                }}
+                                                className="text-xs text-blue-400 hover:underline flex items-center gap-1"
+                                            >
+                                                <ArrowLeft size={12} /> {shareCurrentFolder ? 'Back to Root' : 'Back to Batches'}
+                                            </button>
+
+                                            <div className="flex gap-2">
+                                                {isCreatingFolder ? (
+                                                    <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1 border border-white/10">
+                                                        <input
+                                                            autoFocus
+                                                            type="text"
+                                                            placeholder="Folder name"
+                                                            className="bg-transparent border-none text-xs text-white px-2 focus:outline-none w-32"
+                                                            value={shareNewFolderName}
+                                                            onChange={(e) => setShareNewFolderName(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleCreateShareFolder()}
+                                                        />
+                                                        <button onClick={handleCreateShareFolder} className="p-1 hover:bg-green-500/20 text-green-400 rounded"><Check size={14} /></button>
+                                                        <button onClick={() => setIsCreatingFolder(false)} className="p-1 hover:bg-red-500/20 text-red-400 rounded"><X size={14} /></button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setIsCreatingFolder(true)}
+                                                        className="text-xs flex items-center gap-1 bg-white/5 hover:bg-white/10 px-2 py-1 rounded text-slate-300 transition-colors"
+                                                    >
+                                                        <FolderPlus size={12} /> New Folder
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {/* Current Location Items (Folders only for navigation) */}
+                                            {materials.filter(m =>
+                                                m.batchId === shareSelectedBatch?.id &&
+                                                m.type === 'FOLDER' &&
+                                                (shareCurrentFolder ? m.folderId === shareCurrentFolder : !m.folderId)
+                                            ).map(folder => (
+                                                <div
+                                                    key={folder.id}
+                                                    onClick={() => setShareCurrentFolder(folder.id)}
+                                                    className="flex items-center gap-3 p-3 bg-white/5 hover:bg-amber-500/10 border border-white/5 hover:border-amber-500/30 rounded-lg cursor-pointer transition-all"
+                                                >
+                                                    <FolderOpen className="text-amber-400" size={18} />
+                                                    <span className="text-sm text-white font-medium">{folder.name}</span>
+                                                    <ChevronRight className="ml-auto text-slate-600" size={14} />
+                                                </div>
+                                            ))}
+
+                                            {materials.filter(m =>
+                                                m.batchId === shareSelectedBatch?.id &&
+                                                m.type === 'FOLDER' &&
+                                                (shareCurrentFolder ? m.folderId === shareCurrentFolder : !m.folderId)
+                                            ).length === 0 && (
+                                                    <div className="py-4 text-center text-slate-500 text-sm border border-dashed border-white/5 rounded-lg">
+                                                        No sub-folders here.
+                                                    </div>
+                                                )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="mt-6 pt-4 border-t border-white/5 flex justify-end gap-3">
+                                <button
+                                    onClick={() => setShowShareModal(false)}
+                                    className="px-4 py-2 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                {shareStep === 'MATERIALS' && (
+                                    <button
+                                        onClick={handleSaveToMaterials}
+                                        className="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-600/20"
+                                    >
+                                        <Share2 size={16} /> Save Here
+                                    </button>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+
+            </AnimatePresence>
+
+            {/* Confirmation Modal */}
+            <AnimatePresence>
+                {confirmModal && confirmModal.isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                        onClick={() => setConfirmModal(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500" />
+
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                                    <AlertCircle size={28} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white tracking-tight">{confirmModal.title}</h3>
+                                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest mt-1">Action Required</p>
+                                </div>
+                            </div>
+
+                            <p className="text-slate-300 mb-8 leading-relaxed text-sm bg-white/5 p-4 rounded-xl border border-white/5">
+                                {confirmModal.message}
+                            </p>
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => setConfirmModal(null)}
+                                    className="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white font-bold transition-all text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        confirmModal.onConfirm();
+                                        setConfirmModal(null);
+                                    }}
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold hover:shadow-lg hover:shadow-red-500/20 transition-all text-sm flex items-center gap-2"
+                                >
+                                    <Trash2 size={16} /> Confirm Delete
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <Toast status={toastStatus} onClose={() => setToastStatus(null)} />
-        </AdvancedModuleLayout>
+        </AdvancedModuleLayout >
     );
 }
