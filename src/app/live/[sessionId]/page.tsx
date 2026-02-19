@@ -7,11 +7,16 @@ import Toast from '@/components/ui/Toast';
 import {
     Mic, MicOff, Video, VideoOff, Monitor, PhoneOff,
     MessageSquare, Users, Settings, Shield, Hand,
-    MoreVertical, Share2, Grid, Layout, Maximize2,
+    MoreVertical, Grid, Layout, Maximize2,
     Send, Smile, Paperclip, X, Crown, Radio, Clock,
     Calendar, Play, Square, Laptop, AlertCircle, Trash2
 } from 'lucide-react';
 import api from '@/lib/api';
+
+// Interface Definitions
+interface Course { id: string; title: string; }
+interface Batch { id: string; batchName: string; }
+interface Material { id: string; name: string; type: string; }
 
 interface LiveSession {
     id: string;
@@ -38,6 +43,10 @@ export default function LiveSessionPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const screenVideoRef = useRef<HTMLVideoElement>(null);
     const [isJoining, setIsJoining] = useState(true);
+
+    // Recording Refs
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
 
     // Data States
     const [sessionData, setSessionData] = useState<LiveSession | null>({
@@ -75,6 +84,8 @@ export default function LiveSessionPage() {
     const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: () => void } | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [mediaPermissionError, setMediaPermissionError] = useState(false);
+
+
 
     const showToast = (type: 'success' | 'error', msg: string) => {
         setToast({ type, msg });
@@ -290,39 +301,102 @@ export default function LiveSessionPage() {
 
 
 
-    const toggleRecording = () => {
-        if (!isRecording) {
+    const startRecording = () => {
+        // Choose the stream to record: Screen share if active, else Camera/Mic
+        const streamToRecord = (isSharingScreen && screenStream) ? screenStream : stream;
+
+        if (!streamToRecord) {
+            showToast('error', 'No active stream to record. Please turn on camera or screen share.');
+            return;
+        }
+
+        try {
+            const mediaRecorder = new MediaRecorder(streamToRecord, {
+                mimeType: 'video/webm;codecs=vp9,opus'
+            });
+
+            mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                    chunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+
+                // Notify user of processing
+                showToast('message', 'Processing recording for local backup...');
+                saveRecordingMetadata();
+
+                // Trigger download
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `recording-${sessionId}-${Date.now()}.webm`;
+                    document.body.appendChild(a);
+                    a.click();
+
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    showToast('success', 'Recording downloaded locally (Cloud upload pending config).');
+                }, 1000);
+            };
+
+            mediaRecorder.start(1000); // Collect 1s chunks
             setIsRecording(true);
             setRecordingStartTime(Date.now());
             setRecordingTime(0);
-            showToast('success', 'Session recording started. Information will be saved to archives.');
-        } else {
+            showToast('success', 'Recording started. Will download locally on stop.');
+        } catch (error) {
+            console.error("Error starting recording:", error);
+            showToast('error', 'Failed to start recording. Internal error.');
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
             setIsRecording(false);
-            const duration = formatElapsedTime(recordingTime);
-
-            // Prepare recording metadata for 'database' (simulated via localStorage)
-            const recordingEntry = {
-                id: `REC-${Date.now()}`,
-                sessionId: sessionId,
-                title: sessionData?.title || 'Live Session',
-                courseName: sessionData?.courseName || 'Advanced Development',
-                batchName: sessionData?.batchName || 'Batch-2024',
-                mentorName: sessionData?.mentorName || currentUser.name,
-                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                duration: duration,
-                views: Math.floor(Math.random() * 50) + 10,
-                status: 'Archived',
-                thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'
-            };
-
-            const existing = JSON.parse(localStorage.getItem('bytecode_recordings') || '[]');
-            const updated = [recordingEntry, ...existing];
-            localStorage.setItem('bytecode_recordings', JSON.stringify(updated));
-            setArchivedRecordings(updated);
-
-            showToast('success', 'Recording saved to database and Session Archive!');
             setRecordingStartTime(null);
             setRecordingTime(0);
+            showToast('success', 'Stopping recording...');
+        }
+    };
+
+    const saveRecordingMetadata = () => {
+        const duration = formatElapsedTime(recordingTime);
+        const recordingEntry = {
+            id: `REC-${Date.now()}`,
+            sessionId: sessionId,
+            title: sessionData?.title || 'Live Session',
+            courseName: sessionData?.courseName || 'Advanced Development',
+            batchName: sessionData?.batchName || 'Batch-2024',
+            mentorName: sessionData?.mentorName || currentUser.name,
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            duration: duration,
+            views: 0,
+            status: 'Archived',
+            thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
+            isLocalFile: true // Indicator that this is a downloaded file
+        };
+
+        const existing = JSON.parse(localStorage.getItem('bytecode_recordings') || '[]');
+        const updated = [recordingEntry, ...existing];
+        localStorage.setItem('bytecode_recordings', JSON.stringify(updated));
+        setArchivedRecordings(updated);
+    };
+
+    const toggleRecording = () => {
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
         }
     };
 
@@ -365,6 +439,9 @@ export default function LiveSessionPage() {
         }]);
         setChatInput("");
     };
+
+
+
 
     return (
         <div className="h-screen w-screen bg-[#050505] text-white overflow-hidden flex flex-col font-outfit">
@@ -557,8 +634,8 @@ export default function LiveSessionPage() {
                                 <h2 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                                     {activeSidebar === 'chat' && <MessageSquare size={16} className="text-blue-500" />}
                                     {activeSidebar === 'participants' && <Users size={16} className="text-emerald-500" />}
-                                    {activeSidebar === 'recordings' && <Monitor size={16} className="text-red-500" />}
-                                    {activeSidebar === 'chat' ? 'Session Chat' : activeSidebar === 'participants' ? 'Participants' : 'Recording Archive'}
+
+                                    {activeSidebar === 'chat' ? 'Session Chat' : 'Participants'}
                                 </h2>
                                 <button onClick={() => setActiveSidebar(null)} className="p-2 hover:bg-white/5 rounded-lg text-slate-500">
                                     <X size={20} />
@@ -583,7 +660,7 @@ export default function LiveSessionPage() {
                                             </div>
                                         ))}
                                     </div>
-                                ) : activeSidebar === 'participants' ? (
+                                ) : (
                                     <div className="space-y-2">
                                         {participants.map((p) => (
                                             <div key={p.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group">
@@ -604,6 +681,13 @@ export default function LiveSessionPage() {
                                                         className={`p-2 rounded-lg transition-colors ${p.isMuted ? 'text-red-400 bg-red-400/10' : 'text-slate-400 hover:bg-white/10'}`}
                                                         disabled={!currentUser.isAdmin && !p.isMe}
                                                         title={p.isMuted ? "Unmute" : "Mute"}
+                                                        onClick={() => {
+                                                            if (p.isMe) {
+                                                                toggleMic();
+                                                            } else if (currentUser.isAdmin) {
+                                                                // Admin mute logic
+                                                            }
+                                                        }}
                                                     >
                                                         {p.isMuted ? <MicOff size={16} /> : <Mic size={16} />}
                                                     </button>
@@ -657,41 +741,6 @@ export default function LiveSessionPage() {
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl mb-4">
-                                            <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest mb-1">Local Archive</p>
-                                            <p className="text-xs text-slate-500 leading-relaxed">Recorded sessions are stored locally and will appear in the operations console upon saving.</p>
-                                        </div>
-                                        {archivedRecordings.length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                                <div className="p-4 bg-white/5 rounded-2xl mb-4">
-                                                    <Video size={32} className="text-slate-600" />
-                                                </div>
-                                                <p className="text-sm font-bold text-slate-500">No recordings found</p>
-                                                <p className="text-[10px] text-slate-600 mt-1">Start recording to see sessions here</p>
-                                            </div>
-                                        ) : (
-                                            archivedRecordings.map((rec, i) => (
-                                                <div key={rec.id || i} className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:border-red-500/30 transition-all group cursor-pointer">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded-lg border border-red-500/20">{rec.duration}</span>
-                                                        <span className="text-[9px] text-slate-500 font-bold">{rec.date}</span>
-                                                    </div>
-                                                    <h4 className="text-xs font-bold text-white group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
-                                                    <p className="text-[9px] text-slate-500 mt-1">{rec.batchName} • {rec.mentorName}</p>
-                                                </div>
-                                            ))
-                                        )}
-                                        {archivedRecordings.length > 0 && (
-                                            <button
-                                                onClick={() => router.push('/admin/dashboard/sessions')}
-                                                className="w-full mt-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-red-600 hover:text-white hover:border-red-500 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Share2 size={14} /> View Global Dashboard Archive
-                                            </button>
-                                        )}
                                     </div>
                                 )}
                             </div>
@@ -830,13 +879,7 @@ export default function LiveSessionPage() {
                 </div>
 
                 <div className="flex items-center justify-end gap-3 w-1/4">
-                    <button
-                        onClick={() => setActiveSidebar(activeSidebar === 'recordings' ? null : 'recordings')}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeSidebar === 'recordings' ? 'bg-red-600 text-white shadow-lg shadow-red-500/20' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}
-                    >
-                        <Video size={16} />
-                        Archive
-                    </button>
+
                     <button
                         onClick={() => setActiveSidebar(activeSidebar === 'participants' ? null : 'participants')}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeSidebar === 'participants' ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}
@@ -978,6 +1021,7 @@ export default function LiveSessionPage() {
                     <Toast status={toast} onClose={() => setToast(null)} />
                 )}
             </AnimatePresence>
+
         </div>
     );
 }
