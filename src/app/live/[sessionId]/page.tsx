@@ -7,10 +7,12 @@ import Toast from '@/components/ui/Toast';
 import {
     Mic, MicOff, Video, VideoOff, Monitor, PhoneOff,
     MessageSquare, Users, Settings, Shield, Hand,
-    MoreVertical, Grid, Layout, Maximize2,
+    MoreVertical, Grid, Layout, Maximize2, Minimize2,
     Send, Smile, Paperclip, X, Crown, Radio, Clock,
     Calendar, Play, Square, Laptop, AlertCircle, Trash2
 } from 'lucide-react';
+
+
 import api from '@/lib/api';
 
 // Interface Definitions
@@ -37,12 +39,25 @@ export default function LiveSessionPage() {
     const router = useRouter();
     const sessionId = params.sessionId;
 
+    // Data States
+    const [participants, setParticipants] = useState([
+        { id: 1, name: "Mahendra Nath Chamnoor", role: "Trainer", isMe: false, isMuted: false, isCamera: true, isHost: true, isAdmin: true, hasJoined: false },
+        { id: 2, name: "Koushik Krishna", role: "Super Admin (You)", isMe: true, isMuted: false, isCamera: true, isHost: true, isAdmin: true, hasJoined: true },
+        { id: 3, name: "Vikas Koud", role: "Student", isMe: false, isMuted: true, isCamera: true, isHost: false, isAdmin: false, hasJoined: false },
+        { id: 4, name: "Ananya Iyer", role: "Student", isMe: false, isMuted: false, isCamera: false, isHost: false, isAdmin: false, hasJoined: false },
+        { id: 5, name: "Rahul Verma", role: "Student", isMe: false, isMuted: true, isCamera: true, isHost: false, isAdmin: false, hasJoined: false },
+    ]);
+
     // Media States
+
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const screenVideoRef = useRef<HTMLVideoElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [isJoining, setIsJoining] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
 
     // Recording Refs
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -78,18 +93,24 @@ export default function LiveSessionPage() {
     const [chatInput, setChatInput] = useState("");
     const [isLeaveMenuOpen, setIsLeaveMenuOpen] = useState(false);
     const leaveMenuRef = useRef<HTMLDivElement>(null);
-    const [pinnedParticipantId, setPinnedParticipantId] = useState<number | null>(1); // Default pin Trainer
+    const [pinnedParticipantId, setPinnedParticipantId] = useState<number | null>(null); // Initial null to allow automatic selection
     const [activeParticipantMenu, setActiveParticipantMenu] = useState<number | null>(null);
     const [toast, setToast] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: () => void } | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [mediaPermissionError, setMediaPermissionError] = useState(false);
 
+    const [messages, setMessages] = useState([
+        { id: 1, user: "Trainer Mahendra", text: "Welcome everyone to today's Advanced React session!", time: "10:30 AM", isTrainer: true },
+        { id: 2, user: "Vikas Koud", text: "Hello Sir! Ready for the session.", time: "10:31 AM" },
+        { id: 3, user: "Ananya Iyer", text: "Will we cover Server Components today?", time: "10:32 AM" },
+    ]);
+
 
 
     const showToast = (type: 'success' | 'error', msg: string) => {
         setToast({ type, msg });
-        setTimeout(() => setToast(null), 3000);
+        setTimeout(() => setToast(null), 5000);
     };
 
     // Current User Info (Simulated - would come from auth context)
@@ -133,6 +154,9 @@ export default function LiveSessionPage() {
         };
         fetchSession();
     }, [sessionId]);
+
+
+
 
     // Unified Timer Logic
     useEffect(() => {
@@ -178,8 +202,28 @@ export default function LiveSessionPage() {
         };
     }, []);
 
+    // Fullscreen Event Listener
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            containerRef.current?.requestFullscreen().catch(err => {
+                showToast('error', `Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
     // Close menu on click outside
     useEffect(() => {
+
         const handleClickOutside = (event: MouseEvent) => {
             if (leaveMenuRef.current && !leaveMenuRef.current.contains(event.target as Node)) {
                 setIsLeaveMenuOpen(false);
@@ -207,18 +251,19 @@ export default function LiveSessionPage() {
         });
     };
 
+    const getSpotlightParticipant = () => {
+        return participants.find(p => p.hasJoined && (p.id === pinnedParticipantId || (pinnedParticipantId === null && p.isAdmin))) || participants.find(p => p.hasJoined);
+    };
+
     // Attach stream to video element whenever it changes or state changes
-    useEffect(() => {
-        if (videoRef.current && stream && !isCameraOff) {
-            videoRef.current.srcObject = stream;
-        }
-    }, [stream, isCameraOff, videoRef.current]);
 
     useEffect(() => {
         if (screenVideoRef.current && screenStream && isSharingScreen) {
             screenVideoRef.current.srcObject = screenStream;
         }
-    }, [screenStream, isSharingScreen, screenVideoRef.current]);
+    }, [screenStream, isSharingScreen]);
+
+
 
     // Toggle Camera
     const toggleCamera = () => {
@@ -267,20 +312,10 @@ export default function LiveSessionPage() {
         }
     };
 
-    // Demo Content
-    const [messages, setMessages] = useState([
-        { id: 1, user: "Trainer Mahendra", text: "Welcome everyone to today's Advanced React session!", time: "10:30 AM", isTrainer: true },
-        { id: 2, user: "Vikas Koud", text: "Hello Sir! Ready for the session.", time: "10:31 AM" },
-        { id: 3, user: "Ananya Iyer", text: "Will we cover Server Components today?", time: "10:32 AM" },
-    ]);
 
-    const [participants, setParticipants] = useState([
-        { id: 1, name: "Mahendra Nath Chamnoor", role: "Trainer", isMe: false, isMuted: false, isCamera: true, isHost: true, isAdmin: true },
-        { id: 2, name: "Koushik Krishna", role: "Super Admin (You)", isMe: true, isMuted: false, isCamera: true, isHost: true, isAdmin: true },
-        { id: 3, name: "Vikas Koud", role: "Student", isMe: false, isMuted: true, isCamera: true, isHost: false, isAdmin: false },
-        { id: 4, name: "Ananya Iyer", role: "Student", isMe: false, isMuted: false, isCamera: false, isHost: false, isAdmin: false },
-        { id: 5, name: "Rahul Verma", role: "Student", isMe: false, isMuted: true, isCamera: true, isHost: false, isAdmin: false },
-    ]);
+
+
+
 
     useEffect(() => {
         setIsMounted(true);
@@ -301,17 +336,50 @@ export default function LiveSessionPage() {
 
 
 
-    const startRecording = () => {
-        // Choose the stream to record: Screen share if active, else Camera/Mic
-        const streamToRecord = (isSharingScreen && screenStream) ? screenStream : stream;
-
-        if (!streamToRecord) {
-            showToast('error', 'No active stream to record. Please turn on camera or screen share.');
-            return;
-        }
-
+    const startRecording = async () => {
         try {
-            const mediaRecorder = new MediaRecorder(streamToRecord, {
+            // 1. Capture the Screen (Total Screen)
+            const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { frameRate: { ideal: 30 } },
+                audio: true // Captures system audio/tabs
+            });
+
+            // 2. Mix in the Microphone (Voice)
+            let mixedStream = displayStream;
+
+            if (stream) {
+                // Initialize Audio Context (Resuming for browser security)
+                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+                const audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
+
+                const mixedAudioStreamDest = audioCtx.createMediaStreamDestination();
+
+                // 2a. Connect Microphone (Filtered to audio tracks only)
+                const micTracks = stream.getAudioTracks();
+                if (micTracks.length > 0) {
+                    const micSource = audioCtx.createMediaStreamSource(new MediaStream([micTracks[0]]));
+                    micSource.connect(mixedAudioStreamDest);
+                }
+
+                // 2b. Connect System Audio (if sharing with audio)
+                const systemAudioTracks = displayStream.getAudioTracks();
+                if (systemAudioTracks.length > 0) {
+                    const systemSource = audioCtx.createMediaStreamSource(new MediaStream([systemAudioTracks[0]]));
+                    systemSource.connect(mixedAudioStreamDest);
+                }
+
+                // 2c. Combine Screen Video + All Mixed Audio
+                mixedStream = new MediaStream([
+                    displayStream.getVideoTracks()[0],
+                    mixedAudioStreamDest.stream.getAudioTracks()[0]
+                ]);
+            }
+
+
+            const mediaRecorder = new MediaRecorder(mixedStream, {
                 mimeType: 'video/webm;codecs=vp9,opus'
             });
 
@@ -324,38 +392,58 @@ export default function LiveSessionPage() {
                 }
             };
 
-            mediaRecorder.onstop = () => {
+            mediaRecorder.onstop = async () => {
                 const blob = new Blob(chunksRef.current, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
 
-                // Notify user of processing
-                showToast('message', 'Processing recording for local backup...');
-                saveRecordingMetadata();
+                // Stop all tracks in display stream
+                displayStream.getTracks().forEach(track => track.stop());
 
-                // Trigger download
-                setTimeout(() => {
+                showToast('success', 'Session ended. Uploading recording to Cloud...');
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', blob, `recording-${sessionId}-${Date.now()}.webm`);
+
+                    const response = await api.post('uploads/videos', formData, {
+                        timeout: 300000, // 5 minute timeout for large files
+                        onUploadProgress: (progressEvent) => {
+                            const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+                            console.log(`Upload progress: ${percentCompleted}%`);
+                        }
+                    });
+
+
+                    if (response.status === 200) {
+                        showToast('success', 'Recording successfully stored in Atlas Cloud.');
+                        saveRecordingMetadata(response.data);
+                    }
+                } catch (error: any) {
+                    console.error("Cloud upload failed:", error);
+                    let ErrorMsg = "Network Error - Please check Gateway Connection.";
+                    if (error.response) {
+                        ErrorMsg = `Server Error (${error.response.status}): ${error.response.data || 'Failed to save to Atlas'}`;
+                    } else if (error.request) {
+                        ErrorMsg = "Connection Timeout or CORS Blockage - Check Gateway Logs.";
+                    }
+                    showToast('error', ErrorMsg);
+
+                    const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.style.display = 'none';
                     a.href = url;
-                    a.download = `recording-${sessionId}-${Date.now()}.webm`;
-                    document.body.appendChild(a);
+                    a.download = `backup-recording-${sessionId}.webm`;
                     a.click();
-
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-
-                    showToast('success', 'Recording downloaded locally (Cloud upload pending config).');
-                }, 1000);
+                }
             };
 
-            mediaRecorder.start(1000); // Collect 1s chunks
+            mediaRecorder.start(1000);
             setIsRecording(true);
             setRecordingStartTime(Date.now());
             setRecordingTime(0);
-            showToast('success', 'Recording started. Will download locally on stop.');
+            showToast('success', 'Cloud Recording Started (Including Voice)');
+
         } catch (error) {
             console.error("Error starting recording:", error);
-            showToast('error', 'Failed to start recording. Internal error.');
+            showToast('error', 'Could not access screen for recording.');
         }
     };
 
@@ -365,14 +453,14 @@ export default function LiveSessionPage() {
             setIsRecording(false);
             setRecordingStartTime(null);
             setRecordingTime(0);
-            showToast('success', 'Stopping recording...');
         }
     };
 
-    const saveRecordingMetadata = () => {
+    const saveRecordingMetadata = (fileId?: string) => {
         const duration = formatElapsedTime(recordingTime);
         const recordingEntry = {
             id: `REC-${Date.now()}`,
+            fileId: fileId,
             sessionId: sessionId,
             title: sessionData?.title || 'Live Session',
             courseName: sessionData?.courseName || 'Advanced Development',
@@ -381,10 +469,13 @@ export default function LiveSessionPage() {
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
             duration: duration,
             views: 0,
-            status: 'Archived',
+            status: fileId ? 'Stored in Cloud' : 'Local Backup',
             thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
-            isLocalFile: true // Indicator that this is a downloaded file
+            url: fileId ? `http://localhost:8080/api/uploads/videos/${fileId}` : undefined,
+            videoUrl: fileId ? `http://localhost:8080/api/uploads/videos/${fileId}` : undefined,
+            isLocalFile: !fileId
         };
+
 
         const existing = JSON.parse(localStorage.getItem('bytecode_recordings') || '[]');
         const updated = [recordingEntry, ...existing];
@@ -444,63 +535,91 @@ export default function LiveSessionPage() {
 
 
     return (
-        <div className="h-screen w-screen bg-[#050505] text-white overflow-hidden flex flex-col font-outfit">
+        <div ref={containerRef} className={`h-screen w-screen bg-[#050505] text-white overflow-hidden flex flex-col font-outfit ${isFullscreen ? 'p-0' : ''}`}>
+            <style jsx global>{`
+                .mirror { transform: scaleX(-1); }
+            `}</style>
             {/* Top Bar */}
-            <header className="h-16 px-6 flex items-center justify-between border-b border-white/5 bg-black/40 backdrop-blur-xl z-20">
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                        <Radio size={20} className="text-white animate-pulse" />
+
+            {!isFullscreen && (
+                <header className="h-16 px-6 flex items-center justify-between border-b border-white/5 bg-black/40 backdrop-blur-xl z-20">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <Radio size={20} className="text-white animate-pulse" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-sm font-black tracking-wider uppercase text-blue-400">Bytecode Live</h1>
+                                <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full animate-pulse">LIVE</span>
+                                {isRecording && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="flex items-center gap-1.5 bg-red-600/10 border border-red-600/30 px-2 py-0.5 rounded-full text-[9px] font-black text-red-500 uppercase tracking-tighter shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                                    >
+                                        <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+                                        REC {formatElapsedTime(recordingTime)}
+                                    </motion.div>
+                                )}
+                            </div>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">Session ID: {sessionId}</p>
+                        </div>
+                        <div className="h-8 w-px bg-white/10 mx-2" />
+                        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> secure-p2p connection
+                        </div>
+
+                        {currentUser.isAdmin && (
+                            <button
+                                onClick={() => {
+                                    const next = participants.find(p => !p.hasJoined);
+                                    if (next) {
+                                        setParticipants(prev => prev.map(p => p.id === next.id ? { ...p, hasJoined: true } : p));
+                                        showToast('success', `${next.name} joined the session`);
+                                    } else {
+                                        showToast('error', 'All students have joined');
+                                    }
+                                }}
+                                className="ml-4 px-3 py-1 bg-blue-600/20 border border-blue-500/40 rounded-lg text-[10px] font-bold text-blue-400 hover:bg-blue-600/40 transition-all uppercase tracking-wider"
+                            >
+                                Simulate Student Join
+                            </button>
+                        )}
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-sm font-black tracking-wider uppercase text-blue-400">Bytecode Live</h1>
-                            <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full animate-pulse">LIVE</span>
-                            {isRecording && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="flex items-center gap-1.5 bg-red-600/10 border border-red-600/30 px-2 py-0.5 rounded-full text-[9px] font-black text-red-500 uppercase tracking-tighter shadow-[0_0_10px_rgba(239,68,68,0.2)]"
-                                >
-                                    <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
-                                    REC {formatElapsedTime(recordingTime)}
-                                </motion.div>
+
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex -space-x-2">
+                            {participants.filter(p => p.hasJoined).slice(0, 3).map((p, i) => (
+                                <div key={i} className="w-8 h-8 rounded-full border-2 border-black bg-slate-800 flex items-center justify-center text-[10px] font-bold">
+                                    {p.name.charAt(0)}
+                                </div>
+                            ))}
+                            {participants.filter(p => p.hasJoined).length > 3 && (
+                                <div className="w-8 h-8 rounded-full border-2 border-black bg-blue-600 flex items-center justify-center text-[10px] font-bold">
+                                    +{isMounted ? (participants.filter(p => p.hasJoined).length - 3) : 2}
+                                </div>
                             )}
                         </div>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">Session ID: {sessionId}</p>
+                        <button className="p-2 hover:bg-white/5 rounded-xl transition-colors text-slate-400">
+                            <Settings size={20} />
+                        </button>
                     </div>
-                    <div className="h-8 w-px bg-white/10 mx-2" />
-                    <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" /> secure-p2p connection
-                    </div>
-                </div>
+                </header>
+            )}
 
-                <div className="flex items-center gap-4">
-                    <div className="flex -space-x-2">
-                        {participants.slice(0, 3).map((p, i) => (
-                            <div key={i} className="w-8 h-8 rounded-full border-2 border-black bg-slate-800 flex items-center justify-center text-[10px] font-bold">
-                                {p.name.charAt(0)}
-                            </div>
-                        ))}
-                        <div className="w-8 h-8 rounded-full border-2 border-black bg-blue-600 flex items-center justify-center text-[10px] font-bold">
-                            +{isMounted ? (participants.length - 3) : (5 - 3)}
-                        </div>
-                    </div>
-                    <button className="p-2 hover:bg-white/5 rounded-xl transition-colors text-slate-400">
-                        <Settings size={20} />
-                    </button>
-                </div>
-            </header>
 
             {/* Main Content Area */}
             <main className="flex-1 flex overflow-hidden relative">
                 {/* Video Grid */}
-                <div className={`flex-1 p-6 transition-all duration-500 ${activeSidebar ? 'mr-[380px]' : ''}`}>
-                    <div className="h-full w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+                <div className={`flex-1 ${isFullscreen ? 'p-0' : 'p-6'} transition-all duration-500 ${activeSidebar ? 'mr-[380px]' : ''}`}>
+                    <div className={`h-full w-full grid gap-4 auto-rows-fr ${participants.filter(p => p.hasJoined).length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                         {/* Main Spotlight (Usually the Trainer or Shared Screen) */}
                         <motion.div
                             layout
-                            className={`relative rounded-3xl overflow-hidden bg-slate-900 border-2 ${pinnedParticipantId ? 'border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : 'border-white/5'} shadow-2xl group ${participants.length === 1 ? 'col-span-full row-span-full' : 'md:col-span-2 md:row-span-2'}`}
+                            className={`relative rounded-3xl overflow-hidden bg-slate-900 border-2 ${pinnedParticipantId ? 'border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : 'border-white/5'} shadow-2xl group ${participants.filter(p => p.hasJoined).length === 1 ? 'col-span-full row-span-full' : 'md:col-span-2 md:row-span-2'}`}
                         >
+
 
 
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
@@ -534,30 +653,44 @@ export default function LiveSessionPage() {
                                         transition={{ duration: 0.8, ease: "easeOut" }}
                                         className="w-full h-full flex items-center justify-center"
                                     >
-                                        {(participants.find(p => p.id === (pinnedParticipantId || 1))?.isMe && !isCameraOff && stream) ? (
-                                            <video
-                                                ref={videoRef}
-                                                autoPlay
-                                                muted
-                                                playsInline
-                                                className="w-full h-full object-cover mirror"
-                                            />
-                                        ) : (
-                                            <>
-                                                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-                                                <div className="text-center z-10">
-                                                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center text-4xl font-bold mb-4 shadow-2xl shadow-blue-500/20 mx-auto border-4 border-white/5">
-                                                        {participants.find(p => p.id === (pinnedParticipantId || 1))?.name.charAt(0) || 'M'}
-                                                    </div>
-                                                    <h3 className="text-xl font-bold">{participants.find(p => p.id === (pinnedParticipantId || 1))?.name || 'Mahendra Nath Chamnoor'}</h3>
-                                                    <p className="text-blue-400 font-medium">
-                                                        {pinnedParticipantId ? 'Pinned to Stage' : `Presenting: ${sessionData?.title || 'Architecture Patterns'}`}
-                                                    </p>
-                                                </div>
-                                            </>
-                                        )}
+                                        {(() => {
+                                            const activeP = getSpotlightParticipant();
+
+                                            if (activeP?.isMe && !isCameraOff && stream) {
+                                                return (
+                                                    <video
+                                                        ref={(el) => {
+                                                            if (el && el.srcObject !== stream) {
+                                                                el.srcObject = stream;
+                                                            }
+                                                        }}
+                                                        autoPlay
+                                                        muted
+                                                        playsInline
+                                                        className="w-full h-full object-cover mirror"
+                                                    />
+                                                );
+                                            } else {
+                                                return (
+                                                    <>
+                                                        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                                                        <div className="text-center z-10">
+                                                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center text-4xl font-bold mb-4 shadow-2xl shadow-blue-500/20 mx-auto border-4 border-white/5">
+                                                                {activeP?.name.charAt(0) || '?'}
+                                                            </div>
+                                                            <h3 className="text-xl font-bold">{activeP?.name || 'Waiting for participants...'}</h3>
+                                                            <p className="text-blue-400 font-medium">
+                                                                {pinnedParticipantId ? 'Pinned to Stage' : activeP?.role || 'Session Starting'}
+                                                            </p>
+                                                        </div>
+                                                    </>
+                                                );
+                                            }
+                                        })()}
+
                                     </motion.div>
                                 )}
+
 
                                 {/* Waveform Visualizer simulation */}
                                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-end gap-1 h-8">
@@ -574,8 +707,10 @@ export default function LiveSessionPage() {
 
                             <div className="absolute bottom-6 left-6 z-10 flex items-center gap-3">
                                 <span className="bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-bold ring-1 ring-white/10">
-                                    {isSharingScreen ? "You are sharing your screen" : (sessionData?.mentorName || "Mahendra Nath Chamnoor") + " (Host)"}
+                                    {isSharingScreen ? "You are sharing your screen" : `${getSpotlightParticipant()?.name || 'Waiting...'} (${getSpotlightParticipant()?.role || 'User'})`}
                                 </span>
+
+
                                 {!isSharingScreen && (
                                     <div className="p-1.5 bg-blue-600 rounded-lg shadow-lg">
                                         <Mic size={14} />
@@ -585,7 +720,9 @@ export default function LiveSessionPage() {
                         </motion.div>
 
                         {/* Other Participants */}
-                        {participants.filter(p => p.id !== (pinnedParticipantId || 1)).slice(0, 4).map((p, i) => (
+                        {participants.filter(p => p.hasJoined && p.id !== getSpotlightParticipant()?.id).map((p, i) => (
+
+
                             <motion.div
                                 key={p.id}
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -593,16 +730,22 @@ export default function LiveSessionPage() {
                                 transition={{ delay: i * 0.1 }}
                                 className="relative rounded-2xl overflow-hidden bg-slate-900 border border-white/5 shadow-xl group"
                             >
+
                                 <div className="absolute inset-0 bg-[#0d1117] flex items-center justify-center">
                                     {p.isMe && !isCameraOff && stream ? (
                                         <video
-                                            ref={videoRef}
+                                            ref={(el) => {
+                                                if (el && el.srcObject !== stream) {
+                                                    el.srcObject = stream;
+                                                }
+                                            }}
                                             autoPlay
                                             muted
                                             playsInline
                                             className="w-full h-full object-cover mirror"
                                         />
                                     ) : (
+
                                         <div className={`w-20 h-20 rounded-full ${p.isMe ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-slate-700'} flex items-center justify-center text-2xl font-bold shadow-xl border-4 border-white/5 group-hover:scale-110 transition-transform duration-500`}>
                                             {p.name.charAt(0)}
                                         </div>
@@ -798,18 +941,22 @@ export default function LiveSessionPage() {
                     >
                         {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
                     </button>
-                    <button
-                        onClick={toggleScreenShare}
-                        className={`p-4 rounded-2xl transition-all duration-300 shadow-xl ${isSharingScreen ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'}`}
-                        title={isSharingScreen ? "Stop Screen Share" : "Share Screen"}
-                    >
-                        <Monitor size={24} />
-                    </button>
 
                     <div className="w-px h-10 bg-white/10 mx-2" />
 
+
+                    <button
+                        onClick={toggleFullscreen}
+                        className={`p-4 rounded-2xl transition-all duration-300 shadow-xl bg-white/5 hover:bg-white/10 text-white border border-white/10`}
+                        title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                    >
+                        {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+                    </button>
+
+
                     <button
                         onClick={toggleRecording}
+
                         className={`p-4 rounded-2xl transition-all duration-300 border ${isRecording ? 'border-red-500 text-red-500 bg-red-500/5 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'bg-white/5 border-white/10 text-slate-400'}`}
                         title={isRecording ? "Stop Recording" : "Record Session"}
                     >
@@ -843,7 +990,10 @@ export default function LiveSessionPage() {
                                 >
                                     <button
                                         onClick={() => {
-                                            if (confirm("Are you sure you want to leave the session?")) router.push('/admin/super/courses');
+                                            if (confirm("Are you sure you want to leave the session?")) {
+                                                if (isRecording) stopRecording();
+                                                router.push('/admin/super/courses');
+                                            }
                                         }}
                                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition-all group"
                                     >
@@ -859,7 +1009,10 @@ export default function LiveSessionPage() {
                                     {currentUser.isAdmin && (
                                         <button
                                             onClick={() => {
-                                                if (confirm("Are you sure you want to end the meeting for everyone?")) router.push('/admin/super/courses');
+                                                if (confirm("Are you sure you want to end the meeting for everyone?")) {
+                                                    if (isRecording) stopRecording();
+                                                    router.push('/admin/super/courses');
+                                                }
                                             }}
                                             className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 text-slate-300 hover:text-red-400 transition-all mt-1 group"
                                         >
@@ -1018,7 +1171,9 @@ export default function LiveSessionPage() {
             {/* Active Toast notifications */}
             <AnimatePresence>
                 {toast && (
-                    <Toast status={toast} onClose={() => setToast(null)} />
+                    <div className="fixed inset-0 pointer-events-none z-[9999]">
+                        <Toast status={toast} onClose={() => setToast(null)} />
+                    </div>
                 )}
             </AnimatePresence>
 

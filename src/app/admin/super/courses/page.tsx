@@ -2201,7 +2201,10 @@ export default function CourseManagementPage() {
 
                             {/* Video Element */}
                             <video
-                                src={selectedVideo.url || selectedVideo.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+                                src={selectedVideo.url ||
+                                    selectedVideo.videoUrl ||
+                                    (selectedVideo.fileId ? `http://localhost:8080/api/uploads/videos/${selectedVideo.fileId}` : "") ||
+                                    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
                                 className="w-full h-full object-contain"
                                 controls
                                 autoPlay
