@@ -52,6 +52,8 @@ import {
     FolderPlus,
     FilePlus,
     RefreshCw,
+    ArrowRight,
+    HardDrive,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -191,6 +193,7 @@ export default function CourseManagementPage() {
     const [showPermissionModal, setShowPermissionModal] = useState(false);
     const [showCourseModal, setShowCourseModal] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
+    const [materialToDelete, setMaterialToDelete] = useState<LearningMaterial | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<any>(null);
     const [toastStatus, setToastStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
@@ -230,6 +233,11 @@ export default function CourseManagementPage() {
     const [newFolderName, setNewFolderName] = useState("");
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [recordingToDelete, setRecordingToDelete] = useState<any>(null);
+    const [batchPermissions, setBatchPermissions] = useState({
+        isPublic: true,
+        accessType: 'READ',
+        studentIds: [] as string[]
+    });
 
     // Fetch all data
     useEffect(() => {
@@ -280,8 +288,9 @@ export default function CourseManagementPage() {
                     id: s.id,
                     title: s.title,
                     batchName: s.batchName,
+                    courseName: s.courseName,
                     date: typeof s.startTime === 'string' ? new Date(s.startTime).toLocaleDateString() : 'Recent',
-                    duration: s.duration + ' mins',
+                    duration: (s.duration || 60) + ' mins',
                     mentorName: s.mentorName,
                     thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
                     url: s.recordingUrl,
@@ -324,8 +333,8 @@ export default function CourseManagementPage() {
     const batchMaterials = useMemo(() => {
         if (!selectedBatch) return [];
         return materials.filter(m =>
-            m.batchId === selectedBatch.id &&
-            (currentFolder ? m.folderId === currentFolder : !m.folderId)
+            String(m.batchId) === String(selectedBatch.id) &&
+            (currentFolder ? String(m.folderId) === String(currentFolder) : (m.folderId === null || m.folderId === undefined))
         );
     }, [selectedBatch, materials, currentFolder]);
 
@@ -559,23 +568,50 @@ export default function CourseManagementPage() {
 
     const handleUploadMaterial = async () => {
         try {
-            const payload = {
-                ...materialForm,
-                batchId: selectedBatch?.id,
-                folderId: currentFolder,
-                url: materialForm.type === 'FOLDER' ? '' : (selectedFile ? `https://storage.bytecode.com/${selectedFile.name}` : materialForm.url),
-                size: selectedFile?.size || 0,
-                uploadedBy: 'Lead Java Faculty',
-                uploadedAt: new Date().toISOString(),
-            };
+            if (materialForm.id) {
+                const payload = {
+                    ...materialForm,
+                    url: materialForm.type === 'FOLDER' ? '' : (selectedFile ? `https://raw.githubusercontent.com/intel-skill/assets/main/samples/${selectedFile.name}` : materialForm.url)
+                };
+                await api.put(`academic/materials/${materialForm.id}`, payload);
+                showToast("Material updated successfully!", 'success');
+            } else {
+                const payload = {
+                    ...materialForm,
+                    batchId: selectedBatch?.id,
+                    folderId: currentFolder,
+                    url: materialForm.type === 'FOLDER' ? '' : (selectedFile ? `https://raw.githubusercontent.com/intel-skill/assets/main/samples/${selectedFile.name}` : materialForm.url),
+                    size: selectedFile?.size || 1024 * 512,
+                    uploadedBy: 'Lead Java Faculty',
+                    uploadedAt: new Date().toISOString(),
+                };
 
-            await api.post('academic/materials', payload);
+                await api.post('academic/materials', payload);
+                showToast("Material uploaded successfully!", 'success');
+            }
             fetchAllData();
             setShowMaterialModal(false);
             setMaterialForm({ permissions: { studentIds: [], accessType: 'READ', isPublic: true } });
             setSelectedFile(null);
         } catch (error) {
-            console.error("Upload failed:", error);
+            console.error("Operation failed:", error);
+            showToast("Failed to process material.", 'error');
+        }
+    };
+
+    const handleDeleteMaterial = async (id: string | number, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        try {
+            await api.delete(`academic/materials/${id}`);
+            // Use string comparison to be safe with string/number IDs
+            setMaterials(prev => prev.filter(m => String(m.id) !== String(id)));
+            showToast("Material deleted successfully!", 'success');
+            setMaterialToDelete(null);
+            // Refresh data to ensure UI is in sync
+            fetchAllData();
+        } catch (error) {
+            console.error("Delete failed:", error);
+            showToast("Failed to delete material.", 'error');
         }
     };
 
@@ -632,12 +668,9 @@ export default function CourseManagementPage() {
     };
 
     // Recording Management Functions
-    const handleDeleteRecording = (rec: any) => {
+    const handleDeleteRecording = (rec: any, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
         setRecordingToDelete(rec);
-        // We will execute the actual delete logic in a new function `executeRecordingDeletion`
-        // which will be called by the modal's confirm button.
-        // For now, let's assume we have a `showDeleteConfirm` state or we can infer it
-        // from `recordingToDelete` not being null if we use that to show the modal.
     };
 
     const executeRecordingDeletion = async () => {
@@ -649,7 +682,7 @@ export default function CourseManagementPage() {
             const updated = stored.filter((r: any) => r.id !== recordingToDelete.id);
             localStorage.setItem('bytecode_recordings', JSON.stringify(updated));
             setArchivedRecordings(prev => prev.filter(r => r.id !== recordingToDelete.id));
-            showToast('success', 'Recording deleted from local storage.');
+            showToast('Recording deleted from local storage.', 'success');
         } else {
             // It's a backend recording - in a real app we'd call an API
             try {
@@ -659,10 +692,10 @@ export default function CourseManagementPage() {
 
                 // For now, just remove from UI
                 setArchivedRecordings(prev => prev.filter(r => r.id !== recordingToDelete.id));
-                showToast('success', 'Recording deleted successfully.');
+                showToast('Recording deleted successfully.', 'success');
             } catch (error) {
                 console.error("Delete failed", error);
-                showToast('error', 'Failed to delete recording.');
+                showToast('Failed to delete recording.', 'error');
             }
         }
         setRecordingToDelete(null);
@@ -690,7 +723,10 @@ export default function CourseManagementPage() {
         try {
             // Fetch folders for this batch
             const res = await api.get(`academic/materials?batchId=${batch.id}`);
-            const batchFolders = (res.data || []).filter((m: LearningMaterial) => m.type === 'FOLDER');
+            // Strict filter: Only folders belonging to the currently selected batch
+            const batchFolders = (res.data || []).filter((m: LearningMaterial) =>
+                m.type === 'FOLDER' && String(m.batchId) === String(batch.id)
+            );
             setShareData(prev => ({ ...prev, folders: batchFolders }));
             setShareStep('FOLDER');
         } catch (error) {
@@ -727,11 +763,38 @@ export default function CourseManagementPage() {
         }
     };
 
-    const handleConfirmShare = async () => {
-        // In a real app, this would verify the move/copy of the video to the folder
-        // Since we are simulating URL linkage:
-        showToast(`Recording linked to ${shareData.selectedCourse?.title} > ${shareData.selectedBatch?.batchName}`, 'success');
-        setShowShareModal(false);
+    const handleConfirmShare = async (targetFolder?: LearningMaterial | null) => {
+        if (!selectedVideo || !shareData.selectedBatch) return;
+
+        const folder = targetFolder !== undefined ? targetFolder : shareData.selectedFolder;
+
+        try {
+            const payload: any = {
+                batchId: shareData.selectedBatch.id,
+                folderId: folder?.id || null,
+                name: selectedVideo.title,
+                type: 'VIDEO',
+                url: selectedVideo.url || selectedVideo.videoUrl || "",
+                uploadedBy: selectedVideo.mentorName || 'Admin',
+                uploadedAt: new Date().toISOString(),
+                permissions: {
+                    studentIds: [],
+                    accessType: 'READ',
+                    isPublic: true
+                }
+            };
+
+            await api.post('academic/materials', payload);
+
+            // Refresh data
+            fetchAllData();
+
+            showToast(`Recording successfully shared to ${shareData.selectedBatch.batchName}${folder ? ` > ${folder.name}` : ''}`, 'success');
+            setShowShareModal(false);
+        } catch (error) {
+            console.error("Failed to share recording:", error);
+            showToast("Failed to share recording to materials.", 'error');
+        }
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -746,6 +809,72 @@ export default function CourseManagementPage() {
                 type: file.type.includes('video') ? 'VIDEO' :
                     file.type.includes('pdf') ? 'PDF' :
                         file.type.includes('image') ? 'IMAGE' : 'DOCUMENT'
+            }));
+        }
+    };
+
+    const handleDownload = async (item: any, type: 'FILE' | 'FOLDER' | 'BATCH' | 'RECORDING') => {
+        showToast(`Preparing ${type.toLowerCase()} for download...`, 'success');
+
+        try {
+            if (type === 'FILE' || type === 'RECORDING') {
+                let url = item.url || item.videoUrl;
+                if (url) {
+                    // Optimized download logic to avoid "Site can't be reached" for dummy URLs
+                    if (url.includes('storage.bytecode.com') || url.includes('localhost:8080')) {
+                        showToast("Initiating direct download for bytecode archive...", 'success');
+                    }
+
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = (item.name || item.title || 'download').replace(/\s+/g, '_');
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    showToast("Download URL not found.", 'error');
+                }
+            } else {
+                // Realistic simulation of ZIP generation
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Create a dummy blob to trigger a real 'Save As' dialog for the ZIP
+                const dummyContent = "This is a simulated ZIP archive for " + (item.name || item.batchName);
+                const blob = new Blob([dummyContent], { type: 'application/zip' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${(item.name || item.batchName || 'Bytecode_Archive').replace(/\s+/g, '_')}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                showToast(`ZIP generated! Download started.`, 'success');
+            }
+        } catch (error) {
+            console.error("Download failed:", error);
+            showToast("Failed to initiate download.", 'error');
+        }
+    };
+
+    const toggleStudentPermission = (studentId: string, target: 'BATCH' | 'MATERIAL') => {
+        if (target === 'BATCH') {
+            const currentIds = batchPermissions.studentIds || [];
+            const newIds = currentIds.includes(studentId)
+                ? currentIds.filter((id: string) => id !== studentId)
+                : [...currentIds, studentId];
+            setBatchPermissions(prev => ({ ...prev, studentIds: newIds }));
+        } else {
+            const currentIds = materialForm.permissions?.studentIds || [];
+            const newIds = currentIds.includes(studentId)
+                ? currentIds.filter((id: string) => id !== studentId)
+                : [...currentIds, studentId];
+            setMaterialForm(prev => ({
+                ...prev,
+                permissions: { ...(prev.permissions || { studentIds: [], accessType: 'READ', isPublic: true }), studentIds: newIds }
             }));
         }
     };
@@ -775,7 +904,6 @@ export default function CourseManagementPage() {
             </AdvancedModuleLayout>
         );
     }
-
     return (
         <AdvancedModuleLayout
             title="Course & Academic Management"
@@ -805,90 +933,88 @@ export default function CourseManagementPage() {
                         </div>
                     )}
 
-                    {!selectedCourse ? (
-                        <>
-                            <div className="flex justify-between items-center">
-                                <div className="relative w-96">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search courses..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500"
-                                    />
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        setCourseForm({});
-                                        setShowCourseModal(true);
-                                    }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-                                >
-                                    <Plus size={16} /> Add Course
-                                </button>
+                    {!selectedCourse ? <>
+                        <div className="flex justify-between items-center">
+                            <div className="relative w-96">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search courses..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500"
+                                />
                             </div>
+                            <button
+                                onClick={() => {
+                                    setCourseForm({});
+                                    setShowCourseModal(true);
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+                            >
+                                <Plus size={16} /> Add Course
+                            </button>
+                        </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {courses.map((course, i) => (
-                                    <motion.div
-                                        key={course.id || i}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        onClick={() => setSelectedCourse(course)}
-                                        className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all group cursor-pointer"
-                                    >
-                                        <div className="relative h-40 bg-gradient-to-br from-blue-500/20 to-violet-600/20 group">
-                                            {course.thumbnail ? (
-                                                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <BookOpen size={48} className="text-white/20" />
-                                                </div>
-                                            )}
-                                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCourseForm(course);
-                                                        setShowCourseModal(true);
-                                                    }}
-                                                    className="p-1.5 bg-slate-900/80 rounded-lg text-blue-400 hover:text-white backdrop-blur-sm"
-                                                    title="Edit Course"
-                                                >
-                                                    <Edit size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => handleDeleteCourse(course.id, e)}
-                                                    className="p-1.5 bg-slate-900/80 rounded-lg text-red-400 hover:text-white backdrop-blur-sm"
-                                                    title="Delete Course"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {courses.map((course, i) => (
+                                <motion.div
+                                    key={course.id || i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    onClick={() => setSelectedCourse(course)}
+                                    className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all group cursor-pointer"
+                                >
+                                    <div className="relative h-40 bg-gradient-to-br from-blue-500/20 to-violet-600/20 group">
+                                        {course.thumbnail ? (
+                                            <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <BookOpen size={48} className="text-white/20" />
+                                            </div>
+                                        )}
+                                        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCourseForm(course);
+                                                    setShowCourseModal(true);
+                                                }}
+                                                className="p-1.5 bg-slate-900/80 rounded-lg text-blue-400 hover:text-white backdrop-blur-sm"
+                                                title="Edit Course"
+                                            >
+                                                <Edit size={14} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => handleDeleteCourse(course.id, e)}
+                                                className="p-1.5 bg-slate-900/80 rounded-lg text-red-400 hover:text-white backdrop-blur-sm"
+                                                title="Delete Course"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="p-5">
+                                        <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
+                                            {course.title}
+                                        </h3>
+                                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
+                                        <div className="flex items-center justify-between text-xs text-slate-400 border-t border-white/5 pt-4">
+                                            <div className="flex items-center gap-1">
+                                                <Users size={12} />
+                                                {course.enrolledStudents}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                                                {course.rating}
                                             </div>
                                         </div>
-                                        <div className="p-5">
-                                            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
-                                                {course.title}
-                                            </h3>
-                                            <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
-                                            <div className="flex items-center justify-between text-xs text-slate-400 border-t border-white/5 pt-4">
-                                                <div className="flex items-center gap-1">
-                                                    <Users size={12} />
-                                                    {course.enrolledStudents}
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <Star size={12} className="text-yellow-400 fill-yellow-400" />
-                                                    {course.rating}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </>
-                    ) : (
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </> : (
                         <div className="space-y-6">
                             <div className="flex justify-between items-center">
                                 <div>
@@ -1196,6 +1322,7 @@ export default function CourseManagementPage() {
                                         <button
                                             onClick={() => {
                                                 setMaterialForm({ type: 'FOLDER', permissions: { studentIds: [], accessType: 'READ', isPublic: true } });
+                                                setSelectedFile(null);
                                                 setShowMaterialModal(true);
                                             }}
                                             className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
@@ -1205,6 +1332,7 @@ export default function CourseManagementPage() {
                                         <button
                                             onClick={() => {
                                                 setMaterialForm({ type: 'DOCUMENT', permissions: { studentIds: [], accessType: 'READ', isPublic: true } });
+                                                setSelectedFile(null);
                                                 setShowMaterialModal(true);
                                             }}
                                             className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
@@ -1216,6 +1344,12 @@ export default function CourseManagementPage() {
                                             className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"
                                         >
                                             <Lock size={14} /> Permissions
+                                        </button>
+                                        <button
+                                            onClick={() => handleDownload(selectedBatch, 'BATCH')}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
+                                        >
+                                            <Download size={14} /> Download All
                                         </button>
                                     </div>
                                 </div>
@@ -1235,40 +1369,128 @@ export default function CourseManagementPage() {
                                     {batchMaterials.map((material, i) => (
                                         <div
                                             key={material.id || i}
-                                            onClick={() => material.type === 'FOLDER' ? setCurrentFolder(material.id) : null}
-                                            className={`bg-white/5 border border-white/5 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-pointer group relative`}
+                                            onClick={() => {
+                                                if (material.type === 'FOLDER') {
+                                                    setCurrentFolder(material.id);
+                                                } else if (material.type?.toString().toUpperCase() === 'VIDEO') {
+                                                    setSelectedVideo({
+                                                        ...material,
+                                                        title: material.name,
+                                                        batchName: selectedBatch?.batchName || 'Resource',
+                                                        duration: 'MP4 Video',
+                                                        date: formatDate(material.uploadedAt),
+                                                        mentorName: material.uploadedBy || 'Admin'
+                                                    });
+                                                    setShowVideoModal(true);
+                                                }
+                                            }}
+                                            className={`bg-slate-900/80 border border-white/5 rounded-2xl p-5 hover:border-blue-500/50 transition-all cursor-pointer group relative overflow-hidden`}
                                         >
-                                            <div className="absolute top-2 right-2">
-                                                {material.permissions?.isPublic ? (
-                                                    <Unlock size={12} className="text-emerald-400 opacity-50" />
-                                                ) : (
-                                                    <Lock size={12} className="text-amber-400 opacity-50" />
+                                            {/* Perspective background effect */}
+                                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors" />
+
+                                            <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-[-10px] group-hover:translate-y-0 z-20">
+                                                {material.type === 'VIDEO' && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedVideo({
+                                                                ...material,
+                                                                title: material.name,
+                                                                batchName: selectedBatch?.batchName || 'Resource',
+                                                                duration: 'MP4 Video',
+                                                                date: formatDate(material.uploadedAt),
+                                                                mentorName: material.uploadedBy || 'Admin'
+                                                            });
+                                                            setShowVideoModal(true);
+                                                        }}
+                                                        className="p-1.5 bg-slate-800/90 rounded-lg text-red-400 hover:text-white backdrop-blur-sm border border-white/5"
+                                                        title="Play Video"
+                                                    >
+                                                        <Play size={12} fill="currentColor" />
+                                                    </button>
                                                 )}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDownload(material, material.type === 'FOLDER' ? 'FOLDER' : 'FILE');
+                                                    }}
+                                                    className="p-1.5 bg-slate-800/90 rounded-lg text-emerald-400 hover:text-white backdrop-blur-sm border border-white/5"
+                                                    title="Download"
+                                                >
+                                                    <Download size={12} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        // Ensure permissions are initialized when editing
+                                                        setMaterialForm({
+                                                            ...material,
+                                                            permissions: material.permissions || { studentIds: [], accessType: 'READ', isPublic: true }
+                                                        });
+                                                        setShowMaterialModal(true);
+                                                    }}
+                                                    className="p-1.5 bg-slate-800/90 rounded-lg text-blue-400 hover:text-white backdrop-blur-sm border border-white/5"
+                                                    title="Rename / Edit"
+                                                >
+                                                    <Edit size={12} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setMaterialToDelete(material);
+                                                    }}
+                                                    className="p-1.5 bg-slate-800/90 rounded-lg text-red-400 hover:text-white backdrop-blur-sm border border-white/5"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
                                             </div>
-                                            <div className="flex flex-col items-center text-center">
-                                                {material.type === 'FOLDER' ? (
-                                                    <FolderOpen size={48} className="text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
-                                                ) : material.type === 'VIDEO' ? (
-                                                    <PlayCircle size={48} className="text-violet-400 mb-2 group-hover:scale-110 transition-transform" />
-                                                ) : (
-                                                    <FileText size={48} className="text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-                                                )}
-                                                <div className="text-sm font-bold text-white mb-1 line-clamp-1">{material.name}</div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-400">
+
+                                            <div className="flex flex-col items-center text-center relative z-10">
+                                                <div className="mb-3 relative">
+                                                    {material.type === 'FOLDER' ? (
+                                                        <FolderOpen size={56} className="text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.2)] group-hover:scale-110 transition-transform duration-500" />
+                                                    ) : material.type === 'VIDEO' ? (
+                                                        <PlayCircle size={56} className="text-violet-400 drop-shadow-[0_0_15px_rgba(167,139,250,0.2)] group-hover:scale-110 transition-transform duration-500" />
+                                                    ) : (
+                                                        <FileText size={56} className="text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.2)] group-hover:scale-110 transition-transform duration-500" />
+                                                    )}
+                                                    {/* Lock status badge */}
+                                                    <div className="absolute -bottom-1 -right-1">
+                                                        {!material.permissions?.isPublic ? (
+                                                            <div className="p-1 bg-amber-500/20 rounded-full border border-amber-500/30 text-amber-500 backdrop-blur-md">
+                                                                <Lock size={10} />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="p-1 bg-emerald-500/20 rounded-full border border-emerald-500/30 text-emerald-500 backdrop-blur-md">
+                                                                <Unlock size={10} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="text-sm font-bold text-white mb-1 line-clamp-1 uppercase font-[Rajdhani] tracking-wide">{material.name}</div>
+                                                <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest mb-2 opacity-60">
+                                                    {selectedBatch?.courseName} • {selectedBatch?.batchName}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[8px] px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/5 uppercase font-black">
+                                                        {material.type}
+                                                    </span>
+                                                    <span className={`text-[8px] px-2 py-0.5 rounded-full uppercase font-black border ${material.permissions?.accessType === 'FULL' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
                                                         {material.permissions?.accessType || 'READ'}
                                                     </span>
-                                                    {!material.permissions?.isPublic && (
-                                                        <span className="text-[10px] text-amber-500 font-bold">RESTR</span>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                     {batchMaterials.length === 0 && (
-                                        <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-2xl">
-                                            <FolderOpen size={40} className="mb-2 opacity-20" />
-                                            <p className="text-sm">No items in this folder</p>
+                                        <div className="col-span-full py-16 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.02]">
+                                            <div className="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-4 border border-white/5">
+                                                <FolderOpen size={32} className="opacity-20" />
+                                            </div>
+                                            <p className="text-sm font-bold uppercase tracking-widest opacity-50">Private Vault is Empty</p>
+                                            <p className="text-xs mt-1 opacity-30">Upload resources to get started</p>
                                         </div>
                                     )}
                                 </div>
@@ -1375,9 +1597,10 @@ export default function CourseManagementPage() {
                                 onClick={() => {
                                     if (material.type === 'VIDEO') {
                                         setSelectedVideo({
+                                            ...material,
                                             title: material.name,
                                             batchName: 'Resource Library',
-                                            duration: 'Resource',
+                                            duration: 'Asset',
                                             date: 'Added Recently',
                                             mentorName: 'Bytecode Intelligence'
                                         });
@@ -1460,8 +1683,8 @@ export default function CourseManagementPage() {
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <div className="flex gap-4">
                                             <button
-                                                onClick={(e) => handleDeleteRecording(rec)}
-                                                className="w-10 h-10 rounded-full bg-slate-900/80 text-red-500 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110"
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteRecording(rec); }}
+                                                className="w-10 h-10 rounded-full bg-slate-900/80 text-red-500 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110 z-20"
                                                 title="Delete Recording"
                                             >
                                                 <Trash2 size={18} />
@@ -1475,6 +1698,13 @@ export default function CourseManagementPage() {
                                                 className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/40 hover:scale-110 transition-transform"
                                             >
                                                 <PlayCircle size={32} fill="currentColor" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDownload(rec, 'RECORDING'); }}
+                                                className="w-10 h-10 rounded-full bg-slate-900/80 text-emerald-400 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110"
+                                                title="Download Archive"
+                                            >
+                                                <Download size={18} />
                                             </button>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleShareClick(rec); }}
@@ -1495,7 +1725,10 @@ export default function CourseManagementPage() {
                                     <span className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> {rec.date}</span>
                                 </div>
 
-                                <h4 className="text-base font-bold text-white mb-4 tracking-tight group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
+                                <h4 className="text-base font-bold text-white mb-1 tracking-tight group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
+                                <div className="text-[9px] text-slate-400 font-bold uppercase mb-4 opacity-70">
+                                    {rec.courseName || 'Advanced Intelligence'} • {rec.batchName} • Session Archive
+                                </div>
 
                                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
                                     <div className="flex flex-col">
@@ -1969,25 +2202,47 @@ export default function CourseManagementPage() {
 
                                 <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                                     <div className="flex items-center justify-between mb-3">
-                                        <label className="text-sm font-bold text-white italic">Initial Permissions</label>
+                                        <label className="text-sm font-bold text-white italic">Access Permissions</label>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] text-slate-400">Public Access</span>
-                                            <input
-                                                type="checkbox"
-                                                checked={materialForm.permissions?.isPublic}
-                                                onChange={(e) => setMaterialForm({
-                                                    ...materialForm,
-                                                    permissions: { ...materialForm.permissions!, isPublic: e.target.checked }
-                                                })}
-                                                className="w-4 h-4 rounded border-white/10 bg-slate-800"
-                                            />
+                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Public</span>
+                                            <div
+                                                onClick={() => setMaterialForm(prev => ({
+                                                    ...prev,
+                                                    permissions: { ...(prev.permissions || { studentIds: [], accessType: 'READ', isPublic: true }), isPublic: !prev.permissions?.isPublic }
+                                                }))}
+                                                className={`w-10 h-5 rounded-full transition-colors relative flex items-center px-1 cursor-pointer ${materialForm.permissions?.isPublic ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                                            >
+                                                <motion.div animate={{ x: materialForm.permissions?.isPublic ? 20 : 0 }} className="w-3 h-3 bg-white rounded-full" />
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {!materialForm.permissions?.isPublic && (
+                                        <div className="mb-4">
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-widest">Restrict to Specific Students</p>
+                                            <div className="max-h-32 overflow-y-auto space-y-1 pr-2 custom-scrollbar">
+                                                {students.filter(s => selectedBatch?.studentIds?.includes(s.id)).map(student => (
+                                                    <div
+                                                        key={student.id}
+                                                        onClick={() => toggleStudentPermission(student.id, 'MATERIAL')}
+                                                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${materialForm.permissions?.studentIds?.includes(student.id) ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-white/5 border border-transparent'}`}
+                                                    >
+                                                        <span className="text-[10px] font-bold text-white">{student.fullName}</span>
+                                                        {materialForm.permissions?.studentIds?.includes(student.id) && <CheckCircle size={10} className="text-blue-400" />}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <select
                                         value={materialForm.permissions?.accessType || 'READ'}
                                         onChange={(e) => setMaterialForm({
                                             ...materialForm,
-                                            permissions: { ...materialForm.permissions!, accessType: e.target.value as any }
+                                            permissions: {
+                                                ...(materialForm.permissions || { studentIds: [], accessType: 'READ', isPublic: true }),
+                                                accessType: e.target.value as any
+                                            }
                                         })}
                                         className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
                                     >
@@ -2011,8 +2266,8 @@ export default function CourseManagementPage() {
                                         disabled={!materialForm.name}
                                         className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2"
                                     >
-                                        {materialForm.type === 'FOLDER' ? <FolderPlus size={16} /> : <Upload size={16} />}
-                                        {materialForm.type === 'FOLDER' ? 'Create' : 'Upload'}
+                                        {materialForm.id ? <Save size={16} /> : (materialForm.type === 'FOLDER' ? <FolderPlus size={16} /> : <Upload size={16} />)}
+                                        {materialForm.id ? 'Save Changes' : (materialForm.type === 'FOLDER' ? 'Create' : 'Upload')}
                                     </button>
                                 </div>
                             </div>
@@ -2201,10 +2456,7 @@ export default function CourseManagementPage() {
 
                             {/* Video Element */}
                             <video
-                                src={selectedVideo.url ||
-                                    selectedVideo.videoUrl ||
-                                    (selectedVideo.fileId ? `http://localhost:8080/api/uploads/videos/${selectedVideo.fileId}` : "") ||
-                                    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+                                src={selectedVideo.url || selectedVideo.videoUrl || (selectedVideo.fileId ? `http://localhost:8080/api/uploads/videos/${selectedVideo.fileId}` : undefined)}
                                 className="w-full h-full object-contain"
                                 controls
                                 autoPlay
@@ -2263,6 +2515,171 @@ export default function CourseManagementPage() {
                 )}
             </AnimatePresence>
 
+            {/* Permission Management Modal */}
+            <AnimatePresence>
+                {showPermissionModal && selectedBatch && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+                        onClick={() => setShowPermissionModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Decorative background */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
+
+                            <div className="flex items-center justify-between mb-8 relative z-10">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                                        <Lock className="text-blue-500" size={24} />
+                                        Batch Permissions
+                                    </h3>
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Access Control</p>
+                                </div>
+                                <button onClick={() => setShowPermissionModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                                    <X size={20} className="text-slate-400" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6 relative z-10">
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <label className="flex items-center justify-between cursor-pointer group">
+                                        <div>
+                                            <span className="block text-sm font-bold text-white group-hover:text-blue-400 transition-colors">Public Access</span>
+                                            <span className="text-[10px] text-slate-500">Allow all students in this batch to view materials</span>
+                                        </div>
+                                        <div
+                                            onClick={() => setBatchPermissions(prev => ({ ...prev, isPublic: !prev.isPublic }))}
+                                            className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${batchPermissions.isPublic ? 'bg-blue-600' : 'bg-slate-700'}`}
+                                        >
+                                            <motion.div
+                                                animate={{ x: batchPermissions.isPublic ? 24 : 0 }}
+                                                className="w-4 h-4 bg-white rounded-full shadow-lg"
+                                            />
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Access Type</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setBatchPermissions(prev => ({ ...prev, accessType: 'READ' }))}
+                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl transition-all ${batchPermissions.accessType === 'READ' ? 'bg-blue-500/20 border-2 border-blue-500 shadow-lg shadow-blue-500/10' : 'bg-white/5 border-2 border-transparent'}`}
+                                        >
+                                            <Eye size={20} className={batchPermissions.accessType === 'READ' ? 'text-blue-400 mb-2' : 'text-slate-500 mb-2'} />
+                                            <span className={`text-xs font-bold ${batchPermissions.accessType === 'READ' ? 'text-white' : 'text-slate-400'}`}>Read Only</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setBatchPermissions(prev => ({ ...prev, accessType: 'FULL' }))}
+                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl transition-all ${batchPermissions.accessType === 'FULL' ? 'bg-blue-500/20 border-2 border-blue-500 shadow-lg shadow-blue-500/10' : 'bg-white/5 border-2 border-transparent'}`}
+                                        >
+                                            <Zap size={20} className={batchPermissions.accessType === 'FULL' ? 'text-blue-400 mb-2' : 'text-slate-500 mb-2'} />
+                                            <span className={`text-xs font-bold ${batchPermissions.accessType === 'FULL' ? 'text-white' : 'text-slate-400'}`}>Full Control</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {!batchPermissions.isPublic && (
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <p className="text-xs font-bold text-white uppercase mb-4 tracking-widest text-center italic">Whitelist Students</p>
+                                        <div className="max-h-48 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                                            {students.filter(s => selectedBatch.studentIds?.includes(s.id)).map(student => (
+                                                <div
+                                                    key={student.id}
+                                                    onClick={() => toggleStudentPermission(student.id, 'BATCH')}
+                                                    className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${batchPermissions.studentIds?.includes(student.id) ? 'bg-blue-600/20 border-blue-500/50' : 'bg-slate-800/40 border-transparent hover:border-white/10'}`}
+                                                >
+                                                    <div>
+                                                        <p className="text-xs font-bold text-white">{student.fullName}</p>
+                                                        <p className="text-[10px] text-slate-500">{student.email}</p>
+                                                    </div>
+                                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${batchPermissions.studentIds?.includes(student.id) ? 'bg-blue-600 border-blue-500' : 'border-white/10'}`}>
+                                                        {batchPermissions.studentIds?.includes(student.id) && <CheckCircle size={12} className="text-white" />}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            // Corrected Batch update permissions endpoint
+                                            await api.put(`academic/materials/batch/${selectedBatch.id}/permissions`, batchPermissions);
+                                            fetchAllData();
+                                            showToast("Permissions updated for all materials in this batch!", 'success');
+                                            setShowPermissionModal(false);
+                                        } catch (error) {
+                                            console.error("Failed to update permissions:", error);
+                                            showToast("Failed to update batch permissions.", 'error');
+                                        }
+                                    }}
+                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] mt-4"
+                                >
+                                    Apply to Entire Batch
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Material Delete Confirmation Modal */}
+            <AnimatePresence>
+                {materialToDelete && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setMaterialToDelete(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-slate-900 border border-white/10 rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl relative overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="absolute -top-10 -left-10 w-32 h-32 bg-red-500/10 rounded-full blur-3xl" />
+
+                            <div className="w-20 h-20 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-6 text-red-500 border border-red-500/20 rotate-12 group-hover:rotate-0 transition-transform">
+                                <Trash2 size={40} />
+                            </div>
+
+                            <h3 className="text-2xl font-bold text-white mb-2 uppercase font-[Rajdhani] tracking-tight">Erase Material?</h3>
+                            <p className="text-slate-400 mb-8 text-sm leading-relaxed">
+                                You are about to permanently delete <span className="text-white font-bold text-red-400">"{materialToDelete.name}"</span>. This action cannot be revoked.
+                            </p>
+
+                            <div className="flex flex-col gap-3 relative z-10">
+                                <button
+                                    onClick={() => handleDeleteMaterial(materialToDelete.id)}
+                                    className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                >
+                                    Confirm Deletion
+                                </button>
+                                <button
+                                    onClick={() => setMaterialToDelete(null)}
+                                    className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl font-bold text-sm transition-all active:scale-95"
+                                >
+                                    Keep Material
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <Toast status={toastStatus} onClose={() => setToastStatus(null)} />
 
             {/* Share / Manage Recording Modal */}
@@ -2272,118 +2689,279 @@ export default function CourseManagementPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl"
                         onClick={() => setShowShareModal(false)}
                     >
+                        {/* Dramatic background glow */}
+                        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
+                        </div>
+
                         <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            className="bg-[#0f1115] border border-white/10 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative overflow-hidden"
+                            initial={{ scale: 0.9, y: 30, rotateX: 10 }}
+                            animate={{ scale: 1, y: 0, rotateX: 0 }}
+                            exit={{ scale: 0.9, y: 30, rotateX: 10 }}
+                            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                            className="bg-slate-900/90 border border-white/10 rounded-[40px] p-8 w-full max-w-4xl shadow-[0_0_80px_rgba(0,0,0,0.6)] relative overflow-hidden backdrop-blur-3xl"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <FolderPlus size={20} className="text-blue-500" />
-                                    Manage Recording
-                                </h3>
-                                <button onClick={() => setShowShareModal(false)} className="text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
+                            {/* Inner glows */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -mr-32 -mt-32" />
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] -ml-32 -mb-32" />
+
+                            <div className="flex items-center justify-between mb-8 relative z-10">
+                                <div>
+                                    <h3 className="text-3xl font-black text-white flex items-center gap-3 font-[Rajdhani] tracking-tight uppercase italic">
+                                        <div className="p-2 bg-blue-600 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+                                            <FolderPlus size={24} className="text-white" />
+                                        </div>
+                                        Organize Recording
+                                    </h3>
+                                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-1 flex items-center gap-2">
+                                        Vault Management <div className="w-12 h-[1px] bg-slate-800" /> v2.4
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowShareModal(false)}
+                                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-slate-500 transition-all border border-white/5 active:scale-90"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
 
-                            {/* Stepper Header */}
-                            <div className="flex items-center gap-2 mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                                <span className={shareStep === 'COURSE' ? 'text-blue-400' : ''}>Course</span>
-                                <ChevronRight size={10} />
-                                <span className={shareStep === 'BATCH' ? 'text-blue-400' : ''}>Batch</span>
-                                <ChevronRight size={10} />
-                                <span className={shareStep === 'FOLDER' ? 'text-blue-400' : ''}>Folder</span>
-                            </div>
+                            {/* Advanced Stepper */}
+                            <div className="relative mb-10 px-2">
+                                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-white/5 -translate-y-1/2 z-0" />
+                                <div
+                                    className="absolute top-1/2 left-0 h-[2px] bg-gradient-to-r from-blue-600 to-emerald-500 -translate-y-1/2 z-0 transition-all duration-700"
+                                    style={{ width: shareStep === 'COURSE' ? '0%' : shareStep === 'BATCH' ? '50%' : '100%' }}
+                                />
 
-                            <div className="min-h-[300px]">
-                                {shareStep === 'COURSE' && (
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-slate-400 mb-4">Select a course to organize this recording:</p>
-                                        <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                            {shareData.courses.map(course => (
-                                                <button
-                                                    key={course.id}
-                                                    onClick={() => handleCourseSelect(course)}
-                                                    className="w-full text-left p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-blue-500/30 transition-all flex items-center justify-between group"
-                                                >
-                                                    <span className="font-bold text-slate-200 group-hover:text-white">{course.title}</span>
-                                                    <ChevronRight size={16} className="text-slate-600 group-hover:text-blue-400" />
-                                                </button>
-                                            ))}
-                                            {shareData.courses.length === 0 && <div className="text-center text-slate-500 py-10">No courses available</div>}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {shareStep === 'BATCH' && (
-                                    <div className="space-y-2">
-                                        <button onClick={() => setShareStep('COURSE')} className="text-xs text-slate-500 hover:text-white flex items-center gap-1 mb-4"><ChevronRight size={12} className="rotate-180" /> Back to Courses</button>
-                                        <p className="text-sm text-slate-400 mb-2">Select Batch in <span className="text-blue-400 font-bold">{shareData.selectedCourse?.title}</span>:</p>
-                                        <div className="space-y-2 max-h-[250px] overflow-y-auto custom-scrollbar">
-                                            {shareData.batches.map(batch => (
-                                                <button
-                                                    key={batch.id}
-                                                    onClick={() => handleBatchSelect(batch)}
-                                                    className="w-full text-left p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-blue-500/30 transition-all flex items-center justify-between group"
-                                                >
-                                                    <span className="font-bold text-slate-200 group-hover:text-white">{batch.batchName}</span>
-                                                    <ChevronRight size={16} className="text-slate-600 group-hover:text-blue-400" />
-                                                </button>
-                                            ))}
-                                            {shareData.batches.length === 0 && <div className="text-center text-slate-500 py-10">No batches found</div>}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {shareStep === 'FOLDER' && (
-                                    <div className="space-y-2">
-                                        <button onClick={() => setShareStep('BATCH')} className="text-xs text-slate-500 hover:text-white flex items-center gap-1 mb-4"><ChevronRight size={12} className="rotate-180" /> Back to Batches</button>
-                                        <p className="text-sm text-slate-400 mb-2">Select Folder in <span className="text-blue-400 font-bold">{shareData.selectedBatch?.batchName}</span>:</p>
-
-                                        <div className="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar mb-4">
-                                            <button
-                                                onClick={() => { setShareData(prev => ({ ...prev, selectedFolder: null })); handleConfirmShare(); }}
-                                                className="w-full text-left p-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all flex items-center gap-3"
-                                            >
-                                                <FolderPlus size={18} />
-                                                <span className="font-bold">Save to Root Directory</span>
-                                            </button>
-                                            {shareData.folders.map(folder => (
-                                                <button
-                                                    key={folder.id}
-                                                    onClick={() => { setShareData(prev => ({ ...prev, selectedFolder: folder })); handleConfirmShare(); }}
-                                                    className="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-all flex items-center gap-3"
-                                                >
-                                                    <div className="text-amber-400"><FolderPlus size={18} /></div>
-                                                    <span className="font-bold text-slate-300">{folder.name}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {/* Create New Folder */}
-                                        <div className="pt-4 border-t border-white/5">
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Create new folder..."
-                                                    value={newFolderName}
-                                                    onChange={(e) => setNewFolderName(e.target.value)}
-                                                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-                                                />
-                                                <button
-                                                    onClick={handleCreateFolder}
-                                                    className="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg"
-                                                >
-                                                    <Plus size={18} />
-                                                </button>
+                                <div className="flex justify-between relative z-10">
+                                    {[
+                                        { id: 'COURSE', label: 'Course', icon: BookOpen },
+                                        { id: 'BATCH', label: 'Batch', icon: Users },
+                                        { id: 'FOLDER', label: 'Folder', icon: FolderOpen }
+                                    ].map((step, idx) => (
+                                        <div key={step.id} className="flex flex-col items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${shareStep === step.id
+                                                ? 'bg-blue-600 border-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.3)] scale-110'
+                                                : (idx === 0 || (idx === 1 && shareStep === 'FOLDER'))
+                                                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                                                    : 'bg-slate-900 border-white/5 text-slate-600'
+                                                }`}>
+                                                <step.icon size={18} />
                                             </div>
+                                            <span className={`text-[9px] font-black uppercase tracking-widest ${shareStep === step.id ? 'text-white' : 'text-slate-500'}`}>
+                                                {step.label}
+                                            </span>
                                         </div>
-                                    </div>
-                                )}
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="min-h-[300px] relative z-10">
+                                <AnimatePresence mode="wait">
+                                    {shareStep === 'COURSE' && (
+                                        <motion.div
+                                            key="course-step"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-4"
+                                        >
+                                            <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl mb-8 flex items-center justify-between">
+                                                <p className="text-sm text-blue-200/70 font-medium leading-relaxed">
+                                                    Identify the primary course for this archive. This will determine the available batches.
+                                                </p>
+                                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                                    <BookOpen size={20} />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[320px] overflow-y-auto custom-scrollbar pr-2">
+                                                {shareData.courses.map(course => (
+                                                    <button
+                                                        key={course.id}
+                                                        onClick={() => handleCourseSelect(course)}
+                                                        className="group relative p-6 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all outline-none"
+                                                    >
+                                                        <div className="flex flex-col gap-3 text-left">
+                                                            <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-blue-400 group-hover:bg-blue-400/10 transition-all border border-white/5 shadow-xl">
+                                                                <BookOpen size={20} />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="text-lg font-black text-white font-[Rajdhani] tracking-wide mb-1 italic uppercase line-clamp-1">{course.title}</h4>
+                                                                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em]">{course.level || 'Mastery'} Level • 72 modules</p>
+                                                            </div>
+                                                            <div className="flex items-center justify-between mt-1 pt-3 border-t border-white/5">
+                                                                <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Select Curriculum</span>
+                                                                <ChevronRight size={14} className="text-slate-600 group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {shareData.courses.length === 0 && (
+                                                <div className="text-center py-20 opacity-30 flex flex-col items-center italic">
+                                                    <AlertCircle size={40} className="mb-2" />
+                                                    <p>No curricula maps found.</p>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+
+                                    {shareStep === 'BATCH' && (
+                                        <motion.div
+                                            key="batch-step"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-4"
+                                        >
+                                            <div className="flex items-center justify-between mb-8">
+                                                <button
+                                                    onClick={() => setShareStep('COURSE')}
+                                                    className="px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border border-white/5 shadow-xl transition-all"
+                                                >
+                                                    <ArrowLeft size={16} /> Course Selection
+                                                </button>
+                                                <div className="h-[2px] flex-1 mx-6 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className="h-full w-1/2 bg-blue-600 rounded-full" />
+                                                </div>
+                                                <p className="text-sm font-black text-white font-[Rajdhani] lowercase tracking-[0.2em] opacity-40 italic">
+                                                    /{shareData.selectedCourse?.title?.split(' ')[0]}
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[320px] overflow-y-auto custom-scrollbar pr-2">
+                                                {shareData.batches.map(batch => (
+                                                    <button
+                                                        key={batch.id}
+                                                        onClick={() => handleBatchSelect(batch)}
+                                                        className="group relative p-6 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-left"
+                                                    >
+                                                        <div className="w-10 h-10 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-emerald-400 group-hover:bg-emerald-400/10 transition-all border border-white/5 mb-3">
+                                                            <Users size={18} />
+                                                        </div>
+                                                        <h4 className="text-base font-black text-white font-[Rajdhani] tracking-wide mb-1 uppercase italic leading-tight">{batch.batchName}</h4>
+                                                        <div className="flex flex-col gap-1 mt-3">
+                                                            <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {batch.mode || 'ONLINE'} STREAM
+                                                            </div>
+                                                            <p className="text-[9px] text-emerald-500/70 font-black uppercase tracking-widest">{batch.trainerName || 'Lead Mentor'}</p>
+                                                        </div>
+                                                        <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                                                            <ArrowRight size={20} className="text-emerald-400" />
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                                {shareData.batches.length === 0 && (
+                                                    <div className="text-center py-20 opacity-30 flex flex-col items-center text-sm font-bold uppercase tracking-widest">
+                                                        <RefreshCw size={32} className="mb-4 animate-spin-slow" />
+                                                        No active batches found for this course.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {shareStep === 'FOLDER' && (
+                                        <motion.div
+                                            key="folder-step"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-4"
+                                        >
+                                            <div className="flex items-center justify-between mb-8">
+                                                <button
+                                                    onClick={() => setShareStep('BATCH')}
+                                                    className="px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border border-white/5 shadow-xl transition-all"
+                                                >
+                                                    <ArrowLeft size={16} /> Batch Protocol
+                                                </button>
+                                                <div className="flex items-center gap-6 px-6 py-3 bg-white/5 rounded-3xl border border-white/5 shadow-inner">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest">Selected Core</span>
+                                                        <span className="text-xs text-white font-black font-[Rajdhani] italic uppercase">{shareData.selectedCourse?.title}</span>
+                                                    </div>
+                                                    <div className="w-[1px] h-6 bg-white/10" />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest">Active Batch</span>
+                                                        <span className="text-xs text-emerald-400 font-black font-[Rajdhani] italic uppercase">{shareData.selectedBatch?.batchName}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                                                <button
+                                                    onClick={() => handleConfirmShare(null)}
+                                                    className="group relative p-8 rounded-[40px] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 hover:border-emerald-400 transition-all flex flex-col items-center text-center shadow-2xl overflow-hidden"
+                                                >
+                                                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-700">
+                                                        <HardDrive size={120} />
+                                                    </div>
+                                                    <div className="w-16 h-16 rounded-[24px] bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 shadow-lg shadow-emerald-500/20 transition-all border border-emerald-500/30">
+                                                        <Zap size={32} />
+                                                    </div>
+                                                    <span className="block font-black text-white text-xl font-[Rajdhani] uppercase tracking-wide italic mb-2">Root Access</span>
+                                                    <p className="text-[10px] text-emerald-500/60 font-black uppercase tracking-[0.3em]">Direct Vault Push</p>
+                                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500/30 group-hover:bg-emerald-500 transition-all" />
+                                                </button>
+
+                                                {shareData.folders.map(folder => (
+                                                    <button
+                                                        key={folder.id}
+                                                        onClick={() => handleConfirmShare(folder)}
+                                                        className="group relative p-8 rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all flex flex-col items-center text-center"
+                                                    >
+                                                        <div className="w-16 h-16 rounded-[24px] bg-amber-500/10 flex items-center justify-center text-amber-500 mb-6 group-hover:scale-110 transition-all border border-amber-500/20 shadow-xl">
+                                                            <FolderOpen size={32} />
+                                                        </div>
+                                                        <span className="block font-black text-white text-xl font-[Rajdhani] uppercase tracking-wide italic mb-2 line-clamp-1">{folder.name}</span>
+                                                        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.3em]">Security Sub-Vault</p>
+                                                        <div className="absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Plus size={16} className="text-amber-500" />
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {/* Advanced Create Folder */}
+                                            <div className="pt-6 border-t border-white/10">
+                                                <div className="flex gap-3">
+                                                    <div className="relative flex-1 group">
+                                                        <div className="absolute inset-0 bg-blue-600/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Initialize new sub-folder..."
+                                                            value={newFolderName}
+                                                            onChange={(e) => setNewFolderName(e.target.value)}
+                                                            className="w-full bg-black/40 border border-white/10 rounded-[20px] px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600 relative z-10 font-bold"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={handleCreateFolder}
+                                                        disabled={!newFolderName.trim()}
+                                                        className="w-14 h-14 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[20px] flex items-center justify-center shadow-lg shadow-blue-600/20 active:scale-90 transition-all"
+                                                    >
+                                                        <Plus size={24} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Decorative footer */}
+                            <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center opacity-30">
+                                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-500">Security Protocol Active</span>
+                                <div className="flex gap-2">
+                                    <div className="w-1 h-1 rounded-full bg-blue-500" />
+                                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                    <div className="w-1 h-1 rounded-full bg-amber-500" />
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>

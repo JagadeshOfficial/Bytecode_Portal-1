@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/academic/materials")
@@ -100,5 +99,22 @@ public class LearningMaterialController {
                     return ResponseEntity.ok(materialRepository.save(material));
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/batch/{batchId}/permissions")
+    public ResponseEntity<Void> updateBatchPermissions(
+            @PathVariable String batchId,
+            @RequestBody LearningMaterial.MaterialPermissions permissions) {
+        try {
+            java.util.List<LearningMaterial> materials = materialRepository.findByBatchId(batchId);
+            for (LearningMaterial material : materials) {
+                material.setPermissions(permissions);
+                materialRepository.save(material);
+            }
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
@@ -11,17 +11,18 @@ import {
     ArrowRight,
     CheckCircle2,
     AlertTriangle,
-    Code2,
+    Wand2,
+    Sparkles,
     MoveLeft,
-    Sparkles
+    ShieldCheck
 } from 'lucide-react';
-import { ROLE_CONFIG } from '@/lib/dashboard-config';
+import { Role, ROLE_CONFIG } from '@/lib/dashboard-config';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import styles from './Login.module.css';
+import styles from '../Login.module.css';
 
 interface Toast {
     type: 'success' | 'error';
@@ -47,14 +48,23 @@ const Toast = ({ status, onClose }: { status: Toast; onClose: () => void }) => (
     </motion.div>
 );
 
-export default function LoginPage() {
+export default function RoleLoginPage({ params }: { params: Promise<{ role: string }> }) {
+    const { role } = use(params);
     const router = useRouter();
     const { login } = useAuth();
+
+    // Auth state
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<Toast | null>(null);
+
+    const config = ROLE_CONFIG[role as Role] || {
+        label: 'Staff Access',
+        dashUrl: '/dashboard'
+    };
+    const description = (config as any).description || 'Secure login for ByteCode Personnel.';
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,32 +74,42 @@ export default function LoginPage() {
         try {
             const response = await api.post('/auth/login', { email, password });
             const data = response.data;
+
+            // Check if the user role matches the route
+            const backendRole = data.role.toUpperCase();
+            const targetRole = role.toUpperCase();
+
+            // Simple check: allow if role matches or if admin
+            if (backendRole !== targetRole && backendRole !== 'ADMIN' && backendRole !== 'SUPER_ADMIN') {
+                throw new Error(`Unauthorized. This portal is for ${role} only.`);
+            }
+
             login(data);
 
             setStatus({
                 type: 'success',
-                title: 'Welcome Back!',
-                message: 'Successfully signed in. Redirecting to your portal...'
+                title: 'Access Granted',
+                message: `Welcome, signed in as ${data.role}.`
             });
 
             setTimeout(() => {
-                const config = ROLE_CONFIG['student'];
-                router.push(config.dashUrl);
-            }, 1500);
+                const roleConfig = ROLE_CONFIG[data.role.toLowerCase() as Role];
+                router.push(roleConfig?.dashUrl || '/dashboard');
+            }, 1000);
 
         } catch (error: any) {
             setStatus({
                 type: 'error',
-                title: 'Authentication Failed',
-                message: error.message || 'Invalid credentials. Please try again.'
+                title: 'Access Denied',
+                message: error.message || 'Invalid credentials. Please verify your access.'
             });
         } finally {
             setLoading(false);
         }
     };
 
-    const quickFill = (role: string) => {
-        setEmail(role === 'student' ? 'student@bytecode.com' : `${role}@bytecode.com`);
+    const quickFill = () => {
+        setEmail(`${role}@bytecode.com`);
         setPassword('password123');
     };
 
@@ -117,7 +137,7 @@ export default function LoginPage() {
             </div>
 
             <div className={styles.contentGrid}>
-                {/* Visual Brand Section */}
+                {/* Visual Narrative Section */}
                 <div className={styles.brandSection}>
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
@@ -125,25 +145,21 @@ export default function LoginPage() {
                         transition={{ duration: 0.8 }}
                         className={styles.heroContent}
                     >
-                        <h1 className={styles.heroTitle}>Student<br />Portal.</h1>
+                        <h1 className={styles.heroTitle}>{role.toUpperCase()}<br />PORTAL.</h1>
                         <p className={styles.heroSubtitle}>
-                            Your gateway to world-class technical education. Access your curriculum, tracking, and achievements in one place.
+                            {description} Please authenticate to access specialized administrative and operational tools.
                         </p>
 
                         <div className={styles.statsRow}>
                             <div className={styles.statItem}>
-                                <h4>25k+</h4>
-                                <p>Students</p>
-                            </div>
-                            <div className={styles.statItem}>
-                                <h4>98%</h4>
-                                <p>Success Rate</p>
+                                <ShieldCheck size={40} color="#8b5cf6" />
+                                <p style={{ marginTop: '1rem' }}>Secure Infrastructure</p>
                             </div>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* Secure Form Section */}
+                {/* Secure Authentication Section */}
                 <div className={styles.formSection}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -152,19 +168,19 @@ export default function LoginPage() {
                         className={styles.loginCard}
                     >
                         <div className={styles.formHeader}>
-                            <h2 className={styles.formTitle}>Welcome back</h2>
-                            <p className={styles.formDesc}>Enter your credentials to continue</p>
+                            <h2 className={styles.formTitle}>Staff Sign In</h2>
+                            <p className={styles.formDesc}>Authentication required for access</p>
                         </div>
 
                         <form onSubmit={handleLogin}>
                             <div className={styles.inputGroup}>
-                                <label className={styles.label}>Email Address</label>
+                                <label className={styles.label}>Operational Email</label>
                                 <div className={styles.inputContainer}>
                                     <Mail className={styles.inputIcon} size={20} />
                                     <input
                                         type="email"
                                         className={styles.inputField}
-                                        placeholder="name@example.com"
+                                        placeholder="staff@bytecode.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
@@ -173,7 +189,7 @@ export default function LoginPage() {
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label className={styles.label}>Password</label>
+                                <label className={styles.label}>Access Key</label>
                                 <div className={styles.inputContainer}>
                                     <Lock className={styles.inputIcon} size={20} />
                                     <input
@@ -199,24 +215,24 @@ export default function LoginPage() {
                                 className={styles.submitBtn}
                                 disabled={loading}
                             >
-                                {loading ? 'Checking...' : (
+                                {loading ? 'Authorizing...' : (
                                     <>
-                                        Sign In <ArrowRight size={20} />
+                                        Authorized Login <ArrowRight size={20} />
                                     </>
                                 )}
                             </button>
                         </form>
 
                         <div className={styles.quickLogin}>
-                            <p className={styles.quickTitle}>Developer Mode</p>
+                            <p className={styles.quickTitle}>System Access</p>
                             <button
                                 className={styles.magicButton}
-                                onClick={() => quickFill('student')}
+                                onClick={quickFill}
                             >
                                 <div className={styles.btnIcon}>
-                                    <Code2 size={16} />
+                                    <Wand2 size={16} />
                                 </div>
-                                <span>Auto-Fill Student Portal</span>
+                                <span>Auto-Fill {role} Credentials</span>
                                 <Sparkles size={14} style={{ opacity: 0.6 }} />
                             </button>
                         </div>
