@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -90,6 +90,8 @@ export default function TrainerUnifiedConsole() {
     const [newFolderName, setNewFolderName] = useState('');
     const [uploading, setUploading] = useState(false);
     const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [hasFullAccess] = useState(true);
 
     const showToast = (type: 'success' | 'error', msg: string) => {
@@ -150,18 +152,19 @@ export default function TrainerUnifiedConsole() {
         if (!selectedBatch) return;
         try {
             setUploading(true);
-            const mockAsset = {
+            const assetData = {
                 batchId: selectedBatch.id,
                 folderId: currentFolderId,
-                name: "COURSE_MATERIAL_" + Date.now() + ".PDF",
-                type: 'PDF',
+                name: selectedFile ? selectedFile.name : ("COURSE_MATERIAL_" + Date.now() + ".PDF"),
+                type: selectedFile ? selectedFile.name.split('.').pop()?.toUpperCase() : 'PDF',
                 uploadedBy: userId,
                 url: "https://bytecode-cloud.storage/path/to/resource.pdf",
                 permissions: { isPublic: true, accessType: 'FULL' }
             };
-            const res = await api.post('academic/materials', mockAsset);
+            const res = await api.post('academic/materials', assetData);
             setMaterials([...materials, res.data]);
             setShowUploadModal(false);
+            setSelectedFile(null);
             showToast('success', 'Asset uploaded successfully');
         } catch (err) {
             console.error(err);
@@ -571,8 +574,20 @@ export default function TrainerUnifiedConsole() {
                             <h3 className="text-2xl font-black text-white uppercase tracking-tight font-[Rajdhani] mb-2">Upload File</h3>
                             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-8">Add new resource to batch library</p>
 
-                            <div className="border-2 border-dashed border-white/10 rounded-3xl p-10 mb-8 hover:border-blue-500/50 transition-all cursor-pointer group">
-                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Select files or drag & drop</span>
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="border-2 border-dashed border-white/10 rounded-3xl p-10 mb-8 hover:border-blue-500/50 transition-all cursor-pointer group bg-white/5"
+                            >
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                />
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                                    {selectedFile ? 'Selected: ' + selectedFile.name : 'Select files or drag & drop'}
+                                </span>
+                                {selectedFile && <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-widest italic">Click again to change file</span>}
                             </div>
 
                             <div className="flex gap-4">

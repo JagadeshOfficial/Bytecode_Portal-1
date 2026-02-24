@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -92,6 +92,9 @@ export default function TrainerUnifiedConsole() {
     const [newFolderName, setNewFolderName] = useState('');
     const [uploading, setUploading] = useState(false);
     const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [fetchingBatches, setFetchingBatches] = useState(false);
 
     const showToast = (type: 'success' | 'error', msg: string) => {
         setToast({ type, msg });
@@ -158,19 +161,20 @@ export default function TrainerUnifiedConsole() {
         if (!selectedBatch) return;
         try {
             setUploading(true);
-            const mockFileAsset = {
+            const assetData = {
                 batchId: selectedBatch.id,
                 folderId: currentFolderId,
-                name: "NEW RESOURCE_" + Math.floor(Math.random() * 100) + ".PDF",
-                type: 'PDF',
+                name: selectedFile ? selectedFile.name : ("ACADEMIC_RESOURCE_" + Date.now() + ".PDF"),
+                type: selectedFile ? selectedFile.name.split('.').pop()?.toUpperCase() : 'PDF',
                 uploadedBy: userId,
                 url: "https://bytecode-cloud.storage/path/to/resource.pdf",
                 permissions: { isPublic: true, accessType: 'FULL' }
             };
-            const res = await api.post('academic/materials', mockFileAsset);
+            const res = await api.post('academic/materials', assetData);
             setMaterials([...materials, res.data]);
             setShowUploadModal(false);
-            showToast('success', 'Asset uploaded successfully');
+            setSelectedFile(null);
+            showToast('success', 'Resource pushed to cloud');
         } catch (err) {
             console.error(err);
             showToast('error', 'Failed to upload asset');
@@ -577,9 +581,21 @@ export default function TrainerUnifiedConsole() {
                             <h3 className="text-2xl font-black text-white uppercase tracking-tight font-[Rajdhani] mb-2">Upload Assets</h3>
                             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-8">Distribute curriculum files to cohort</p>
 
-                            <div className="border-2 border-dashed border-white/10 rounded-3xl p-10 mb-8 hover:border-blue-500/50 transition-all cursor-pointer group">
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="border-2 border-dashed border-white/10 rounded-3xl p-10 mb-8 hover:border-blue-500/50 transition-all cursor-pointer group bg-white/5"
+                            >
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                />
                                 <Plus size={24} className="text-slate-700 mx-auto mb-4 group-hover:rotate-90 transition-transform duration-500" />
-                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Select files or drag & drop</span>
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                                    {selectedFile ? 'Selected: ' + selectedFile.name : 'Select files or drag & drop'}
+                                </span>
+                                {selectedFile && <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-widest italic">Click again to change file</span>}
                             </div>
 
                             <div className="flex gap-4">
