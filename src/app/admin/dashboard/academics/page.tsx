@@ -13,6 +13,7 @@ import {
     Lock, Share2, FolderOpen, FileVideo, FileCode, FileType, Star
 } from 'lucide-react';
 import api from '@/lib/api';
+import { useUserId } from '@/lib/useUserId';
 
 // ========== INTERFACES ==========
 interface Batch {
@@ -81,6 +82,7 @@ function getCourseEmoji(name: string) {
 export default function AdminUnifiedConsole() {
     const [activeTab, setActiveTab] = useState<string>('courses');
     const [loading, setLoading] = useState(true);
+    const userId = useUserId();
 
     // Data states
     const [batches, setBatches] = useState<Batch[]>([]);

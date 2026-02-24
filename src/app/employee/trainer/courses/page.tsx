@@ -39,6 +39,7 @@ interface LearningMaterial {
     name: string;
     type: string;
     batchId: string;
+    folderId?: string;
     batchName?: string;
     uploadedAt: string;
     url: string;
