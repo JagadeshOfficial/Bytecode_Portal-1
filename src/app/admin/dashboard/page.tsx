@@ -101,79 +101,65 @@ export default function AdminOperationsDashboard() {
         <DashboardLayout role="admin">
             <div className="space-y-8 pb-12">
                 {/* Header with Glassmorphism */}
-                <div className="relative p-8 rounded-3xl bg-gradient-to-br from-violet-600/10 via-transparent to-fuchsia-600/10 border border-white/5 backdrop-blur-xl overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 blur-[100px] -mr-48 -mt-48 rounded-full transition-transform duration-1000 group-hover:scale-110" />
-                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-fuchsia-600/10 blur-[100px] -ml-48 -mb-48 rounded-full transition-transform duration-1000 group-hover:scale-110" />
+                <div className="relative p-6 rounded-2xl bg-[#0b0b1a] border border-white/5 overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -mr-32 -mt-32 rounded-full" />
 
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div>
-                            <motion.h1
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="text-4xl font-[Rajdhani] font-bold text-white tracking-wider flex items-center gap-3"
-                            >
-                                <div className="p-2 bg-violet-600 rounded-lg shadow-lg shadow-violet-500/50">
-                                    <Activity className="w-8 h-8 text-white" />
-                                </div>
-                                INSTITUTE <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 uppercase">Operations Hub</span>
-                            </motion.h1>
-                            <p className="mt-2 text-slate-400 text-lg flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                Real-time oversight of administrative & academic excellence.
-                            </p>
+                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div className="flex items-center gap-5">
+                            <div className="w-14 h-14 bg-blue-600/10 rounded-xl border border-blue-500/20 flex items-center justify-center shadow-lg shadow-blue-500/5">
+                                <Activity className="w-8 h-8 text-blue-400" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-[Rajdhani] font-black text-white tracking-[0.05em] uppercase leading-tight">
+                                    Institute <span className="text-blue-400">Operations Hub</span>
+                                </h1>
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mt-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Real-time Administrative Control • v4.0.2
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3">
-                                {[1, 2, 3, 4].map((i: number) => (
-                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#030014] bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white">
-                                        JD
+                        <div className="flex items-center gap-6">
+                            <div className="flex -space-x-2">
+                                {[1, 2, 3].map((i: number) => (
+                                    <div key={i} className="w-8 h-8 rounded-lg border border-[#030014] bg-slate-800 flex items-center justify-center text-[8px] font-black text-white uppercase tracking-tighter">
+                                        ADM
                                     </div>
                                 ))}
-                                <div className="w-10 h-10 rounded-full border-2 border-[#030014] bg-violet-600 flex items-center justify-center text-[10px] font-bold text-white">
-                                    +12
-                                </div>
                             </div>
-                            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl text-white font-bold shadow-xl shadow-violet-500/20 hover:scale-105 transition-all group">
-                                <Plus size={20} className="group-hover:rotate-180 transition-transform duration-500" />
-                                NEW SESSION
+                            <button className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all group">
+                                <Plus size={14} /> NEW SESSION
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Advanced Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((stat: Stat, idx: number) => (
                         <motion.div
                             key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            whileHover={{ y: -5 }}
-                            className="p-6 bg-[#0a0a1a]/60 border border-white/5 rounded-3xl backdrop-blur-md relative overflow-hidden group cursor-pointer"
+                            whileHover={{ y: -4 }}
+                            className="p-4 bg-[#0b0b1a] border border-white/5 rounded-xl relative overflow-hidden group cursor-pointer"
                         >
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full transition-transform duration-500 group-hover:scale-125" />
-
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors">
-                                    <stat.icon size={24} style={{ color: stat.color }} />
+                                <div className="p-2 rounded-lg bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors">
+                                    <stat.icon size={16} style={{ color: stat.color }} />
                                 </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full flex items-center gap-1">
-                                        <TrendingUp size={10} /> {stat.trend}
-                                    </span>
-                                </div>
+                                <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/5 border border-emerald-400/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                    {stat.trend}
+                                </span>
                             </div>
 
-                            <div className="space-y-1">
-                                <h3 className="text-3xl font-bold text-white font-[Rajdhani]">{stat.value}</h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1 italic">
-                                    <AlertCircle size={10} /> {stat.subtext}
-                                </p>
+                            <div className="space-y-0.5">
+                                <h3 className="text-2xl font-black text-white font-[Rajdhani] uppercase-tracking-tight">{stat.value}</h3>
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">{stat.label}</p>
                             </div>
 
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-violet-500/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                            <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2 text-[7px] font-black text-slate-600 uppercase tracking-widest">
+                                <div className={`w-1.5 h-1.5 rounded-full`} style={{ backgroundColor: stat.color }} />
+                                {stat.subtext}
+                            </div>
                         </motion.div>
                     ))}
                 </div>
@@ -181,74 +167,51 @@ export default function AdminOperationsDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Live academic pulse */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-[#0a0a1a]/60 border border-white/5 rounded-3xl backdrop-blur-md overflow-hidden shadow-2xl">
+                        <div className="bg-[#0b0b1a] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
                             <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                                    Academic Pulse Today
+                                <h3 className="text-sm font-black text-white flex items-center gap-3 uppercase tracking-widest font-[Rajdhani]">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
+                                    Academic Activity Stream
                                 </h3>
-                                <div className="flex gap-2 text-[10px] font-bold uppercase tracking-widest">
-                                    <span className="text-violet-400">{liveSessions.length} SESSIONS ACTIVE</span>
+                                <div className="text-[9px] font-black text-blue-400 uppercase tracking-widest bg-blue-400/5 px-3 py-1 rounded-full border border-blue-400/20">
+                                    {liveSessions.length} LIVE SESSIONS
                                 </div>
                             </div>
 
-                            <div className="p-6 space-y-4">
+                            <div className="p-6 space-y-3">
                                 {loading ? (
-                                    <div className="text-center py-10 text-slate-500">Loading sessions...</div>
+                                    <div className="text-center py-10 text-slate-700 font-black uppercase tracking-widest text-[10px]">Synchronizing...</div>
                                 ) : liveSessions.length > 0 ? (
-                                    liveSessions.map((session: LiveSession, i: number) => {
-                                        const startTime = new Date(session.startTime);
-                                        const timeStr = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                        const dateStr = startTime.toLocaleDateString([], { day: '2-digit', month: 'short' });
-                                        const isLive = session.status === 'LIVE';
-
-                                        return (
-                                            <motion.div
-                                                key={session.id || i}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: i * 0.1 }}
-                                                className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all group flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 border border-white/10 flex flex-col items-center justify-center font-[Rajdhani] relative shadow-inner">
-                                                        <span className="text-[10px] text-slate-400 -mb-1">{dateStr}</span>
-                                                        <span className="text-xl font-bold text-white">{timeStr}</span>
-                                                        {isLive && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#030014] animate-pulse" />}
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors uppercase tracking-tight">{session.title}</div>
-                                                        <div className="flex items-center gap-3 text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">
-                                                            <span className="flex items-center gap-1 text-violet-300"><Users size={12} /> {session.mentorName}</span>
-                                                            <span className="w-1 h-1 bg-slate-700 rounded-full" />
-                                                            <span className="px-2 py-0.5 bg-white/5 rounded-md text-slate-300">{session.status}</span>
-                                                        </div>
+                                    liveSessions.map((session: LiveSession, i: number) => (
+                                        <motion.div
+                                            key={session.id || i}
+                                            whileHover={{ x: 4 }}
+                                            className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all group flex items-center justify-between gap-4"
+                                        >
+                                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                <div className="w-12 h-12 rounded-xl bg-blue-600/10 border border-blue-500/20 flex flex-col items-center justify-center font-[Rajdhani] shadow-inner shrink-0">
+                                                    <span className="text-[14px] font-black text-white">{new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="text-[13px] font-bold text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight truncate">{session.title}</div>
+                                                    <div className="flex items-center gap-3 text-[8px] text-slate-500 mt-1 uppercase font-black tracking-[0.15em]">
+                                                        <span className="flex items-center gap-1 text-slate-400"><Users size={10} /> {session.mentorName}</span>
+                                                        <span className="px-2 py-0.5 bg-white/5 rounded text-blue-300 border border-white/5">{session.status}</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-3">
-                                                    {session.meetingLink && (
-                                                        <a
-                                                            href={session.meetingLink}
-                                                            target="_blank"
-                                                            className="px-4 py-2 rounded-xl bg-violet-600 text-white text-[10px] font-black hover:bg-violet-500 transition-all uppercase tracking-widest shadow-lg shadow-violet-600/20"
-                                                        >
-                                                            JOIN
-                                                        </a>
-                                                    )}
-                                                    <button className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-slate-400 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest">
-                                                        MODERATE
-                                                    </button>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })
+                                            </div>
+                                            <div className="flex gap-2 shrink-0">
+                                                {session.meetingLink && (
+                                                    <a href={session.meetingLink} target="_blank" className="px-4 py-2 bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-blue-500/10 hover:bg-blue-500 transition-all">JOIN</a>
+                                                )}
+                                                <button className="px-4 py-2 bg-white/5 border border-white/5 text-[9px] font-black text-slate-500 uppercase tracking-widest rounded-lg hover:text-white transition-all">MOD</button>
+                                            </div>
+                                        </motion.div>
+                                    ))
                                 ) : (
-                                    <div className="text-center py-10 text-slate-500 italic">No active sessions scheduled for today.</div>
+                                    <div className="text-center py-10 text-slate-700 font-black uppercase tracking-widest text-[10px] border-2 border-dashed border-white/5 rounded-2xl">No active channels</div>
                                 )}
                             </div>
-                            <button className="w-full py-4 border border-dashed border-white/10 rounded-2xl text-slate-500 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/5 transition-all font-bold text-sm tracking-widest uppercase">
-                                View Full Academic Calendar
-                            </button>
                         </div>
 
                         {/* Middle Row with tasks and collection */}

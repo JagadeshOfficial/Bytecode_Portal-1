@@ -478,20 +478,25 @@ export default function TrainerUnifiedConsole() {
                             {batches.map((batch) => (
                                 <motion.div
                                     key={batch.id}
-                                    whileHover={{ y: -5 }}
+                                    whileHover={{ y: -4 }}
                                     onClick={() => { setActiveTab('courses'); setSelectedCourseId(batch.courseId); setSelectedBatch(batch); }}
-                                    className="bg-[#0d0d1f] border border-white/5 rounded-[2.5rem] p-8 cursor-pointer group hover:border-blue-500/30 transition-all shadow-2xl relative overflow-hidden"
+                                    className="bg-[#0b0b1a] border border-white/5 rounded-xl p-5 cursor-pointer group hover:border-blue-500/30 transition-all shadow-2xl relative overflow-hidden flex items-center gap-5"
                                 >
-                                    <h4 className="text-xl font-black text-white uppercase mb-1 font-[Rajdhani]">{batch.batchName}</h4>
-                                    <p className="text-xs font-bold text-slate-500 uppercase mb-6 tracking-widest">{batch.courseName}</p>
-                                    <div className="flex items-center gap-4 text-[10px] font-black text-slate-400">
-                                        <div className="flex items-center gap-1"><Users size={12} /> {batch.totalStudents} STUDENTS</div>
-                                        <div className="flex items-center gap-1"><Clock size={12} /> {batch.schedule}</div>
+                                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex flex-col items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
+                                        <Users size={20} />
                                     </div>
-                                    <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                                        <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase border ${STATUS_COLOR[batch.status] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>{batch.status}</span>
-                                        <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                                            <ArrowRight size={18} />
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-[13px] font-black text-white uppercase tracking-tight font-[Rajdhani] truncate">{batch.batchName}</h4>
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest truncate">{batch.courseName}</p>
+                                        <div className="flex items-center gap-3 mt-2 text-[8px] font-black text-slate-600 uppercase tracking-widest">
+                                            <span className="flex items-center gap-1"><Users size={10} /> {batch.totalStudents}</span>
+                                            <span className="flex items-center gap-1"><Clock size={10} /> {batch.schedule}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase border ${STATUS_COLOR[batch.status] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>{batch.status}</span>
+                                        <div className="w-6 h-6 rounded-lg bg-blue-500/5 text-blue-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                            <ArrowRight size={12} />
                                         </div>
                                     </div>
                                 </motion.div>
