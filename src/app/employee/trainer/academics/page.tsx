@@ -71,7 +71,7 @@ function getCourseEmoji(name: string) {
 }
 
 export default function TrainerUnifiedConsole() {
-    const [activeTab, setActiveTab] = useState<string>('catalog');
+    const [activeTab, setActiveTab] = useState<string>('courses');
     const [loading, setLoading] = useState(true);
     const userId = useUserId();
 
@@ -231,15 +231,15 @@ export default function TrainerUnifiedConsole() {
             onTabChange={(id) => { setActiveTab(id); setSelectedCourseId(null); setSelectedBatch(null); }}
             role="trainer"
             tabs={[
-                { id: 'catalog', label: 'Course Catalog', icon: Layers },
-                { id: 'sessions', label: 'Live Sessions', icon: Video },
-                { id: 'materials', label: 'Faculty Assets', icon: BookOpen },
-                { id: 'tasks', label: 'Assignments', icon: FileText },
+                { id: 'courses', label: 'Courses', icon: BookOpen },
+                { id: 'batches', label: 'Batches', icon: Users },
+                { id: 'sessions', label: 'Sessions', icon: Video },
+                { id: 'recordings', label: 'Recordings', icon: PlayCircle },
             ]}
         >
             <AnimatePresence mode="wait">
-                {activeTab === 'catalog' && (
-                    <motion.div key="catalog" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                {activeTab === 'courses' && (
+                    <motion.div key="courses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
 
                         {/* Breadcrumbs */}
                         {(selectedCourseId || selectedBatch) && (
@@ -406,65 +406,55 @@ export default function TrainerUnifiedConsole() {
                                 {/* Learning Materials Section (Image 4) */}
                                 <div className="bg-[#0b0b1a] border border-white/5 rounded-[3rem] p-10 shadow-2xl relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-600/5 blur-[100px] rounded-full -mr-32 -mt-32" />
-                                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 relative z-10">
-                                        <div className="flex flex-col gap-2">
-                                            <h3 className="text-3xl font-black text-white uppercase tracking-tighter font-[Rajdhani] flex items-center gap-4">
-                                                <FolderOpen className="text-emerald-400" size={32} /> Faculty Resource Library
+                                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 relative z-10 px-2">
+                                        <div className="flex flex-col gap-1">
+                                            <h3 className="text-xl font-black text-white uppercase tracking-[0.05em] font-[Rajdhani] flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                                                    <FolderOpen className="text-emerald-400" size={20} />
+                                                </div>
+                                                Faculty Resource Library
                                             </h3>
-                                            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-12">
-                                                <button onClick={() => setCurrentFolderId(null)} className={`hover:text-emerald-400 transition-colors ${!currentFolderId ? 'text-emerald-400' : ''}`}>Root</button>
+                                            <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 ml-14">
+                                                <button onClick={() => setCurrentFolderId(null)} className={`hover:text-emerald-400 transition-colors ${!currentFolderId ? 'text-emerald-400 font-bold' : ''}`}>Root</button>
                                                 {currentFolderId && (
                                                     <>
-                                                        <ChevronRight size={10} />
-                                                        <span className="text-emerald-400">{materials.find(m => m.id === currentFolderId)?.name || 'Folder'}</span>
+                                                        <ChevronRight size={8} />
+                                                        <span className="text-emerald-400 font-bold">{materials.find(m => m.id === currentFolderId)?.name || 'Folder'}</span>
                                                     </>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap justify-center gap-3">
+                                        <div className="flex flex-wrap justify-end gap-2">
                                             <button
                                                 onClick={() => setShowFolderModal(true)}
-                                                className="px-6 py-3 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 hover:text-white transition-all">
-                                                <FolderPlus size={16} /> New Folder
+                                                className="px-4 py-2 bg-[#1a1a2e] border border-white/5 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:border-emerald-500/30 hover:text-emerald-400 transition-all">
+                                                <FolderPlus size={14} /> New Folder
                                             </button>
                                             <button
                                                 onClick={() => setShowUploadModal(true)}
-                                                className="px-6 py-3 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 hover:text-white transition-all">
-                                                <Upload size={16} /> Upload New
+                                                className="px-4 py-2 bg-emerald-600 border border-emerald-500 text-white rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20">
+                                                <Upload size={14} /> Upload
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
                                         {materials.filter(m => m.batchId === selectedBatch.id && (currentFolderId ? m.folderId === currentFolderId : !m.folderId)).length > 0 ? (
                                             materials.filter(m => m.batchId === selectedBatch.id && (currentFolderId ? m.folderId === currentFolderId : !m.folderId)).map((item, i) => {
                                                 const isFolder = item.type === 'FOLDER';
                                                 return (
                                                     <motion.div
                                                         key={item.id || i}
-                                                        whileHover={{ y: -10, scale: 1.02 }}
+                                                        whileHover={{ y: -4 }}
                                                         onClick={() => isFolder && setCurrentFolderId(item.id)}
-                                                        className={`relative overflow-hidden group p-8 rounded-[2.5rem] border transition-all duration-500 cursor-pointer flex flex-col items-center text-center
+                                                        className={`relative overflow-hidden group p-4 rounded-xl border transition-all duration-300 cursor-pointer flex items-center gap-4
                                                             ${isFolder
-                                                                ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/40 hover:shadow-[0_0_40px_rgba(245,158,11,0.2)]'
+                                                                ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/40'
                                                                 : item.type === 'VIDEO'
-                                                                    ? 'bg-violet-500/5 border-violet-500/10 hover:border-violet-500/40 hover:shadow-[0_0_40px_rgba(124,58,237,0.2)]'
-                                                                    : 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/40 hover:shadow-[0_0_40px_rgba(244,63,94,0.2)]'
-                                                            } backdrop-blur-2xl`}
+                                                                    ? 'bg-violet-500/5 border-violet-500/10 hover:border-violet-500/40'
+                                                                    : 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/40'
+                                                            }`}
                                                     >
-                                                        {/* Animated Mesh Glow */}
-                                                        <div className={`absolute -top-20 -right-20 w-40 h-40 blur-[70px] rounded-full transition-all duration-700 opacity-10 group-hover:opacity-30 group-hover:scale-150
-                                                            ${isFolder ? 'bg-amber-500' : item.type === 'VIDEO' ? 'bg-violet-500' : 'bg-rose-500'}`} />
-
-                                                        {/* Main Icon with Dynamic Border */}
-                                                        <div className={`w-24 h-24 rounded-3xl flex items-center justify-center mb-8 relative transition-all duration-500 group-hover:rotate-6
-                                                            ${isFolder ? 'bg-amber-400/10 border-amber-400/20 shadow-[inset_0_0_15px_rgba(251,191,36,0.1)]' : item.type === 'VIDEO' ? 'bg-violet-400/10 border-violet-400/20 shadow-[inset_0_0_15px_rgba(167,139,250,0.1)]' : 'bg-rose-400/10 border-rose-400/20 shadow-[inset_0_0_15px_rgba(251,113,133,0.1)]'} border`}>
-                                                            {isFolder ? <FolderOpen size={48} className="text-amber-400 filter drop-shadow-[0_4px_12px_rgba(251,191,36,0.4)]" /> : item.type === 'VIDEO' ? <FileVideo size={48} className="text-violet-400 filter drop-shadow-[0_4px_12px_rgba(167,139,250,0.4)]" /> : <FileType size={48} className="text-rose-400 filter drop-shadow-[0_4px_12px_rgba(251,113,133,0.4)]" />}
-
-                                                            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-950 border border-white/10 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                                                                <Lock size={10} className="text-emerald-500" />
-                                                            </div>
-                                                        </div>
 
                                                         {/* Metadata Section */}
                                                         <div className="relative z-10 w-full mb-8">
@@ -512,6 +502,48 @@ export default function TrainerUnifiedConsole() {
                                 </div>
                             </motion.div>
                         )}
+                    </motion.div>
+                )}
+
+                {activeTab === 'batches' && (
+                    <motion.div key="batches" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+                        <div className="flex justify-between items-center bg-white/5 border border-white/5 p-8 rounded-[2rem] backdrop-blur-xl">
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tight font-[Rajdhani]">Your Active Cohorts</h3>
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Direct access to managed student batches</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {batches.map((batch) => (
+                                <motion.div
+                                    key={batch.id}
+                                    whileHover={{ y: -5 }}
+                                    onClick={() => { setActiveTab('courses'); setSelectedCourseId(batch.courseId); setSelectedBatch(batch); }}
+                                    className="bg-[#0d0d1f] border border-white/5 rounded-[2.5rem] p-8 cursor-pointer group hover:border-blue-500/30 transition-all shadow-2xl"
+                                >
+                                    <h4 className="text-xl font-black text-white uppercase mb-1 font-[Rajdhani]">{batch.batchName}</h4>
+                                    <p className="text-xs font-bold text-slate-500 uppercase mb-6 tracking-widest">{batch.courseName}</p>
+                                    <div className="flex items-center gap-4 text-[10px] font-black text-slate-400">
+                                        <div className="flex items-center gap-1"><Users size={12} /> {batch.totalStudents} STUDENTS</div>
+                                        <div className="flex items-center gap-1"><Calendar size={12} /> {batch.schedule}</div>
+                                    </div>
+                                    <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                                        <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase border ${STATUS_COLOR[batch.status]}`}>{batch.status}</span>
+                                        <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                            <ArrowRight size={18} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {activeTab === 'recordings' && (
+                    <motion.div key="recordings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-40 text-slate-700 border-2 border-dashed border-white/5 rounded-[3rem]">
+                        <PlayCircle size={80} className="mb-6 opacity-10 animate-pulse" />
+                        <h4 className="text-2xl font-black text-white uppercase tracking-[0.2em] font-[Rajdhani]">Recording Vault</h4>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">All past live sessions are being synchronized...</p>
                     </motion.div>
                 )}
 

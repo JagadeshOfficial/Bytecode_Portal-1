@@ -460,100 +460,75 @@ export default function AdminUnifiedConsole() {
                                 {/* Learning Materials Section */}
                                 <div className="bg-[#0b0b1a] border border-white/5 rounded-[3rem] p-10 shadow-2xl relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-600/5 blur-[100px] rounded-full -mr-32 -mt-32" />
-                                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 relative z-10">
-                                        <div className="flex flex-col gap-2">
-                                            <h3 className="text-3xl font-black text-white uppercase tracking-tighter font-[Rajdhani] flex items-center gap-4">
-                                                <FolderOpen className="text-emerald-400" size={32} /> Learning Materials
+                                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 relative z-10 px-2">
+                                        <div className="flex flex-col gap-1">
+                                            <h3 className="text-xl font-black text-white uppercase tracking-[0.05em] font-[Rajdhani] flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
+                                                    <Layers className="text-violet-400" size={20} />
+                                                </div>
+                                                Central Academic Library
                                             </h3>
-                                            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-12">
-                                                <button onClick={() => setCurrentFolderId(null)} className={`hover:text-emerald-400 transition-colors ${!currentFolderId ? 'text-emerald-400' : ''}`}>Root</button>
+                                            <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 ml-14">
+                                                <button onClick={() => setCurrentFolderId(null)} className={`hover:text-violet-400 transition-colors ${!currentFolderId ? 'text-violet-400 font-bold' : ''}`}>Root</button>
                                                 {currentFolderId && (
                                                     <>
-                                                        <ChevronRight size={10} />
-                                                        <span className="text-emerald-400">{materials.find(m => m.id === currentFolderId)?.name || 'Folder'}</span>
+                                                        <ChevronRight size={8} />
+                                                        <span className="text-violet-400 font-bold">{materials.find(m => m.id === currentFolderId)?.name || 'Folder'}</span>
                                                     </>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap justify-center gap-3">
+                                        <div className="flex flex-wrap justify-end gap-2">
                                             <button
                                                 onClick={() => setShowFolderModal(true)}
-                                                className="px-6 py-3 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 hover:text-white transition-all">
-                                                <FolderPlus size={16} /> New Folder
+                                                className="px-4 py-2 bg-[#1a1a2e] border border-white/5 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:border-violet-500/30 hover:text-violet-400 transition-all">
+                                                <FolderPlus size={14} /> Organization
                                             </button>
                                             <button
                                                 onClick={() => setShowUploadModal(true)}
-                                                className="px-6 py-3 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 hover:text-white transition-all">
-                                                <Upload size={16} /> Upload
+                                                className="px-4 py-2 bg-violet-600 border border-violet-500 text-white rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-violet-500 transition-all shadow-lg shadow-violet-500/20">
+                                                <Upload size={14} /> Deploy Asset
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
                                         {materials.filter(m => m.batchId === selectedBatch.id && (currentFolderId ? m.folderId === currentFolderId : !m.folderId)).length > 0 ? (
                                             materials.filter(m => m.batchId === selectedBatch.id && (currentFolderId ? m.folderId === currentFolderId : !m.folderId)).map((item, i) => {
                                                 const isFolder = item.type === 'FOLDER';
                                                 return (
                                                     <motion.div
                                                         key={item.id || i}
-                                                        whileHover={{ y: -10, scale: 1.02 }}
+                                                        whileHover={{ y: -4 }}
                                                         onClick={() => isFolder && setCurrentFolderId(item.id)}
-                                                        className={`relative overflow-hidden group p-8 rounded-[2.5rem] border transition-all duration-500 cursor-pointer flex flex-col items-center text-center
+                                                        className={`relative overflow-hidden group p-4 rounded-xl border transition-all duration-300 cursor-pointer flex items-center gap-4
                                                             ${isFolder
-                                                                ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/40 hover:shadow-[0_0_40px_rgba(245,158,11,0.2)]'
+                                                                ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/40'
                                                                 : item.type === 'VIDEO'
-                                                                    ? 'bg-violet-500/5 border-violet-500/10 hover:border-violet-500/40 hover:shadow-[0_0_40px_rgba(124,58,237,0.2)]'
-                                                                    : 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/40 hover:shadow-[0_0_40px_rgba(244,63,94,0.2)]'
-                                                            } backdrop-blur-2xl`}
+                                                                    ? 'bg-violet-500/5 border-violet-500/10 hover:border-violet-500/40'
+                                                                    : 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/40'
+                                                            }`}
                                                     >
-                                                        {/* Animated Mesh Glow */}
-                                                        <div className={`absolute -top-20 -right-20 w-40 h-40 blur-[70px] rounded-full transition-all duration-700 opacity-10 group-hover:opacity-30 group-hover:scale-150
-                                                            ${isFolder ? 'bg-amber-500' : item.type === 'VIDEO' ? 'bg-violet-500' : 'bg-rose-500'}`} />
-
-                                                        {/* Main Icon with Dynamic Border */}
-                                                        <div className={`w-24 h-24 rounded-3xl flex items-center justify-center mb-8 relative transition-all duration-500 group-hover:rotate-6
-                                                            ${isFolder ? 'bg-amber-400/10 border-amber-400/20 shadow-[inset_0_0_15px_rgba(251,191,36,0.1)]' : item.type === 'VIDEO' ? 'bg-violet-400/10 border-violet-400/20 shadow-[inset_0_0_15px_rgba(167,139,250,0.1)]' : 'bg-rose-400/10 border-rose-400/20 shadow-[inset_0_0_15px_rgba(251,113,133,0.1)]'} border`}>
-                                                            {isFolder ? <FolderOpen size={48} className="text-amber-400 filter drop-shadow-[0_4px_12px_rgba(251,191,36,0.4)]" /> : item.type === 'VIDEO' ? <FileVideo size={48} className="text-violet-400 filter drop-shadow-[0_4px_12px_rgba(167,139,250,0.4)]" /> : <FileType size={48} className="text-rose-400 filter drop-shadow-[0_4px_12px_rgba(251,113,133,0.4)]" />}
-
-                                                            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-950 border border-white/10 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                                                                <Lock size={10} className="text-emerald-500" />
+                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 
+                                                            ${isFolder ? 'bg-amber-500/10 text-amber-500' :
+                                                                item.type === 'VIDEO' ? 'bg-violet-500/10 text-violet-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                                            {isFolder ? <FolderOpen size={20} /> : item.type === 'VIDEO' ? <Video size={20} /> : <FileText size={20} />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="text-[11px] font-bold text-white uppercase tracking-tight truncate">{item.name}</div>
+                                                            <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">
+                                                                {isFolder ? 'SYSTEM FOLDER' : `${item.type} RESOURCE`}
                                                             </div>
                                                         </div>
-
-                                                        {/* Metadata Section */}
-                                                        <div className="relative z-10 w-full mb-8">
-                                                            <h4 className="text-lg font-black text-white uppercase tracking-tight mb-2 font-[Rajdhani] line-clamp-1 group-hover:text-amber-400 transition-colors">
-                                                                {item.name}
-                                                            </h4>
-                                                            <div className="flex items-center justify-center gap-2">
-                                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{selectedBatch.batchName}</p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Modern Interactive Actions */}
-                                                        <div className="flex gap-2 w-full relative z-10">
-                                                            <div className="flex-1 py-3 bg-white/5 border border-white/5 rounded-xl text-[8px] font-black text-slate-400 tracking-widest uppercase flex items-center justify-center">
-                                                                {item.type}
-                                                            </div>
+                                                        <div className="flex gap-1">
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); handleDeleteMaterial(item.id); }}
-                                                                className="px-4 py-3 bg-rose-500/10 border border-white/5 rounded-xl text-rose-500 hover:bg-rose-600 hover:text-white transition-all active:scale-90"
+                                                                className="w-8 h-8 flex items-center justify-center bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-lg hover:bg-rose-500 hover:text-white transition-all"
                                                             >
-                                                                <Trash2 size={14} />
+                                                                <Trash2 size={12} />
                                                             </button>
-                                                            <button className={`flex-1 py-3 rounded-xl text-[8px] font-black tracking-widest uppercase transition-all shadow-lg border
-                                                                    ${isFolder
-                                                                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-white'
-                                                                    : item.type === 'VIDEO'
-                                                                        ? 'bg-violet-500/10 border-violet-500/30 text-violet-400 hover:bg-violet-500 hover:text-white'
-                                                                        : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white'
-                                                                }`}>
-                                                                {isFolder ? 'Explore' : 'Access'}
-                                                            </button>
+                                                            <ChevronRight size={14} className="text-slate-800" />
                                                         </div>
-
-                                                        {/* Glass Reflection Highlight */}
-                                                        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                                                     </motion.div>
                                                 );
                                             })

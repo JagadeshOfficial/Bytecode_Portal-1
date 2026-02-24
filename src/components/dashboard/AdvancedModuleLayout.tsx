@@ -82,60 +82,79 @@ export default function AdvancedModuleLayout({
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className={styles.statsGrid}>
+                {/* High-Performance Stats Grid (Precision Design) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {stats.map((stat, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className={styles.glassPanel}
-                            style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', position: 'relative', overflow: 'hidden' }}
+                            className="relative group bg-[#0d0d1f]/40 border border-white/5 rounded-2xl p-6 hover:border-violet-500/20 transition-all duration-500 overflow-hidden"
                         >
-                            <div className="absolute top-0 right-0 p-3 opacity-10">
-                                <stat.icon size={64} />
-                            </div>
-                            <div className="flex justify-between items-start relative z-10">
-                                <div style={{
-                                    padding: '0.75rem',
-                                    borderRadius: '0.75rem',
-                                    background: `${stat.color}20`,
-                                    color: stat.color,
-                                    backdropFilter: 'blur(4px)'
-                                }}>
-                                    <stat.icon size={20} />
+                            {/* Technical Accent Line */}
+                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <div className="flex justify-between items-start mb-4">
+                                <div
+                                    className="p-3 rounded-xl bg-white/5 border border-white/10 text-slate-400 group-hover:text-violet-400 group-hover:border-violet-500/20 transition-all"
+                                    style={{ color: stat.color }}
+                                >
+                                    <stat.icon size={18} />
                                 </div>
                                 {stat.trend && (
-                                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/10">
                                         {stat.trend}
                                     </span>
                                 )}
                             </div>
-                            <div className="relative z-10">
-                                <div className={styles.textH1} style={{ fontSize: '2rem', marginTop: '0.5rem', lineHeight: 1 }}>{stat.value}</div>
-                                <div className={styles.textLabel} style={{ opacity: 0.7, marginTop: '0.25rem' }}>{stat.label}</div>
+
+                            <div>
+                                <div className="text-2xl font-black text-white tracking-tighter mb-0.5 font-[Rajdhani]">{stat.value}</div>
+                                <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">{stat.label}</div>
                             </div>
+
+                            {/* Background Glow Overlay */}
+                            <div
+                                className="absolute -right-4 -bottom-4 w-24 h-24 blur-[40px] opacity-0 group-hover:opacity-10 transition-opacity duration-700 rounded-full"
+                                style={{ backgroundColor: stat.color }}
+                            />
                         </motion.div>
                     ))}
                 </div>
 
-                {/* Navigation Tabs */}
+                {/* High-Precision Professional Navigation (Sleek Ghost Style) */}
                 {tabs.length > 0 && (
-                    <div className="flex items-center gap-2 mb-6 border-b border-white/10 pb-2 overflow-x-auto">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => onTabChange && onTabChange(tab.id)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === tab.id
-                                    ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                {tab.icon && <tab.icon size={16} />}
-                                {tab.label}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-8 mb-12 border-b border-white/5 pb-6 overflow-x-auto no-scrollbar">
+                        {tabs.map((tab) => {
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => onTabChange && onTabChange(tab.id)}
+                                    className={`flex items-center gap-3 px-6 py-2.5 rounded-full text-[10px] font-black transition-all duration-500 relative group
+                                        ${isActive
+                                            ? 'text-violet-400 border border-violet-500/40 bg-violet-500/5 shadow-[0_0_15px_rgba(139,92,246,0.05)]'
+                                            : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                                        }`}
+                                >
+                                    {tab.icon && (
+                                        <tab.icon
+                                            size={16}
+                                            className={`transition-colors duration-300 ${isActive ? 'text-violet-400' : 'text-slate-600 group-hover:text-slate-400'}`}
+                                        />
+                                    )}
+                                    <span className="uppercase tracking-[0.2em]">{tab.label}</span>
+
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute -bottom-[25px] left-1/2 -translate-x-1/2 w-12 h-[2px] bg-violet-500 shadow-[0_0_10px_#8b5cf6]"
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 )}
 
