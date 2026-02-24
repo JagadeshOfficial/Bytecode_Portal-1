@@ -23,11 +23,12 @@ public class LearningMaterial {
     private String name;
     private String type; // FOLDER, VIDEO, PDF, DOCUMENT, IMAGE
     private String url;
+    private String fileId;
     private Long size; // in bytes
     private String uploadedBy;
     private Date uploadedAt;
     private MaterialPermissions permissions;
-    
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

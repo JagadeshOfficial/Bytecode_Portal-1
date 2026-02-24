@@ -9,8 +9,14 @@ import java.util.List;
 @Repository
 public interface BatchRepository extends MongoRepository<Batch, String> {
     List<Batch> findByCourseId(String courseId);
+
     List<Batch> findByTrainerId(String trainerId);
+
+    List<Batch> findByStudentIdsContaining(String studentId);
+
     List<Batch> findByStatus(String status);
+
     List<Batch> findByBranch(String branch);
+
     List<Batch> findByBatchCode(String batchCode);
 }

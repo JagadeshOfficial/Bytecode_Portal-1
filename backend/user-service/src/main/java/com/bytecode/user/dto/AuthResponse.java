@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthResponse {
     private String token;
+    private String id; // MongoDB _id of the user
     private String email;
-    private String role; // ADMIN or STUDENT
+    private String name;
+    private String role; // SUPER_ADMIN, ADMIN, TRAINER, STUDENT, etc.
     private String status;
 }

@@ -71,8 +71,7 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     admin: [
         { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { label: 'User Management', href: '/admin/dashboard/users', icon: Users },
-        { label: 'Academic', href: '/admin/dashboard/academics', icon: BookOpen },
-        { label: 'Course Management', href: '/admin/dashboard/courses', icon: Layers },
+        { label: 'Course & Academics', href: '/admin/dashboard/academics', icon: Layers },
         { label: 'Online Sessions', href: '/admin/dashboard/sessions', icon: Video },
         { label: 'Assessments', href: '/admin/dashboard/assessments', icon: CheckCircle2 },
         { label: 'Finance', href: '/admin/dashboard/finance', icon: Wallet },
@@ -81,6 +80,7 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     ],
     trainer: [
         { label: 'Dashboard', href: '/employee/trainer', icon: LayoutDashboard },
+        { label: 'Course & Academics', href: '/employee/trainer/academics', icon: Layers },
         { label: 'Online Sessions', href: '/employee/trainer/sessions', icon: Video },
         { label: 'LMS Management', href: '/employee/trainer/lms', icon: BookOpen },
         { label: 'Assessments', href: '/employee/trainer/assessments', icon: CheckCircle2 },
@@ -108,6 +108,8 @@ export const DASHBOARD_NAV: Record<Role, NavItem[]> = {
     ],
     student: [
         { label: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
+        { label: 'My Courses', href: '/student/dashboard/courses', icon: Layers },
+        { label: 'Academics Portal', href: '/student/dashboard/academics', icon: GraduationCap },
         { label: 'Online Classes', href: '/student/dashboard/classes', icon: Video },
         { label: 'LMS Access', href: '/student/dashboard/lms', icon: BookOpen },
         { label: 'Assessments', href: '/student/dashboard/assessments', icon: CheckCircle2 },

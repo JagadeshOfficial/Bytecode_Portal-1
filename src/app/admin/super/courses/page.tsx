@@ -114,6 +114,12 @@ interface LiveSession {
     platform: string;
     totalParticipants: number;
     recordingUrl?: string;
+    fileId?: string;
+    permissions?: {
+        studentIds: string[];
+        trainerIds: string[];
+        isPublic: boolean;
+    };
 }
 
 interface Assignment {
@@ -139,6 +145,7 @@ interface LearningMaterial {
     name: string;
     type: 'FOLDER' | 'VIDEO' | 'PDF' | 'DOCUMENT' | 'IMAGE';
     url?: string;
+    fileId?: string;
     size?: number;
     uploadedBy: string;
     uploadedAt: string;
@@ -196,16 +203,36 @@ export default function CourseManagementPage() {
     const [materialToDelete, setMaterialToDelete] = useState<LearningMaterial | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<any>(null);
     const [toastStatus, setToastStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string; type: string; title: string; onConfirm: () => void } | null>(null);
+    const [showSessionPermissionModal, setShowSessionPermissionModal] = useState(false);
+    const [selectedSessionForPermission, setSelectedSessionForPermission] = useState<LiveSession | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error') => {
         setToastStatus({ type, msg });
         setTimeout(() => setToastStatus(null), 3000);
     };
 
+    const handleUpdateSessionPermission = async (sessionId: string, permissions: any) => {
+        if (!selectedSessionForPermission) return;
+        try {
+            const updatedSession = { ...selectedSessionForPermission, permissions };
+            await api.put(`academic/sessions/${sessionId}`, updatedSession);
+            // Optimistically update local state so the modal reflects changes immediately
+            setSelectedSessionForPermission(updatedSession);
+            setSessions(prev => prev.map(s => s.id === sessionId ? updatedSession : s));
+            showToast('Session permissions updated!', 'success');
+        } catch (error) {
+            console.error('Failed to update session permissions:', error);
+            showToast('Failed to update permissions.', 'error');
+        }
+    };
+
     // Form states
     const [courseForm, setCourseForm] = useState<Partial<Course>>({});
     const [batchForm, setBatchForm] = useState<Partial<Batch>>({});
-    const [sessionForm, setSessionForm] = useState<Partial<LiveSession>>({});
+    const [sessionForm, setSessionForm] = useState<Partial<LiveSession>>({
+        permissions: { studentIds: [], trainerIds: [], isPublic: true }
+    });
     const [materialForm, setMaterialForm] = useState<Partial<LearningMaterial>>({
         permissions: { studentIds: [], accessType: 'READ', isPublic: true }
     });
@@ -294,7 +321,8 @@ export default function CourseManagementPage() {
                     mentorName: s.mentorName,
                     thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
                     url: s.recordingUrl,
-                    videoUrl: s.recordingUrl
+                    videoUrl: s.recordingUrl,
+                    fileId: s.fileId
                 }));
 
             // Load simulated recordings from localStorage (Bytecode Live)
@@ -486,18 +514,23 @@ export default function CourseManagementPage() {
 
     const handleDeleteBatch = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (confirm("Are you sure you want to delete this batch? All sessions and student assignments for this batch will be lost.")) {
-            try {
-                await api.delete(`academic/batches/${id}`);
-                fetchAllData();
-                if (selectedBatch?.id === id) setSelectedBatch(null);
-                showToast("Batch deleted successfully!", 'success');
-            } catch (error: any) {
-                console.error("Failed to delete batch:", error);
-                const errMsg = error.response?.data || "Failed to delete batch.";
-                showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+        setDeleteConfirmation({
+            id,
+            type: 'batch',
+            title: 'Delete Training Batch?',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`academic/batches/${id}`);
+                    fetchAllData();
+                    if (selectedBatch?.id === id) setSelectedBatch(null);
+                    showToast("Batch deleted successfully!", 'success');
+                } catch (error: any) {
+                    console.error("Failed to delete batch:", error);
+                    const errMsg = error.response?.data || "Failed to delete batch.";
+                    showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+                }
             }
-        }
+        });
     };
 
     const handleAssignStudent = async (studentId: string) => {
@@ -564,6 +597,25 @@ export default function CourseManagementPage() {
             console.error("Failed to save session:", error);
             showToast("Failed to save session.", 'error');
         }
+    };
+
+    const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDeleteConfirmation({
+            id,
+            type: 'session',
+            title: 'Delete Live Session?',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`academic/sessions/${id}`);
+                    showToast("Session deleted successfully!", 'success');
+                    fetchAllData();
+                } catch (error) {
+                    console.error("Failed to delete session:", error);
+                    showToast("Failed to delete session.", 'error');
+                }
+            }
+        });
     };
 
     const handleUploadMaterial = async () => {
@@ -640,17 +692,22 @@ export default function CourseManagementPage() {
 
     const handleDeleteCourse = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
-            try {
-                await api.delete(`courses/${id}`);
-                fetchAllData();
-                showToast("Course deleted successfully!", 'success');
-            } catch (error: any) {
-                console.error("Failed to delete course:", error);
-                const errMsg = error.response?.data || "Failed to delete course.";
-                showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+        setDeleteConfirmation({
+            id,
+            type: 'course',
+            title: 'Terminate Course?',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`courses/${id}`);
+                    fetchAllData();
+                    showToast("Course deleted successfully!", 'success');
+                } catch (error: any) {
+                    console.error("Failed to delete course:", error);
+                    const errMsg = error.response?.data || "Failed to delete course.";
+                    showToast(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg), 'error');
+                }
             }
-        }
+        });
     };
 
     const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -775,6 +832,7 @@ export default function CourseManagementPage() {
                 name: selectedVideo.title,
                 type: 'VIDEO',
                 url: selectedVideo.url || selectedVideo.videoUrl || "",
+                fileId: selectedVideo.fileId || "",
                 uploadedBy: selectedVideo.mentorName || 'Admin',
                 uploadedAt: new Date().toISOString(),
                 permissions: {
@@ -887,6 +945,7 @@ export default function CourseManagementPage() {
                 stats={stats}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
+                actions={<div />}
                 tabs={[
                     { id: 'courses', label: 'Courses', icon: BookOpen },
                     { id: 'batches', label: 'Batches', icon: Users },
@@ -911,6 +970,7 @@ export default function CourseManagementPage() {
             stats={stats}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            actions={<div />}
             tabs={[
                 { id: 'courses', label: 'Courses', icon: BookOpen },
                 { id: 'batches', label: 'Batches', icon: Users },
@@ -1298,13 +1358,44 @@ export default function CourseManagementPage() {
                                                 }}>
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div className="text-sm font-bold text-white">{session.title}</div>
-                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(session.status)}`}>
-                                                        {session.status}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${getStatusColor(session.status)}`}>
+                                                            {session.status}
+                                                        </span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedSessionForPermission(session);
+                                                                setShowSessionPermissionModal(true);
+                                                            }}
+                                                            className="p-1 hover:bg-violet-500/20 rounded text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            title="Manage Permissions"
+                                                        >
+                                                            <Lock size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => handleDeleteSession(session.id, e)}
+                                                            className="p-1 hover:bg-red-500/20 rounded text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            title="Delete Session"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="text-xs text-slate-400">
                                                     {formatDate(session.startTime)} • {formatTime(session.startTime)}
                                                 </div>
+                                                {session.meetingLink && (
+                                                    <a
+                                                        href={session.meetingLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="mt-2 block w-full py-1.5 bg-violet-600/20 hover:bg-violet-600 text-violet-400 hover:text-white rounded text-[10px] font-bold text-center transition-all border border-violet-500/30"
+                                                    >
+                                                        Join Session
+                                                    </a>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -1376,6 +1467,8 @@ export default function CourseManagementPage() {
                                                     setSelectedVideo({
                                                         ...material,
                                                         title: material.name,
+                                                        url: material.url,
+                                                        fileId: material.fileId,
                                                         batchName: selectedBatch?.batchName || 'Resource',
                                                         duration: 'MP4 Video',
                                                         date: formatDate(material.uploadedAt),
@@ -1397,6 +1490,8 @@ export default function CourseManagementPage() {
                                                             setSelectedVideo({
                                                                 ...material,
                                                                 title: material.name,
+                                                                url: material.url,
+                                                                fileId: material.fileId,
                                                                 batchName: selectedBatch?.batchName || 'Resource',
                                                                 duration: 'MP4 Video',
                                                                 date: formatDate(material.uploadedAt),
@@ -1404,7 +1499,7 @@ export default function CourseManagementPage() {
                                                             });
                                                             setShowVideoModal(true);
                                                         }}
-                                                        className="p-1.5 bg-slate-800/90 rounded-lg text-red-400 hover:text-white backdrop-blur-sm border border-white/5"
+                                                        className="p-1.5 bg-slate-800/90 rounded-lg text-violet-400 hover:text-white backdrop-blur-sm border border-white/5"
                                                         title="Play Video"
                                                     >
                                                         <Play size={12} fill="currentColor" />
@@ -1498,259 +1593,309 @@ export default function CourseManagementPage() {
                         </div>
                     )}
                 </div>
-            )}
+            )
+            }
 
             {/* ========== SESSIONS TAB ========== */}
-            {activeTab === 'sessions' && (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div className="relative w-96">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Search sessions..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-violet-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {sessions.filter(s =>
-                            s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            s.batchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            s.mentorName.toLowerCase().includes(searchQuery.toLowerCase())
-                        ).map((session, i) => (
-                            <motion.div
-                                key={session.id || i}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-violet-500/50 transition-all group"
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
-                                        <Video size={20} />
-                                    </div>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(session.status)}`}>
-                                        {session.status}
-                                    </span>
-                                </div>
-                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-violet-400 cursor-pointer" onClick={() => { setSessionForm(session); setShowSessionModal(true); }}>{session.title}</h3>
-                                <div className="text-sm text-slate-400 mb-4">{session.batchName}</div>
-
-                                <div className="space-y-3 text-xs text-slate-400 border-t border-white/5 pt-4">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar size={14} />
-                                        <span>{formatDate(session.startTime)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock size={14} />
-                                        <span>{formatTime(session.startTime)} ({session.duration} mins)</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Users size={14} />
-                                        <span>Mentor: {session.mentorName || 'Not Assigned'}</span>
-                                    </div>
-                                </div>
-
-                                {session.meetingLink && (
-                                    <a
-                                        href={session.meetingLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-4 w-full flex items-center justify-center gap-2 py-2 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white rounded-lg text-xs font-bold transition-all"
-                                    >
-                                        <LinkIcon size={14} /> Join Session
-                                    </a>
-                                )}
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* ========== MATERIALS TAB ========== */}
-            {activeTab === 'materials' && (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div className="relative w-96">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Search materials..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {materials.filter(m =>
-                            m.name.toLowerCase().includes(searchQuery.toLowerCase())
-                        ).map((material) => (
-                            <motion.div
-                                key={material.id}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                onClick={() => {
-                                    if (material.type === 'VIDEO') {
-                                        setSelectedVideo({
-                                            ...material,
-                                            title: material.name,
-                                            batchName: 'Resource Library',
-                                            duration: 'Asset',
-                                            date: 'Added Recently',
-                                            mentorName: 'Bytecode Intelligence'
-                                        });
-                                        setShowVideoModal(true);
-                                    }
-                                }}
-                                className={`bg-slate-900/50 border border-white/5 rounded-2xl p-4 hover:border-amber-500/50 transition-all group text-center ${material.type === 'VIDEO' ? 'cursor-pointer' : 'cursor-default'}`}
-                            >
-                                <div className="mb-3 flex justify-center">
-                                    {material.type === 'FOLDER' ? (
-                                        <FolderOpen size={40} className="text-amber-400" />
-                                    ) : material.type === 'VIDEO' ? (
-                                        <PlayCircle size={40} className="text-violet-400" />
-                                    ) : (
-                                        <FileText size={40} className="text-blue-400" />
-                                    )}
-                                </div>
-                                <div className="text-xs font-bold text-white mb-1 line-clamp-1">{material.name}</div>
-                                <div className="text-[10px] text-slate-500">{material.type}</div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* ========== RECORDINGS TAB ========== */}
-            {activeTab === 'recordings' && (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center bg-slate-900/40 border border-white/5 p-6 rounded-2xl">
-                        <div className="relative w-96">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Search recordings by topic or batch..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-red-500 transition-all font-bold"
-                            />
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest">
-                                <Clock size={14} /> {archivedRecordings.length} Total Archives
+            {
+                activeTab === 'sessions' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <div className="relative w-96">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search sessions..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-violet-500"
+                                />
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {archivedRecordings.filter(rec =>
-                            rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            rec.batchName.toLowerCase().includes(searchQuery.toLowerCase())
-                        ).length === 0 ? (
-                            <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                                <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                                    <Video className="text-slate-600" size={32} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white mb-2 uppercase font-[Rajdhani]">No Recordings Found</h3>
-                                <p className="text-sm text-slate-500">Recordings started in the live room will appear here automatically.</p>
-                            </div>
-                        ) : archivedRecordings.filter(rec =>
-                            rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            rec.batchName.toLowerCase().includes(searchQuery.toLowerCase())
-                        ).map((rec, i) => (
-                            <motion.div
-                                key={rec.id || i}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.1 }}
+                            <button
                                 onClick={() => {
-                                    setSelectedVideo(rec);
-                                    setShowVideoModal(true);
+                                    setSessionForm({ platform: 'BYTECODE_LIVE', status: 'UPCOMING', duration: 60 });
+                                    setShowSessionModal(true);
                                 }}
-                                className="group bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-red-500/30 transition-all cursor-pointer relative overflow-hidden flex flex-col"
+                                className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-600/20"
                             >
-                                <div className="aspect-video bg-black rounded-xl mb-4 relative overflow-hidden border border-white/5 group-hover:border-red-500/20 transition-all shadow-2xl">
-                                    <img
-                                        src={rec.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'}
-                                        alt={rec.title}
-                                        className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="flex gap-4">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteRecording(rec); }}
-                                                className="w-10 h-10 rounded-full bg-slate-900/80 text-red-500 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110 z-20"
-                                                title="Delete Recording"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedVideo(rec);
-                                                    setShowVideoModal(true);
-                                                }}
-                                                className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/40 hover:scale-110 transition-transform"
-                                            >
-                                                <PlayCircle size={32} fill="currentColor" />
-                                            </button>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDownload(rec, 'RECORDING'); }}
-                                                className="w-10 h-10 rounded-full bg-slate-900/80 text-emerald-400 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110"
-                                                title="Download Archive"
-                                            >
-                                                <Download size={18} />
-                                            </button>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleShareClick(rec); }}
-                                                className="w-10 h-10 rounded-full bg-slate-900/80 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110"
-                                                title="Share / Manage"
-                                            >
-                                                <FolderPlus size={18} />
-                                            </button>
+                                <Plus size={16} /> Schedule Session
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {sessions.filter(s =>
+                                s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                s.batchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                s.mentorName.toLowerCase().includes(searchQuery.toLowerCase())
+                            ).map((session, i) => (
+                                <motion.div
+                                    key={session.id || i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-violet-500/50 transition-all group"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
+                                            <Video size={20} />
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(session.status)}`}>
+                                                {session.status}
+                                            </span>
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSessionForm(session);
+                                                        setShowSessionModal(true);
+                                                    }}
+                                                    className="p-1.5 hover:bg-white/10 rounded-lg text-white"
+                                                    title="Edit Session"
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedSessionForPermission(session);
+                                                        setShowSessionPermissionModal(true);
+                                                    }}
+                                                    className="p-1.5 hover:bg-white/10 rounded-lg text-violet-400"
+                                                    title="Manage Permissions"
+                                                >
+                                                    <Lock size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeleteSession(session.id, e)}
+                                                    className="p-1.5 hover:bg-red-500/20 rounded-lg text-red-400"
+                                                    title="Delete Session"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-md rounded text-[9px] font-black text-white border border-white/10">
-                                        {rec.duration}
+                                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-violet-400 cursor-pointer" onClick={() => { setSessionForm(session); setShowSessionModal(true); }}>{session.title}</h3>
+                                    <div className="text-sm text-slate-400 mb-4">{session.batchName}</div>
+
+                                    <div className="space-y-3 text-xs text-slate-400 border-t border-white/5 pt-4">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar size={14} />
+                                            <span>{formatDate(session.startTime)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={14} />
+                                            <span>{formatTime(session.startTime)} ({session.duration} mins)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Users size={14} />
+                                            <span>Mentor: {session.mentorName || 'Not Assigned'}</span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="flex justify-between items-start mb-3">
-                                    <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-tighter">{rec.batchName}</span>
-                                    <span className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> {rec.date}</span>
-                                </div>
-
-                                <h4 className="text-base font-bold text-white mb-1 tracking-tight group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
-                                <div className="text-[9px] text-slate-400 font-bold uppercase mb-4 opacity-70">
-                                    {rec.courseName || 'Advanced Intelligence'} • {rec.batchName} • Session Archive
-                                </div>
-
-                                <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
-                                    <div className="flex flex-col">
-                                        <span className="text-[8px] text-slate-500 uppercase font-black mb-0.5">MENTOR</span>
-                                        <span className="text-[11px] font-bold text-slate-300">{rec.mentorName}</span>
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedVideo(rec);
-                                            setShowVideoModal(true);
-                                        }}
-                                        className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-500 transition-all font-[Rajdhani]"
-                                    >
-                                        PLAY <Play size={14} />
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
+                                    {session.meetingLink && (
+                                        <a
+                                            href={session.meetingLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white rounded-lg text-xs font-bold transition-all"
+                                        >
+                                            <LinkIcon size={14} /> Join Session
+                                        </a>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* ========== MATERIALS TAB ========== */}
+            {
+                activeTab === 'materials' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <div className="relative w-96">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search materials..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            {materials.filter(m =>
+                                m.name.toLowerCase().includes(searchQuery.toLowerCase())
+                            ).map((material) => (
+                                <motion.div
+                                    key={material.id}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    onClick={() => {
+                                        if (material.type === 'VIDEO') {
+                                            setSelectedVideo({
+                                                title: material.name,
+                                                url: material.url,
+                                                fileId: material.fileId,
+                                                batchName: 'Resource Library',
+                                                duration: 'Asset',
+                                                date: 'Added Recently',
+                                                mentorName: 'Bytecode Intelligence'
+                                            });
+                                            setShowVideoModal(true);
+                                        }
+                                    }}
+                                    className={`bg-slate-900/50 border border-white/5 rounded-2xl p-4 hover:border-amber-500/50 transition-all group text-center ${material.type === 'VIDEO' ? 'cursor-pointer' : 'cursor-default'}`}
+                                >
+                                    <div className="mb-3 flex justify-center">
+                                        {material.type === 'FOLDER' ? (
+                                            <FolderOpen size={40} className="text-amber-400" />
+                                        ) : material.type === 'VIDEO' ? (
+                                            <PlayCircle size={40} className="text-violet-400" />
+                                        ) : (
+                                            <FileText size={40} className="text-blue-400" />
+                                        )}
+                                    </div>
+                                    <div className="text-xs font-bold text-white mb-1 line-clamp-1">{material.name}</div>
+                                    <div className="text-[10px] text-slate-500">{material.type}</div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* ========== RECORDINGS TAB ========== */}
+            {
+                activeTab === 'recordings' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center bg-slate-900/40 border border-white/5 p-6 rounded-2xl">
+                            <div className="relative w-96">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Search recordings by topic or batch..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-red-500 transition-all font-bold"
+                                />
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest">
+                                    <Clock size={14} /> {archivedRecordings.length} Total Archives
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {archivedRecordings.filter(rec =>
+                                rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                rec.batchName.toLowerCase().includes(searchQuery.toLowerCase())
+                            ).length === 0 ? (
+                                <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                                    <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                                        <Video className="text-slate-600" size={32} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-2 uppercase font-[Rajdhani]">No Recordings Found</h3>
+                                    <p className="text-sm text-slate-500">Recordings started in the live room will appear here automatically.</p>
+                                </div>
+                            ) : archivedRecordings.filter(rec =>
+                                rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                rec.batchName.toLowerCase().includes(searchQuery.toLowerCase())
+                            ).map((rec, i) => (
+                                <motion.div
+                                    key={rec.id || i}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    onClick={() => {
+                                        setSelectedVideo(rec);
+                                        setShowVideoModal(true);
+                                    }}
+                                    className="group bg-slate-900/50 border border-white/5 rounded-2xl p-5 hover:border-red-500/30 transition-all cursor-pointer relative overflow-hidden flex flex-col"
+                                >
+                                    <div className="aspect-video bg-black rounded-xl mb-4 relative overflow-hidden border border-white/5 group-hover:border-red-500/20 transition-all shadow-2xl">
+                                        <img
+                                            src={rec.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'}
+                                            alt={rec.title}
+                                            className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex gap-4">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteRecording(rec); }}
+                                                    className="w-10 h-10 rounded-full bg-slate-900/80 text-red-500 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110 z-20"
+                                                    title="Delete Recording"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedVideo(rec);
+                                                        setShowVideoModal(true);
+                                                    }}
+                                                    className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/40 hover:scale-110 transition-transform"
+                                                >
+                                                    <PlayCircle size={32} fill="currentColor" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDownload(rec, 'RECORDING'); }}
+                                                    className="w-10 h-10 rounded-full bg-slate-900/80 text-emerald-400 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110"
+                                                    title="Download Archive"
+                                                >
+                                                    <Download size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleShareClick(rec); }}
+                                                    className="w-10 h-10 rounded-full bg-slate-900/80 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all transform hover:scale-110"
+                                                    title="Share / Manage"
+                                                >
+                                                    <FolderPlus size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-md rounded text-[9px] font-black text-white border border-white/10">
+                                            {rec.duration}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-between items-start mb-3">
+                                        <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-tighter">{rec.batchName}</span>
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> {rec.date}</span>
+                                    </div>
+
+                                    <h4 className="text-base font-bold text-white mb-1 tracking-tight group-hover:text-red-400 transition-colors uppercase font-[Rajdhani] line-clamp-1">{rec.title}</h4>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase mb-4 opacity-70">
+                                        {rec.courseName || 'Advanced Intelligence'} • {rec.batchName} • Session Archive
+                                    </div>
+
+                                    <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] text-slate-500 uppercase font-black mb-0.5">MENTOR</span>
+                                            <span className="text-[11px] font-bold text-slate-300">{rec.mentorName}</span>
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedVideo(rec);
+                                                setShowVideoModal(true);
+                                            }}
+                                            className="flex items-center gap-2 text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-widest bg-red-500/5 px-4 py-2 rounded-xl border border-red-500/10 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-500 transition-all font-[Rajdhani]"
+                                        >
+                                            PLAY <Play size={14} />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                )
+            }
             {/* ========== MODALS ========== */}
 
             {/* Batch Modal */}
@@ -1789,6 +1934,37 @@ export default function CourseManagementPage() {
                                         className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
                                         placeholder="e.g., Full Stack Winter 2024"
                                     />
+                                </div>
+
+                                {/* ── TRAINER ASSIGNMENT ── */}
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-400 mb-2">
+                                        🎓 Assign Trainer / Tutor
+                                    </label>
+                                    <select
+                                        value={batchForm.trainerId || ''}
+                                        onChange={(e) => {
+                                            const selected = trainers.find(t => t.id === e.target.value);
+                                            setBatchForm({
+                                                ...batchForm,
+                                                trainerId: selected?.id || '',
+                                                trainerName: selected?.fullName || '',
+                                            });
+                                        }}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    >
+                                        <option value="">— Select Trainer —</option>
+                                        {trainers.map(t => (
+                                            <option key={t.id} value={t.id}>
+                                                {t.fullName}{t.specialization ? ` · ${t.specialization}` : ''}{t.email ? ` (${t.email})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {batchForm.trainerName && (
+                                        <p className="mt-1.5 text-xs text-emerald-400 font-bold">
+                                            ✓ {batchForm.trainerName} will be assigned to this batch
+                                        </p>
+                                    )}
                                 </div>
 
                                 {!selectedCourse && !batchForm.id && (
@@ -2036,6 +2212,51 @@ export default function CourseManagementPage() {
                                     </div>
                                 </div>
 
+                            </div>
+
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-bold text-white italic">Join Access & Permissions</label>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase">Public Access</span>
+                                        <button
+                                            onClick={() => setSessionForm(prev => ({
+                                                ...prev,
+                                                permissions: { ...(prev.permissions || { studentIds: [], trainerIds: [], isPublic: true }), isPublic: !prev.permissions?.isPublic }
+                                            }))}
+                                            className={`w-9 h-5 rounded-full relative transition-colors ${sessionForm.permissions?.isPublic ? 'bg-violet-600' : 'bg-slate-700'}`}
+                                        >
+                                            <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${sessionForm.permissions?.isPublic ? 'left-5' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 border-t border-white/5 pt-3">
+                                    <button
+                                        onClick={() => setSessionForm(prev => ({
+                                            ...prev,
+                                            permissions: {
+                                                ...(prev.permissions || { studentIds: [], trainerIds: [], isPublic: true }),
+                                                studentIds: prev.permissions?.studentIds?.length === 0 ? ['ALL_ENROLLED'] : []
+                                            }
+                                        }))}
+                                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase border transition-all ${sessionForm.permissions?.studentIds?.length ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-slate-800 border-white/5 text-slate-500'}`}
+                                    >
+                                        Student Access: {sessionForm.permissions?.studentIds?.length ? 'Enabled' : 'Disabled'}
+                                    </button>
+                                    <button
+                                        onClick={() => setSessionForm(prev => ({
+                                            ...prev,
+                                            permissions: {
+                                                ...(prev.permissions || { studentIds: [], trainerIds: [], isPublic: true }),
+                                                trainerIds: prev.permissions?.trainerIds?.length === 0 ? ['ALL_ACTIVE'] : []
+                                            }
+                                        }))}
+                                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase border transition-all ${sessionForm.permissions?.trainerIds?.length ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-800 border-white/5 text-slate-500'}`}
+                                    >
+                                        Trainer Access: {sessionForm.permissions?.trainerIds?.length ? 'Enabled' : 'Disabled'}
+                                    </button>
+                                </div>
                             </div>
 
                             <div>
@@ -2454,18 +2675,44 @@ export default function CourseManagementPage() {
                                 </div>
                             </div>
 
-                            {/* Video Element */}
-                            <video
-                                src={selectedVideo.url || selectedVideo.videoUrl || (selectedVideo.fileId ? `http://localhost:8080/api/uploads/videos/${selectedVideo.fileId}` : undefined)}
-                                className="w-full h-full object-contain"
-                                controls
-                                autoPlay
-                                playsInline
-                            />
+                            {/* Video Container */}
+                            <div className="w-full h-full flex items-center justify-center bg-black">
+                                {selectedVideo.url?.includes('youtube.com') || selectedVideo.url?.includes('youtu.be') ? (
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${selectedVideo.url.includes('v=') ? selectedVideo.url.split('v=')[1]?.split('&')[0] : selectedVideo.url.split('/').pop()}?autoplay=1`}
+                                        className="w-full h-full border-none"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    />
+                                ) : (
+                                    <video
+                                        key={selectedVideo.id || selectedVideo.url || selectedVideo.videoUrl || selectedVideo.fileId || 'fallback-key'}
+                                        src={
+                                            selectedVideo.url && selectedVideo.url.startsWith('http') ? selectedVideo.url :
+                                                selectedVideo.videoUrl && selectedVideo.videoUrl.startsWith('http') ? selectedVideo.videoUrl :
+                                                    selectedVideo.fileId ? `http://localhost:8080/api/uploads/videos/${selectedVideo.fileId}` :
+                                                        selectedVideo.url || selectedVideo.videoUrl || undefined
+                                        }
+                                        className="w-full h-full object-contain"
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        onError={(e) => {
+                                            const video = e.currentTarget;
+                                            if (!video.src || video.src.includes('undefined') || video.src === window.location.href) return;
+                                            console.error("Video failed to load:", video.src);
+                                            // Fallback to a sample video if it's a demo
+                                            if (!video.src.includes('mov_bbb.mp4') && !video.src.includes('BigBuckBunny')) {
+                                                video.src = 'https://www.w3schools.com/html/mov_bbb.mp4';
+                                            }
+                                        }}
+                                    />
+                                )}
+                            </div>
 
                             {/* Bottom Controls Legend */}
-                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 opacity-0 hover:opacity-100 transition-opacity">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Bytecode Archive Player v1.0 • {selectedVideo.mentorName}</p>
+                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Bytecode Archive Player v1.0 • {selectedVideo.mentorName || 'System Archive'}</p>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -2967,6 +3214,348 @@ export default function CourseManagementPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* Session Permission Modal */}
+            <AnimatePresence>
+                {showSessionPermissionModal && selectedSessionForPermission && (
+                    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-[#0f172a] border border-white/10 rounded-[32px] p-8 max-w-2xl w-full shadow-2xl relative overflow-hidden"
+                        >
+                            <div className="flex justify-between items-center mb-8">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white font-[Rajdhani] uppercase tracking-tight">Session Access Control</h3>
+                                    <p className="text-slate-400 text-sm">{selectedSessionForPermission.title} • {selectedSessionForPermission.batchName}</p>
+                                </div>
+                                <button onClick={() => setShowSessionPermissionModal(false)} className="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-all">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* Global Toggles */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Public Access</div>
+                                            <div className="text-white font-bold">{selectedSessionForPermission.permissions?.isPublic ? 'ENABLED' : 'RESTRICTED'}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                handleUpdateSessionPermission({ ...p, isPublic: !p.isPublic });
+                                            }}
+                                            className={`w-12 h-6 rounded-full relative transition-colors ${selectedSessionForPermission.permissions?.isPublic ? 'bg-violet-600' : 'bg-slate-700'}`}
+                                        >
+                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${selectedSessionForPermission.permissions?.isPublic ? 'left-7' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Auto-Grant Enrolled</div>
+                                            <div className="text-white font-bold">{selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED') ? 'ON' : 'OFF'}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                let newIds = [...(p.studentIds || [])];
+                                                if (newIds.includes('ALL_ENROLLED')) newIds = newIds.filter(id => id !== 'ALL_ENROLLED');
+                                                else newIds.push('ALL_ENROLLED');
+                                                handleUpdateSessionPermission({ ...p, studentIds: newIds });
+                                            }}
+                                            className={`w-12 h-6 rounded-full relative transition-colors ${selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED') ? 'bg-blue-600' : 'bg-slate-700'}`}
+                                        >
+                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED') ? 'left-7' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Granular Access */}
+                                <div className="grid grid-cols-2 gap-6 h-[400px]">
+                                    {/* Students List */}
+                                    <div className="flex flex-col">
+                                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                            <Users size={12} className="text-blue-400" /> Batch Students
+                                        </h4>
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                                            {students.filter(s =>
+                                                // If we have a selected batch, only show students in that batch
+                                                batches.find(b => b.id === selectedSessionForPermission.batchId)?.studentIds?.includes(s.id)
+                                            ).map(student => {
+                                                const hasAccess = selectedSessionForPermission.permissions?.studentIds?.includes(student.id) || selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED');
+                                                return (
+                                                    <div key={student.id} className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group">
+                                                        <div className="truncate pr-2">
+                                                            <div className="text-xs font-bold text-white truncate">{student.fullName}</div>
+                                                            <div className="text-[10px] text-slate-500 truncate">{student.email}</div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                                let newIds = [...(p.studentIds || [])];
+                                                                if (newIds.includes(student.id)) newIds = newIds.filter(id => id !== student.id);
+                                                                else newIds.push(student.id);
+                                                                handleUpdateSessionPermission({ ...p, studentIds: newIds });
+                                                            }}
+                                                            disabled={selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED')}
+                                                            className={`p-1.5 rounded-lg transition-all ${hasAccess ? 'bg-blue-600/20 text-blue-400' : 'bg-white/5 text-slate-600 hover:text-white'} disabled:opacity-30`}
+                                                        >
+                                                            {hasAccess ? <Unlock size={14} /> : <Lock size={14} />}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Trainers List */}
+                                    <div className="flex flex-col">
+                                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                            <GraduationCap size={12} className="text-emerald-400" /> Staff & Tutors
+                                        </h4>
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between mb-4">
+                                                <div>
+                                                    <div className="text-xs font-bold text-white leading-none">All Active Tutors</div>
+                                                    <div className="text-[9px] text-slate-500 mt-1 uppercase">Global Staff Access</div>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                        let newIds = [...(p.trainerIds || [])];
+                                                        if (newIds.includes('ALL_ACTIVE')) newIds = newIds.filter(id => id !== 'ALL_ACTIVE');
+                                                        else newIds.push('ALL_ACTIVE');
+                                                        handleUpdateSessionPermission({ ...p, trainerIds: newIds });
+                                                    }}
+                                                    className={`w-10 h-5 rounded-full relative transition-colors ${selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE') ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                                                >
+                                                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE') ? 'left-6' : 'left-1'}`} />
+                                                </button>
+                                            </div>
+                                            {trainers.map(trainer => {
+                                                const hasAccess = selectedSessionForPermission.permissions?.trainerIds?.includes(trainer.id) || selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE');
+                                                return (
+                                                    <div key={trainer.id} className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group">
+                                                        <div className="truncate pr-2">
+                                                            <div className="text-xs font-bold text-white truncate">{trainer.fullName}</div>
+                                                            <div className="text-[10px] text-slate-500 truncate">{trainer.specialization || 'Academic Staff'}</div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                                let newIds = [...(p.trainerIds || [])];
+                                                                if (newIds.includes(trainer.id)) newIds = newIds.filter(id => id !== trainer.id);
+                                                                else newIds.push(trainer.id);
+                                                                handleUpdateSessionPermission({ ...p, trainerIds: newIds });
+                                                            }}
+                                                            disabled={selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE')}
+                                                            className={`p-1.5 rounded-lg transition-all ${hasAccess ? 'bg-emerald-600/20 text-emerald-400' : 'bg-white/5 text-slate-600 hover:text-white'} disabled:opacity-30`}
+                                                        >
+                                                            {hasAccess ? <Unlock size={14} /> : <Lock size={14} />}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Session Permission Modal */}
+            <AnimatePresence>
+                {showSessionPermissionModal && selectedSessionForPermission && (
+                    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-[#0f172a] border border-white/10 rounded-[32px] p-8 max-w-2xl w-full shadow-2xl relative overflow-hidden"
+                        >
+                            <div className="flex justify-between items-center mb-8">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white font-[Rajdhani] uppercase tracking-tight">Session Access Control</h3>
+                                    <p className="text-slate-400 text-sm">{selectedSessionForPermission.title} • {selectedSessionForPermission.batchName}</p>
+                                </div>
+                                <button onClick={() => setShowSessionPermissionModal(false)} className="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-all">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* Global Toggles */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Public Access</div>
+                                            <div className="text-white font-bold">{selectedSessionForPermission.permissions?.isPublic ? 'ENABLED' : 'RESTRICTED'}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                handleUpdateSessionPermission(selectedSessionForPermission.id, { ...p, isPublic: !p.isPublic });
+                                            }}
+                                            className={`w-12 h-6 rounded-full relative transition-colors ${selectedSessionForPermission.permissions?.isPublic ? 'bg-violet-600' : 'bg-slate-700'}`}
+                                        >
+                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${selectedSessionForPermission.permissions?.isPublic ? 'left-7' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Auto-Grant Enrolled</div>
+                                            <div className="text-white font-bold">{selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED') ? 'ON' : 'OFF'}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                let newIds = [...(p.studentIds || [])];
+                                                if (newIds.includes('ALL_ENROLLED')) newIds = newIds.filter(id => id !== 'ALL_ENROLLED');
+                                                else newIds.push('ALL_ENROLLED');
+                                                handleUpdateSessionPermission(selectedSessionForPermission.id, { ...p, studentIds: newIds });
+                                            }}
+                                            className={`w-12 h-6 rounded-full relative transition-colors ${selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED') ? 'bg-blue-600' : 'bg-slate-700'}`}
+                                        >
+                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED') ? 'left-7' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Granular Access */}
+                                <div className="grid grid-cols-2 gap-6 h-[400px]">
+                                    {/* Students List */}
+                                    <div className="flex flex-col">
+                                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                            <Users size={12} className="text-blue-400" /> Batch Students
+                                        </h4>
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                                            {students.filter(s =>
+                                                batches.find(b => b.id === selectedSessionForPermission.batchId)?.studentIds?.includes(s.id)
+                                            ).map(student => {
+                                                const hasAccess = selectedSessionForPermission.permissions?.studentIds?.includes(student.id) || selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED');
+                                                return (
+                                                    <div key={student.id} className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group">
+                                                        <div className="truncate pr-2">
+                                                            <div className="text-xs font-bold text-white truncate">{student.fullName}</div>
+                                                            <div className="text-[10px] text-slate-500 truncate">{student.email}</div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                                let newIds = [...(p.studentIds || [])];
+                                                                if (newIds.includes(student.id)) newIds = newIds.filter(id => id !== student.id);
+                                                                else newIds.push(student.id);
+                                                                handleUpdateSessionPermission(selectedSessionForPermission.id, { ...p, studentIds: newIds });
+                                                            }}
+                                                            disabled={selectedSessionForPermission.permissions?.studentIds?.includes('ALL_ENROLLED')}
+                                                            className={`p-1.5 rounded-lg transition-all ${hasAccess ? 'bg-blue-600/20 text-blue-400' : 'bg-white/5 text-slate-600 hover:text-white'} disabled:opacity-30`}
+                                                        >
+                                                            {hasAccess ? <Unlock size={14} /> : <Lock size={14} />}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Trainers List */}
+                                    <div className="flex flex-col">
+                                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                            <GraduationCap size={12} className="text-emerald-400" /> Staff & Tutors
+                                        </h4>
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between mb-4">
+                                                <div>
+                                                    <div className="text-xs font-bold text-white leading-none">All Active Tutors</div>
+                                                    <div className="text-[9px] text-slate-500 mt-1 uppercase">Global Staff Access</div>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                        let newIds = [...(p.trainerIds || [])];
+                                                        if (newIds.includes('ALL_ACTIVE')) newIds = newIds.filter(id => id !== 'ALL_ACTIVE');
+                                                        else newIds.push('ALL_ACTIVE');
+                                                        handleUpdateSessionPermission(selectedSessionForPermission.id, { ...p, trainerIds: newIds });
+                                                    }}
+                                                    className={`w-10 h-5 rounded-full relative transition-colors ${selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE') ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                                                >
+                                                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE') ? 'left-6' : 'left-1'}`} />
+                                                </button>
+                                            </div>
+                                            {trainers.map(trainer => {
+                                                const hasAccess = selectedSessionForPermission.permissions?.trainerIds?.includes(trainer.id) || selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE');
+                                                return (
+                                                    <div key={trainer.id} className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group">
+                                                        <div className="truncate pr-2">
+                                                            <div className="text-xs font-bold text-white truncate">{trainer.fullName}</div>
+                                                            <div className="text-[10px] text-slate-500 truncate">{trainer.specialization || 'Academic Staff'}</div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                const p = selectedSessionForPermission.permissions || { studentIds: [], trainerIds: [], isPublic: true };
+                                                                let newIds = [...(p.trainerIds || [])];
+                                                                if (newIds.includes(trainer.id)) newIds = newIds.filter(id => id !== trainer.id);
+                                                                else newIds.push(trainer.id);
+                                                                handleUpdateSessionPermission(selectedSessionForPermission.id, { ...p, trainerIds: newIds });
+                                                            }}
+                                                            disabled={selectedSessionForPermission.permissions?.trainerIds?.includes('ALL_ACTIVE')}
+                                                            className={`p-1.5 rounded-lg transition-all ${hasAccess ? 'bg-emerald-600/20 text-emerald-400' : 'bg-white/5 text-slate-600 hover:text-white'} disabled:opacity-30`}
+                                                        >
+                                                            {hasAccess ? <Unlock size={14} /> : <Lock size={14} />}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {deleteConfirmation && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-[#0f172a] border border-white/10 rounded-[32px] p-8 max-w-md w-full shadow-2xl"
+                    >
+                        <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6 mx-auto">
+                            <Trash2 size={32} />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white text-center mb-2 font-[Rajdhani] uppercase tracking-tight">{deleteConfirmation.title}</h3>
+                        <p className="text-slate-400 text-center mb-8 text-sm">This action cannot be undone. All data associated with this {deleteConfirmation.type} will be permanently removed.</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={() => setDeleteConfirmation(null)}
+                                className="px-6 py-3 rounded-xl bg-white/5 text-white font-bold hover:bg-white/10 transition-all border border-white/5"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    deleteConfirmation.onConfirm();
+                                    setDeleteConfirmation(null);
+                                }}
+                                className="px-6 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 transition-all shadow-lg shadow-red-600/20"
+                            >
+                                Delete Now
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {toastStatus && (
+                <Toast
+                    status={toastStatus}
+                    onClose={() => setToastStatus(null)}
+                />
+            )}
         </AdvancedModuleLayout >
     );
 }

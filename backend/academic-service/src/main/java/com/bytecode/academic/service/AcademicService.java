@@ -107,6 +107,10 @@ public class AcademicService {
         return batchRepository.findByTrainerId(trainerId);
     }
 
+    public List<Batch> getBatchesByStudent(String studentId) {
+        return batchRepository.findByStudentIdsContaining(studentId);
+    }
+
     public List<Batch> getBatchesByStatus(String status) {
         return batchRepository.findByStatus(status);
     }

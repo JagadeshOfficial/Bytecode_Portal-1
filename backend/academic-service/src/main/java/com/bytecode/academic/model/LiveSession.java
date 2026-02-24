@@ -36,10 +36,12 @@ public class LiveSession {
     private String platform; // ZOOM, GOOGLE_MEET, MS_TEAMS
     private List<String> topics;
     private String recordingUrl;
+    private String fileId;
     private Integer totalParticipants;
     private List<String> attendees; // student IDs
     private String notes;
     private List<String> resources; // URLs to shared materials
     private Date createdAt;
     private String branch;
+    private SessionPermissions permissions;
 }

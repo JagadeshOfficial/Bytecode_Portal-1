@@ -123,6 +123,11 @@ public class AcademicController {
         return academicService.getBatchesByTrainer(trainerId);
     }
 
+    @GetMapping("/batches/student/{studentId}")
+    public List<Batch> getBatchesByStudent(@PathVariable("studentId") String studentId) {
+        return academicService.getBatchesByStudent(studentId);
+    }
+
     @GetMapping("/batches/status/{status}")
     public List<Batch> getBatchesByStatus(@PathVariable("status") String status) {
         return academicService.getBatchesByStatus(status);
@@ -147,7 +152,8 @@ public class AcademicController {
     }
 
     @PutMapping("/assignments/{id}")
-    public ResponseEntity<Assignment> updateAssignment(@PathVariable("id") String id, @RequestBody Assignment assignment) {
+    public ResponseEntity<Assignment> updateAssignment(@PathVariable("id") String id,
+            @RequestBody Assignment assignment) {
         try {
             return ResponseEntity.ok(academicService.updateAssignment(id, assignment));
         } catch (RuntimeException e) {
@@ -191,7 +197,8 @@ public class AcademicController {
     }
 
     @PutMapping("/curriculum/{id}")
-    public ResponseEntity<Curriculum> updateCurriculum(@PathVariable("id") String id, @RequestBody Curriculum curriculum) {
+    public ResponseEntity<Curriculum> updateCurriculum(@PathVariable("id") String id,
+            @RequestBody Curriculum curriculum) {
         try {
             return ResponseEntity.ok(academicService.updateCurriculum(id, curriculum));
         } catch (RuntimeException e) {
@@ -218,7 +225,8 @@ public class AcademicController {
     }
 
     @PutMapping("/announcements/{id}")
-    public ResponseEntity<Announcement> updateAnnouncement(@PathVariable("id") String id, @RequestBody Announcement announcement) {
+    public ResponseEntity<Announcement> updateAnnouncement(@PathVariable("id") String id,
+            @RequestBody Announcement announcement) {
         try {
             return ResponseEntity.ok(academicService.updateAnnouncement(id, announcement));
         } catch (RuntimeException e) {

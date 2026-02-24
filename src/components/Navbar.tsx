@@ -159,7 +159,7 @@ export default function Navbar() {
             <div className={styles.notificationDot} />
             <div className={styles.iconGlow} />
           </button>
-          <Link href="/login">
+          <Link href="/login/student">
             <button className={styles.loginBtn}>
               <div className={styles.loginBtnBorder} />
               <div className={styles.loginBtnBg} />
