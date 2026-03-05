@@ -2,16 +2,23 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, run the full platform (Backend + Frontend):
+
+```bash
+npm run start:all
+```
+
+This will launch all 10 microservices and the Next.js frontend in separate Terminal windows.
+
+### Individual Services
+
+If you only need the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# ...
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
