@@ -32,6 +32,10 @@ public class UserService {
             user.setEmail(tempUser.getEmail());
             user.setRole(tempUser.getRole());
             user.setBranch(tempUser.getBranch());
+            user.setDepartment(tempUser.getDepartment());
+            user.setUserStatus(tempUser.getUserStatus());
+            user.setCheckInTime(tempUser.getCheckInTime());
+            user.setAttendanceRate(tempUser.getAttendanceRate());
             user.setActive(tempUser.isActive());
             if (tempUser.getPassword() != null && !tempUser.getPassword().isEmpty()) {
                 user.setPassword(tempUser.getPassword());
@@ -45,6 +49,7 @@ public class UserService {
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }
+
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }

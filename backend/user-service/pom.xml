@@ -43,11 +43,7 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.google.firebase</groupId>
-			<artifactId>firebase-admin</artifactId>
-			<version>9.4.3</version> <!-- Use a stable version -->
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>

@@ -20,10 +20,14 @@ public class User {
     private String email;
     private String fullName;
     private UserRole role; // SUPER_ADMIN, ADMIN, EMPLOYEE, STUDENT
-    private String branch; // For Multi-branch management
+    private String branch;
+    private String department;
+    private String userStatus; // Present, Absent, On Leave, Remote
+    private String checkInTime;
+    private double attendanceRate;
     private String password;
     private String phoneNumber;
-    private String profileImage; // URL or Base64
+    private String profileImage;
     private boolean active;
     private Date createdAt;
 }

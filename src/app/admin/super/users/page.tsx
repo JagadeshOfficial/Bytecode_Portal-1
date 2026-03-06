@@ -13,7 +13,7 @@ import styles from '../SuperAdmin.module.css';
 import api from '@/lib/api';
 
 // -- Types --
-type UserRole = 'student' | 'faculty' | 'staff';
+type UserRole = 'student' | 'faculty' | 'staff' | 'admin' | 'super_admin';
 type Status = 'Present' | 'Absent' | 'On Leave' | 'Remote';
 
 interface User {
@@ -71,7 +71,7 @@ export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(INITIAL_LEAVE_REQUESTS);
-    const [activeTab, setActiveTab] = useState<'all' | 'student' | 'faculty' | 'staff'>('all');
+    const [activeTab, setActiveTab] = useState<'all' | 'student' | 'faculty' | 'staff' | 'admin' | 'super_admin'>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
     // Modal States
@@ -84,27 +84,29 @@ export default function UsersPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await api.get('/users');
+                const response = await api.get('users');
                 const backendUsers = response.data;
 
                 const mappedUsers: User[] = backendUsers.map((u: any) => {
                     let mapRole: UserRole = 'staff';
                     if (u.role === 'STUDENT') mapRole = 'student';
                     else if (u.role === 'TRAINER') mapRole = 'faculty';
+                    else if (u.role === 'ADMIN') mapRole = 'admin';
+                    else if (u.role === 'SUPER_ADMIN') mapRole = 'super_admin';
 
                     return {
-                        id: u.id || u._id, // Handle Mongo ID
+                        id: u.id || u._id,
                         name: u.fullName || 'Unknown',
                         role: mapRole,
-                        department: u.branch || 'General',
+                        department: u.department || u.branch || 'General',
                         email: u.email || '',
-                        phone: u.phoneNumber || 'N/A', // Updated
-                        status: u.active ? 'Present' : 'Absent',
-                        checkInTime: u.active ? '09:00 AM' : undefined,
+                        phone: u.phoneNumber || 'N/A',
+                        status: u.userStatus || (u.active ? 'Present' : 'Absent'),
+                        checkInTime: u.checkInTime,
                         avatarInitials: (u.fullName || 'U').substring(0, 2).toUpperCase(),
-                        profileImage: u.profileImage, // Map from backend
+                        profileImage: u.profileImage,
                         joinDate: u.createdAt ? u.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
-                        attendanceRate: 0 // Default
+                        attendanceRate: u.attendanceRate || 0
                     };
                 });
 
@@ -134,27 +136,68 @@ export default function UsersPage() {
         onLeave: users.filter(u => u.status === 'On Leave').length,
     };
 
-    const handleAddUser = (e: React.FormEvent) => {
+    const deptStats = users.reduce((acc: any, user) => {
+        const dept = user.department || 'General';
+        acc[dept] = (acc[dept] || 0) + 1;
+        return acc;
+    }, {});
+
+    const chartItems = Object.entries(deptStats).map(([label, val], i) => ({
+        label,
+        val: val as number,
+        col: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#f97316', '#06b6d4'][i % 7]
+    }));
+
+    const maxVal = Math.max(...chartItems.map(i => i.val), 1);
+
+    const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
         const form = e.target as HTMLFormElement;
-        const role = (form.elements.namedItem('role') as HTMLSelectElement).value as UserRole;
+        const roleValue = (form.elements.namedItem('role') as HTMLSelectElement).value as UserRole;
 
-        const newUser: User = {
-            id: `${role === 'student' ? 'ST' : 'EMP'}-${Math.floor(Math.random() * 1000)}`,
-            name: (form.elements.namedItem('name') as HTMLInputElement).value,
+        let backendRole = 'STUDENT';
+        if (roleValue === 'faculty') backendRole = 'TRAINER';
+        else if (roleValue === 'staff') backendRole = 'HR';
+        else if (roleValue === 'admin') backendRole = 'ADMIN';
+        else if (roleValue === 'super_admin') backendRole = 'SUPER_ADMIN';
+
+        const newUserPayload = {
+            fullName: (form.elements.namedItem('name') as HTMLInputElement).value,
             email: (form.elements.namedItem('email') as HTMLInputElement).value,
-            phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
+            phoneNumber: (form.elements.namedItem('phone') as HTMLInputElement).value,
             department: (form.elements.namedItem('department') as HTMLInputElement).value,
-            role: role,
-            status: 'Present',
+            role: backendRole,
+            password: (form.elements.namedItem('password') as HTMLInputElement).value,
+            userStatus: 'Present',
             checkInTime: '09:00 AM',
-            avatarInitials: (form.elements.namedItem('name') as HTMLInputElement).value.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-            joinDate: new Date().toISOString().split('T')[0],
-            attendanceRate: 100
+            attendanceRate: 100,
+            active: true
         };
 
-        setUsers([newUser, ...users]);
-        setIsAddUserOpen(false);
+        try {
+            const response = await api.post('users', newUserPayload);
+            const savedUser = response.data;
+
+            const mappedUser: User = {
+                id: savedUser.id,
+                name: savedUser.fullName,
+                email: savedUser.email,
+                phone: savedUser.phoneNumber,
+                role: roleValue,
+                department: savedUser.department || 'General',
+                status: 'Present',
+                checkInTime: '09:00 AM',
+                avatarInitials: savedUser.fullName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+                joinDate: new Date().toISOString().split('T')[0],
+                attendanceRate: 100
+            };
+
+            setUsers([mappedUser, ...users]);
+            setIsAddUserOpen(false);
+        } catch (error) {
+            console.error("Failed to add user:", error);
+            alert("Failed to add user. Check if email already exists.");
+        }
     };
 
     const handleLeaveAction = (id: number, action: 'Approved' | 'Rejected') => {
@@ -175,21 +218,22 @@ export default function UsersPage() {
         const updatedUserPayload = {
             fullName: (form.elements.namedItem('edit_name') as HTMLInputElement).value,
             email: (form.elements.namedItem('edit_email') as HTMLInputElement).value,
-            branch: (form.elements.namedItem('edit_dept') as HTMLInputElement).value,
+            department: (form.elements.namedItem('edit_dept') as HTMLInputElement).value,
+            userStatus: (form.elements.namedItem('edit_status') as HTMLSelectElement).value,
             role: backendRole,
             active: (form.elements.namedItem('edit_status') as HTMLSelectElement).value === 'Present' || (form.elements.namedItem('edit_status') as HTMLSelectElement).value === 'Remote'
         };
 
         try {
-            await api.put(`/users/${selectedUser.id}`, updatedUserPayload);
+            await api.put(`users/${selectedUser.id}`, updatedUserPayload);
 
             const updatedUser: User = {
                 ...selectedUser,
                 name: updatedUserPayload.fullName,
                 email: updatedUserPayload.email,
-                department: updatedUserPayload.branch,
+                department: updatedUserPayload.department,
                 role: roleValue,
-                status: (form.elements.namedItem('edit_status') as HTMLSelectElement).value as Status,
+                status: updatedUserPayload.userStatus as Status,
             };
 
             setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
@@ -198,6 +242,18 @@ export default function UsersPage() {
         } catch (error) {
             console.error("Failed to update user:", error);
             alert("Failed to update user. Please try again.");
+        }
+    };
+
+    const handleDeleteUser = async (id: string) => {
+        if (!window.confirm("Are you sure you want to remove this user? This action cannot be undone.")) return;
+        try {
+            await api.delete(`users/${id}`);
+            setUsers(users.filter(u => u.id !== id));
+            setSelectedUser(null);
+        } catch (error) {
+            console.error("Failed to delete user:", error);
+            alert("Failed to delete user.");
         }
     };
 
@@ -274,14 +330,18 @@ export default function UsersPage() {
                     <div className={styles.card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(51, 65, 85, 0.3)' }}>
                             <div className={styles.tabContainer} style={{ marginBottom: 0, borderBottom: 'none' }}>
-                                {(['all', 'student', 'faculty', 'staff'] as const).map(tab => (
+                                {(['all', 'student', 'faculty', 'staff', 'admin', 'super_admin'] as const).map(tab => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
                                         className={`${styles.tabBtn} ${activeTab === tab ? styles.tabBtnActive : ''}`}
                                         style={{ textTransform: 'capitalize', fontSize: '0.9rem', padding: '0.5rem 1rem', borderRadius: '6px', marginRight: '0.5rem', background: activeTab === tab ? 'rgba(124, 58, 237, 0.1)' : 'transparent', border: activeTab === tab ? '1px solid rgba(124, 58, 237, 0.3)' : 'none' }}
                                     >
-                                        {tab}s
+                                        {tab === 'all' ? 'All' :
+                                            tab === 'faculty' ? 'Faculty' :
+                                                tab === 'staff' ? 'Staff' :
+                                                    tab === 'student' ? 'Students' :
+                                                        tab === 'admin' ? 'Admins' : 'Super Admins'}
                                     </button>
                                 ))}
                             </div>
@@ -413,19 +473,16 @@ export default function UsersPage() {
                             <div className={styles.cardHeader}>Organization Stats</div>
                             <div style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
                                 <div style={{ display: 'flex', gap: '1rem', height: '200px', alignItems: 'flex-end', justifyContent: 'space-around', marginBottom: '1.5rem', background: 'rgba(15, 23, 42, 0.3)', borderRadius: '0.75rem', padding: '1rem' }}>
-                                    {[
-                                        { label: 'Java', val: 120, col: '#3b82f6' },
-                                        { label: 'Data', val: 80, col: '#8b5cf6' },
-                                        { label: 'AI', val: 45, col: '#10b981' },
-                                        { label: 'Admin', val: 15, col: '#f59e0b' }
-                                    ].map((item, i) => (
-                                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%', justifyContent: 'flex-end' }}>
-                                            <div style={{ width: '32px', height: `${(item.val / 150) * 100}%`, background: item.col, borderRadius: '4px 4px 0 0', opacity: 0.8, position: 'relative', transition: 'height 0.5s ease' }}>
+                                    {chartItems.length > 0 ? chartItems.map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%', justifyContent: 'flex-end', flex: 1 }}>
+                                            <div style={{ width: '100%', maxWidth: '40px', height: `${(item.val / maxVal) * 100}%`, background: item.col, borderRadius: '4px 4px 0 0', opacity: 0.8, position: 'relative', transition: 'height 0.5s ease' }}>
                                                 <div style={{ position: 'absolute', top: '-24px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.85rem', fontWeight: 700, color: 'white' }}>{item.val}</div>
                                             </div>
-                                            <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>{item.label}</div>
+                                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.label}</div>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="flex items-center justify-center w-full h-full text-slate-500 text-sm italic">No department data available</div>
+                                    )}
                                 </div>
                                 <div style={{ fontSize: '0.9rem', color: '#cbd5e1', textAlign: 'center', fontStyle: 'italic', opacity: 0.7 }}>
                                     {/* Footer stats if needed */}
@@ -704,7 +761,11 @@ export default function UsersPage() {
                                             <button className={styles.btnSecondary} onClick={() => setIsEditing(true)} style={{ justifyContent: 'center' }}>
                                                 <Edit size={16} /> Edit Profile
                                             </button>
-                                            <button className={styles.btnSecondary} style={{ justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }}>
+                                            <button
+                                                className={styles.btnSecondary}
+                                                onClick={() => handleDeleteUser(selectedUser.id)}
+                                                style={{ justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }}
+                                            >
                                                 <Trash2 size={16} /> Remove User
                                             </button>
                                         </div>

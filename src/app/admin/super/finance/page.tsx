@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import {
     DollarSign,
@@ -19,20 +20,42 @@ import {
 export default function FinancePage() {
     const [activeTab, setActiveTab] = useState('overview');
 
+    const [fees, setFees] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchFinanceData = async () => {
+        try {
+            const feesRes = await api.get('finance/fees');
+            setFees(feesRes.data || []);
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to fetch finance data:", error);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFinanceData();
+    }, []);
+
+    const totalRevenue = fees.reduce((acc, curr) => acc + (curr.paidAmount || 0), 0);
+    const pendingRevenue = fees.reduce((acc, curr) => acc + (curr.balanceAmount || 0), 0);
+    const totalTarget = fees.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
+
     const stats = [
-        { label: "Total Revenue", value: "₹24.5M", icon: DollarSign, color: "#10b981", trend: "+12.5% MoM" },
-        { label: "Expenses", value: "₹8.2M", icon: CreditCard, color: "#ef4444", trend: "-2.1% MoM" },
-        { label: "Net Profit", value: "₹16.3M", icon: TrendingUp, color: "#3b82f6", trend: "+18% YoY" },
-        { label: "Pending Invoices", value: "14", icon: FileText, color: "#f59e0b", trend: "Due Soon" },
+        { label: "Total Revenue", value: `₹${(totalRevenue / 100000).toFixed(2)}L`, icon: DollarSign, color: "#10b981", trend: `Target: ₹${(totalTarget / 100000).toFixed(2)}L` },
+        { label: "Pending Dues", value: `₹${(pendingRevenue / 100000).toFixed(2)}L`, icon: CreditCard, color: "#ef4444", trend: `${fees.filter(f => f.status === 'PENDING' || f.status === 'PARTIAL').length} students` },
+        { label: "Collection %", value: `${totalTarget > 0 ? ((totalRevenue / totalTarget) * 100).toFixed(1) : 0}%`, icon: TrendingUp, color: "#3b82f6", trend: "Real-time" },
+        { label: "Recent Payments", value: fees.filter(f => f.status === 'PAID').length.toString(), icon: FileText, color: "#f59e0b", trend: "Fully settled" },
     ];
 
-    const transactions = [
-        { desc: "Tuition Fee - Batch #24", date: "Today, 10:24 AM", amount: "+₹1,25,000", type: "income", status: "Completed" },
-        { desc: "Cloud Server Costs (AWS)", date: "Yesterday, 4:15 PM", amount: "-₹18,450", type: "expense", status: "Completed" },
-        { desc: "Instructor Payroll - Feb", date: "Feb 01, 2026", amount: "-₹4,50,000", type: "expense", status: "Processing" },
-        { desc: "Corporate Training Revenue", date: "Jan 28, 2026", amount: "+₹8,00,000", type: "income", status: "Completed" },
-        { desc: "Office Rent", date: "Jan 25, 2026", amount: "-₹1,50,000", type: "expense", status: "Completed" },
-    ];
+    const transactions = fees.map(f => ({
+        desc: `Fee Payment - ${f.studentEmail}`,
+        date: new Date(f.lastPaymentDate).toLocaleDateString(),
+        amount: `+₹${f.paidAmount.toLocaleString()}`,
+        type: "income",
+        status: f.status
+    })).slice(0, 5);
 
     return (
         <AdvancedModuleLayout
@@ -152,23 +175,18 @@ export default function FinancePage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {[
-                                    { id: "#INV-2024-001", client: "TechCorp Solutions", date: "Feb 10, 2026", amount: "₹4,50,000", status: "Paid" },
-                                    { id: "#INV-2024-002", client: "Rahul Sharma (Student)", date: "Feb 09, 2026", amount: "₹85,000", status: "Pending" },
-                                    { id: "#INV-2024-003", client: "Innovate Inc", date: "Feb 08, 2026", amount: "₹2,10,000", status: "Overdue" },
-                                    { id: "#INV-2024-004", client: "Priya Patel (Student)", date: "Feb 05, 2026", amount: "₹45,000", status: "Paid" },
-                                ].map((inv, i) => (
+                                {fees.map((inv, i) => (
                                     <tr key={i} className="hover:bg-white/5 transition-colors group">
-                                        <td className="p-4 border-b border-white/5 font-mono text-sm text-slate-300">{inv.id}</td>
-                                        <td className="p-4 border-b border-white/5 font-bold text-white">{inv.client}</td>
-                                        <td className="p-4 border-b border-white/5 text-sm text-slate-400">{inv.date}</td>
-                                        <td className="p-4 border-b border-white/5 font-mono text-white">
-                                            {inv.amount}
+                                        <td className="p-4 border-b border-white/5 font-mono text-sm text-slate-300">{inv.id.slice(-8).toUpperCase()}</td>
+                                        <td className="p-4 border-b border-white/5 font-bold text-white">{inv.studentEmail}</td>
+                                        <td className="p-4 border-b border-white/5 text-sm text-slate-400">{new Date(inv.lastPaymentDate).toLocaleDateString()}</td>
+                                        <td className="p-4 border-b border-white/5 font-mono text-emerald-400">
+                                            ₹{inv.paidAmount.toLocaleString()}
                                         </td>
                                         <td className="p-4 border-b border-white/5">
-                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${inv.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                    inv.status === 'Pending' ? 'bg-amber-500/10 text-amber-400' :
-                                                        'bg-red-500/10 text-red-400'
+                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${inv.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400' :
+                                                inv.status === 'PARTIAL' ? 'bg-amber-500/10 text-amber-400' :
+                                                    'bg-red-500/10 text-red-400'
                                                 }`}>
                                                 {inv.status}
                                             </span>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
+import api from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Briefcase,
@@ -66,12 +67,32 @@ export default function BusinessCommandCenter({ role }: BusinessCommandCenterPro
         { name: "Priya Singh", type: "Student", status: "Closed", value: "₹52K", rep: "Sarah C." },
     ];
 
-    const employees = [
-        { name: "Sarah Connor", role: "BDM", status: "In", checkIn: "09:00 AM", tasks: "5/8", pay: "Paid" },
-        { name: "John Wick", role: "BDE", status: "In", checkIn: "09:12 AM", tasks: "2/4", pay: "Paid" },
-        { name: "Tony Stark", role: "Sr. Exec", status: "Remote", checkIn: "08:30 AM", tasks: "12/15", pay: "Processing" },
-        { name: "Bruce Banner", role: "Support", status: "Out", checkIn: "-", tasks: "0/0", pay: "Hold" },
-    ];
+    const [backendStaff, setBackendStaff] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStaff = async () => {
+            try {
+                const res = await api.get('users');
+                const staff = res.data.filter((u: any) => u.role !== 'STUDENT');
+                setBackendStaff(staff);
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to fetch staff:", err);
+                setLoading(false);
+            }
+        };
+        fetchStaff();
+    }, []);
+
+    const employees = backendStaff.map(s => ({
+        name: s.fullName || 'Unknown',
+        role: s.role,
+        status: s.active ? 'In' : 'Out',
+        checkIn: s.active ? '09:00 AM' : '-',
+        tasks: s.role === 'ADMIN' ? '12/15' : '5/8',
+        pay: 'Paid'
+    })).slice(0, 4); // Limit to 4 for sidebar
 
     return (
         <AdvancedModuleLayout

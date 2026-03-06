@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import AdvancedModuleLayout from '@/components/dashboard/AdvancedModuleLayout';
+import api from '@/lib/api';
 import styles from '@/app/admin/super/SuperAdmin.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -27,18 +28,47 @@ export default function ExamsPage() {
     const [activeTab, setActiveTab] = useState('summary');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+    const [exams, setExams] = useState<any[]>([]);
+    const [results, setResults] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchExamData = async () => {
+        try {
+            const [examsRes, resultsRes] = await Promise.all([
+                api.get('exams'),
+                api.get('exams/results')
+            ]);
+            setExams(examsRes.data || []);
+            setResults(resultsRes.data || []);
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to fetch exam data:", error);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchExamData();
+    }, []);
+
+    const passRate = results.length > 0
+        ? (results.filter(r => r.score >= 40).length / results.length) * 100
+        : 0;
+
     const stats = [
-        { label: "Active Exams", value: "8", icon: FileText, color: "#3b82f6", trend: "+2 Today" },
-        { label: "Candidates", value: "1,240", icon: Users, color: "#8b5cf6", trend: "+12%" },
-        { label: "Completion", value: "76.4%", icon: CheckCircle, color: "#10b981", trend: "On Track" },
-        { label: "Pending", value: "45", icon: Clock, color: "#f59e0b", trend: "Needs Action" },
+        { label: "Total Exams", value: exams.length.toString(), icon: FileText, color: "#3b82f6", trend: `${exams.filter(e => e.active).length} Active` },
+        { label: "Attempts", value: results.length.toLocaleString(), icon: Users, color: "#8b5cf6", trend: "Total Submissions" },
+        { label: "Avg. Score", value: `${results.length > 0 ? (results.reduce((acc, r) => acc + r.score, 0) / results.length).toFixed(1) : 0}%`, icon: CheckCircle, color: "#10b981", trend: "Success Rate" },
+        { label: "Distinctions", value: results.filter(r => r.score >= 80).length.toString(), icon: Trophy, color: "#f59e0b", trend: "Score > 80%" },
     ];
 
-    const upcomingExams = [
-        { name: "Full Stack Certification", date: "Feb 15", candidates: 320, status: "Ready", time: "10:00 AM" },
-        { name: "Python Basics", date: "Feb 18", candidates: 150, status: "Draft", time: "02:00 PM" },
-        { name: "DevOps Masters", date: "Feb 20", candidates: 80, status: "Scheduling", time: "11:00 AM" },
-    ];
+    const upcomingExams = exams.slice(0, 3).map(e => ({
+        name: e.title,
+        date: new Date(e.createdAt).toLocaleDateString(),
+        candidates: 0,
+        status: e.active ? "Ready" : "Draft",
+        time: "TBD"
+    }));
 
     const activeSessions = [
         { student: "Rahul S.", exam: "JS Final", progress: 65, status: "Active", alerts: 0 },
@@ -89,7 +119,7 @@ export default function ExamsPage() {
                                         </div>
                                     </div>
                                     <div className={`text-xs font-bold px-3 py-1 rounded-full ${exam.status === 'Ready' ? 'bg-emerald-500/10 text-emerald-400' :
-                                            exam.status === 'Draft' ? 'bg-slate-500/10 text-slate-400' : 'bg-amber-500/10 text-amber-400'
+                                        exam.status === 'Draft' ? 'bg-slate-500/10 text-slate-400' : 'bg-amber-500/10 text-amber-400'
                                         }`}>
                                         {exam.status}
                                     </div>
@@ -110,9 +140,12 @@ export default function ExamsPage() {
                         <div className="flex-1 flex flex-col justify-center items-center relative">
                             {/* Simple CSS Donut Chart */}
                             <div className="w-40 h-40 rounded-full border-[12px] border-slate-700 relative flex items-center justify-center">
-                                <div className="absolute inset-0 rounded-full border-[12px] border-violet-500 border-t-transparent border-l-transparent rotate-45"></div>
+                                <div
+                                    className="absolute inset-0 rounded-full border-[12px] border-violet-500 border-t-transparent border-l-transparent"
+                                    style={{ transform: `rotate(${45 + (passRate * 3.6)}deg)` }}
+                                ></div>
                                 <div className="text-center">
-                                    <div className="text-3xl font-bold text-white">76%</div>
+                                    <div className="text-3xl font-bold text-white">{passRate.toFixed(0)}%</div>
                                     <div className="text-[10px] text-slate-400 uppercase tracking-widest">Pass Rate</div>
                                 </div>
                             </div>

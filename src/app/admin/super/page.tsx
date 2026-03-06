@@ -95,7 +95,7 @@ export default function SuperAdminMasterDashboard() {
 
                 // Process Stats
                 const activeUsers = users.filter(u => u.active).length;
-                const staffCount = users.filter(u => u.role === 'TRAINER' || u.role === 'ADMIN').length;
+                const staffCount = users.filter(u => u.role !== 'STUDENT').length;
                 const uniqueBranches = new Set(users.map(u => u.branch).filter(b => b)).size;
                 const totalRevenue = fees.reduce((acc, curr) => acc + (curr.paidAmount || 0), 0);
 
@@ -281,6 +281,7 @@ export default function SuperAdminMasterDashboard() {
                                 { label: "Online Exam Engine", icon: GraduationCap, hex: "#f59e0b", href: "/admin/super/exams" },
                                 { label: "Business & Employees", icon: Globe, hex: "#3b82f6", href: "/admin/super/business" },
                                 { label: "Finance & Payroll", icon: Wallet, hex: "#10b981", href: "/admin/super/finance" },
+                                { label: "Database & Master Data", icon: HardDrive, hex: "#ec4899", href: "/admin/super/data-master" },
                                 { label: "Analytics & Reports", icon: PieChart, hex: "#f97316", href: "/admin/super/reports" },
                                 { label: "Platform Settings", icon: Settings, hex: "#94a3b8", href: "/admin/super/settings" },
                             ].map((module, i) => (
