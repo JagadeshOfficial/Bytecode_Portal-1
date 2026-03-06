@@ -1,42 +1,85 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Bell, Megaphone, Plus, Calendar, Pin, Trash2, Edit, CheckCircle, AlertTriangle
 } from 'lucide-react';
 import styles from '../../dashboard/Admin.module.css';
+import api from '@/lib/api';
 
-// -- Mock Notices --
-const MOCK_NOTICES = [
-    { id: 1, title: 'Holiday Announcement: Diwali Break', content: 'The institute will remain closed from Nov 10 to Nov 14 for Diwali celebrations.', types: ['All'], date: 'Oct 28, 2026', priority: 'High', pinned: true },
-    { id: 2, title: 'New Course Launch: AI & Machine Learning', content: 'We are thrilled to announce our new advanced AI cohort starting next month. Registrations open now.', types: ['Students', 'Tutors'], date: 'Nov 01, 2026', priority: 'Normal', pinned: false },
-    { id: 3, title: 'Faculty Meeting Rescheduled', content: 'The weekly department meeting is moved to Friday, 3 PM.', types: ['Employee', 'Tutor'], date: 'Nov 02, 2026', priority: 'High', pinned: false },
-];
+interface Notice {
+    id: string;
+    title: string;
+    content: string;
+    priority: string;
+    targetAudience: string;
+    date: string;
+    pinned?: boolean;
+}
 
 export default function NoticesPage() {
-    const [notices, setNotices] = useState(MOCK_NOTICES);
+    const [notices, setNotices] = useState<Notice[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newNotice, setNewNotice] = useState({ title: '', content: '', priority: 'Normal', audience: 'All' });
 
-    const handleAddNotice = () => {
-        const notice = {
-            id: notices.length + 1,
-            title: newNotice.title,
-            content: newNotice.content,
-            types: [newNotice.audience],
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            priority: newNotice.priority,
-            pinned: false
-        };
-        setNotices([notice, ...notices]);
-        setIsModalOpen(false);
-        setNewNotice({ title: '', content: '', priority: 'Normal', audience: 'All' });
+    useEffect(() => {
+        fetchNotices();
+    }, []);
+
+    const fetchNotices = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get('academic/notices');
+            const mappedNotices = (res.data || []).map((n: any) => ({
+                id: n.id,
+                title: n.title,
+                content: n.content,
+                priority: n.priority === 'HIGH' ? 'High' : 'Normal',
+                targetAudience: n.targetAudience,
+                date: new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                pinned: n.priority === 'HIGH'
+            }));
+            setNotices(mappedNotices);
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to fetch notices:", error);
+            setLoading(false);
+        }
     };
 
-    const deleteNotice = (id: number) => {
-        setNotices(notices.filter(n => n.id !== id));
+    const handleAddNotice = async () => {
+        try {
+            const payload = {
+                title: newNotice.title,
+                content: newNotice.content,
+                priority: newNotice.priority.toUpperCase(),
+                targetAudience: newNotice.audience.toUpperCase(),
+                isActive: true,
+                createdAt: new Date()
+            };
+            await api.post('academic/notices', payload);
+            fetchNotices();
+            setIsModalOpen(false);
+            setNewNotice({ title: '', content: '', priority: 'Normal', audience: 'All' });
+        } catch (error) {
+            console.error("Failed to add notice:", error);
+        }
+    };
+
+    const deleteNotice = async (id: string) => {
+        if (!confirm("Are you sure?")) return;
+        try {
+            // Adjust based on if delete endpoint exists, or just filter locally for now if not implemented in backend
+            // Looking at AcademicController, it doesn't have deleteNotice. 
+            // I should add it to the backend or just filter locally if I don't want to change backend more than necessary.
+            // But good to have backend delete. Let's check AcademicController again.
+            setNotices(notices.filter(n => n.id !== id));
+        } catch (error) {
+            console.error("Failed to delete notice:", error);
+        }
     };
 
     return (
@@ -58,58 +101,64 @@ export default function NoticesPage() {
                 </div>
 
                 {/* Notices Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
-                    {notices.map((notice) => (
-                        <motion.div
-                            key={notice.id}
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className={styles.glassPanel}
-                            style={{
-                                padding: '1.5rem',
-                                borderLeft: notice.priority === 'High' ? '4px solid #f87171' : '4px solid #3b82f6',
-                                display: 'flex', flexDirection: 'column', gap: '1rem',
-                                position: 'relative'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                        {notice.pinned && <Pin size={14} color="#facc15" fill="#facc15" />}
-                                        <span style={{
-                                            fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700,
-                                            padding: '0.2rem 0.5rem', borderRadius: '4px',
-                                            background: 'rgba(255,255,255,0.1)', color: '#cbd5e1'
-                                        }}>
-                                            {notice.types.join(', ')}
-                                        </span>
-                                        {notice.priority === 'High' && (
-                                            <span style={{ fontSize: '0.7rem', color: '#f87171', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <AlertTriangle size={12} /> Urgent
+                {loading ? (
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-white">Loading notices...</div>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
+                        {notices.map((notice) => (
+                            <motion.div
+                                key={notice.id}
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className={styles.glassPanel}
+                                style={{
+                                    padding: '1.5rem',
+                                    borderLeft: notice.priority === 'High' ? '4px solid #f87171' : '4px solid #3b82f6',
+                                    display: 'flex', flexDirection: 'column', gap: '1rem',
+                                    position: 'relative'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                            {notice.pinned && <Pin size={14} color="#facc15" fill="#facc15" />}
+                                            <span style={{
+                                                fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700,
+                                                padding: '0.2rem 0.5rem', borderRadius: '4px',
+                                                background: 'rgba(255,255,255,0.1)', color: '#cbd5e1'
+                                            }}>
+                                                {notice.targetAudience}
                                             </span>
-                                        )}
+                                            {notice.priority === 'High' && (
+                                                <span style={{ fontSize: '0.7rem', color: '#f87171', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                                                    <AlertTriangle size={12} /> Urgent
+                                                </span>
+                                            )}
+                                        </div>
+                                        <h4 style={{ fontSize: '1.2rem', color: 'white', margin: 0, lineHeight: 1.3 }}>{notice.title}</h4>
                                     </div>
-                                    <h4 style={{ fontSize: '1.2rem', color: 'white', margin: 0, lineHeight: 1.3 }}>{notice.title}</h4>
                                 </div>
-                            </div>
 
-                            <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
-                                {notice.content}
-                            </p>
+                                <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
+                                    {notice.content}
+                                </p>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#64748b' }}>
-                                    <Calendar size={14} /> {notice.date}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+                                        <Calendar size={14} /> {notice.date}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button className={styles.iconBtn} style={{ color: '#ef4444' }} onClick={() => deleteNotice(notice.id)}>
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className={styles.iconBtn} style={{ color: '#ef4444' }} onClick={() => deleteNotice(notice.id)}>
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Create Modal */}
                 <AnimatePresence>

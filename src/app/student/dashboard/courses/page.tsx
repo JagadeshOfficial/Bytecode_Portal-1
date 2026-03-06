@@ -81,9 +81,9 @@ export default function StudentCoursesPage() {
             try {
                 const [batchRes, allCoursesRes, mRes] = await Promise.all([
                     // Get only batches this student is enrolled in
-                    api.get(`/academic/batches/student/${encodeURIComponent(userId)}`),
-                    api.get('/courses'),
-                    api.get('/courses/materials').catch(() => ({ data: [] })),
+                    api.get(`academic/batches/student/${encodeURIComponent(userId)}`),
+                    api.get('courses'),
+                    api.get('courses/materials').catch(() => ({ data: [] })),
                 ]);
 
                 const myBatches: Batch[] = batchRes.data || [];

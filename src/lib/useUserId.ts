@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
 export function useUserId(): string | null {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [resolvedId, setResolvedId] = useState<string | null>(user?.id ?? null);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export function useUserId(): string | null {
 
         // Slow path — old localStorage session without id, fetch from user-service
         if (user.email) {
-            api.get(`/users/${encodeURIComponent(user.email)}`)
+            api.get(`users/${encodeURIComponent(user.email)}`)
                 .then(res => {
                     const dbId: string = res.data?.id;
                     if (dbId) {
@@ -34,9 +34,16 @@ export function useUserId(): string | null {
                         localStorage.setItem('user', JSON.stringify(patched));
                     }
                 })
-                .catch(err => console.error('useUserId fallback failed:', err));
+                .catch(err => {
+                    if (err.response?.status === 404) {
+                        console.warn('Session is stale, user not found. Logging out.');
+                        if (logout) logout();
+                    } else {
+                        console.error('useUserId fallback failed:', err);
+                    }
+                });
         }
-    }, [user?.id, user?.email]);
+    }, [user?.id, user?.email, logout]);
 
     return resolvedId;
 }

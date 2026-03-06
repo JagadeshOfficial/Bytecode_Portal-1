@@ -166,10 +166,10 @@ export default function AcademicsPage() {
         try {
             setLoading(true);
             const [batchesRes, sessionsRes, assignmentsRes, announcementsRes, studentsRes, trainersRes] = await Promise.all([
-                api.get('/academic/batches'),
-                api.get('/academic/sessions'),
-                api.get('/academic/assignments'),
-                api.get('/academic/announcements'),
+                api.get('academic/batches'),
+                api.get('academic/sessions'),
+                api.get('academic/assignments'),
+                api.get('academic/announcements'),
                 api.get('users?role=STUDENT'),
                 api.get('users?role=TRAINER')
             ]);
@@ -217,7 +217,7 @@ export default function AcademicsPage() {
                 toast.error("Batch Name and Code are required");
                 return;
             }
-            const res = await api.post('/academic/batches', batchForm);
+            const res = await api.post('academic/batches', batchForm);
             setBatches([...batches, res.data]);
             setShowBatchModal(false);
             setBatchForm({});
@@ -230,7 +230,7 @@ export default function AcademicsPage() {
 
     const handleUpdateBatch = async () => {
         try {
-            const res = await api.put(`/academic/batches/${batchForm.id}`, batchForm);
+            const res = await api.put(`academic/batches/${batchForm.id}`, batchForm);
             setBatches(batches.map(b => b.id === batchForm.id ? res.data : b));
             setShowBatchModal(false);
             setBatchForm({});
@@ -248,7 +248,7 @@ export default function AcademicsPage() {
             title: 'Delete Batch?',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/academic/batches/${id}`);
+                    await api.delete(`academic/batches/${id}`);
                     setBatches(batches.filter(b => b.id !== id));
                     toast.success("Batch deleted");
                 } catch (error) {
@@ -269,10 +269,10 @@ export default function AcademicsPage() {
 
             let res: any;
             if (sessionForm.id) {
-                res = await api.put(`/academic/sessions/${sessionForm.id}`, sessionForm);
+                res = await api.put(`academic/sessions/${sessionForm.id}`, sessionForm);
                 setSessions(sessions.map(s => s.id === sessionForm.id ? res.data : s));
             } else {
-                res = await api.post('/academic/sessions', sessionForm);
+                res = await api.post('academic/sessions', sessionForm);
                 setSessions([...sessions, res.data]);
             }
 
@@ -292,7 +292,7 @@ export default function AcademicsPage() {
             title: 'Delete Session?',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/academic/sessions/${id}`);
+                    await api.delete(`academic/sessions/${id}`);
                     setSessions(sessions.filter(s => s.id !== id));
                     toast.success("Session deleted");
                 } catch (error) {
@@ -313,10 +313,10 @@ export default function AcademicsPage() {
 
             let res: any;
             if (assignmentForm.id) {
-                res = await api.put(`/academic/assignments/${assignmentForm.id}`, assignmentForm);
+                res = await api.put(`academic/assignments/${assignmentForm.id}`, assignmentForm);
                 setAssignments(assignments.map(a => a.id === assignmentForm.id ? res.data : a));
             } else {
-                res = await api.post('/academic/assignments', {
+                res = await api.post('academic/assignments', {
                     ...assignmentForm,
                     assignedDate: new Date().toISOString(),
                     status: 'ACTIVE'
@@ -340,7 +340,7 @@ export default function AcademicsPage() {
             title: 'Delete Assignment?',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/academic/assignments/${id}`);
+                    await api.delete(`academic/assignments/${id}`);
                     setAssignments(assignments.filter(a => a.id !== id));
                     toast.success("Assignment deleted");
                 } catch (error) {

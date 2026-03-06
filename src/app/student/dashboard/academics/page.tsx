@@ -94,14 +94,14 @@ export default function StudentAcademicsPage() {
             if (!userId) return;
             try {
                 // Step 1: get batches the student is enrolled in
-                const batchRes = await api.get(`/academic/batches/student/${encodeURIComponent(userId)}`);
+                const batchRes = await api.get(`academic/batches/student/${encodeURIComponent(userId)}`);
                 const myBatches: { id: string }[] = batchRes.data || [];
                 const batchIds = myBatches.map(b => b.id);
 
                 const [sRes, aRes, anRes] = await Promise.all([
-                    api.get('/academic/sessions'),
-                    api.get('/academic/assignments'),
-                    api.get('/academic/announcements'),
+                    api.get('academic/sessions'),
+                    api.get('academic/assignments'),
+                    api.get('academic/announcements'),
                 ]);
 
                 // Filter to only sessions/assignments from the student's batches

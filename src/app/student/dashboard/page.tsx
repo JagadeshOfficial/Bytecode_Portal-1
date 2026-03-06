@@ -66,8 +66,8 @@ export default function StudentMasterDashboard() {
         const fetchStudentData = async () => {
             try {
                 const [coursesRes, sessionsRes] = await Promise.all([
-                    api.get('/courses'),
-                    api.get('/academic/sessions')
+                    api.get('courses'),
+                    api.get('academic/sessions')
                 ]);
 
                 setCourses((coursesRes.data || []).slice(0, 3));

@@ -106,10 +106,10 @@ export default function TrainerUnifiedConsole() {
             try {
                 setLoading(true);
                 const [batchRes, matRes, studentsRes, sessionsRes] = await Promise.all([
-                    api.get(`/academic/batches/trainer/${encodeURIComponent(userId)}`),
-                    api.get('/academic/materials').catch(() => ({ data: [] })),
-                    api.get('/users?role=STUDENT').catch(() => ({ data: [] })),
-                    api.get('/academic/sessions').catch(() => ({ data: [] })),
+                    api.get(`academic/batches/trainer/${encodeURIComponent(userId)}`),
+                    api.get('academic/materials').catch(() => ({ data: [] })),
+                    api.get('users?role=STUDENT').catch(() => ({ data: [] })),
+                    api.get('academic/sessions').catch(() => ({ data: [] })),
                 ]);
                 setBatches(batchRes.data || []);
                 setMaterials(matRes.data || []);
@@ -178,7 +178,7 @@ export default function TrainerUnifiedConsole() {
     const handleDeleteMaterial = async (id: string) => {
         if (!confirm('Are you sure you want to remove this resource?')) return;
         try {
-            await api.delete(`/academic/materials/${id}`);
+            await api.delete(`academic/materials/${id}`);
             setMaterials(materials.filter(m => m.id !== id));
             showToast('success', 'Resource deleted');
         } catch (err) {

@@ -31,6 +31,10 @@ public class ExamService {
         return examRepository.findById(id);
     }
 
+    public List<ExamResult> getAllResults() {
+        return resultRepository.findAll();
+    }
+
     public ExamResult processSubmission(ExamSubmission submission) {
         Exam exam = examRepository.findById(submission.getExamId())
                 .orElseThrow(() -> new RuntimeException("Exam not found"));

@@ -209,7 +209,7 @@ export default function Placements() {
         // Fetch dynamic stories from backend
         const fetchStories = async () => {
             try {
-                const response = await api.get('/placements/records');
+                const response = await api.get('placements/records');
                 if (response.data && response.data.length > 0) {
                     const mappedStories = response.data.map((r: any) => ({
                         name: r.studentName,

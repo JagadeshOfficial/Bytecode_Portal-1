@@ -28,7 +28,7 @@ export default function Sidebar({ role }: SidebarProps) {
         const fetchUserProfile = async () => {
             if (user?.email) {
                 try {
-                    const response = await api.get(`/users/${user.email}`);
+                    const response = await api.get(`users/${user.email}`);
                     setProfileData(response.data);
                 } catch (error) {
                     console.error("Failed to fetch profile on mount", error);
@@ -43,7 +43,7 @@ export default function Sidebar({ role }: SidebarProps) {
         setIsProfileOpen(true);
         if (user?.email && !profileData) {
             try {
-                const response = await api.get(`/users/${user.email}`);
+                const response = await api.get(`users/${user.email}`);
                 setProfileData(response.data);
                 setTempProfile(response.data);
             } catch (error) {
@@ -67,7 +67,7 @@ export default function Sidebar({ role }: SidebarProps) {
                 profileImage: tempProfile.profileImage || ""
             };
 
-            await api.put(`/users/${tempProfile.id}`, updatedData);
+            await api.put(`users/${tempProfile.id}`, updatedData);
             setProfileData(updatedData);
             setIsEditing(false);
             setStatus({ type: 'success', msg: 'Profile updated successfully!' });

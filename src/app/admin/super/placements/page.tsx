@@ -67,9 +67,9 @@ export default function PlacementsPage() {
         try {
             // Use Promise.allSettled to avoid crashing if one service is down
             const results = await Promise.allSettled([
-                api.get('/placements/records'),
-                api.get('/placements/jobs'),
-                api.get('/users')
+                api.get('placements/records'),
+                api.get('placements/jobs'),
+                api.get('users')
             ]);
 
             const placemenData = results[0].status === 'fulfilled' ? results[0].value.data : [];
@@ -205,9 +205,9 @@ export default function PlacementsPage() {
     const handleDelete = async (type: 'placement' | 'job' | 'candidate', id: string) => {
         if (confirm("Are you sure you want to delete this record?")) {
             try {
-                if (type === 'placement') await api.delete(`/placements/records/${id}`);
-                if (type === 'job') await api.delete(`/placements/jobs/${id}`);
-                if (type === 'candidate') await api.delete(`/users/${id}`);
+                if (type === 'placement') await api.delete(`placements/records/${id}`);
+                if (type === 'job') await api.delete(`placements/jobs/${id}`);
+                if (type === 'candidate') await api.delete(`users/${id}`);
                 fetchData();
             } catch (err) {
                 console.error(`Failed to delete ${type}:`, err);
@@ -220,19 +220,19 @@ export default function PlacementsPage() {
         e.preventDefault();
         try {
             if (modalType === 'placement') {
-                if (formData.id) await api.put(`/placements/records/${formData.id}`, formData);
-                else await api.post('/placements/records', formData);
+                if (formData.id) await api.put(`placements/records/${formData.id}`, formData);
+                else await api.post('placements/records', formData);
             } else if (modalType === 'job') {
                 // Ensure skills is array if string
                 const payload = { ...formData };
                 if (typeof payload.skillsRequired === 'string') {
                     payload.skillsRequired = payload.skillsRequired.split(',').map((s: string) => s.trim());
                 }
-                if (formData.id) await api.put(`/placements/jobs/${formData.id}`, payload);
-                else await api.post('/placements/jobs', payload);
+                if (formData.id) await api.put(`placements/jobs/${formData.id}`, payload);
+                else await api.post('placements/jobs', payload);
             } else if (modalType === 'candidate') {
-                if (formData.id) await api.put(`/users/${formData.id}`, formData);
-                else await api.post('/users', { ...formData, role: 'STUDENT', active: true });
+                if (formData.id) await api.put(`users/${formData.id}`, formData);
+                else await api.post('users', { ...formData, role: 'STUDENT', active: true });
             }
             setIsModalOpen(false);
             fetchData();

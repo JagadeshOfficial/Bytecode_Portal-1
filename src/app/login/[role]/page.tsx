@@ -73,7 +73,7 @@ export default function RoleLoginPage({ params }: { params: Promise<{ role: stri
         setStatus(null);
 
         try {
-            const response = await api.post('/auth/login', { email, password });
+            const response = await api.post('auth/login', { email, password });
             const data = response.data;
 
             if (!data || !data.token) {
@@ -122,7 +122,7 @@ export default function RoleLoginPage({ params }: { params: Promise<{ role: stri
     const quickFill = async () => {
         setFillLoading(true);
         try {
-            const res = await api.get(`/auth/credentials/${role}`);
+            const res = await api.get(`auth/credentials/${role}`);
             const data = res.data;
             if (data?.found) {
                 setEmail(data.email);

@@ -198,7 +198,7 @@ export default function AdminUnifiedConsole() {
     const handleDeleteMaterial = async (id: string) => {
         if (!confirm('Are you sure you want to remove this resource from the institution?')) return;
         try {
-            await api.delete(`/academic/materials/${id}`);
+            await api.delete(`academic/materials/${id}`);
             setMaterials(materials.filter(m => m.id !== id));
             showToast('success', 'Institutional asset removed');
         } catch (err) {
