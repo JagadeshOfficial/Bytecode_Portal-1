@@ -39,10 +39,34 @@ const MENUS = {
 export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [userName, setUserName] = useState('User');
     const menuItems = MENUS[role] || [];
 
     // Format role for display Title Case
     const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    };
+
+    const getUserName = () => {
+        if (typeof window !== 'undefined') {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const parsed = JSON.parse(storedUser);
+                return parsed.name || parsed.email || 'User';
+            }
+        }
+        return 'User';
+    };
+
+    // Client-side effect to safely set user name
+    useState(() => {
+        if (typeof window !== 'undefined') {
+            setUserName(getUserName());
+        }
+    });
 
     return (
         <div className={styles.container}>
@@ -70,9 +94,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                         </li>
                     ))}
                     <li className={styles.menuItem} style={{ marginTop: 'auto' }}>
-                        <Link href="/" className={styles.menuLink}>
+                        <button onClick={handleLogout} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
                             <span>🚪</span> Logout
-                        </Link>
+                        </button>
                     </li>
                 </ul>
             </aside>
@@ -86,8 +110,8 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                         <h2 className={styles.headerTitle}>{roleDisplay} Portal</h2>
                     </div>
                     <div className={styles.userProfile}>
-                        <span>Welcome, User</span>
-                        <div className={styles.avatar}>U</div>
+                        <span>Welcome, {userName}</span>
+                        <div className={styles.avatar}>{userName.charAt(0)}</div>
                     </div>
                 </header>
                 <div className={styles.content}>

@@ -25,15 +25,32 @@ const studentData = [
 
 export default function AdminDashboard() {
     const [isMounted, setIsMounted] = useState(false);
+    const [userCount, setUserCount] = useState(0);
+    const [adminName, setAdminName] = useState('Admin');
 
     useEffect(() => {
         setIsMounted(true);
+        
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            setAdminName(parsed.name || 'Admin');
+        }
+
+        fetch('http://localhost:8082/api/users')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setUserCount(data.length);
+                }
+            })
+            .catch(err => console.error('Error fetching user count:', err));
     }, []);
 
     return (
         <DashboardLayout role="admin">
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Dashboard Overview</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Welcome, {adminName}</h1>
                 <p style={{ color: 'var(--text-dim)' }}>Live institute metrics and performance analytics.</p>
             </div>
 
@@ -43,7 +60,7 @@ export default function AdminDashboard() {
                 gap: '1.5rem',
                 marginBottom: '2rem'
             }}>
-                <StatsCard title="Total Students" value="1,240" trend="+12.5%" color="blue" />
+                <StatsCard title="Total Users" value={userCount.toLocaleString()} trend="+12.5%" color="blue" />
                 <StatsCard title="Monthly Revenue" value="$45,000" trend="+8.2%" color="green" />
                 <StatsCard title="New Enrollments" value="128" trend="+24%" color="purple" />
                 <StatsCard title="Placement Ratio" value="92%" trend="Top 1%" color="orange" />

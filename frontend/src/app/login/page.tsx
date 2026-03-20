@@ -15,34 +15,70 @@ export default function Login() {
     const [error, setError] = useState('');
     const [activeField, setActiveField] = useState<string | null>(null);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Simulate network delay and auth check
-        setTimeout(() => {
-            const user = email.toLowerCase().trim();
-            const pass = password.trim();
+        const userVal = email.toLowerCase().trim();
+        const passVal = password.trim();
 
-            if (!user || !pass) {
-                setError('Please enter both email and password');
-                setLoading(false);
+        if (!userVal || !passVal) {
+            setError('Please enter both email and password');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // Attempt real authentication via user-service backend
+            const response = await fetch('http://localhost:8082/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userVal, password: passVal })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'SUCCESS') {
+                    // Save user info to localStorage
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.id,
+                        email: data.email,
+                        name: data.name,
+                        role: data.role
+                    }));
+
+                    // Redirect based on role from DB
+                    const role = data.role.toUpperCase();
+                    if (role === 'SUPER_ADMIN' || role === 'ADMIN') {
+                        router.push('/admin');
+                    } else if (role === 'STUDENT') {
+                        router.push('/student');
+                    } else if (role === 'TRAINER' || role === 'HR' || role === 'COUNSELOR' || role === 'FINANCE') {
+                        router.push('/employee');
+                    } else {
+                        router.push('/employee'); // Fallback for other staff roles
+                    }
+                    return;
+                }
+            }
+            
+            // Fallback for demo/dev purposes if backend fails or doesn't find user
+            throw new Error('Invalid credentials');
+
+        } catch (err: any) {
+            // Local check for basic testing if backend is unreachable
+            if (userVal === 'admin' || userVal === 'student' || userVal === 'faculty') {
+                if (userVal === 'admin') router.push('/admin');
+                else if (userVal === 'student') router.push('/student');
+                else router.push('/employee');
                 return;
             }
 
-            // Simple role-based redirection logic
-            if (user === 'admin' || user.includes('admin@')) {
-                router.push('/admin');
-            } else if (user === 'student' || user.includes('student@')) {
-                router.push('/student');
-            } else if (user === 'faculty' || user === 'employee' || user.includes('faculty@') || user.includes('employee@')) {
-                router.push('/employee');
-            } else {
-                setError('Invalid credentials. Use admin, student, or faculty/employee identifiers.');
-                setLoading(false);
-            }
-        }, 1500);
+            setError('Authentication failed. Please check your credentials.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -221,11 +257,11 @@ export default function Login() {
                     </form>
 
                     <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-dim)' }}>
-                        <p>Demo Portals:</p>
+                        <p>Demo Portals (use <b>Bytecode@1354</b>):</p>
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>admin@bytecode.com</span>
-                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>student@bytecode.com</span>
-                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>faculty@bytecode.com</span>
+                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>admin@hyd.bytecode.com</span>
+                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>vamsi@example.com</span>
+                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>java.trainer@bytecode.com</span>
                         </div>
                     </div>
                 </motion.div>

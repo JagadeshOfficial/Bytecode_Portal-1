@@ -3,15 +3,33 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const scheduleIds = [1, 2, 3];
 
 export default function EmployeeDashboard() {
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            fetch(`http://localhost:8082/api/users/${parsed.email}`)
+                .then(res => res.json())
+                .then(data => setUser(data))
+                .catch(err => setUser(parsed));
+        }
+    }, []);
+
+    const name = user?.fullName || user?.name || 'Faculty';
+
     return (
         <DashboardLayout role="employee">
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Faculty Hub</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Manage your academic schedule and student assessments.</p>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Welcome, {name}</h1>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                    {user?.department || 'Faculty Hub'} • {user?.userStatus || 'Present'}
+                </p>
             </div>
 
             <div style={{

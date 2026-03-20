@@ -13,16 +13,30 @@ const data = [
 
 export default function StudentDashboard() {
     const [isMounted, setIsMounted] = useState(false);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         setIsMounted(true);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            // Optionally fetch full profile if needed, but for now use what we have
+            fetch(`http://localhost:8082/api/users/${parsed.email}`)
+                .then(res => res.json())
+                .then(data => setUser(data))
+                .catch(err => setUser(parsed)); // Fallback to basic info
+        }
     }, []);
+
+    const name = user?.fullName || user?.name || 'Student';
 
     return (
         <DashboardLayout role="student">
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>My Learning Space</h1>
-                <p style={{ color: 'var(--text-dim)' }}>Track your progress and prepare for placements.</p>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Welcome, {name}</h1>
+                <p style={{ color: 'var(--text-dim)' }}>
+                    {user?.department || 'Student'} • {user?.userStatus || 'Present'}
+                </p>
             </div>
 
             <div style={{
@@ -33,9 +47,9 @@ export default function StudentDashboard() {
             }}>
                 <StatsCard
                     icon={<Book size={24} className="text-purple-400" />}
-                    title="Courses Active"
-                    value="2"
-                    trend="In Progress"
+                    title="Attendance Rate"
+                    value={`${user?.attendanceRate || 0}%`}
+                    trend="Consistent"
                     color="purple"
                 />
                 <StatsCard
@@ -47,9 +61,9 @@ export default function StudentDashboard() {
                 />
                 <StatsCard
                     icon={<Briefcase size={24} className="text-blue-400" />}
-                    title="Job Eligible"
-                    value="Yes"
-                    trend="Verified"
+                    title="Status"
+                    value={user?.userStatus || 'N/A'}
+                    trend={`Checked in at ${user?.checkInTime || 'N/A'}`}
                     color="blue"
                 />
             </div>
