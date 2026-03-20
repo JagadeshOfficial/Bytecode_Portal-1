@@ -75,3 +75,4 @@
 2026-03-20T17:07:06.179+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:12:06.188+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:17:06.197+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:26:16.677+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

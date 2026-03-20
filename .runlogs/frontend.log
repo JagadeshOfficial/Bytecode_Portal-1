@@ -87,3 +87,16 @@
  GET /login 200 in 334ms (compile: 203ms, render: 131ms)
 ✓ Compiled in 39ms
  GET /super-admin 200 in 284ms (compile: 243ms, render: 41ms)
+ GET /admin 200 in 358ms (compile: 327ms, render: 31ms)
+ GET /admin/students 404 in 558ms (compile: 543ms, render: 15ms)
+ GET /admin/students 404 in 89ms (compile: 9ms, render: 80ms)
+ GET /admin 200 in 179ms (compile: 11ms, render: 167ms)
+ GET /super-admin 200 in 42ms (compile: 16ms, render: 26ms)
+ GET /super-admin/logs 404 in 29ms (compile: 6ms, render: 23ms)
+ GET /super-admin/logs 404 in 36ms (compile: 4ms, render: 32ms)
+ GET /super-admin 200 in 160ms (compile: 7ms, render: 154ms)
+ GET /super-admin 200 in 14ms (compile: 6ms, render: 9ms)
+ GET /admin 200 in 21ms (compile: 5ms, render: 16ms)
+✓ Compiled in 126ms
+ GET /super-admin 200 in 159ms (compile: 100ms, render: 59ms)
+ GET /super-admin 200 in 34ms (compile: 1616µs, render: 32ms)

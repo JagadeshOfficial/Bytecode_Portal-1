@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
@@ -69,12 +69,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
         return 'User';
     };
 
-    // Client-side effect to safely set user name
-    useState(() => {
-        if (typeof window !== 'undefined') {
-            setUserName(getUserName());
-        }
-    });
+    useEffect(() => {
+        setUserName(getUserName());
+    }, []);
 
     return (
         <div className={styles.container}>

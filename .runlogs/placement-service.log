@@ -75,3 +75,4 @@
 2026-03-20T17:07:07.603+05:30  INFO 5988 --- [placement-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:12:07.623+05:30  INFO 5988 --- [placement-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:17:07.632+05:30  INFO 5988 --- [placement-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:26:18.109+05:30  INFO 5988 --- [placement-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
