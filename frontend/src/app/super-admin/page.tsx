@@ -3,403 +3,179 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-    BarChart, Bar, Cell, PieChart, Pie 
+    BarChart, Bar, Legend, Cell, PieChart, Pie,
+    ComposedChart, Line
 } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { 
-    Shield, Activity, Database, Globe, Zap, Users, 
-    Server, Cpu, HardDrive, Terminal, Bell, 
-    Clock, RefreshCw, Download, Settings, Lock
+    Users, DollarSign, BookOpen, Layers, 
+    Award, TrendingUp, AlertCircle, ChevronRight,
+    Search, UserCheck, Activity, Target
 } from 'lucide-react';
 
-const throughputData = [
-    { time: '10:00', load: 45, reqs: 1200 },
-    { time: '11:00', load: 52, reqs: 1450 },
-    { time: '12:00', load: 48, reqs: 1300 },
-    { time: '13:00', load: 75, reqs: 2100 },
-    { time: '14:00', load: 60, reqs: 1800 },
-    { time: '15:00', load: 85, reqs: 2500 },
-    { time: '16:00', load: 70, reqs: 2200 },
+const conversionData = [
+    { name: 'Leads', value: 850, fill: '#8b5cf6' },
+    { name: 'Prospects', value: 420, fill: '#3b82f6' },
+    { name: 'Admissions', value: 310, fill: '#10b981' },
 ];
 
-const serviceIntegrity = [
-    { name: 'Gateway', status: 'Online', uptime: '99.99%', load: 12, color: '#06b6d4' },
-    { name: 'User Auth', status: 'Online', uptime: '100%', load: 8, color: '#10b981' },
-    { name: 'Course Engine', status: 'Optimizing', uptime: '98.5%', load: 85, color: '#f59e0b' },
-    { name: 'Discovery', status: 'Online', uptime: '99.9%', load: 5, color: '#8b5cf6' },
+const revenueTrend = [
+    { day: 'Mon', revenue: 4200, enrollments: 12 },
+    { day: 'Tue', revenue: 3800, enrollments: 8 },
+    { day: 'Wed', revenue: 5600, enrollments: 14 },
+    { day: 'Thu', revenue: 7100, enrollments: 19 },
+    { day: 'Fri', revenue: 4800, enrollments: 11 },
+    { day: 'Sat', revenue: 3200, enrollments: 6 },
+    { day: 'Sun', revenue: 5900, enrollments: 15 },
 ];
 
-const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
-
-export default function SuperAdminDashboard() {
+export default function SuperAdminHome() {
     const [isMounted, setIsMounted] = useState(false);
-    const [stats, setStats] = useState({ users: 0, apiCalls: '1.2M', responseTime: '42ms' });
-    const [activeSection, setActiveSection] = useState('overview');
 
     useEffect(() => {
         setIsMounted(true);
-        fetch('http://localhost:8082/api/users')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setStats(prev => ({ ...prev, users: data.length }));
-            })
-            .catch(err => console.error(err));
     }, []);
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { 
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
 
     return (
         <DashboardLayout role="super_admin">
-            <motion.div 
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-                style={{ padding: '1rem 0' }}
-            >
-                {/* --- HEADER SECTION --- */}
-                <div style={{ 
-                    marginBottom: '3rem', 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '1.5rem'
-                }}>
-                    <div>
-                        <motion.div 
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}
-                        >
-                            <div style={{ 
-                                padding: '4px 12px', 
-                                background: 'rgba(124, 58, 237, 0.1)', 
-                                border: '1px solid rgba(124, 58, 237, 0.2)',
-                                borderRadius: '100px',
-                                fontSize: '0.7rem',
-                                fontWeight: 800,
-                                color: 'var(--primary)',
-                                letterSpacing: '2px'
-                            }}>CENTRAL COMMAND</div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 700 }}>VER 4.2.0-STABLE</span>
-                        </motion.div>
-                        <h1 style={{ 
-                            fontSize: 'clamp(1.5rem, 4vw, 3rem)', 
-                            fontWeight: 900, 
-                            letterSpacing: '-1px',
-                            lineHeight: 1,
-                            marginBottom: '0.5rem'
-                        }}>Global Engine Control</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage infrastructure, security, and global institute nodes.</p>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                         <div style={{ textAlign: 'right', display: 'none' }} className="desktop-only">
-                            <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: 700 }}>LAST BACKUP</div>
-                            <div style={{ fontWeight: 800, color: '#10b981' }}>2h 14m ago</div>
-                         </div>
-                         <button style={{ 
-                             background: 'rgba(255,255,255,0.03)', 
-                             border: '1px solid rgba(255,255,255,0.1)', 
-                             padding: '12px', 
-                             borderRadius: '12px',
-                             cursor: 'pointer'
-                         }}><Bell size={20} /></button>
-                         <button className="btn-quantum" style={{ padding: '12px 24px', fontSize: '0.8rem' }}>
-                            <RefreshCw size={14} style={{ marginRight: '8px' }} /> BOOT SYSTEM
-                         </button>
-                    </div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                
+                {/* --- OVERVIEW CARDS --- */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                    <HomeMetricCard icon={<Users />} title="Total Students" value="4,852" trend="+124 new" color="#8b5cf6" />
+                    <HomeMetricCard icon={<Target />} title="Conversion Rate" value="36.4%" trend="Optimized" color="#3b82f6" />
+                    <HomeMetricCard icon={<DollarSign />} title="Monthly Revenue" value="$142,500" trend="22% Growth" color="#10b981" />
+                    <HomeMetricCard icon={<Layers />} title="Active Batches" value="18" sub="Across 4 Courses" color="#f59e0b" />
+                    <HomeMetricCard icon={<Award />} title="Placement Rate" value="92.4%" sub="Global Benchmark" color="#ec4899" />
                 </div>
 
-                {/* --- CORE METRICS GRID --- */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                    gap: '1.5rem',
-                    marginBottom: '2.5rem'
-                }}>
-                    <ControlCard 
-                        icon={<Users size={24} />} 
-                        title="Active Citizens" 
-                        value={stats.users} 
-                        trend="+14% this month" 
-                        chartColor="#3b82f6" 
-                    />
-                    <ControlCard 
-                        icon={<Activity size={24} />} 
-                        title="API Response" 
-                        value={stats.responseTime} 
-                        trend="-5ms avg" 
-                        chartColor="#10b981" 
-                    />
-                    <ControlCard 
-                        icon={<Zap size={24} />} 
-                        title="Compute Load" 
-                        value="32.4%" 
-                        trend="Normal range" 
-                        chartColor="#f59e0b" 
-                    />
-                    <ControlCard 
-                        icon={<HardDrive size={24} />} 
-                        title="DB Queries" 
-                        value="24k/s" 
-                        trend="Peak efficiency" 
-                        chartColor="#ec4899" 
-                    />
-                </div>
-
-                {/* --- MAIN DASHBOARD AREA --- */}
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '7fr 3fr', 
-                    gap: '2rem',
-                    marginBottom: '2rem'
-                }}>
-                    {/* Left: Real-time traffic */}
-                    <motion.div variants={containerVariants} className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    {/* Main Growth Graph */}
+                    <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '0.25rem' }}>Infrastructure Throughput</h3>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Requests per second vs Server Load</p>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Market Growth & Revenue</h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Real-time student acquisitions vs daily yield</p>
                             </div>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <button style={{ padding: '4px 12px', fontSize: '0.7rem', borderRadius: '6px', background: 'var(--primary)', color: '#fff', border: 'none' }}>LIVE</button>
-                                <button style={{ padding: '4px 12px', fontSize: '0.7rem', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-dim)', border: 'none' }}>24H</button>
+                                <Badge label="Real-time Sync" color="#10b981" />
                             </div>
                         </div>
-
-                        <div style={{ height: 400, width: '100%', marginLeft: '-20px' }}>
+                        <div style={{ height: 350, width: '100%', marginLeft: '-20px' }}>
                             {isMounted && (
                                 <ResponsiveContainer>
-                                    <AreaChart data={throughputData}>
-                                        <defs>
-                                            <linearGradient id="loadGrad" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
-                                                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="5 5" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                                        <XAxis dataKey="time" stroke="#64748b" axisLine={false} tickLine={false} dy={10} />
-                                        <YAxis stroke="#64748b" axisLine={false} tickLine={false} />
-                                        <Tooltip 
-                                            contentStyle={{ 
-                                                background: 'rgba(15, 23, 42, 0.95)', 
-                                                border: '1px solid rgba(255,255,255,0.1)', 
-                                                borderRadius: '16px',
-                                                backdropFilter: 'blur(12px)'
-                                            }} 
-                                        />
-                                        <Area 
-                                            type="monotone" 
-                                            dataKey="load" 
-                                            stroke="var(--primary)" 
-                                            strokeWidth={4}
-                                            fill="url(#loadGrad)" 
-                                            animationDuration={2000}
-                                        />
-                                        <Area 
-                                            type="monotone" 
-                                            dataKey="reqs" 
-                                            stroke="#06b6d4" 
-                                            strokeWidth={2}
-                                            strokeDasharray="8 4"
-                                            fill="none" 
-                                            animationDuration={2500}
-                                        />
-                                    </AreaChart>
+                                    <ComposedChart data={revenueTrend}>
+                                        <XAxis dataKey="day" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} />
+                                        <YAxis yAxisId="left" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} />
+                                        <YAxis yAxisId="right" orientation="right" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} />
+                                        <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '16px' }} />
+                                        <Area yAxisId="left" type="monotone" dataKey="revenue" fill="rgba(139, 92, 246, 0.1)" stroke="#8b5cf6" strokeWidth={3} />
+                                        <Line yAxisId="right" type="step" dataKey="enrollments" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981' }} />
+                                    </ComposedChart>
                                 </ResponsiveContainer>
                             )}
                         </div>
-                    </motion.div>
+                    </div>
 
-                    {/* Right: Security & Actions */}
+                    {/* Conversion Funnel & Alerts */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        {/* Status Pulse */}
-                        <motion.div variants={containerVariants} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', textAlign: 'center' }}>
-                            <div style={{ 
-                                position: 'relative', 
-                                width: '100px', 
-                                height: '100px', 
-                                margin: '0 auto 1.5rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <motion.div 
-                                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                    style={{ position: 'absolute', width: '100%', height: '100%', background: '#10b981', borderRadius: '50%', filter: 'blur(20px)' }} 
-                                />
-                                <div style={{ position: 'relative', width: '50px', height: '50px', background: '#10b981', borderRadius: '50%', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px #10b981' }}>
-                                    <Shield size={24} />
-                                </div>
-                            </div>
-                            <h4 style={{ fontWeight: 900, marginBottom: '0.25rem' }}>Firewall Intact</h4>
-                            <p style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700 }}>0 SECURITY BREACHES</p>
-                        </motion.div>
-
-                        {/* Quick Control Center */}
-                        <motion.div variants={containerVariants} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px' }}>
-                            <h4 style={{ fontSize: '0.9rem', fontWeight: 900, marginBottom: '1.5rem', color: 'var(--text-bright)' }}>ENGINEER ACTIONS</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                <EngineAction icon={<Terminal size={14} />} label="Flush Gateway Cache" primary />
-                                <EngineAction icon={<Download size={14} />} label="Download System Logs" />
-                                <EngineAction icon={<Settings size={14} />} label="Runtime Config" />
-                                <EngineAction icon={<Lock size={14} />} label="Rotate Auth Keys" color="#ef4444" />
-                            </div>
-                        </motion.div>
-
-                        {/* Resource Pie */}
-                        <motion.div variants={containerVariants} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', height: '240px' }}>
-                             <div style={{ height: '100%', width: '100%' }}>
+                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '2rem' }}>Leads Funnel</h3>
+                            <div style={{ height: 220, width: '100%' }}>
                                 {isMounted && (
                                     <ResponsiveContainer>
-                                        <PieChart>
-                                            <Pie
-                                                data={[
-                                                    { name: 'App Nodes', value: 45 },
-                                                    { name: 'Worker Pool', value: 25 },
-                                                    { name: 'Cache Layer', value: 15 },
-                                                    { name: 'Reserved', value: 15 }
-                                                ]}
-                                                innerRadius={60}
-                                                outerRadius={80}
-                                                paddingAngle={5}
-                                                dataKey="value"
-                                            >
-                                                {COLORS.map((color, index) => (
-                                                    <Cell key={`cell-${index}`} fill={color} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip />
-                                        </PieChart>
+                                        <BarChart data={conversionData} layout="vertical">
+                                            <XAxis type="number" hide />
+                                            <YAxis dataKey="name" type="category" stroke="var(--text-dim)" axisLine={false} tickLine={false} />
+                                            <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#1e293b', border: 'none' }} />
+                                            <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={25}>
+                                                {conversionData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                                            </Bar>
+                                        </BarChart>
                                     </ResponsiveContainer>
                                 )}
-                             </div>
-                        </motion.div>
+                            </div>
+                        </div>
+
+                        {/* Alerts Panel */}
+                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', borderLeft: '4px solid #ef4444' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <AlertCircle size={18} color="#ef4444" /> System Critical Alerts
+                            </h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <AlertRow type="FOLLOW-UP" label="24 Pending Counsellor calls" time="30m ago" />
+                                <AlertRow type="ATTENDANCE" label="Batch J1 attendance below 60%" time="2h ago" />
+                                <AlertRow type="FINANCE" label="4 Payments overdue ($3.2k)" time="Today" />
+                            </div>
+                            <button style={{ width: '100%', marginTop: '1.5rem', padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer' }}>RESOLVE ALL →</button>
+                        </div>
                     </div>
                 </div>
 
-                {/* --- SERVICE GRID --- */}
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '1.5rem' }}>Service Cluster Integrity</h3>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '1.5rem'
-                }}>
-                    {serviceIntegrity.map((s, i) => (
-                        <ServiceNode key={i} {...s} />
-                    ))}
+                {/* --- RECENT ACTIVITY TABLE --- */}
+                <div style={{ marginTop: '3rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Real-time Pulse Feed</h3>
+                        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem' }}>VIEW GLOBAL LOGS</div>
+                    </div>
+                    <div className="glass-panel" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ background: 'rgba(255,255,255,0.02)', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>
+                                    <th style={{ padding: '15px 20px' }}>ENTITY</th>
+                                    <th style={{ padding: '15px 20px' }}>ACTION</th>
+                                    <th style={{ padding: '15px 20px' }}>TIMESTAMP</th>
+                                    <th style={{ padding: '15px 20px' }}>SECURITY RANK</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <PulseRow entity="Auth Service" action="Token Cluster Rotate" time="Just Now" rank="LEVEL_1" />
+                                <PulseRow entity="Gateway Node 4" action="Throughput Balanced" time="3m ago" rank="LEVEL_3" />
+                                <PulseRow entity="Admin: Sai" action="Created Batch: FullStack_Apr" time="15m ago" rank="LEVEL_2" />
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
             </motion.div>
-
-            <style jsx global>{`
-                .glass-panel {
-                    border: 1px solid rgba(255,255,255,0.05) !important;
-                    background: rgba(255,255,255,0.02) !important;
-                    box-shadow: 0 4px 64px -12px rgba(0,0,0,0.4) !important;
-                }
-                .glass-panel:hover {
-                    background: rgba(255,255,255,0.03) !important;
-                    border-color: rgba(124, 58, 237, 0.2) !important;
-                }
-            `}</style>
         </DashboardLayout>
     );
 }
 
-function ControlCard({ icon, title, value, trend, chartColor }: any) {
+function HomeMetricCard({ icon, title, value, trend, sub, color }: any) {
     return (
-        <motion.div 
-            variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
-            whileHover={{ y: -8, scale: 1.02 }}
-            className="glass-panel"
-            style={{ padding: '1.75rem', borderRadius: '28px', position: 'relative', overflow: 'hidden' }}
-        >
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${chartColor}20`, color: chartColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                {icon}
-            </div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>{title.toUpperCase()}</div>
-            <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem', letterSpacing: '-1px' }}>{value}</div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: chartColor }}>{trend}</div>
-            
-            {/* Background flourish */}
-            <div style={{ position: 'absolute', bottom: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: chartColor, opacity: 0.03, filter: 'blur(30px)' }} />
-        </motion.div>
+        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', borderBottom: `3px solid ${color}` }}>
+            <div style={{ color: color, marginBottom: '0.75rem' }}>{icon}</div>
+            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-dim)', letterSpacing: '1px' }}>{title.toUpperCase()}</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 900, margin: '0.25rem 0' }}>{value}</div>
+            <div style={{ fontSize: '0.75rem', color: trend ? '#10b981' : 'var(--text-dim)', fontWeight: 700 }}>{trend || sub}</div>
+        </div>
     );
 }
 
-function ServiceNode({ name, status, uptime, load, color }: any) {
+function Badge({ label, color }: any) {
+    return <span style={{ background: `${color}10`, color: color, padding: '4px 12px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900 }}>{label.toUpperCase()}</span>;
+}
+
+function AlertRow({ type, label, time }: any) {
     return (
-        <motion.div 
-            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-            className="glass-panel" 
-            style={{ padding: '1.5rem', borderRadius: '24px' }}
-        >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Server size={18} color={color} />
-                    <span style={{ fontWeight: 800, fontSize: '1rem' }}>{name}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: status === 'Online' ? '#10b981' : '#f59e0b' }} />
-                    <span style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.8 }}>{status.toUpperCase()}</span>
-                </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#ef4444' }}>{type}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{label}</div>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-dim)', marginBottom: '4px' }}>UPTIME</div>
-                    <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{uptime}</div>
-                </div>
-                <div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-dim)', marginBottom: '4px' }}>LOAD</div>
-                    <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{load}%</div>
-                </div>
-            </div>
-
-            <div style={{ height: '6px', width: '100%', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden' }}>
-                <motion.div 
-                    initial={{ width: 0 }} 
-                    animate={{ width: `${load}%` }} 
-                    style={{ height: '100%', background: color }} 
-                />
-            </div>
-        </motion.div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{time}</div>
+        </div>
     );
 }
 
-function EngineAction({ icon, label, primary, color }: any) {
+function PulseRow({ entity, action, time, rank }: any) {
     return (
-        <motion.button 
-            whileHover={{ x: 5, background: 'rgba(255,255,255,0.05)' }}
-            style={{ 
-                width: '100%', 
-                padding: '12px 16px', 
-                borderRadius: '12px', 
-                background: primary ? 'rgba(124, 58, 237, 0.1)' : 'transparent',
-                border: primary ? '1px solid rgba(124, 58, 237, 0.2)' : '1px solid rgba(255,255,255,0.05)',
-                color: color || (primary ? 'var(--primary)' : 'var(--text-bright)'),
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                textAlign: 'left',
-                transition: 'all 0.2s'
-            }}
-        >
-            {icon}
-            {label}
-        </motion.button>
+        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+            <td style={{ padding: '15px 20px', fontWeight: 800 }}>{entity}</td>
+            <td style={{ padding: '15px 20px', color: 'var(--text-dim)', fontSize: '0.9rem' }}>{action}</td>
+            <td style={{ padding: '15px 20px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>{time}</td>
+            <td style={{ padding: '15px 20px' }}><Badge label={rank} color={rank === 'LEVEL_1' ? '#ef4444' : '#3b82f6'} /></td>
+        </tr>
     );
 }

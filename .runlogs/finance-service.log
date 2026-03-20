@@ -81,3 +81,4 @@
 2026-03-20T17:41:18.324+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:46:18.335+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:51:18.322+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:56:18.329+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

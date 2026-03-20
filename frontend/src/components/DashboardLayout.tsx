@@ -3,10 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, LogOut, LayoutDashboard, Database, Shield, Activity, Globe, Zap, Users, BookOpen, GraduationCap, Briefcase, FileText, Settings, HeartPulse } from 'lucide-react';
+import { 
+    Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar, 
+    Video, FileText, CheckCircle, Target, Search, Phone, DollarSign, 
+    BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap, 
+    HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool
+} from 'lucide-react';
 import styles from './Dashboard.module.css';
 
-type Role = 'super_admin' | 'admin' | 'employee' | 'student';
+type Role = 'super_admin' | 'admin' | 'counsellor' | 'tutor' | 'placement' | 'social_media' | 'student';
 
 interface MenuItem {
     label: string;
@@ -20,35 +25,60 @@ interface DashboardLayoutProps {
     role: Role;
 }
 
-const MENUS: Record<Role, MenuItem[]> = {
+const MENUS: Record<string, MenuItem[]> = {
     super_admin: [
-        { section: 'Intelligence', label: 'Platform Hub', href: '/super-admin', icon: <LayoutDashboard size={20} /> },
-        { section: 'Master Management', label: 'User & Role Control', href: '/super-admin/users', icon: <Users size={20} /> },
-        { label: 'Platform Modules', href: '/super-admin/modules', icon: <BookOpen size={20} /> },
-        { section: 'Operations', label: 'Center Admins', href: '/admin', icon: <Globe size={20} /> },
-        { section: 'Health & Science', label: 'Platform Pulse', href: '/super-admin/pulse', icon: <HeartPulse size={20} /> },
-        { section: 'Security Lab', label: 'Shield Protocol', href: '/super-admin/security', icon: <Shield size={20} /> },
-        { label: 'System Settings', href: '/super-admin/settings', icon: <Settings size={20} /> },
+        { section: 'Intelligence', label: 'Dashboard Home', href: '/super-admin', icon: <LayoutDashboard size={18} /> },
+        { section: 'Global Access', label: 'User Master', href: '/super-admin/users', icon: <Users size={18} /> },
+        { label: 'Platform Modules', href: '/super-admin/modules', icon: <BookOpen size={18} /> },
+        { label: 'Batch Architect', href: '/super-admin/batches', icon: <Layers size={18} /> },
+        { section: 'Operational Link', label: 'Live Scheduler', href: '/super-admin/live', icon: <Video size={18} /> },
+        { label: 'Recordings Hub', href: '/super-admin/recordings', icon: <Activity size={18} /> },
+        { label: 'Assignments Desk', href: '/super-admin/assignments', icon: <FileText size={18} /> },
+        { section: 'Evaluations', label: 'Test Management', href: '/super-admin/tests', icon: <CheckCircle size={18} /> },
+        { label: 'Mock Bench', href: '/super-admin/mocks', icon: <Target size={18} /> },
+        { section: 'Revenue & CRM', label: 'CRM Leads', href: '/super-admin/crm', icon: <Search size={18} /> },
+        { label: 'Follow-up Portal', href: '/super-admin/followup', icon: <Phone size={18} /> },
+        { label: 'Finance Engine', href: '/super-admin/finance', icon: <DollarSign size={18} /> },
+        { section: 'Workforce', label: 'Employee Tracking', href: '/super-admin/tracking', icon: <UserCheck size={18} /> },
+        { label: 'Salary Master', href: '/super-admin/salary', icon: <DollarSign size={18} /> },
+        { section: 'Growth', label: 'Marketing Planner', href: '/super-admin/marketing', icon: <TrendingUp size={18} /> },
+        { label: 'Platform Reports', href: '/super-admin/reports', icon: <BarChart3 size={18} /> },
+        { label: 'System Settings', href: '/super-admin/settings', icon: <Settings size={18} /> },
     ],
     admin: [
-        { section: 'Operations', label: 'Overview', href: '/admin', icon: <LayoutDashboard size={20} /> },
-        { label: 'Talent Pool', href: '/admin/students', icon: <GraduationCap size={20} /> },
-        { label: 'Faculty Roster', href: '/admin/employees', icon: <Users size={20} /> },
-        { section: 'Academic', label: 'All Courses', href: '/admin/courses', icon: <BookOpen size={20} /> },
-        { section: 'Finance', label: 'Revenue Flow', href: '/admin/finance', icon: <Zap size={20} /> },
-        { label: 'Strategic Reports', href: '/admin/reports', icon: <FileText size={20} /> },
+        { section: 'Main', label: 'Admin Home', href: '/admin', icon: <LayoutDashboard size={18} /> },
+        { label: 'Student Nexus', href: '/admin/students', icon: <Users size={18} /> },
+        { label: 'Batch Control', href: '/admin/batches', icon: <Layers size={18} /> },
+        { section: 'CRM', label: 'Leads Desk', href: '/admin/leads', icon: <Target size={18} /> },
+        { label: 'Operations Report', href: '/admin/reports', icon: <BarChart3 size={18} /> },
     ],
-    employee: [
-        { section: 'Teaching', label: 'My Console', href: '/employee', icon: <LayoutDashboard size={20} /> },
-        { label: 'Active Batches', href: '/employee/classes', icon: <Users size={20} /> },
-        { label: 'Evaluations', href: '/employee/assignments', icon: <FileText size={20} /> },
-        { section: 'Records', label: 'My Students', href: '/employee/students', icon: <GraduationCap size={20} /> },
+    counsellor: [
+        { section: 'Performance', label: 'My Targets', href: '/counsellor', icon: <LayoutDashboard size={18} /> },
+        { label: 'Assigned Leads', href: '/counsellor/leads', icon: <Target size={18} /> },
+        { section: 'Action', label: 'Follow-ups', href: '/counsellor/followup', icon: <Phone size={18} /> },
+    ],
+    tutor: [
+        { section: 'Academy', label: 'Live Classes', href: '/tutor', icon: <Video size={18} /> },
+        { label: 'Manage Recordings', href: '/tutor/recordings', icon: <Activity size={18} /> },
+        { section: 'Grading', label: 'Assignment Review', href: '/tutor/assignments', icon: <FileText size={18} /> },
+        { label: 'Student Insights', href: '/tutor/students', icon: <Users size={18} /> },
+    ],
+    placement: [
+        { section: 'Career', label: 'Readiness Tracker', href: '/placement', icon: <UserCheck size={18} /> },
+        { label: 'Interview Desk', href: '/placement/interviews', icon: <Calendar size={18} /> },
+        { label: 'Job Master List', href: '/placement/jobs', icon: <Briefcase size={18} /> },
+    ],
+    social_media: [
+        { section: 'Creator', label: 'Content Planner', href: '/social-media', icon: <PenTool size={18} /> },
+        { label: 'Campaign Pulse', href: '/social-media/campaigns', icon: <BarChart3 size={18} /> },
+        { label: 'Gen Leads Audit', href: '/social-media/leads', icon: <Target size={18} /> },
     ],
     student: [
-        { section: 'Academy', label: 'My Learning', href: '/student', icon: <LayoutDashboard size={20} /> },
-        { label: 'Catalog', href: '/student/courses', icon: <BookOpen size={20} /> },
-        { label: 'Daily Planner', href: '/student/schedule', icon: <Zap size={20} /> },
-        { section: 'Career', label: 'Career Hub', href: '/student/placements', icon: <Briefcase size={20} /> },
+        { section: 'Learning', label: 'My Courses', href: '/student', icon: <BookOpen size={18} /> },
+        { label: 'Submission Hub', href: '/student/assignments', icon: <FileText size={18} /> },
+        { label: 'Exam Center', href: '/student/tests', icon: <CheckCircle size={18} /> },
+        { section: 'Career', label: 'Career Launch', href: '/student/placements', icon: <Briefcase size={18} /> },
+        { label: 'Growth Progress', href: '/student/progress', icon: <TrendingUp size={18} /> },
     ]
 };
 
@@ -58,7 +88,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
     const [userName, setUserName] = useState('User');
     const menuItems = MENUS[role] || [];
 
-    const roleDisplay = role.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+    const roleDisplay = role.replace(/_/g, ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -70,7 +100,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const parsed = JSON.parse(storedUser);
-                return parsed.name || parsed.email || 'User';
+                return parsed.name || parsed.fullName || parsed.email || 'User';
             }
         }
         return 'User';
@@ -89,36 +119,38 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     <span>🔷</span> 
                     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
                         <span style={{ fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--primary)' }}>Bytecode</span>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>{roleDisplay}</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase' }}>{roleDisplay}</span>
                     </div>
                     <button className={styles.closeBtn} onClick={() => setIsSidebarOpen(false)}>
                         <X size={20} />
                     </button>
                 </div>
                 
-                <ul className={styles.menu}>
-                    {menuItems.map((item, index) => (
-                        <li key={item.href} className={styles.menuItem}>
-                            {item.section && <div className={styles.menuSection}>{item.section}</div>}
-                            <Link
-                                href={item.href}
-                                className={`${styles.menuLink} ${pathname === item.href ? styles.activeLink : ''}`}
-                                onClick={() => setIsSidebarOpen(false)}
-                            >
-                                <span style={{ opacity: 0.8 }}>{item.icon}</span>
-                                {item.label}
-                            </Link>
+                <div className={styles.sidebarContent} style={{ flex: 1, overflowY: 'scroll', paddingBottom: '2rem' }}>
+                    <ul className={styles.menu}>
+                        {menuItems.map((item, index) => (
+                            <li key={item.href} className={styles.menuItem}>
+                                {item.section && <div className={styles.menuSection}>{item.section}</div>}
+                                <Link
+                                    href={item.href}
+                                    className={`${styles.menuLink} ${pathname === item.href ? styles.activeLink : ''}`}
+                                    onClick={() => setIsSidebarOpen(false)}
+                                >
+                                    <span style={{ opacity: 0.8 }}>{item.icon}</span>
+                                    {item.label}
+                                </Link>
+                            </li>
+                        ))}
+                        
+                        <li className={styles.menuItem} style={{ marginTop: '2rem' }}>
+                            <div className={styles.menuSection}>Runtime</div>
+                            <button onClick={handleLogout} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
+                                <LogOut size={18} style={{ opacity: 0.8 }} />
+                                Terminate Session
+                            </button>
                         </li>
-                    ))}
-                    
-                    <li className={styles.menuItem} style={{ marginTop: 'auto' }}>
-                        <div className={styles.menuSection}>System</div>
-                        <button onClick={handleLogout} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
-                            <LogOut size={20} style={{ opacity: 0.8 }} />
-                            Terminate Session
-                        </button>
-                    </li>
-                </ul>
+                    </ul>
+                </div>
             </aside>
 
             <main className={styles.main}>
@@ -127,7 +159,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                         <button className={styles.menuBtn} onClick={() => setIsSidebarOpen(true)}>
                             <Menu size={24} />
                         </button>
-                        <h2 className={styles.headerTitle}>{roleDisplay} Hub</h2>
+                        <h2 className={styles.headerTitle}>{roleDisplay} Panel</h2>
                     </div>
                     
                     <div className={styles.userProfile}>
