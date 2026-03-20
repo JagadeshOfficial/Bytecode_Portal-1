@@ -1,0 +1,47 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.bytecode:placement-service >-------------------
+[INFO] Building placement-service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.0.2:run (default-cli) > test-compile @ placement-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ placement-service ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ placement-service ---
+[INFO] Recompiling the module because of added or removed source files.
+[INFO] Compiling 8 source files with javac [debug parameters release 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ placement-service ---
+[INFO] skip non existing resourceDirectory /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/placement-service/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ placement-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 17] to target/test-classes
+[INFO] 
+[INFO] <<< spring-boot:4.0.2:run (default-cli) < test-compile @ placement-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.0.2:run (default-cli) @ placement-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.2)
+
+2026-03-20T16:10:48.359+05:30  INFO 90044 --- [placement-service] [           main] c.b.p.PlacementServiceApplication        : Starting PlacementServiceApplication using Java 21.0.7 with PID 90044 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/placement-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/placement-service)
+2026-03-20T16:10:48.365+05:30  INFO 90044 --- [placement-service] [           main] c.b.p.PlacementServiceApplication        : No active profile set, falling back to 1 default profile: "default"
+2026-03-20T16:10:48.366+05:30 DEBUG 90044 --- [placement-service] [           main] o.s.boot.SpringApplication               : Loading source class com.bytecode.placement.PlacementServiceApplication
+2026-03-20T16:10:48.443+05:30 DEBUG 90044 --- [placement-service] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext@37091312
+2026-03-20T16:10:49.544+05:30  INFO 90044 --- [placement-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-03-20T16:10:49.561+05:30 DEBUG 90044 --- [placement-service] [           main] o.s.b.a.AutoConfigurationPackages        : @EnableAutoConfiguration was declared on a class in the package 'com.bytecode.placement'. Automatic @Repository and @Entity scanning is enabled.
+2026-03-20T16:10:49.758+05:30  INFO 90044 --- [placement-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 209 ms. Found 2 MongoDB repository interfaces.
+2026-03-20T16:10:50.046+05:30  INFO 90044 --- [placement-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=28e0c26d-8c52-3e01-97e5-2b6fe80c0f4d

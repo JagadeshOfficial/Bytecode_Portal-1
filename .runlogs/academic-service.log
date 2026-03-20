@@ -1,0 +1,43 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.bytecode:academic-service >--------------------
+[INFO] Building academic-service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.0.2:run (default-cli) > test-compile @ academic-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ academic-service ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ academic-service ---
+[INFO] Recompiling the module because of added or removed source files.
+[INFO] Compiling 24 source files with javac [debug parameters release 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ academic-service ---
+[INFO] skip non existing resourceDirectory /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/academic-service/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ academic-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 17] to target/test-classes
+[INFO] 
+[INFO] <<< spring-boot:4.0.2:run (default-cli) < test-compile @ academic-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.0.2:run (default-cli) @ academic-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.2)
+
+2026-03-20T16:10:49.784+05:30  INFO 90047 --- [academic-service] [           main] c.b.academic.AcademicServiceApplication  : Starting AcademicServiceApplication using Java 21.0.7 with PID 90047 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/academic-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/academic-service)
+2026-03-20T16:10:49.788+05:30  INFO 90047 --- [academic-service] [           main] c.b.academic.AcademicServiceApplication  : No active profile set, falling back to 1 default profile: "default"
+2026-03-20T16:10:49.789+05:30 DEBUG 90047 --- [academic-service] [           main] o.s.boot.SpringApplication               : Loading source class com.bytecode.academic.AcademicServiceApplication
+2026-03-20T16:10:49.852+05:30 DEBUG 90047 --- [academic-service] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext@604c5de8
