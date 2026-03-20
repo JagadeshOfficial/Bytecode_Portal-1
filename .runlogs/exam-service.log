@@ -77,3 +77,4 @@
 2026-03-20T17:12:07.504+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:17:07.518+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:26:18.002+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:31:18.026+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

@@ -76,3 +76,7 @@
 2026-03-20T17:12:06.188+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:17:06.197+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T17:26:16.677+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:31:16.688+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:31:54.565+05:30  INFO 5983 --- [assessment-service] [nio-8083-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-20T17:31:54.566+05:30  INFO 5983 --- [assessment-service] [nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-20T17:31:54.603+05:30  INFO 5983 --- [assessment-service] [nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 36 ms
