@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, MessageCircle } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const PHONE = "+918309879187";
 const WA_URL = `https://wa.me/918309879187?text=${encodeURIComponent("Hi Bytecode! I want to know more about your courses.")}`;
 
 export default function StickyMobileCTA() {
+    const pathname = usePathname();
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -15,6 +17,13 @@ export default function StickyMobileCTA() {
         const timer = setTimeout(() => setVisible(true), 2000);
         return () => clearTimeout(timer);
     }, []);
+
+    const isDashboard = pathname?.startsWith('/admin') || 
+                       pathname?.startsWith('/super-admin') || 
+                       pathname?.startsWith('/student') || 
+                       pathname?.startsWith('/employee');
+
+    if (isDashboard) return null;
 
     return (
         <AnimatePresence>

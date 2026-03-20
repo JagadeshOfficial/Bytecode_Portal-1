@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
-type Role = 'admin' | 'employee' | 'student';
+type Role = 'super_admin' | 'admin' | 'employee' | 'student';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -14,6 +14,14 @@ interface DashboardLayoutProps {
 }
 
 const MENUS = {
+    super_admin: [
+        { label: 'Platform Overview', href: '/super-admin', icon: '🌐' },
+        { label: 'Institute Admin', href: '/admin', icon: '🏛️' },
+        { label: 'System Logs', href: '/super-admin/logs', icon: '📋' },
+        { label: 'Database Control', href: '/super-admin/database', icon: '💾' },
+        { label: 'Security Center', href: '/super-admin/security', icon: '🛡️' },
+        { label: 'Global Reports', href: '/super-admin/reports', icon: '📊' },
+    ],
     admin: [
         { label: 'Dashboard', href: '/admin', icon: '📊' },
         { label: 'Students', href: '/admin/students', icon: '👨‍🎓' },
@@ -43,7 +51,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
     const menuItems = MENUS[role] || [];
 
     // Format role for display Title Case
-    const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1);
+    const roleDisplay = role.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
     const handleLogout = () => {
         localStorage.removeItem('user');

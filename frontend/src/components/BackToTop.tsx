@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function BackToTop() {
+    const pathname = usePathname();
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -12,6 +14,13 @@ export default function BackToTop() {
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
+
+    const isDashboard = pathname?.startsWith('/admin') || 
+                       pathname?.startsWith('/super-admin') || 
+                       pathname?.startsWith('/student') || 
+                       pathname?.startsWith('/employee');
+
+    if (isDashboard) return null;
 
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 

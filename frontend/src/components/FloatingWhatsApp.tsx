@@ -3,8 +3,10 @@
 import { MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function FloatingWhatsApp() {
+    const pathname = usePathname();
     const phoneNumber = "918309879187";
     const message = "Hi Bytecode! I am confused about which course to take. Can a Career Expert guide me?";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
@@ -25,6 +27,13 @@ export default function FloatingWhatsApp() {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
+
+    const isDashboard = pathname?.startsWith('/admin') || 
+                       pathname?.startsWith('/super-admin') || 
+                       pathname?.startsWith('/student') || 
+                       pathname?.startsWith('/employee');
+
+    if (isDashboard) return null;
 
     return (
         <motion.div

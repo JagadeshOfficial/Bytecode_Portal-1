@@ -30,6 +30,12 @@
   /* Borders & Shadows */
   --border-luminous: 1px solid rgba(124, 58, 237, 0.2);
   --border-faint: 1px solid rgba(0, 0, 0, 0.1);
+  --border: rgba(0, 0, 0, 0.1);
+  --surface: #ffffff;
+  --surface-hover: rgba(124, 58, 237, 0.05);
+  --radius-md: 12px;
+  --text-secondary: #475569;
+  --primary-light: rgba(124, 58, 237, 0.1);
   --glow-sm: 0 0 20px rgba(124, 58, 237, 0.15);
   --glow-lg: 0 0 50px rgba(124, 58, 237, 0.25);
 
@@ -64,6 +70,12 @@
   /* Borders & Shadows */
   --border-luminous: 1px solid rgba(139, 92, 246, 0.3);
   --border-faint: 1px solid rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --surface: #030014;
+  --surface-hover: rgba(124, 58, 237, 0.15);
+  --radius-md: 12px;
+  --text-secondary: #94a3b8;
+  --primary-light: rgba(124, 58, 237, 0.2);
   --glow-sm: 0 0 20px rgba(124, 58, 237, 0.3);
   --glow-lg: 0 0 50px rgba(124, 58, 237, 0.5);
 }

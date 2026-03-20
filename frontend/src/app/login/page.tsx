@@ -50,7 +50,9 @@ export default function Login() {
 
                     // Redirect based on role from DB
                     const role = data.role.toUpperCase();
-                    if (role === 'SUPER_ADMIN' || role === 'ADMIN') {
+                    if (role === 'SUPER_ADMIN') {
+                        router.push('/super-admin');
+                    } else if (role === 'ADMIN') {
                         router.push('/admin');
                     } else if (role === 'STUDENT') {
                         router.push('/student');
