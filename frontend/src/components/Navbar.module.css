@@ -1,0 +1,324 @@
+.navbar {
+    position: fixed;
+    top: 25px;
+    left: 50%;
+    /* transform is handled by framer motion */
+    width: 92%;
+    max-width: 1400px;
+    height: 72px;
+    z-index: 1000;
+    background: var(--bg-panel);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: var(--border-luminous);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.1),
+        inset 0 0 1px 1px rgba(124, 58, 237, 0.1);
+}
+
+.navbar:hover {
+    background: var(--bg-panel);
+    border-color: var(--primary);
+    box-shadow: var(--glow-sm);
+}
+
+.navContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 2rem;
+}
+
+.logoWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg-void);
+    padding: 0.6rem 2rem;
+    border-radius: 12px;
+    border: var(--border-faint);
+    box-shadow: var(--glow-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logoWrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-lg);
+    border-color: var(--primary);
+}
+
+.logoImg {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.3));
+}
+
+.logoGlow {
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    filter: blur(15px);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    border-radius: 16px;
+}
+
+.logoWrapper:hover .logoGlow {
+    opacity: 0.3;
+}
+
+.techDecoration {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    color: var(--primary);
+    filter: drop-shadow(0 0 5px var(--primary));
+}
+
+.navLinks {
+    display: flex;
+    gap: 0.75rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navItemPill {
+    position: relative;
+    padding: 0.6rem 1.4rem;
+    border-radius: 12px;
+    background: var(--bg-subtle);
+    border: var(--border-faint);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+.navItemPill:hover {
+    background: var(--bg-panel);
+    border-color: var(--primary);
+    box-shadow: var(--glow-sm);
+    color: var(--primary);
+}
+
+.pillGlow {
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, transparent, rgba(124, 58, 237, 0.3), transparent);
+    border-radius: inherit;
+    z-index: -1;
+    filter: blur(8px);
+}
+
+.linkTextWrapper {
+    display: flex;
+    position: relative;
+    z-index: 1;
+}
+
+.char {
+    display: inline-block;
+    white-space: pre;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.liquidUnderline {
+    position: absolute;
+    bottom: 6px;
+    height: 2px;
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+    border-radius: 1px;
+}
+
+.underlineDot {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+
+
+.loginBtn {
+    background: #0b0f1a;
+    color: #ffffff;
+    padding: 0.6rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.loginBtnBorder {
+    position: absolute;
+    inset: -2px;
+    background: conic-gradient(from 0deg,
+            transparent 0deg,
+            transparent 180deg,
+            var(--primary) 270deg,
+            var(--primary) 360deg);
+    filter: blur(2px);
+}
+
+.loginBtnText {
+    position: relative;
+    z-index: 2;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.loginBtnBg {
+    position: absolute;
+    inset: 1px;
+    background: var(--primary);
+    z-index: 1;
+    border-radius: 11px;
+}
+
+.topBanner {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #7c3aed, #d946ef);
+    color: white;
+    padding: 0.2rem 1rem;
+    border-radius: 0 0 12px 12px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    z-index: -1;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+@media (max-width: 1024px) {
+    .navLinks {
+        display: none;
+    }
+
+    .navbar {
+        top: 20px;
+        height: 60px;
+        width: 95%;
+    }
+
+    .logoImg {
+        height: 28px;
+    }
+
+    .topBanner {
+        top: auto;
+        bottom: 100%;
+        white-space: normal;
+        width: 85%;
+        text-align: center;
+        font-size: 0.65rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 8px 8px 0 0;
+        line-height: 1.2;
+    }
+}
+
+@media (max-width: 480px) {
+    .topBanner {
+        display: none;
+    }
+
+    .navbar {
+        top: 12px;
+        height: 56px;
+        width: 96%;
+    }
+
+    .navContainer {
+        padding: 0 1rem;
+    }
+
+    .logoImg {
+        height: 26px;
+    }
+}
+
+/* Mobile Menu Styles */
+.mobileMenuBtn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-bright);
+    cursor: pointer;
+    z-index: 1002;
+    padding: 0.5rem;
+}
+
+.mobileMenuOverlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-panel);
+    backdrop-filter: blur(20px);
+    border-radius: 0 0 20px 20px;
+    border: var(--border-luminous);
+    border-top: none;
+    overflow: hidden;
+    padding-bottom: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.mobileLinks {
+    list-style: none;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.mobileLink {
+    color: var(--text-bright);
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: var(--border-faint);
+    min-height: 48px;
+}
+
+@media (max-width: 1024px) {
+    .mobileMenuBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

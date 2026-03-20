@@ -1,0 +1,190 @@
+/* PRIVACY POLICY & TERMS */
+.main {
+    min-height: 100vh;
+    background: var(--bg-void);
+    color: var(--text-bright);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow-x: hidden;
+}
+
+.heroSection {
+    position: relative;
+    padding: 180px 0 100px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15), transparent 70%);
+}
+
+.heroTitle {
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 900;
+    font-family: 'Rajdhani', sans-serif;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    background: var(--grad-text-main);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.heroSubtitle {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.lastUpdated {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 0.5rem 1rem;
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 100px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contentWrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem 100px;
+}
+
+.policyGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+.policyCard {
+    background: var(--bg-panel);
+    border: var(--border-faint);
+    padding: 3rem;
+    border-radius: 32px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+}
+
+.policyCard:hover {
+    background: var(--bg-nebula);
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.iconWrapper {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(217, 70, 239, 0.1));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.cardTitle {
+    font-size: 1.8rem;
+    font-weight: 800;
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--grad-text-main);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.cardText {
+    color: var(--text-dim);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.cardText p {
+    margin-bottom: 1rem;
+}
+
+.cardText ul {
+    list-style: none;
+    padding-left: 1rem;
+}
+
+.cardText li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.cardText li::before {
+    content: '▹';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+    margin: 4rem 0;
+}
+
+.contactBox {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(15, 7, 40, 0.6));
+    border: 1px solid var(--primary);
+    padding: 3rem;
+    border-radius: 32px;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.contactBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding: 1rem 2.5rem;
+    background: var(--grad-main);
+    color: white;
+    font-weight: 800;
+    border-radius: 100px;
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+.contactBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+}
+
+@media (max-width: 768px) {
+    .policyCard {
+        padding: 2rem;
+    }
+
+    .cardHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .heroTitle {
+        font-size: 2.5rem;
+    }
+}

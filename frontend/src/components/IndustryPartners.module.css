@@ -1,0 +1,179 @@
+.partnersSection {
+    padding: 3rem 0;
+    position: relative;
+    background: transparent;
+    overflow: hidden;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 5;
+}
+
+.sectionHeader {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 800;
+    font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-bright);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 500;
+}
+
+.whiteBlock {
+    background: white;
+    border-radius: 40px;
+    padding: 40px 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(124, 58, 237, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+
+
+.whiteBlock::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #7c3aed, #4f46e5);
+}
+
+.logoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 5px;
+    /* Extremely small gap */
+    align-items: center;
+    justify-items: center;
+}
+
+.logoGridReverse {
+    display: none;
+    /* Hide second grid on desktop initially since the first grid handles everything */
+}
+
+.marqueeDuplicate {
+    display: none;
+}
+
+.partnerCard {
+    width: 100%;
+    height: 100px;
+    /* Tighter height to remove vertical gap */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    /* Remove all internal padding to maximize logo size */
+}
+
+.partnerLogoImage {
+    max-width: 150px;
+    /* Filling the 160px cell almost entirely */
+    max-height: 80px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: none;
+    /* Keep original vibrant colors */
+    transition: transform 0.3s ease;
+}
+
+.partnerCard:hover .partnerLogoImage {
+    transform: scale(1.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .logoGrid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .whiteBlock {
+        padding: 60px 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.2rem;
+        letter-spacing: 4px;
+    }
+
+    .whiteBlock {
+        padding: 2rem 0;
+        /* Important: remove horizontal padding for full bleed marquee */
+    }
+
+    .logoGrid {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 2rem;
+        animation: scrollLeft 40s linear infinite;
+        width: max-content;
+        margin-bottom: 2rem;
+        /* gap between rows */
+    }
+
+    .logoGridReverse {
+        display: flex;
+        /* Show the second row on mobile */
+        animation: scrollRight 40s linear infinite;
+        margin-bottom: 0;
+    }
+
+    .marqueeDuplicate {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .partnerCard {
+        width: 140px;
+        flex-shrink: 0;
+    }
+
+    .partnerLogoImage {
+        max-width: 120px;
+    }
+}
+
+@keyframes scrollLeft {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(-50% - 1rem));
+    }
+}
+
+@keyframes scrollRight {
+    0% {
+        transform: translateX(calc(-50% - 1rem));
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
