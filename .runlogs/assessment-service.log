@@ -71,3 +71,4 @@
 2026-03-20T16:47:06.530+05:30  INFO 5983 --- [assessment-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.0.207:assessment-service:8083 - registration status: 204
 2026-03-20T16:52:06.127+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T16:57:06.162+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:02:06.172+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

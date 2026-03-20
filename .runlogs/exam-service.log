@@ -72,3 +72,4 @@
 2026-03-20T16:47:07.772+05:30  INFO 5985 --- [exam-service] [           main] com.bytecode.exam.config.DataSeeder      : Exam data already exists, skipping seeding.
 2026-03-20T16:52:07.434+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T16:57:07.470+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:02:07.479+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

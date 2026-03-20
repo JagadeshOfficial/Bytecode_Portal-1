@@ -107,3 +107,6 @@
 2026-03-20T16:58:38.217+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
 2026-03-20T16:59:38.219+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
 2026-03-20T17:00:38.223+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-20T17:01:38.136+05:30  INFO 4913 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-03-20T17:01:38.224+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-03-20T17:02:38.230+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms

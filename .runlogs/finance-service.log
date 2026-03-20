@@ -71,3 +71,4 @@
 2026-03-20T16:47:08.012+05:30  INFO 5989 --- [finance-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_FINANCE-SERVICE/192.168.0.207:finance-service:8087 - registration status: 204
 2026-03-20T16:52:07.718+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T16:57:07.752+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:02:07.761+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

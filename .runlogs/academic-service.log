@@ -85,3 +85,4 @@
 2026-03-20T16:47:08.093+05:30  INFO 5986 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Academic Data Seeding Completed!
 2026-03-20T16:52:07.730+05:30  INFO 5986 --- [academic-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T16:57:07.762+05:30  INFO 5986 --- [academic-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T17:02:07.771+05:30  INFO 5986 --- [academic-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

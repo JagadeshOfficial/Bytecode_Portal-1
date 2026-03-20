@@ -70,3 +70,4 @@
 2026-03-20T16:59:09.970+05:30  INFO 6125 --- [api-gateway] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-03-20T16:59:09.972+05:30  INFO 6125 --- [api-gateway] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-03-20T16:59:10.001+05:30  INFO 6125 --- [api-gateway] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 29 ms
+2026-03-20T17:02:12.161+05:30  INFO 6125 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
