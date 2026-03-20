@@ -67,3 +67,6 @@
 2026-03-20T16:47:12.251+05:30  INFO 6125 --- [api-gateway] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.207:api-gateway:8080 - registration status: 204
 2026-03-20T16:52:12.114+05:30  INFO 6125 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-03-20T16:57:12.149+05:30  INFO 6125 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:59:09.970+05:30  INFO 6125 --- [api-gateway] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-20T16:59:09.972+05:30  INFO 6125 --- [api-gateway] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-20T16:59:10.001+05:30  INFO 6125 --- [api-gateway] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 29 ms
