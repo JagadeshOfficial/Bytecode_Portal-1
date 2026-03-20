@@ -65,3 +65,5 @@
 2026-03-20T16:47:12.237+05:30  INFO 6125 --- [api-gateway] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8080
 2026-03-20T16:47:12.243+05:30  INFO 6125 --- [api-gateway] [           main] c.b.gateway.ApiGatewayApplication        : Started ApiGatewayApplication in 1.491 seconds (process running for 1.804)
 2026-03-20T16:47:12.251+05:30  INFO 6125 --- [api-gateway] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.207:api-gateway:8080 - registration status: 204
+2026-03-20T16:52:12.114+05:30  INFO 6125 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:57:12.149+05:30  INFO 6125 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

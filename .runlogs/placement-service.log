@@ -69,3 +69,5 @@
 2026-03-20T16:47:07.830+05:30  INFO 5988 --- [placement-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8084
 2026-03-20T16:47:07.838+05:30  INFO 5988 --- [placement-service] [           main] c.b.p.PlacementServiceApplication        : Started PlacementServiceApplication in 3.251 seconds (process running for 3.774)
 2026-03-20T16:47:07.842+05:30  INFO 5988 --- [placement-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_PLACEMENT-SERVICE/192.168.0.207:placement-service:8084 - registration status: 204
+2026-03-20T16:52:07.538+05:30  INFO 5988 --- [placement-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:57:07.578+05:30  INFO 5988 --- [placement-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

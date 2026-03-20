@@ -70,3 +70,5 @@
 2026-03-20T16:47:07.726+05:30  INFO 5985 --- [exam-service] [           main] c.bytecode.exam.ExamServiceApplication   : Started ExamServiceApplication in 3.504 seconds (process running for 4.397)
 2026-03-20T16:47:07.732+05:30  INFO 5985 --- [exam-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_EXAM-SERVICE/192.168.0.207:exam-service:8086 - registration status: 204
 2026-03-20T16:47:07.772+05:30  INFO 5985 --- [exam-service] [           main] com.bytecode.exam.config.DataSeeder      : Exam data already exists, skipping seeding.
+2026-03-20T16:52:07.434+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:57:07.470+05:30  INFO 5985 --- [exam-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

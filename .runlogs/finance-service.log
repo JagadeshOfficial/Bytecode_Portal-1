@@ -69,3 +69,5 @@
 2026-03-20T16:47:07.985+05:30  INFO 5989 --- [finance-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8087
 2026-03-20T16:47:07.996+05:30  INFO 5989 --- [finance-service] [           main] c.b.finance.FinanceServiceApplication    : Started FinanceServiceApplication in 3.128 seconds (process running for 3.638)
 2026-03-20T16:47:08.012+05:30  INFO 5989 --- [finance-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_FINANCE-SERVICE/192.168.0.207:finance-service:8087 - registration status: 204
+2026-03-20T16:52:07.718+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:57:07.752+05:30  INFO 5989 --- [finance-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

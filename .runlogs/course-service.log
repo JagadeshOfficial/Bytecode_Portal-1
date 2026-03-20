@@ -77,3 +77,5 @@
 2026-03-20T16:47:23.505+05:30  INFO 5217 --- [course-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
 2026-03-20T16:47:23.505+05:30  INFO 5217 --- [course-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
 2026-03-20T16:47:23.560+05:30  INFO 5217 --- [course-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-20T16:51:53.163+05:30  INFO 5217 --- [course-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:56:53.204+05:30  INFO 5217 --- [course-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

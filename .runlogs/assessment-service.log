@@ -69,3 +69,5 @@
 2026-03-20T16:47:06.501+05:30  INFO 5983 --- [assessment-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8083
 2026-03-20T16:47:06.510+05:30  INFO 5983 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : Started AssessmentServiceApplication in 3.609 seconds (process running for 4.22)
 2026-03-20T16:47:06.530+05:30  INFO 5983 --- [assessment-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.0.207:assessment-service:8083 - registration status: 204
+2026-03-20T16:52:06.127+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:57:06.162+05:30  INFO 5983 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
