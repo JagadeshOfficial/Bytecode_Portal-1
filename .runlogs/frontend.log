@@ -1,0 +1,16 @@
+
+> Bytecode-trainings-platform@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.207:3000
+
+✓ Starting...
+Creating turbopack project {
+  dir: '/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/frontend',
+  testMode: true
+}
+✓ Ready in 1977ms
+○ Compiling / ...
+ HEAD / 200 in 6.5s (compile: 6.0s, render: 448ms)

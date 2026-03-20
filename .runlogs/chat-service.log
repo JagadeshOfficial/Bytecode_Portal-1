@@ -35,70 +35,70 @@
 
  :: Spring Boot ::                (v4.0.2)
 
-2026-03-20T16:13:25.466+05:30  INFO 92401 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Starting ChatServiceApplication using Java 21.0.7 with PID 92401 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service)
-2026-03-20T16:13:25.469+05:30  INFO 92401 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : No active profile set, falling back to 1 default profile: "default"
-2026-03-20T16:13:25.470+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.boot.SpringApplication               : Loading source class com.bytecode.chat.ChatServiceApplication
-2026-03-20T16:13:25.509+05:30 DEBUG 92401 --- [chat-service] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext@1c32386d
-2026-03-20T16:13:26.657+05:30  INFO 92401 --- [chat-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2e47f5e9-286c-3783-9967-f67823f363e0
-2026-03-20T16:13:26.909+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: /Users/bytecode/.m2/repository/org/springframework/boot/spring-boot-web-server/4.0.2/spring-boot-web-server-4.0.2.jar
-2026-03-20T16:13:26.910+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: /Users/bytecode/.m2/repository/org/springframework/boot/spring-boot-web-server/4.0.2/spring-boot-web-server-4.0.2.jar
-2026-03-20T16:13:26.910+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
-2026-03-20T16:13:26.935+05:30  INFO 92401 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
-2026-03-20T16:13:26.950+05:30  INFO 92401 --- [chat-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-20T16:13:26.950+05:30  INFO 92401 --- [chat-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.15]
-2026-03-20T16:13:27.024+05:30 DEBUG 92401 --- [chat-service] [           main] b.w.c.s.WebApplicationContextInitializer : Published root WebApplicationContext as ServletContext attribute with name [org.springframework.web.context.WebApplicationContext.ROOT]
-2026-03-20T16:13:27.025+05:30  INFO 92401 --- [chat-service] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1515 ms
-2026-03-20T16:13:27.050+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105
-2026-03-20T16:13:27.050+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
-2026-03-20T16:13:27.086+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.s.f.OrderedRequestContextFilter    : Filter 'requestContextFilter' configured for use
-2026-03-20T16:13:27.090+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.s.f.OrderedCharacterEncodingFilter : Filter 'characterEncodingFilter' configured for use
-2026-03-20T16:13:27.090+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.s.filter.OrderedFormContentFilter  : Filter 'formContentFilter' configured for use
-2026-03-20T16:13:27.136+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.a.AutoConfigurationPackages        : @EnableAutoConfiguration was declared on a class in the package 'com.bytecode.chat'. Automatic @Repository and @Entity scanning is enabled.
-2026-03-20T16:13:27.344+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.w.s.s.s.WebSocketHandlerMapping      : Patterns [/ws-chat/**] in 'stompWebSocketHandlerMapping'
-2026-03-20T16:13:27.545+05:30 DEBUG 92401 --- [chat-service] [           main] .WebSocketAnnotationMethodMessageHandler : 
+2026-03-20T16:16:42.418+05:30  INFO 94474 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Starting ChatServiceApplication using Java 21.0.7 with PID 94474 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service)
+2026-03-20T16:16:42.428+05:30  INFO 94474 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-03-20T16:16:42.431+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.boot.SpringApplication               : Loading source class com.bytecode.chat.ChatServiceApplication
+2026-03-20T16:16:42.503+05:30 DEBUG 94474 --- [chat-service] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext@1c32386d
+2026-03-20T16:16:43.532+05:30  INFO 94474 --- [chat-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2e47f5e9-286c-3783-9967-f67823f363e0
+2026-03-20T16:16:43.756+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: /Users/bytecode/.m2/repository/org/springframework/boot/spring-boot-web-server/4.0.2/spring-boot-web-server-4.0.2.jar
+2026-03-20T16:16:43.757+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: /Users/bytecode/.m2/repository/org/springframework/boot/spring-boot-web-server/4.0.2/spring-boot-web-server-4.0.2.jar
+2026-03-20T16:16:43.757+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
+2026-03-20T16:16:43.779+05:30  INFO 94474 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
+2026-03-20T16:16:43.795+05:30  INFO 94474 --- [chat-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-20T16:16:43.795+05:30  INFO 94474 --- [chat-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-03-20T16:16:43.844+05:30 DEBUG 94474 --- [chat-service] [           main] b.w.c.s.WebApplicationContextInitializer : Published root WebApplicationContext as ServletContext attribute with name [org.springframework.web.context.WebApplicationContext.ROOT]
+2026-03-20T16:16:43.845+05:30  INFO 94474 --- [chat-service] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1343 ms
+2026-03-20T16:16:43.868+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105
+2026-03-20T16:16:43.869+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
+2026-03-20T16:16:43.887+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.s.f.OrderedRequestContextFilter    : Filter 'requestContextFilter' configured for use
+2026-03-20T16:16:43.889+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.s.f.OrderedCharacterEncodingFilter : Filter 'characterEncodingFilter' configured for use
+2026-03-20T16:16:43.889+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.s.filter.OrderedFormContentFilter  : Filter 'formContentFilter' configured for use
+2026-03-20T16:16:43.921+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.a.AutoConfigurationPackages        : @EnableAutoConfiguration was declared on a class in the package 'com.bytecode.chat'. Automatic @Repository and @Entity scanning is enabled.
+2026-03-20T16:16:44.053+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.w.s.s.s.WebSocketHandlerMapping      : Patterns [/ws-chat/**] in 'stompWebSocketHandlerMapping'
+2026-03-20T16:16:44.277+05:30 DEBUG 94474 --- [chat-service] [           main] .WebSocketAnnotationMethodMessageHandler : 
 	c.b.c.c.ChatController:
-	{[MESSAGE],[/chat.sendMessage]}: sendMessage(ChatMessage)
 	{[MESSAGE],[/chat.addUser]}: addUser(ChatMessage)
-2026-03-20T16:13:27.740+05:30 DEBUG 92401 --- [chat-service] [           main] .WebSocketAnnotationMethodMessageHandler : 
+	{[MESSAGE],[/chat.sendMessage]}: sendMessage(ChatMessage)
+2026-03-20T16:16:44.282+05:30 DEBUG 94474 --- [chat-service] [           main] .WebSocketAnnotationMethodMessageHandler : 
 	o.s.b.w.a.e.BasicErrorController:
 	
-2026-03-20T16:13:27.843+05:30 DEBUG 92401 --- [chat-service] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 2 mappings in 'requestMappingHandlerMapping'
-2026-03-20T16:13:27.865+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
-2026-03-20T16:13:27.877+05:30 DEBUG 92401 --- [chat-service] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
-2026-03-20T16:13:27.919+05:30 DEBUG 92401 --- [chat-service] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
-2026-03-20T16:13:28.220+05:30  INFO 92401 --- [chat-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestClient.
-2026-03-20T16:13:28.253+05:30  WARN 92401 --- [chat-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2026-03-20T16:13:28.268+05:30 DEBUG 92401 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientOutboundChannel added SubProtocolWebSocketHandler[StompSubProtocolHandler[v10.stomp, v11.stomp, v12.stomp]]
-2026-03-20T16:13:28.268+05:30 DEBUG 92401 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientInboundChannel added WebSocketAnnotationMethodMessageHandler[prefixes=[/app/]]
-2026-03-20T16:13:28.269+05:30  INFO 92401 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
-2026-03-20T16:13:28.269+05:30 DEBUG 92401 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientInboundChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1de13f34]
-2026-03-20T16:13:28.269+05:30 DEBUG 92401 --- [chat-service] [           main] org.springframework.web.SimpLogging      : brokerChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1de13f34]
-2026-03-20T16:13:28.270+05:30  INFO 92401 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1de13f34]]
-2026-03-20T16:13:28.271+05:30  INFO 92401 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
-2026-03-20T16:13:28.271+05:30 DEBUG 92401 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientInboundChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
-2026-03-20T16:13:28.271+05:30 DEBUG 92401 --- [chat-service] [           main] org.springframework.web.SimpLogging      : brokerChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
-2026-03-20T16:13:28.297+05:30  INFO 92401 --- [chat-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
-2026-03-20T16:13:28.331+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
-2026-03-20T16:13:28.334+05:30  INFO 92401 --- [chat-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-20T16:13:28.347+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
-2026-03-20T16:13:28.347+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
-2026-03-20T16:13:28.347+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
-2026-03-20T16:13:28.347+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
-2026-03-20T16:13:28.347+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
-2026-03-20T16:13:28.348+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
-2026-03-20T16:13:28.348+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
-2026-03-20T16:13:28.713+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
-2026-03-20T16:13:28.724+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
-2026-03-20T16:13:28.725+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
-2026-03-20T16:13:28.728+05:30  INFO 92401 --- [chat-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
-2026-03-20T16:13:28.729+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774003408729 with initial instances count: 0
-2026-03-20T16:13:28.733+05:30  INFO 92401 --- [chat-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application CHAT-SERVICE with eureka with status UP
-2026-03-20T16:13:28.733+05:30  INFO 92401 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1774003408733, current=UP, previous=STARTING]
-2026-03-20T16:13:28.735+05:30  INFO 92401 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085: registering service...
-2026-03-20T16:13:28.755+05:30 DEBUG 92401 --- [chat-service] [foReplicator-%d] o.s.web.client.DefaultRestClient         : Writing [InstanceInfo [instanceId = 192.168.0.207:chat-service:8085, appName = CHAT-SERVICE, hostName = 192.168.0.207, status = UP, ipAddr = 192.168.0.207, port = 8085, securePort = 443, dataCenterInfo = com.netflix.appinfo.MyDataCenterInfo@70933b09] as "application/json" with org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
-2026-03-20T16:13:28.757+05:30  INFO 92401 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
-2026-03-20T16:13:28.757+05:30  INFO 92401 --- [chat-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8085
-2026-03-20T16:13:28.767+05:30 DEBUG 92401 --- [chat-service] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+2026-03-20T16:16:44.372+05:30 DEBUG 94474 --- [chat-service] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 2 mappings in 'requestMappingHandlerMapping'
+2026-03-20T16:16:44.391+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2026-03-20T16:16:44.401+05:30 DEBUG 94474 --- [chat-service] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-03-20T16:16:44.428+05:30 DEBUG 94474 --- [chat-service] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-03-20T16:16:44.582+05:30  INFO 94474 --- [chat-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestClient.
+2026-03-20T16:16:44.612+05:30  WARN 94474 --- [chat-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-03-20T16:16:44.627+05:30 DEBUG 94474 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientOutboundChannel added SubProtocolWebSocketHandler[StompSubProtocolHandler[v10.stomp, v11.stomp, v12.stomp]]
+2026-03-20T16:16:44.628+05:30 DEBUG 94474 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientInboundChannel added WebSocketAnnotationMethodMessageHandler[prefixes=[/app/]]
+2026-03-20T16:16:44.628+05:30  INFO 94474 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-03-20T16:16:44.628+05:30 DEBUG 94474 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientInboundChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@6c2a95d5]
+2026-03-20T16:16:44.628+05:30 DEBUG 94474 --- [chat-service] [           main] org.springframework.web.SimpLogging      : brokerChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@6c2a95d5]
+2026-03-20T16:16:44.628+05:30  INFO 94474 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@6c2a95d5]]
+2026-03-20T16:16:44.630+05:30  INFO 94474 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-03-20T16:16:44.630+05:30 DEBUG 94474 --- [chat-service] [           main] org.springframework.web.SimpLogging      : clientInboundChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2026-03-20T16:16:44.630+05:30 DEBUG 94474 --- [chat-service] [           main] org.springframework.web.SimpLogging      : brokerChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2026-03-20T16:16:44.637+05:30  INFO 94474 --- [chat-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-03-20T16:16:44.660+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-03-20T16:16:44.663+05:30  INFO 94474 --- [chat-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:16:44.669+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-20T16:16:44.670+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-20T16:16:44.670+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-20T16:16:44.670+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-20T16:16:44.670+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-20T16:16:44.670+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-03-20T16:16:44.670+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-20T16:16:45.015+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:16:45.055+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-20T16:16:45.058+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-03-20T16:16:45.061+05:30  INFO 94474 --- [chat-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-03-20T16:16:45.063+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774003605062 with initial instances count: 2
+2026-03-20T16:16:45.069+05:30  INFO 94474 --- [chat-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application CHAT-SERVICE with eureka with status UP
+2026-03-20T16:16:45.070+05:30  INFO 94474 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1774003605070, current=UP, previous=STARTING]
+2026-03-20T16:16:45.071+05:30  INFO 94474 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085: registering service...
+2026-03-20T16:16:45.088+05:30 DEBUG 94474 --- [chat-service] [foReplicator-%d] o.s.web.client.DefaultRestClient         : Writing [InstanceInfo [instanceId = 192.168.0.207:chat-service:8085, appName = CHAT-SERVICE, hostName = 192.168.0.207, status = UP, ipAddr = 192.168.0.207, port = 8085, securePort = 443, dataCenterInfo = com.netflix.appinfo.MyDataCenterInfo@4ffc9fa8] as "application/json" with org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+2026-03-20T16:16:45.091+05:30  INFO 94474 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
+2026-03-20T16:16:45.093+05:30  INFO 94474 --- [chat-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8085
+2026-03-20T16:16:45.109+05:30 DEBUG 94474 --- [chat-service] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
 
 
 ============================
@@ -875,7 +875,11 @@ Unconditional classes:
 
 
 
-2026-03-20T16:13:28.769+05:30  INFO 92401 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Started ChatServiceApplication in 3.783 seconds (process running for 4.56)
-2026-03-20T16:13:28.769+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state LivenessState changed to CORRECT
-2026-03-20T16:13:28.770+05:30 DEBUG 92401 --- [chat-service] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state ReadinessState changed to ACCEPTING_TRAFFIC
-2026-03-20T16:13:28.773+05:30  INFO 92401 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085 - registration status: 204
+2026-03-20T16:16:45.113+05:30  INFO 94474 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Started ChatServiceApplication in 3.546 seconds (process running for 4.225)
+2026-03-20T16:16:45.114+05:30  INFO 94474 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085 - registration status: 204
+2026-03-20T16:16:45.115+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state LivenessState changed to CORRECT
+2026-03-20T16:16:45.117+05:30 DEBUG 94474 --- [chat-service] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state ReadinessState changed to ACCEPTING_TRAFFIC
+2026-03-20T16:17:15.113+05:30 DEBUG 94474 --- [chat-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:17:44.644+05:30  INFO 94474 --- [chat-service] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2026-03-20T16:17:45.142+05:30 DEBUG 94474 --- [chat-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:18:15.155+05:30 DEBUG 94474 --- [chat-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
