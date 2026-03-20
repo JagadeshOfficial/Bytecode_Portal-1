@@ -165,3 +165,5 @@
 2026-03-20T17:56:48.859+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
 2026-03-20T17:57:48.863+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
 2026-03-20T17:58:48.866+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-20T17:59:48.863+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-03-20T18:00:48.869+05:30  INFO 4913 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
