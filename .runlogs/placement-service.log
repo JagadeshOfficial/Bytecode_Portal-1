@@ -1036,3 +1036,7 @@ Unconditional classes:
 2026-03-20T16:32:16.289+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:32:46.442+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:33:16.527+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:33:46.537+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:34:16.561+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:34:46.581+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:35:16.588+05:30 DEBUG 94469 --- [placement-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]

@@ -1544,3 +1544,5 @@ Unconditional classes:
 2026-03-20T16:31:14.615+05:30  INFO 93406 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
 2026-03-20T16:32:14.561+05:30  INFO 93406 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
 2026-03-20T16:33:14.454+05:30  INFO 93406 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-03-20T16:34:14.457+05:30  INFO 93406 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-20T16:35:14.459+05:30  INFO 93406 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms

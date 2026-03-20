@@ -1036,3 +1036,7 @@ Unconditional classes:
 2026-03-20T16:32:16.693+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:32:46.781+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:33:16.815+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:33:46.827+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:34:16.925+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:34:46.954+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:35:16.965+05:30 DEBUG 94471 --- [finance-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]

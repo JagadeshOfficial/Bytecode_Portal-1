@@ -1037,3 +1037,7 @@ Unconditional classes:
 2026-03-20T16:32:16.953+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:32:47.156+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:33:17.195+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:33:47.205+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:34:17.464+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:34:47.504+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:35:17.520+05:30 DEBUG 94472 --- [exam-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
