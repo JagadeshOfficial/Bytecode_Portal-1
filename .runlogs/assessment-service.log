@@ -1027,3 +1027,12 @@ Unconditional classes:
 2026-03-20T16:28:15.929+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:28:45.949+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:29:16.004+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:29:46.027+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:30:16.207+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:30:46.295+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:31:16.475+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:31:44.910+05:30  INFO 94473 --- [assessment-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:31:46.610+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:32:16.665+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:32:46.790+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:33:16.819+05:30 DEBUG 94473 --- [assessment-service] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]

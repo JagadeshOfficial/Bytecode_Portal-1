@@ -1082,3 +1082,12 @@ Unconditional classes:
 2026-03-20T16:28:20.536+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:28:50.557+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
 2026-03-20T16:29:20.575+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:29:50.606+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:30:20.636+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:30:50.701+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:31:20.857+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:31:49.117+05:30  INFO 94612 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-20T16:31:51.013+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:32:21.038+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:32:51.104+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
+2026-03-20T16:33:21.185+05:30 DEBUG 94612 --- [api-gateway] [reshExecutor-%d] o.s.web.client.DefaultRestClient         : Reading to [com.netflix.discovery.shared.Applications]
