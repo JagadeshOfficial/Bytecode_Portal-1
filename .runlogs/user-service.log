@@ -82,3 +82,16 @@ User data enrichment completed.
 2026-03-21T10:14:31.076+05:30  INFO 26848 --- [user-service] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-03-21T10:14:31.162+05:30  INFO 26848 --- [user-service] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 86 ms
 2026-03-21T10:18:59.786+05:30  INFO 26848 --- [user-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  07:04 min
+[INFO] Finished at: 2026-03-21T10:21:00+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:4.0.2:run (default-cli) on project user-service: Process terminated with exit code: 137 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

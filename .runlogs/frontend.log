@@ -36,3 +36,4 @@
  GET /super-admin/tracking 200 in 460ms (compile: 418ms, render: 42ms)
  GET /super-admin/salary 200 in 450ms (compile: 424ms, render: 26ms)
  GET /super-admin/marketing 200 in 431ms (compile: 411ms, render: 20ms)
+[?25h
