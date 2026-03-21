@@ -14,6 +14,6 @@
 - Network:       http://192.168.1.38:3000
 
 ✓ Starting...
-✓ Ready in 1209ms
- GET /login 200 in 855ms (compile: 611ms, render: 244ms)
- GET /icon?d878d31cd40b5385 200 in 124ms (compile: 45ms, render: 79ms)
+✓ Ready in 845ms
+ GET /login 200 in 828ms (compile: 614ms, render: 214ms)
+ GET /icon?d878d31cd40b5385 200 in 160ms (compile: 77ms, render: 83ms)
