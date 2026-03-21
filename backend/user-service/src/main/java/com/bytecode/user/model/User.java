@@ -29,5 +29,10 @@ public class User {
     private String phoneNumber;
     private String profileImage;
     private boolean active;
+    private Double salary;
+    private Double deductions;
+    private Integer leavesTotal;
+    private Integer leavesAccepted;
+    private Integer leavesRejected;
     private Date createdAt;
 }

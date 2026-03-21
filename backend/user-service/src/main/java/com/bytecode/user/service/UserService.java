@@ -46,6 +46,11 @@ public class UserService {
             if (tempUser.getProfileImage() != null && !tempUser.getProfileImage().isEmpty()) {
                 user.setProfileImage(tempUser.getProfileImage());
             }
+            if (tempUser.getSalary() != null) user.setSalary(tempUser.getSalary());
+            if (tempUser.getDeductions() != null) user.setDeductions(tempUser.getDeductions());
+            if (tempUser.getLeavesTotal() != null) user.setLeavesTotal(tempUser.getLeavesTotal());
+            if (tempUser.getLeavesAccepted() != null) user.setLeavesAccepted(tempUser.getLeavesAccepted());
+            if (tempUser.getLeavesRejected() != null) user.setLeavesRejected(tempUser.getLeavesRejected());
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }

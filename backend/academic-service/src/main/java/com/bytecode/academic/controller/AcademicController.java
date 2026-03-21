@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/academic")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class AcademicController {
 
     private final AcademicService academicService;

@@ -14,8 +14,11 @@
 - Network:       http://192.168.0.207:3000
 
 ✓ Starting...
-✓ Ready in 1293ms
- GET /super-admin/modules 200 in 651ms (compile: 433ms, render: 218ms)
- GET /super-admin/users 200 in 128ms (compile: 75ms, render: 53ms)
- GET /icon?d878d31cd40b5385 200 in 240ms (compile: 67ms, render: 173ms)
- GET /icon?d878d31cd40b5385 200 in 19ms (compile: 6ms, render: 13ms)
+✓ Ready in 788ms
+ GET /super-admin/modules 200 in 735ms (compile: 389ms, render: 346ms)
+ GET /super-admin/users 200 in 885ms (compile: 663ms, render: 221ms)
+ GET /icon?d878d31cd40b5385 200 in 507ms (compile: 217ms, render: 291ms)
+ GET /icon?d878d31cd40b5385 200 in 518ms (compile: 332ms, render: 186ms)
+ GET /super-admin/users 200 in 63ms (compile: 26ms, render: 37ms)
+ GET /super-admin/users 200 in 118ms (compile: 28ms, render: 90ms)
+ GET /icon?d878d31cd40b5385 200 in 44ms (compile: 4ms, render: 39ms)
