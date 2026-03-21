@@ -42,8 +42,8 @@ export default function AdminDashboard() {
 
         // Fetch metrics from backend services
         Promise.all([
-            fetch('http://localhost:8082/api/users').then(res => res.json()),
-            fetch('http://localhost:8081/api/courses').then(res => res.json()).catch(() => []),
+            fetch('http://localhost:8080/api/users').then(res => res.json()),
+            fetch('http://localhost:8080/api/courses').then(res => res.json()).catch(() => []),
         ]).then(([users, courses]) => {
             setStats({
                 totalUsers: users.length || 0,

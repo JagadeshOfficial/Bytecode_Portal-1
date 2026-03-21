@@ -14,9 +14,6 @@
 - Network:       http://192.168.1.38:3000
 
 ✓ Starting...
-✓ Ready in 1043ms
- GET /super-admin/users 200 in 953ms (compile: 697ms, render: 256ms)
- GET /icon?d878d31cd40b5385 200 in 226ms (compile: 110ms, render: 116ms)
-✓ Compiled in 383ms
- GET /super-admin/users 200 in 214ms (compile: 81ms, render: 133ms)
- GET /icon?d878d31cd40b5385 200 in 18ms (compile: 3ms, render: 15ms)
+✓ Ready in 1209ms
+ GET /login 200 in 855ms (compile: 611ms, render: 244ms)
+ GET /icon?d878d31cd40b5385 200 in 124ms (compile: 45ms, render: 79ms)

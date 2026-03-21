@@ -35,80 +35,122 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-03-21T17:18:47.060+05:30  INFO 56472 --- [discovery-service] [           main] c.b.d.DiscoveryServiceApplication        : Starting DiscoveryServiceApplication using Java 21.0.7 with PID 56472 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/discovery-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/discovery-service)
-2026-03-21T17:18:47.061+05:30  INFO 56472 --- [discovery-service] [           main] c.b.d.DiscoveryServiceApplication        : No active profile set, falling back to 1 default profile: "default"
-2026-03-21T17:18:47.493+05:30  INFO 56472 --- [discovery-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bc4569a6-a5d7-3231-a785-5d486ea2943d
-2026-03-21T17:18:47.516+05:30  WARN 56472 --- [discovery-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
-2026-03-21T17:18:47.517+05:30  WARN 56472 --- [discovery-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
-2026-03-21T17:18:47.612+05:30  INFO 56472 --- [discovery-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8761 (http)
-2026-03-21T17:18:47.618+05:30  INFO 56472 --- [discovery-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-21T17:18:47.618+05:30  INFO 56472 --- [discovery-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
-2026-03-21T17:18:47.647+05:30  INFO 56472 --- [discovery-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-03-21T17:18:47.647+05:30  INFO 56472 --- [discovery-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 568 ms
+2026-03-21T17:47:52.930+05:30  INFO 72449 --- [discovery-service] [           main] c.b.d.DiscoveryServiceApplication        : Starting DiscoveryServiceApplication using Java 21.0.7 with PID 72449 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/discovery-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/discovery-service)
+2026-03-21T17:47:52.931+05:30  INFO 72449 --- [discovery-service] [           main] c.b.d.DiscoveryServiceApplication        : No active profile set, falling back to 1 default profile: "default"
+2026-03-21T17:47:53.359+05:30  INFO 72449 --- [discovery-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bc4569a6-a5d7-3231-a785-5d486ea2943d
+2026-03-21T17:47:53.381+05:30  WARN 72449 --- [discovery-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2026-03-21T17:47:53.382+05:30  WARN 72449 --- [discovery-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-03-21T17:47:53.486+05:30  INFO 72449 --- [discovery-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8761 (http)
+2026-03-21T17:47:53.492+05:30  INFO 72449 --- [discovery-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-21T17:47:53.492+05:30  INFO 72449 --- [discovery-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-03-21T17:47:53.522+05:30  INFO 72449 --- [discovery-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-21T17:47:53.522+05:30  INFO 72449 --- [discovery-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 572 ms
 Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
-2026-03-21T17:18:47.990+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON encoding codec LegacyJacksonJson
-2026-03-21T17:18:47.990+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON decoding codec LegacyJacksonJson
-2026-03-21T17:18:48.076+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML encoding codec XStreamXml
-2026-03-21T17:18:48.076+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML decoding codec XStreamXml
-2026-03-21T17:18:48.390+05:30  WARN 56472 --- [discovery-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2026-03-21T17:18:48.397+05:30  INFO 56472 --- [discovery-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
-2026-03-21T17:18:48.408+05:30  INFO 56472 --- [discovery-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
-2026-03-21T17:18:48.408+05:30  INFO 56472 --- [discovery-service] [           main] com.netflix.discovery.DiscoveryClient    : Client configured to neither register nor query for data.
-2026-03-21T17:18:48.411+05:30  INFO 56472 --- [discovery-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774093728411 with initial instances count: 0
-2026-03-21T17:18:48.425+05:30  INFO 56472 --- [discovery-service] [           main] c.n.eureka.DefaultEurekaServerContext    : Initializing ...
-2026-03-21T17:18:48.426+05:30  INFO 56472 --- [discovery-service] [           main] c.n.eureka.cluster.PeerEurekaNodes       : Adding new peer nodes [http://localhost:8761/eureka/]
-2026-03-21T17:18:48.497+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON encoding codec LegacyJacksonJson
-2026-03-21T17:18:48.497+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON decoding codec LegacyJacksonJson
-2026-03-21T17:18:48.497+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML encoding codec XStreamXml
-2026-03-21T17:18:48.498+05:30  INFO 56472 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML decoding codec XStreamXml
-2026-03-21T17:18:48.553+05:30  INFO 56472 --- [discovery-service] [           main] c.n.eureka.cluster.PeerEurekaNodes       : Replica node URL:  http://localhost:8761/eureka/
-2026-03-21T17:18:48.556+05:30  INFO 56472 --- [discovery-service] [           main] c.n.e.registry.AbstractInstanceRegistry  : Finished initializing remote region registries. All known remote regions: []
-2026-03-21T17:18:48.556+05:30  INFO 56472 --- [discovery-service] [           main] c.n.eureka.DefaultEurekaServerContext    : Initialized
-2026-03-21T17:18:48.561+05:30  INFO 56472 --- [discovery-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-03-21T17:18:48.580+05:30  INFO 56472 --- [discovery-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application DISCOVERY-SERVICE with eureka with status UP
-2026-03-21T17:18:48.584+05:30  INFO 56472 --- [discovery-service] [       Thread-9] o.s.c.n.e.server.EurekaServerBootstrap   : isAws returned false
-2026-03-21T17:18:48.585+05:30  INFO 56472 --- [discovery-service] [       Thread-9] o.s.c.n.e.server.EurekaServerBootstrap   : Initialized server context
-2026-03-21T17:18:48.585+05:30  INFO 56472 --- [discovery-service] [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Got 1 instances from neighboring DS node
-2026-03-21T17:18:48.585+05:30  INFO 56472 --- [discovery-service] [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Renew threshold is: 1
-2026-03-21T17:18:48.585+05:30  INFO 56472 --- [discovery-service] [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Changing status to UP
-2026-03-21T17:18:48.588+05:30  INFO 56472 --- [discovery-service] [       Thread-9] e.s.EurekaServerInitializerConfiguration : Started Eureka Server
-2026-03-21T17:18:48.593+05:30  INFO 56472 --- [discovery-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8761 (http) with context path ''
-2026-03-21T17:18:48.593+05:30  INFO 56472 --- [discovery-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8761
-2026-03-21T17:18:48.603+05:30  INFO 56472 --- [discovery-service] [           main] c.b.d.DiscoveryServiceApplication        : Started DiscoveryServiceApplication in 1.718 seconds (process running for 1.874)
-2026-03-21T17:19:03.387+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-03-21T17:19:03.388+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-03-21T17:19:03.394+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
-2026-03-21T17:19:03.529+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status UP (replication=false)
-2026-03-21T17:19:03.529+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status UP (replication=false)
-2026-03-21T17:19:04.136+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status UP (replication=true)
-2026-03-21T17:19:04.137+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status UP (replication=true)
-2026-03-21T17:19:18.099+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status UP (replication=false)
-2026-03-21T17:19:18.620+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status UP (replication=true)
-2026-03-21T17:19:18.640+05:30  INFO 56472 --- [discovery-service] [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CHAT-SERVICE/192.168.1.38:chat-service:8085 with status UP (replication=false)
-2026-03-21T17:19:18.840+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 with status UP (replication=false)
-2026-03-21T17:19:19.000+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status UP (replication=false)
-2026-03-21T17:19:19.047+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status UP (replication=false)
-2026-03-21T17:19:19.154+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CHAT-SERVICE/192.168.1.38:chat-service:8085 with status UP (replication=true)
-2026-03-21T17:19:19.154+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 with status UP (replication=true)
-2026-03-21T17:19:19.155+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status UP (replication=true)
-2026-03-21T17:19:19.155+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status UP (replication=true)
-2026-03-21T17:19:19.236+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status UP (replication=false)
-2026-03-21T17:19:19.743+05:30  INFO 56472 --- [discovery-service] [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status UP (replication=true)
-2026-03-21T17:19:23.096+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.1.38:api-gateway:8080 with status UP (replication=false)
-2026-03-21T17:19:23.607+05:30  INFO 56472 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.1.38:api-gateway:8080 with status UP (replication=true)
-2026-03-21T17:19:48.586+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
-2026-03-21T17:20:48.590+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
-2026-03-21T17:21:48.594+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
-2026-03-21T17:22:48.597+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
-2026-03-21T17:23:48.618+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
-2026-03-21T17:24:48.627+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
-2026-03-21T17:25:48.629+05:30  INFO 56472 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
-2026-03-21T17:26:39.137+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.s.EurekaServiceRegistry        : Unregistering application DISCOVERY-SERVICE with eureka with status DOWN
-2026-03-21T17:26:39.157+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.server.EurekaServerBootstrap   : Shutting down Eureka Server..
-2026-03-21T17:26:39.161+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shutting down ...
-2026-03-21T17:26:39.172+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shut down
-2026-03-21T17:26:39.172+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.server.EurekaServerBootstrap   : Eureka Service is now shutdown...
-2026-03-21T17:26:39.173+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shutting down ...
-2026-03-21T17:26:39.175+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shut down
-2026-03-21T17:26:39.181+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] com.netflix.discovery.DiscoveryClient    : Shutting down DiscoveryClient ...
-2026-03-21T17:26:39.183+05:30  INFO 56472 --- [discovery-service] [ionShutdownHook] com.netflix.discovery.DiscoveryClient    : Completed shut down of DiscoveryClient
+2026-03-21T17:47:53.872+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON encoding codec LegacyJacksonJson
+2026-03-21T17:47:53.872+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON decoding codec LegacyJacksonJson
+2026-03-21T17:47:53.954+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML encoding codec XStreamXml
+2026-03-21T17:47:53.955+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML decoding codec XStreamXml
+2026-03-21T17:47:54.264+05:30  WARN 72449 --- [discovery-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-03-21T17:47:54.272+05:30  INFO 72449 --- [discovery-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-03-21T17:47:54.282+05:30  INFO 72449 --- [discovery-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-03-21T17:47:54.282+05:30  INFO 72449 --- [discovery-service] [           main] com.netflix.discovery.DiscoveryClient    : Client configured to neither register nor query for data.
+2026-03-21T17:47:54.286+05:30  INFO 72449 --- [discovery-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774095474285 with initial instances count: 0
+2026-03-21T17:47:54.299+05:30  INFO 72449 --- [discovery-service] [           main] c.n.eureka.DefaultEurekaServerContext    : Initializing ...
+2026-03-21T17:47:54.300+05:30  INFO 72449 --- [discovery-service] [           main] c.n.eureka.cluster.PeerEurekaNodes       : Adding new peer nodes [http://localhost:8761/eureka/]
+2026-03-21T17:47:54.370+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON encoding codec LegacyJacksonJson
+2026-03-21T17:47:54.370+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON decoding codec LegacyJacksonJson
+2026-03-21T17:47:54.370+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML encoding codec XStreamXml
+2026-03-21T17:47:54.370+05:30  INFO 72449 --- [discovery-service] [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML decoding codec XStreamXml
+2026-03-21T17:47:54.425+05:30  INFO 72449 --- [discovery-service] [           main] c.n.eureka.cluster.PeerEurekaNodes       : Replica node URL:  http://localhost:8761/eureka/
+2026-03-21T17:47:54.428+05:30  INFO 72449 --- [discovery-service] [           main] c.n.e.registry.AbstractInstanceRegistry  : Finished initializing remote region registries. All known remote regions: []
+2026-03-21T17:47:54.428+05:30  INFO 72449 --- [discovery-service] [           main] c.n.eureka.DefaultEurekaServerContext    : Initialized
+2026-03-21T17:47:54.433+05:30  INFO 72449 --- [discovery-service] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-03-21T17:47:54.451+05:30  INFO 72449 --- [discovery-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application DISCOVERY-SERVICE with eureka with status UP
+2026-03-21T17:47:54.456+05:30  INFO 72449 --- [discovery-service] [       Thread-9] o.s.c.n.e.server.EurekaServerBootstrap   : isAws returned false
+2026-03-21T17:47:54.456+05:30  INFO 72449 --- [discovery-service] [       Thread-9] o.s.c.n.e.server.EurekaServerBootstrap   : Initialized server context
+2026-03-21T17:47:54.456+05:30  INFO 72449 --- [discovery-service] [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Got 1 instances from neighboring DS node
+2026-03-21T17:47:54.456+05:30  INFO 72449 --- [discovery-service] [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Renew threshold is: 1
+2026-03-21T17:47:54.456+05:30  INFO 72449 --- [discovery-service] [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Changing status to UP
+2026-03-21T17:47:54.460+05:30  INFO 72449 --- [discovery-service] [       Thread-9] e.s.EurekaServerInitializerConfiguration : Started Eureka Server
+2026-03-21T17:47:54.463+05:30  INFO 72449 --- [discovery-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8761 (http) with context path ''
+2026-03-21T17:47:54.464+05:30  INFO 72449 --- [discovery-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8761
+2026-03-21T17:47:54.473+05:30  INFO 72449 --- [discovery-service] [           main] c.b.d.DiscoveryServiceApplication        : Started DiscoveryServiceApplication in 1.717 seconds (process running for 1.876)
+2026-03-21T17:48:09.268+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-21T17:48:09.269+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-21T17:48:09.270+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-03-21T17:48:09.398+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status UP (replication=false)
+2026-03-21T17:48:09.398+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status UP (replication=false)
+2026-03-21T17:48:10.000+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status UP (replication=true)
+2026-03-21T17:48:10.001+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status UP (replication=true)
+2026-03-21T17:48:22.628+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status UP (replication=false)
+2026-03-21T17:48:23.094+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CHAT-SERVICE/192.168.1.38:chat-service:8085 with status UP (replication=false)
+2026-03-21T17:48:23.141+05:30  INFO 72449 --- [discovery-service] [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status UP (replication=true)
+2026-03-21T17:48:23.141+05:30  INFO 72449 --- [discovery-service] [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CHAT-SERVICE/192.168.1.38:chat-service:8085 with status UP (replication=true)
+2026-03-21T17:48:23.252+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status UP (replication=false)
+2026-03-21T17:48:23.374+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status UP (replication=false)
+2026-03-21T17:48:23.377+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 with status UP (replication=false)
+2026-03-21T17:48:23.643+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status UP (replication=false)
+2026-03-21T17:48:23.763+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status UP (replication=true)
+2026-03-21T17:48:23.763+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status UP (replication=true)
+2026-03-21T17:48:23.763+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 with status UP (replication=true)
+2026-03-21T17:48:23.763+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status UP (replication=true)
+2026-03-21T17:48:28.781+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-2] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.1.38:api-gateway:8080 with status UP (replication=false)
+2026-03-21T17:48:29.290+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.1.38:api-gateway:8080 with status UP (replication=true)
+2026-03-21T17:48:39.441+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-7] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status DOWN (replication=false)
+2026-03-21T17:48:39.442+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status DOWN (replication=false)
+2026-03-21T17:48:39.948+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status DOWN (replication=true)
+2026-03-21T17:48:39.948+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status DOWN (replication=true)
+2026-03-21T17:48:39.951+05:30  WARN 72449 --- [discovery-service] [get_localhost-0] c.n.eureka.cluster.ReplicationTask       : The replication of task USER-SERVICE/192.168.1.38:user-service:8082:Heartbeat@localhost failed with response code 409
+2026-03-21T17:48:39.951+05:30  WARN 72449 --- [discovery-service] [get_localhost-0] c.netflix.eureka.cluster.PeerEurekaNode  : Peer wants us to take the instance information from it, since the timestamp differs,Id : 192.168.1.38:user-service:8082 My Timestamp : 1774095489337, Peer's timestamp: 1774095519436
+2026-03-21T17:48:39.952+05:30  INFO 72449 --- [discovery-service] [get_localhost-0] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.1.38:user-service:8082 with status DOWN (replication=true)
+2026-03-21T17:48:39.952+05:30  WARN 72449 --- [discovery-service] [get_localhost-0] c.n.eureka.cluster.ReplicationTask       : The replication of task COURSE-SERVICE/192.168.1.38:course-service:8081:Heartbeat@localhost failed with response code 409
+2026-03-21T17:48:39.952+05:30  WARN 72449 --- [discovery-service] [get_localhost-0] c.netflix.eureka.cluster.PeerEurekaNode  : Peer wants us to take the instance information from it, since the timestamp differs,Id : 192.168.1.38:course-service:8081 My Timestamp : 1774095489337, Peer's timestamp: 1774095519438
+2026-03-21T17:48:39.952+05:30  INFO 72449 --- [discovery-service] [get_localhost-0] c.n.e.registry.AbstractInstanceRegistry  : Registered instance COURSE-SERVICE/192.168.1.38:course-service:8081 with status DOWN (replication=true)
+2026-03-21T17:48:52.697+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status DOWN (replication=false)
+2026-03-21T17:48:53.117+05:30  INFO 72449 --- [discovery-service] [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status DOWN (replication=true)
+2026-03-21T17:48:53.119+05:30  WARN 72449 --- [discovery-service] [get_localhost-3] c.n.eureka.cluster.ReplicationTask       : The replication of task EXAM-SERVICE/192.168.1.38:exam-service:8086:Heartbeat@localhost failed with response code 409
+2026-03-21T17:48:53.120+05:30  WARN 72449 --- [discovery-service] [get_localhost-3] c.netflix.eureka.cluster.PeerEurekaNode  : Peer wants us to take the instance information from it, since the timestamp differs,Id : 192.168.1.38:exam-service:8086 My Timestamp : 1774095502592, Peer's timestamp: 1774095532693
+2026-03-21T17:48:53.120+05:30  INFO 72449 --- [discovery-service] [get_localhost-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.1.38:exam-service:8086 with status DOWN (replication=true)
+2026-03-21T17:48:53.285+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status DOWN (replication=false)
+2026-03-21T17:48:53.415+05:30  INFO 72449 --- [discovery-service] [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status DOWN (replication=false)
+2026-03-21T17:48:53.681+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status DOWN (replication=false)
+2026-03-21T17:48:53.765+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status DOWN (replication=true)
+2026-03-21T17:48:53.765+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status DOWN (replication=true)
+2026-03-21T17:48:53.765+05:30  INFO 72449 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status DOWN (replication=true)
+2026-03-21T17:48:53.768+05:30  WARN 72449 --- [discovery-service] [get_localhost-8] c.n.eureka.cluster.ReplicationTask       : The replication of task FINANCE-SERVICE/192.168.1.38:finance-service:8087:Heartbeat@localhost failed with response code 409
+2026-03-21T17:48:53.768+05:30  WARN 72449 --- [discovery-service] [get_localhost-8] c.netflix.eureka.cluster.PeerEurekaNode  : Peer wants us to take the instance information from it, since the timestamp differs,Id : 192.168.1.38:finance-service:8087 My Timestamp : 1774095503225, Peer's timestamp: 1774095533282
+2026-03-21T17:48:53.768+05:30  INFO 72449 --- [discovery-service] [get_localhost-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.1.38:finance-service:8087 with status DOWN (replication=true)
+2026-03-21T17:48:53.768+05:30  WARN 72449 --- [discovery-service] [get_localhost-8] c.n.eureka.cluster.ReplicationTask       : The replication of task PLACEMENT-SERVICE/192.168.1.38:placement-service:8084:Heartbeat@localhost failed with response code 409
+2026-03-21T17:48:53.768+05:30  WARN 72449 --- [discovery-service] [get_localhost-8] c.netflix.eureka.cluster.PeerEurekaNode  : Peer wants us to take the instance information from it, since the timestamp differs,Id : 192.168.1.38:placement-service:8084 My Timestamp : 1774095503352, Peer's timestamp: 1774095533412
+2026-03-21T17:48:53.768+05:30  INFO 72449 --- [discovery-service] [get_localhost-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PLACEMENT-SERVICE/192.168.1.38:placement-service:8084 with status DOWN (replication=true)
+2026-03-21T17:48:53.768+05:30  WARN 72449 --- [discovery-service] [get_localhost-8] c.n.eureka.cluster.ReplicationTask       : The replication of task ACADEMIC-SERVICE/192.168.1.38:academic-service:8089:Heartbeat@localhost failed with response code 409
+2026-03-21T17:48:53.768+05:30  WARN 72449 --- [discovery-service] [get_localhost-8] c.netflix.eureka.cluster.PeerEurekaNode  : Peer wants us to take the instance information from it, since the timestamp differs,Id : 192.168.1.38:academic-service:8089 My Timestamp : 1774095503627, Peer's timestamp: 1774095533677
+2026-03-21T17:48:53.768+05:30  INFO 72449 --- [discovery-service] [get_localhost-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.1.38:academic-service:8089 with status DOWN (replication=true)
+2026-03-21T17:48:54.461+05:30  INFO 72449 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-03-21T17:49:54.465+05:30  INFO 72449 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-03-21T17:50:54.467+05:30  INFO 72449 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-03-21T17:51:54.467+05:30  INFO 72449 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-03-21T17:52:05.848+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.s.EurekaServiceRegistry        : Unregistering application DISCOVERY-SERVICE with eureka with status DOWN
+2026-03-21T17:52:05.860+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.server.EurekaServerBootstrap   : Shutting down Eureka Server..
+2026-03-21T17:52:05.865+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shutting down ...
+2026-03-21T17:52:05.869+05:30 ERROR 72449 --- [discovery-service] [t-Conn-Cleaner2] c.n.d.s.t.j.EurekaJersey3ClientImpl      : Cannot clean connections
+
+java.lang.IllegalStateException: Client instance has been closed.
+	at org.glassfish.jersey.internal.guava.Preconditions.checkState(Preconditions.java:169) ~[jersey-common-3.1.6.jar:na]
+	at org.glassfish.jersey.client.JerseyClient.checkNotClosed(JerseyClient.java:248) ~[jersey-client-3.1.6.jar:na]
+	at org.glassfish.jersey.client.JerseyClient.getConfiguration(JerseyClient.java:363) ~[jersey-client-3.1.6.jar:na]
+	at org.glassfish.jersey.client.JerseyClient.getConfiguration(JerseyClient.java:54) ~[jersey-client-3.1.6.jar:na]
+	at com.netflix.discovery.shared.transport.jersey3.EurekaJersey3ClientImpl$ConnectionCleanerTask.run(EurekaJersey3ClientImpl.java:347) ~[eureka-client-jersey3-2.0.2.jar:2.0.2]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2026-03-21T17:52:05.874+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shut down
+2026-03-21T17:52:05.875+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.server.EurekaServerBootstrap   : Eureka Service is now shutdown...
+2026-03-21T17:52:05.875+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shutting down ...
+2026-03-21T17:52:05.877+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shut down
+2026-03-21T17:52:05.884+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] com.netflix.discovery.DiscoveryClient    : Shutting down DiscoveryClient ...
+2026-03-21T17:52:05.885+05:30  INFO 72449 --- [discovery-service] [ionShutdownHook] com.netflix.discovery.DiscoveryClient    : Completed shut down of DiscoveryClient
