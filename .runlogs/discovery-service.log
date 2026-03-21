@@ -220,3 +220,5 @@ Caused by: java.net.SocketTimeoutException: Read timed out
 2026-03-21T11:42:23.590+05:30  INFO 30192 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
 2026-03-21T11:43:23.588+05:30  INFO 30192 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
 2026-03-21T11:44:23.590+05:30  INFO 30192 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-21T11:45:23.594+05:30  INFO 30192 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-21T11:46:23.608+05:30  INFO 30192 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms

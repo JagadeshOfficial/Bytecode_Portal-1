@@ -41,3 +41,6 @@
  GET / 200 in 520ms (compile: 96ms, render: 423ms)
 ✓ Compiled in 667ms
 ✓ Compiled in 108ms
+✓ Compiled in 602ms
+ GET /super-admin/modules 200 in 1679ms (compile: 1612ms, render: 67ms)
+ GET /super-admin/users 200 in 644ms (compile: 540ms, render: 103ms)

@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 
 const conversionData = [
-    { name: 'Leads', value: 850, fill: '#8b5cf6' },
-    { name: 'Prospects', value: 420, fill: '#3b82f6' },
+    { name: 'New Leads', value: 850, fill: '#8b5cf6' },
+    { name: 'Interested', value: 420, fill: '#3b82f6' },
     { name: 'Admissions', value: 310, fill: '#10b981' },
 ];
 
@@ -44,10 +44,10 @@ export default function SuperAdminHome() {
                 {/* --- OVERVIEW CARDS --- */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
                     <HomeMetricCard icon={<Users />} title="Total Students" value="4,852" trend="+124 new" color="#8b5cf6" />
-                    <HomeMetricCard icon={<Target />} title="Conversion Rate" value="36.4%" trend="Optimized" color="#3b82f6" />
-                    <HomeMetricCard icon={<DollarSign />} title="Monthly Revenue" value="$142,500" trend="22% Growth" color="#10b981" />
-                    <HomeMetricCard icon={<Layers />} title="Active Batches" value="18" sub="Across 4 Courses" color="#f59e0b" />
-                    <HomeMetricCard icon={<Award />} title="Placement Rate" value="92.4%" sub="Global Benchmark" color="#ec4899" />
+                    <HomeMetricCard icon={<Target />} title="Conversion" value="36.4%" trend="Good" color="#3b82f6" />
+                    <HomeMetricCard icon={<DollarSign />} title="Monthly Income" value="$142,500" trend="22% Growth" color="#10b981" />
+                    <HomeMetricCard icon={<Layers />} title="Active Batches" value="18" sub="4 Main Courses" color="#f59e0b" />
+                    <HomeMetricCard icon={<Award />} title="Job Placements" value="92.4%" sub="Industry Best" color="#ec4899" />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '1.5rem', flexWrap: 'wrap' }}>
@@ -55,11 +55,11 @@ export default function SuperAdminHome() {
                     <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Market Growth & Revenue</h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Real-time student acquisitions vs daily yield</p>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Income & Enrollment Growth</h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Daily tracking of new students and revenue</p>
                             </div>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <Badge label="Real-time Sync" color="#10b981" />
+                                <Badge label="Live Update" color="#10b981" />
                             </div>
                         </div>
                         <div style={{ height: 350, width: '100%', marginLeft: '-20px' }}>
@@ -81,7 +81,7 @@ export default function SuperAdminHome() {
                     {/* Conversion Funnel & Alerts */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px' }}>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '2rem' }}>Leads Funnel</h3>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '2rem' }}>Leads Tracking</h3>
                             <div style={{ height: 220, width: '100%' }}>
                                 {isMounted && (
                                     <ResponsiveContainer>
@@ -101,14 +101,14 @@ export default function SuperAdminHome() {
                         {/* Alerts Panel */}
                         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', borderLeft: '4px solid #ef4444' }}>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <AlertCircle size={18} color="#ef4444" /> System Critical Alerts
+                                <AlertCircle size={18} color="#ef4444" /> Pending Tasks
                             </h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <AlertRow type="FOLLOW-UP" label="24 Pending Counsellor calls" time="30m ago" />
-                                <AlertRow type="ATTENDANCE" label="Batch J1 attendance below 60%" time="2h ago" />
-                                <AlertRow type="FINANCE" label="4 Payments overdue ($3.2k)" time="Today" />
+                                <AlertRow type="ATTENDANCE" label="Batch J1 attendance low" time="2h ago" />
+                                <AlertRow type="PAYMENTS" label="4 Payments overdue ($3.2k)" time="Today" />
                             </div>
-                            <button style={{ width: '100%', marginTop: '1.5rem', padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer' }}>RESOLVE ALL →</button>
+                            <button style={{ width: '100%', marginTop: '1.5rem', padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer' }}>VIEW ALL NOTIFICATIONS →</button>
                         </div>
                     </div>
                 </div>
@@ -116,23 +116,23 @@ export default function SuperAdminHome() {
                 {/* --- RECENT ACTIVITY TABLE --- */}
                 <div style={{ marginTop: '3rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Real-time Pulse Feed</h3>
-                        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem' }}>VIEW GLOBAL LOGS</div>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Recent Activity</h3>
+                        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem' }}>VIEW ALL ACTIVITY</div>
                     </div>
                     <div className="glass-panel" style={{ borderRadius: '24px', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ background: 'rgba(255,255,255,0.02)', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>
-                                    <th style={{ padding: '15px 20px' }}>ENTITY</th>
-                                    <th style={{ padding: '15px 20px' }}>ACTION</th>
-                                    <th style={{ padding: '15px 20px' }}>TIMESTAMP</th>
-                                    <th style={{ padding: '15px 20px' }}>SECURITY RANK</th>
+                                    <th style={{ padding: '15px 20px' }}>ENTITY / USER</th>
+                                    <th style={{ padding: '15px 20px' }}>ACTION PERFORMED</th>
+                                    <th style={{ padding: '15px 20px' }}>TIME</th>
+                                    <th style={{ padding: '15px 20px' }}>PRIORITY</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <PulseRow entity="Auth Service" action="Token Cluster Rotate" time="Just Now" rank="LEVEL_1" />
-                                <PulseRow entity="Gateway Node 4" action="Throughput Balanced" time="3m ago" rank="LEVEL_3" />
-                                <PulseRow entity="Admin: Sai" action="Created Batch: FullStack_Apr" time="15m ago" rank="LEVEL_2" />
+                                <PulseRow entity="Security Service" action="Regular System Check" time="Just Now" rank="LOW" />
+                                <PulseRow entity="Server Node 4" action="Performance Balanced" time="3m ago" rank="NORMAL" />
+                                <PulseRow entity="Admin: Sai" action="Created New Batch" time="15m ago" rank="NORMAL" />
                             </tbody>
                         </table>
                     </div>
@@ -175,7 +175,7 @@ function PulseRow({ entity, action, time, rank }: any) {
             <td style={{ padding: '15px 20px', fontWeight: 800 }}>{entity}</td>
             <td style={{ padding: '15px 20px', color: 'var(--text-dim)', fontSize: '0.9rem' }}>{action}</td>
             <td style={{ padding: '15px 20px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>{time}</td>
-            <td style={{ padding: '15px 20px' }}><Badge label={rank} color={rank === 'LEVEL_1' ? '#ef4444' : '#3b82f6'} /></td>
+            <td style={{ padding: '15px 20px' }}><Badge label={rank} color={rank === 'HIGH' ? '#ef4444' : rank === 'NORMAL' ? '#3b82f6' : '#94a3b8'} /></td>
         </tr>
     );
 }
