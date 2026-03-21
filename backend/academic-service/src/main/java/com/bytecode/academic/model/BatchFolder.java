@@ -14,6 +14,9 @@ import java.util.List;
 @Builder
 public class BatchFolder {
     private String name;
+    private String createdBy;
+    @Builder.Default
+    private List<UserAccess> sharedWith = new ArrayList<>();
     @Builder.Default
     private List<BatchFile> files = new ArrayList<>();
 }

@@ -91,3 +91,21 @@
 2026-03-21T14:16:31.584+05:30  INFO 76619 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Announcements already exist, skipping seeding
 2026-03-21T14:16:31.604+05:30  INFO 76619 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Notices already exist, skipping seeding
 2026-03-21T14:16:31.604+05:30  INFO 76619 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Academic Data Seeding Completed!
+2026-03-21T14:16:39.130+05:30  INFO 76619 --- [academic-service] [nio-8089-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-21T14:16:39.137+05:30  INFO 76619 --- [academic-service] [nio-8089-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-21T14:16:39.151+05:30  INFO 76619 --- [academic-service] [nio-8089-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 14 ms
+2026-03-21T14:21:31.124+05:30  INFO 76619 --- [academic-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-21T14:26:31.132+05:30  INFO 76619 --- [academic-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10:52 min
+[INFO] Finished at: 2026-03-21T14:27:12+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:4.0.2:run (default-cli) on project academic-service: Process terminated with exit code: 137 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
