@@ -14,33 +14,8 @@
 - Network:       http://192.168.0.207:3000
 
 ✓ Starting...
-✓ Ready in 1388ms
- GET /super-admin/salary 200 in 643ms (compile: 460ms, render: 183ms)
- GET /icon?d878d31cd40b5385 200 in 406ms (compile: 314ms, render: 92ms)
- GET /super-admin/users 200 in 106ms (compile: 31ms, render: 75ms)
- GET /icon?d878d31cd40b5385 200 in 8ms (compile: 1574µs, render: 7ms)
- GET /super-admin/users 200 in 19ms (compile: 6ms, render: 13ms)
- GET /super-admin/users 200 in 111ms (compile: 46ms, render: 64ms)
- GET /icon?d878d31cd40b5385 200 in 37ms (compile: 4ms, render: 34ms)
- GET /super-admin/users 200 in 86ms (compile: 16ms, render: 70ms)
- GET /icon?d878d31cd40b5385 200 in 17ms (compile: 1581µs, render: 15ms)
-✓ Compiled in 641ms
-✓ Compiled in 28ms
-✓ Compiled in 57ms
-✓ Compiled in 46ms
-✓ Compiled in 117ms
-✓ Compiled in 267ms
- GET / 200 in 3.0s (compile: 2.5s, render: 490ms)
-✓ Compiled in 445ms
-✓ Compiled in 218ms
- GET / 200 in 366ms (compile: 66ms, render: 299ms)
- GET / 200 in 282ms (compile: 51ms, render: 231ms)
-✓ Compiled in 314ms
-✓ Compiled in 124ms
-✓ Compiled in 106ms
- GET / 200 in 520ms (compile: 96ms, render: 423ms)
-✓ Compiled in 667ms
-✓ Compiled in 108ms
-✓ Compiled in 602ms
- GET /super-admin/modules 200 in 1679ms (compile: 1612ms, render: 67ms)
- GET /super-admin/users 200 in 644ms (compile: 540ms, render: 103ms)
+✓ Ready in 1293ms
+ GET /super-admin/modules 200 in 651ms (compile: 433ms, render: 218ms)
+ GET /super-admin/users 200 in 128ms (compile: 75ms, render: 53ms)
+ GET /icon?d878d31cd40b5385 200 in 240ms (compile: 67ms, render: 173ms)
+ GET /icon?d878d31cd40b5385 200 in 19ms (compile: 6ms, render: 13ms)
