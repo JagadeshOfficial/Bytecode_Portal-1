@@ -15,7 +15,7 @@ export default function LiveClassManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8080/api/batches').then(res => res.json()).then(data => setBatches(data));
+        fetch('http://localhost:8081/api/batches').then(res => res.json()).then(data => setBatches(data));
         // Mocking sessions for now as academic-service sessions endpoint might need setup
         setSessions([
             { id: 1, title: 'Spring Boot Advanced', batch: 'J1_APRIL', trainer: 'Vamsi Krishna', status: 'LIVE', start: '10:00 AM' },

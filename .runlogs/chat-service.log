@@ -70,3 +70,13 @@
 2026-03-21T17:19:18.629+05:30  INFO 57521 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
 2026-03-21T17:19:18.637+05:30  INFO 57521 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Started ChatServiceApplication in 3.24 seconds (process running for 3.888)
 2026-03-21T17:19:18.642+05:30  INFO 57521 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.1.38:chat-service:8085 - registration status: 204
+2026-03-21T17:19:48.606+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:48.606+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:48.606+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:48.606+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:48.607+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:48.607+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:48.607+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:48.629+05:30  INFO 57521 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:20:18.255+05:30  INFO 57521 --- [chat-service] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2026-03-21T17:24:18.314+05:30  INFO 57521 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

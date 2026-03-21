@@ -110,3 +110,12 @@
 2026-03-21T17:19:19.753+05:30  INFO 57528 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Seeded 5 announcements
 2026-03-21T17:19:19.776+05:30  INFO 57528 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Seeded 3 notices
 2026-03-21T17:19:19.776+05:30  INFO 57528 --- [academic-service] [           main] c.bytecode.academic.config.DataSeeder    : Academic Data Seeding Completed!
+2026-03-21T17:19:49.217+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:49.220+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:49.220+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:49.220+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:49.221+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:49.221+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:49.221+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:49.246+05:30  INFO 57528 --- [academic-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:24:19.098+05:30  INFO 57528 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

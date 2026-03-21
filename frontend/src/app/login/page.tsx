@@ -31,7 +31,7 @@ export default function Login() {
 
         try {
             // Attempt real authentication via user-service backend
-            const response = await fetch('http://localhost:8080/api/auth/login', {
+            const response = await fetch('http://localhost:8082/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: userVal, password: passVal })

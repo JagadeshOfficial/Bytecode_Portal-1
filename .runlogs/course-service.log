@@ -75,3 +75,12 @@ Initialized Course Catalog in MongoDB.
 2026-03-21T17:19:19.385+05:30  INFO 56737 --- [course-service] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-03-21T17:19:19.386+05:30  INFO 56737 --- [course-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-03-21T17:19:19.388+05:30  INFO 56737 --- [course-service] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-03-21T17:19:33.465+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:33.466+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:33.466+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:33.467+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:33.467+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:33.467+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:33.467+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:33.514+05:30  INFO 56737 --- [course-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:24:03.230+05:30  INFO 56737 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

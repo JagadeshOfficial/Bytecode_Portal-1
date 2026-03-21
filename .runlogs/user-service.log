@@ -76,3 +76,12 @@ User data enrichment completed.
 2026-03-21T17:19:19.290+05:30  INFO 56738 --- [user-service] [nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-03-21T17:19:19.291+05:30  INFO 56738 --- [user-service] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-03-21T17:19:19.293+05:30  INFO 56738 --- [user-service] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-03-21T17:19:33.470+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:33.471+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:33.471+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:33.471+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:33.471+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:33.471+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:33.472+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:33.515+05:30  INFO 56738 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:24:03.230+05:30  INFO 56738 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

@@ -71,3 +71,12 @@
 2026-03-21T17:19:18.830+05:30  INFO 57519 --- [assessment-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8083
 2026-03-21T17:19:18.840+05:30  INFO 57519 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : Started AssessmentServiceApplication in 3.391 seconds (process running for 4.187)
 2026-03-21T17:19:18.841+05:30  INFO 57519 --- [assessment-service] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 - registration status: 204
+2026-03-21T17:19:48.801+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:48.802+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:48.802+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:48.802+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:48.802+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:48.802+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:48.802+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:48.831+05:30  INFO 57519 --- [assessment-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:24:18.628+05:30  INFO 57519 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

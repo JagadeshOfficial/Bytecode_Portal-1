@@ -39,9 +39,9 @@ export default function AcademicHub() {
         setLoading(true);
         try {
             const [cRes, bRes, uRes] = await Promise.all([
-                fetch('http://localhost:8080/api/courses'),
-                fetch('http://localhost:8080/api/academic/batches'),
-                fetch('http://localhost:8080/api/users')
+                fetch('http://localhost:8081/api/courses'),
+                fetch('http://localhost:8089/api/academic/batches'),
+                fetch('http://localhost:8082/api/users')
             ]);
             
             const cData = await cRes.json();
@@ -76,7 +76,7 @@ export default function AcademicHub() {
         updatedBatch.folders = [...(updatedBatch.folders || []), newFolder];
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`http://localhost:8089/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -111,7 +111,7 @@ export default function AcademicHub() {
         const updatedBatch = { ...selectedBatch, folders: updatedFolders };
         
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`http://localhost:8089/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)

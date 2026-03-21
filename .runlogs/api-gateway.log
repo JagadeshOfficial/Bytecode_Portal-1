@@ -79,3 +79,12 @@
 2026-03-21T17:19:23.125+05:30  INFO 57672 --- [api-gateway] [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080
 2026-03-21T17:19:23.125+05:30  INFO 57672 --- [api-gateway] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8080
 2026-03-21T17:19:23.138+05:30  INFO 57672 --- [api-gateway] [           main] c.b.gateway.ApiGatewayApplication        : Started ApiGatewayApplication in 1.5 seconds (process running for 1.647)
+2026-03-21T17:19:53.075+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:53.076+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:53.076+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:53.076+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:53.076+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:53.076+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:53.076+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:53.107+05:30  INFO 57672 --- [api-gateway] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:24:22.919+05:30  INFO 57672 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

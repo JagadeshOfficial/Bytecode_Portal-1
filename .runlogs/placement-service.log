@@ -75,3 +75,12 @@ Seeding Placement Records...
 Seeded 38 placement records.
 Seeding Job Listings...
 Seeded 6 job listings.
+2026-03-21T17:19:48.029+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:48.030+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:48.030+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:48.030+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:48.030+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:48.030+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T17:19:48.030+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:48.062+05:30  INFO 57518 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:24:17.721+05:30  INFO 57518 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

@@ -40,7 +40,7 @@ export default function UserManagement() {
 
     const fetchUsers = () => {
         setLoading(true);
-        fetch('http://localhost:8080/api/users')
+        fetch('http://localhost:8082/api/users')
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) setUsers(data);
@@ -58,7 +58,7 @@ export default function UserManagement() {
 
     const fetchTrainerBatches = async (trainerId: string) => {
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/trainer/${trainerId}`);
+            const res = await fetch(`http://localhost:8089/api/academic/batches/trainer/${trainerId}`);
             if (res.ok) {
                 const data = await res.json();
                 setTrainerBatches(data);
@@ -107,8 +107,8 @@ export default function UserManagement() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         const url = selectedUser 
-            ? `http://localhost:8080/api/users/${selectedUser.id}` 
-            : 'http://localhost:8080/api/users';
+            ? `http://localhost:8082/api/users/${selectedUser.id}` 
+            : 'http://localhost:8082/api/users';
         const method = selectedUser ? 'PUT' : 'POST';
 
         try {
@@ -136,7 +136,7 @@ export default function UserManagement() {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this user?')) return;
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${id}`, { method: 'DELETE' });
+            const res = await fetch(`http://localhost:8082/api/users/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchUsers();
                 showNotification('User deleted successfully.');

@@ -2,3 +2,21 @@
 > Bytecode-trainings-platform@0.1.0 dev
 > next dev
 
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/frontend/package-lock.json
+
+▲ Next.js 16.1.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.38:3000
+
+✓ Starting...
+✓ Ready in 1043ms
+ GET /super-admin/users 200 in 953ms (compile: 697ms, render: 256ms)
+ GET /icon?d878d31cd40b5385 200 in 226ms (compile: 110ms, render: 116ms)
+✓ Compiled in 383ms
+ GET /super-admin/users 200 in 214ms (compile: 81ms, render: 133ms)
+ GET /icon?d878d31cd40b5385 200 in 18ms (compile: 3ms, render: 15ms)

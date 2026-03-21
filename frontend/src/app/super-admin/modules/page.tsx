@@ -25,7 +25,7 @@ export default function ModuleManagement() {
 
     const fetchCourses = () => {
         setLoading(true);
-        fetch('http://localhost:8080/api/courses')
+        fetch('http://localhost:8081/api/courses')
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) setCourses(data);
@@ -61,8 +61,8 @@ export default function ModuleManagement() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         const url = selectedCourse 
-            ? `http://localhost:8080/api/courses/${selectedCourse.id}` 
-            : 'http://localhost:8080/api/courses';
+            ? `http://localhost:8081/api/courses/${selectedCourse.id}` 
+            : 'http://localhost:8081/api/courses';
         const method = selectedCourse ? 'PUT' : 'POST';
 
         try {
@@ -87,7 +87,7 @@ export default function ModuleManagement() {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this course?')) return;
         try {
-            const res = await fetch(`http://localhost:8080/api/courses/${id}`, { method: 'DELETE' });
+            const res = await fetch(`http://localhost:8081/api/courses/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchCourses();
                 showNotification('Course deleted successfully.');
