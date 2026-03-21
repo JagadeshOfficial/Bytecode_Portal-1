@@ -34,139 +34,40 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-03-21T16:47:09.962+05:30  INFO 45296 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : Starting AssessmentServiceApplication using Java 21.0.7 with PID 45296 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/assessment-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/assessment-service)
-2026-03-21T16:47:09.963+05:30  INFO 45296 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : No active profile set, falling back to 1 default profile: "default"
-2026-03-21T16:47:10.736+05:30  INFO 45296 --- [assessment-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
-2026-03-21T16:47:10.769+05:30  INFO 45296 --- [assessment-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 27 ms. Found 0 MongoDB repository interfaces.
-2026-03-21T16:47:11.146+05:30  INFO 45296 --- [assessment-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bc705b6a-a447-3829-8c21-38311e22809b
-2026-03-21T16:47:11.273+05:30  WARN 45296 --- [assessment-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
-2026-03-21T16:47:11.275+05:30  WARN 45296 --- [assessment-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
-2026-03-21T16:47:11.539+05:30  INFO 45296 --- [assessment-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8083 (http)
-2026-03-21T16:47:11.561+05:30  INFO 45296 --- [assessment-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-21T16:47:11.561+05:30  INFO 45296 --- [assessment-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
-2026-03-21T16:47:11.598+05:30  INFO 45296 --- [assessment-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-03-21T16:47:11.599+05:30  INFO 45296 --- [assessment-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1610 ms
-2026-03-21T16:47:12.196+05:30  INFO 45296 --- [assessment-service] [           main] org.mongodb.driver.client                : MongoClient with metadata {"application": {"name": "BytecodeTrainings"}, "driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "4.11.2"}, "os": {"type": "Darwin", "name": "Mac OS X", "architecture": "aarch64", "version": "15.7.4"}, "platform": "Java/Eclipse Adoptium/21.0.7+6-LTS"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=MongoCredential{mechanism=null, userName='bytecodetrainings_db_user', source='admin', password=<hidden>, mechanismProperties=<hidden>}, transportSettings=null, streamFactoryFactory=null, commandListeners=[], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@525647f3, com.mongodb.Jep395RecordCodecProvider@42fc4ac4, com.mongodb.KotlinCodecProvider@20a24edf]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[127.0.0.1:27017], srvHost=bytecodetrainings.4nosy2u.mongodb.net, srvServiceName=mongodb, mode=MULTIPLE, requiredClusterType=REPLICA_SET, requiredReplicaSetName='atlas-hy5sqn-shard-0', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=true, invalidHostNameAllowed=false, context=null}, applicationName='BytecodeTrainings', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null}
-2026-03-21T16:47:12.214+05:30  INFO 45296 --- [assessment-service] [y2u.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net:27017 to client view of cluster
-2026-03-21T16:47:12.233+05:30  INFO 45296 --- [assessment-service] [y2u.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net:27017 to client view of cluster
-2026-03-21T16:47:12.234+05:30  INFO 45296 --- [assessment-service] [y2u.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net:27017 to client view of cluster
-2026-03-21T16:47:12.568+05:30  INFO 45296 --- [assessment-service] [ngodb.net:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net:27017
-
-com.mongodb.MongoSocketWriteException: Exception sending message
-	at com.mongodb.internal.connection.InternalStreamConnection.translateWriteException(InternalStreamConnection.java:714) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:587) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendCommandMessage(InternalStreamConnection.java:419) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendAndReceive(InternalStreamConnection.java:364) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.CommandHelper.sendAndReceive(CommandHelper.java:92) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.CommandHelper.executeCommand(CommandHelper.java:48) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.initializeConnectionDescription(InternalStreamConnectionInitializer.java:130) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.startHandshake(InternalStreamConnectionInitializer.java:78) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:213) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:193) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:153) ~[mongodb-driver-core-4.11.2.jar:na]
-	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
-Caused by: javax.net.ssl.SSLException: Received fatal alert: internal_error
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:132) ~[na:na]
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:117) ~[na:na]
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:370) ~[na:na]
-	at java.base/sun.security.ssl.Alert$AlertConsumer.consume(Alert.java:287) ~[na:na]
-	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:209) ~[na:na]
-	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.ensureNegotiated(SSLSocketImpl.java:922) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl$AppOutputStream.write(SSLSocketImpl.java:1291) ~[na:na]
-	at com.mongodb.internal.connection.SocketStream.write(SocketStream.java:164) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:584) ~[mongodb-driver-core-4.11.2.jar:na]
-	... 10 common frames omitted
-
-2026-03-21T16:47:12.572+05:30  INFO 45296 --- [assessment-service] [ngodb.net:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net:27017
-
-com.mongodb.MongoSocketWriteException: Exception sending message
-	at com.mongodb.internal.connection.InternalStreamConnection.translateWriteException(InternalStreamConnection.java:714) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:587) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendCommandMessage(InternalStreamConnection.java:419) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendAndReceive(InternalStreamConnection.java:364) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.CommandHelper.sendAndReceive(CommandHelper.java:92) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.CommandHelper.executeCommand(CommandHelper.java:48) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.initializeConnectionDescription(InternalStreamConnectionInitializer.java:130) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.startHandshake(InternalStreamConnectionInitializer.java:78) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:213) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:193) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:153) ~[mongodb-driver-core-4.11.2.jar:na]
-	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
-Caused by: javax.net.ssl.SSLException: Received fatal alert: internal_error
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:132) ~[na:na]
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:117) ~[na:na]
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:370) ~[na:na]
-	at java.base/sun.security.ssl.Alert$AlertConsumer.consume(Alert.java:287) ~[na:na]
-	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:209) ~[na:na]
-	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.ensureNegotiated(SSLSocketImpl.java:922) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl$AppOutputStream.write(SSLSocketImpl.java:1291) ~[na:na]
-	at com.mongodb.internal.connection.SocketStream.write(SocketStream.java:164) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:584) ~[mongodb-driver-core-4.11.2.jar:na]
-	... 10 common frames omitted
-
-2026-03-21T16:47:12.569+05:30  INFO 45296 --- [assessment-service] [ngodb.net:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net:27017
-
-com.mongodb.MongoSocketWriteException: Exception sending message
-	at com.mongodb.internal.connection.InternalStreamConnection.translateWriteException(InternalStreamConnection.java:714) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:587) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendCommandMessage(InternalStreamConnection.java:419) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendAndReceive(InternalStreamConnection.java:364) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.CommandHelper.sendAndReceive(CommandHelper.java:92) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.CommandHelper.executeCommand(CommandHelper.java:48) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.initializeConnectionDescription(InternalStreamConnectionInitializer.java:130) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.startHandshake(InternalStreamConnectionInitializer.java:78) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:213) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:193) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:153) ~[mongodb-driver-core-4.11.2.jar:na]
-	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
-Caused by: javax.net.ssl.SSLException: Received fatal alert: internal_error
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:132) ~[na:na]
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:117) ~[na:na]
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:370) ~[na:na]
-	at java.base/sun.security.ssl.Alert$AlertConsumer.consume(Alert.java:287) ~[na:na]
-	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:209) ~[na:na]
-	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl.ensureNegotiated(SSLSocketImpl.java:922) ~[na:na]
-	at java.base/sun.security.ssl.SSLSocketImpl$AppOutputStream.write(SSLSocketImpl.java:1291) ~[na:na]
-	at com.mongodb.internal.connection.SocketStream.write(SocketStream.java:164) ~[mongodb-driver-core-4.11.2.jar:na]
-	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:584) ~[mongodb-driver-core-4.11.2.jar:na]
-	... 10 common frames omitted
-
-2026-03-21T16:47:12.629+05:30  INFO 45296 --- [assessment-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
-2026-03-21T16:47:12.668+05:30  WARN 45296 --- [assessment-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2026-03-21T16:47:12.694+05:30  INFO 45296 --- [assessment-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
-2026-03-21T16:47:12.819+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
-2026-03-21T16:47:12.828+05:30  INFO 45296 --- [assessment-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T16:47:12.869+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
-2026-03-21T16:47:12.869+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
-2026-03-21T16:47:12.869+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
-2026-03-21T16:47:12.869+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
-2026-03-21T16:47:12.869+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
-2026-03-21T16:47:12.869+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
-2026-03-21T16:47:12.870+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
-2026-03-21T16:47:13.137+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
-2026-03-21T16:47:13.139+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
-2026-03-21T16:47:13.140+05:30  INFO 45296 --- [assessment-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
-2026-03-21T16:47:13.143+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774091833142 with initial instances count: 2
-2026-03-21T16:47:13.144+05:30  INFO 45296 --- [assessment-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application ASSESSMENT-SERVICE with eureka with status UP
-2026-03-21T16:47:13.144+05:30  INFO 45296 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1774091833144, current=UP, previous=STARTING]
-2026-03-21T16:47:13.146+05:30  INFO 45296 --- [assessment-service] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083: registering service...
-2026-03-21T16:47:13.167+05:30  INFO 45296 --- [assessment-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8083 (http) with context path ''
-2026-03-21T16:47:13.168+05:30  INFO 45296 --- [assessment-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8083
-2026-03-21T16:47:13.183+05:30  INFO 45296 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : Started AssessmentServiceApplication in 3.719 seconds (process running for 4.108)
-2026-03-21T16:47:13.189+05:30  INFO 45296 --- [assessment-service] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 - registration status: 204
-2026-03-21T16:52:12.871+05:30  INFO 45296 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T17:01:18.935+05:30  INFO 45296 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T17:06:18.972+05:30  INFO 45296 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T17:11:18.997+05:30  INFO 45296 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-21T17:19:16.109+05:30  INFO 57519 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : Starting AssessmentServiceApplication using Java 21.0.7 with PID 57519 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/assessment-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/assessment-service)
+2026-03-21T17:19:16.111+05:30  INFO 57519 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-03-21T17:19:17.038+05:30  INFO 57519 --- [assessment-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-03-21T17:19:17.056+05:30  INFO 57519 --- [assessment-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 12 ms. Found 0 MongoDB repository interfaces.
+2026-03-21T17:19:17.241+05:30  INFO 57519 --- [assessment-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bc705b6a-a447-3829-8c21-38311e22809b
+2026-03-21T17:19:17.288+05:30  WARN 57519 --- [assessment-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2026-03-21T17:19:17.292+05:30  WARN 57519 --- [assessment-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-03-21T17:19:17.546+05:30  INFO 57519 --- [assessment-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8083 (http)
+2026-03-21T17:19:17.557+05:30  INFO 57519 --- [assessment-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-21T17:19:17.557+05:30  INFO 57519 --- [assessment-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-03-21T17:19:17.604+05:30  INFO 57519 --- [assessment-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-21T17:19:17.604+05:30  INFO 57519 --- [assessment-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1454 ms
+2026-03-21T17:19:18.214+05:30  INFO 57519 --- [assessment-service] [           main] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "4.11.2"}, "os": {"type": "Darwin", "name": "Mac OS X", "architecture": "aarch64", "version": "15.7.4"}, "platform": "Java/Eclipse Adoptium/21.0.7+6-LTS"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=null, transportSettings=null, streamFactoryFactory=null, commandListeners=[], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@5d71b500, com.mongodb.Jep395RecordCodecProvider@8840c98, com.mongodb.KotlinCodecProvider@626b639e]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null}
+2026-03-21T17:19:18.241+05:30  INFO 57519 --- [assessment-service] [localhost:27017] org.mongodb.driver.cluster               : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=27, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=18078667}
+2026-03-21T17:19:18.436+05:30  INFO 57519 --- [assessment-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+2026-03-21T17:19:18.471+05:30  WARN 57519 --- [assessment-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-03-21T17:19:18.485+05:30  INFO 57519 --- [assessment-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-03-21T17:19:18.591+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-03-21T17:19:18.593+05:30  INFO 57519 --- [assessment-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-03-21T17:19:18.604+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T17:19:18.799+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T17:19:18.800+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-03-21T17:19:18.802+05:30  INFO 57519 --- [assessment-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-03-21T17:19:18.804+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774093758804 with initial instances count: 0
+2026-03-21T17:19:18.805+05:30  INFO 57519 --- [assessment-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application ASSESSMENT-SERVICE with eureka with status UP
+2026-03-21T17:19:18.806+05:30  INFO 57519 --- [assessment-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1774093758806, current=UP, previous=STARTING]
+2026-03-21T17:19:18.807+05:30  INFO 57519 --- [assessment-service] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083: registering service...
+2026-03-21T17:19:18.829+05:30  INFO 57519 --- [assessment-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8083 (http) with context path ''
+2026-03-21T17:19:18.830+05:30  INFO 57519 --- [assessment-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8083
+2026-03-21T17:19:18.840+05:30  INFO 57519 --- [assessment-service] [           main] c.b.a.AssessmentServiceApplication       : Started AssessmentServiceApplication in 3.391 seconds (process running for 4.187)
+2026-03-21T17:19:18.841+05:30  INFO 57519 --- [assessment-service] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ASSESSMENT-SERVICE/192.168.1.38:assessment-service:8083 - registration status: 204

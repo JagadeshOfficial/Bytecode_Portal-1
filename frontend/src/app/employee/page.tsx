@@ -36,7 +36,7 @@ export default function EmployeeDashboard() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const parsed = JSON.parse(storedUser);
-            fetch(`http://localhost:8082/api/users/${parsed.email}`)
+            fetch(`http://localhost:8080/api/users/${parsed.email}`)
                 .then(res => res.json())
                 .then(data => setEmployee(data))
                 .catch(() => setEmployee(parsed));

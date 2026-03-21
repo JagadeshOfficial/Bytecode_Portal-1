@@ -36,9 +36,9 @@ export default function BatchManagement() {
     const fetchAll = () => {
         setLoading(true);
         Promise.all([
-            fetch('http://localhost:8089/api/academic/batches').then(res => res.json()),
-            fetch('http://localhost:8081/api/courses').then(res => res.json()),
-            fetch('http://localhost:8082/api/users').then(res => res.json().then(users => {
+            fetch('http://localhost:8080/api/academic/batches').then(res => res.json()),
+            fetch('http://localhost:8080/api/courses').then(res => res.json()),
+            fetch('http://localhost:8080/api/users').then(res => res.json().then(users => {
                 return Array.isArray(users) ? users.filter((u: any) => u.role === 'TRAINER') : [];
             }))
         ]).then(([batchesData, coursesData, trainersData]) => {
@@ -59,8 +59,8 @@ export default function BatchManagement() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         const url = selectedBatch 
-            ? `http://localhost:8089/api/academic/batches/${selectedBatch.id}` 
-            : 'http://localhost:8089/api/academic/batches';
+            ? `http://localhost:8080/api/academic/batches/${selectedBatch.id}` 
+            : 'http://localhost:8080/api/academic/batches';
         const method = selectedBatch ? 'PUT' : 'POST';
 
         try {
