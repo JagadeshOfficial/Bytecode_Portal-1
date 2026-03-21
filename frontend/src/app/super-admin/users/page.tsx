@@ -80,24 +80,24 @@ export default function UserManagement() {
             if (res.ok) {
                 setIsModalOpen(false);
                 fetchUsers();
-                showNotification(selectedUser ? 'ENTITY_RECONFIGURED: Secure parameters updated successfully.' : 'ENTITY_INITIALIZED: New record added to the ecosystem.');
+                showNotification(selectedUser ? 'User updated successfully!' : 'New user added successfully!');
             } else {
                 const err = await res.json();
-                showNotification('PROTOCOL_FAILURE: ' + (err.error || 'Check infrastructure logs.'), 'error');
+                showNotification('Error saving user: ' + (err.error || 'System error.'), 'error');
             }
         } catch (err) {
             console.error(err);
-            showNotification('CONNECTION_REFUSED: System offline.', 'error');
+            showNotification('Server connection failed.', 'error');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this user? This action is irreversible.')) return;
+        if (!confirm('Are you sure you want to delete this user?')) return;
         try {
             const res = await fetch(`http://localhost:8082/api/users/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchUsers();
-                showNotification('ENTITY_PURGED: Record has been removed from the registry.');
+                showNotification('User deleted successfully.');
             }
         } catch (err) {
             console.error(err);
@@ -125,8 +125,8 @@ export default function UserManagement() {
                 {/* --- PAGE HEADER --- */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                     <div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px' }}>User & Role Master</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Administer global credentials and infrastructure access.</p>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px' }}>User Management</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage system accounts and user permissions.</p>
                     </div>
                     <motion.button 
                         whileHover={{ scale: 1.05 }}
@@ -135,7 +135,7 @@ export default function UserManagement() {
                         className="btn-quantum" 
                         style={{ padding: '14px 28px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
-                        <Plus size={18} /> CREATE SYSTEM USER
+                        <Plus size={18} /> ADD NEW USER
                     </motion.button>
                 </div>
 
@@ -178,7 +178,7 @@ export default function UserManagement() {
                         <Search size={20} color="var(--text-dim)" />
                         <input 
                             type="text" 
-                            placeholder="Find by name, email or access level..." 
+                            placeholder="Search by name or email..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{ 
@@ -201,16 +201,16 @@ export default function UserManagement() {
                             <thead>
                                 <tr style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
                                     <th style={{ padding: '20px' }}>User Details</th>
-                                    <th style={{ padding: '20px' }}>Access Rank</th>
-                                    <th style={{ padding: '20px' }}>Security Status</th>
-                                    <th style={{ padding: '20px' }}>Verified Date</th>
+                                    <th style={{ padding: '20px' }}>Role</th>
+                                    <th style={{ padding: '20px' }}>Status</th>
+                                    <th style={{ padding: '20px' }}>Joined Date</th>
                                     <th style={{ padding: '20px', textAlign: 'right' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <AnimatePresence>
                                 {loading ? (
-                                    <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', fontWeight: 'bold' }}>ACCESSING RECORDS...</td></tr>
+                                    <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', fontWeight: 'bold' }}>FETCHING USERS...</td></tr>
                                 ) : filteredUsers.map((u, i) => (
                                     <motion.tr 
                                         key={u.id || i}
@@ -223,9 +223,9 @@ export default function UserManagement() {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', overflow: 'hidden' }}>
                                                      {u.profileImage ? (
-                                                         <img src={u.profileImage} alt={u.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                          <img src={u.profileImage} alt={u.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                      ) : (
-                                                         u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
+                                                          u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
                                                      )}
                                                  </div>
                                                  <div>
@@ -237,24 +237,29 @@ export default function UserManagement() {
                                             </div>
                                         </td>
                                         <td style={{ padding: '20px' }}>
-                                            <span style={{ 
-                                                background: u.role === 'SUPER_ADMIN' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                                                color: u.role === 'SUPER_ADMIN' ? '#ef4444' : '#60a5fa',
-                                                padding: '6px 14px',
-                                                borderRadius: '100px',
-                                                fontSize: '0.7rem',
-                                                fontWeight: 900,
-                                                letterSpacing: '0.5px'
-                                            }}>{u.role?.replace('_', ' ')}</span>
+                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                 <div style={{ 
+                                                     width: '8px', 
+                                                     height: '8px', 
+                                                     borderRadius: '50%', 
+                                                     background: u.role === 'SUPER_ADMIN' ? '#ef4444' : u.role === 'TRAINER' ? '#8b5cf6' : '#3b82f6' 
+                                                 }} />
+                                                 <span style={{ 
+                                                     color: u.role === 'SUPER_ADMIN' ? '#ef4444' : u.role === 'TRAINER' ? '#8b5cf6' : '#3b82f6',
+                                                     fontSize: '0.75rem',
+                                                     fontWeight: 800,
+                                                     letterSpacing: '0.5px'
+                                                 }}>{u.role?.replace('_', ' ')}</span>
+                                             </div>
                                         </td>
                                         <td style={{ padding: '20px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: u.active ? '#10b981' : '#ed4e4e' }}>
                                                 {u.active ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                                                <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{u.active ? 'ACTIVE' : 'LOCKED'}</span>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{u.active ? 'ACTIVE' : 'INACTIVE'}</span>
                                             </div>
                                         </td>
                                         <td style={{ padding: '20px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
-                                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'SECURE_INIT'}
+                                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'New User'}
                                         </td>
                                         <td style={{ padding: '20px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -282,35 +287,35 @@ export default function UserManagement() {
                             className="glass-panel"
                             style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', borderRadius: '32px' }}
                         >
-                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>{selectedUser ? 'Reconfigure Entity' : 'Initialize New Entity'}</h2>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>{selectedUser ? 'Edit User' : 'Create New User'}</h2>
                             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>FULL LEGAL NAME</label>
-                                    <input value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} placeholder="e.g. Director General" style={inputStyle} />
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>FULL NAME</label>
+                                    <input value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} placeholder="e.g. John Doe" style={inputStyle} />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>SECURED ACCESS EMAIL</label>
-                                    <input value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="director@bytecode.com" style={inputStyle} />
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>EMAIL ADDRESS</label>
+                                    <input value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="email@bytecode.com" style={inputStyle} />
                                 </div>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>CREDENTIAL LEVEL</label>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>USER ROLE</label>
                                         <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} style={inputStyle}>
                                             {USER_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                                         </select>
                                     </div>
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>SECURED PASS</label>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>PASSWORD</label>
                                         <input type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="••••••••" style={inputStyle} />
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
                                     <input type="checkbox" checked={formData.active} onChange={(e) => setFormData({...formData, active: e.target.checked})} />
-                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Entity Active & Verified</span>
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Account Active</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                    <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}>ABORT</button>
-                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', fontWeight: 800 }}>{selectedUser ? 'UPDATE PROTOCOLS' : 'FINALIZE ENTITY'}</button>
+                                    <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', fontWeight: 800 }}>{selectedUser ? 'UPDATE USER' : 'SAVE USER'}</button>
                                 </div>
                             </form>
                         </motion.div>
