@@ -14,13 +14,11 @@
 - Network:       http://192.168.29.221:3000
 
 ✓ Starting...
-✓ Ready in 792ms
- GET /login 200 in 765ms (compile: 584ms, render: 181ms)
- GET /icon?d878d31cd40b5385 200 in 138ms (compile: 56ms, render: 82ms)
- GET /login 200 in 77ms (compile: 10ms, render: 68ms)
- GET /icon?d878d31cd40b5385 200 in 13ms (compile: 2ms, render: 11ms)
- GET /login 200 in 98ms (compile: 30ms, render: 69ms)
- GET /icon?d878d31cd40b5385 200 in 17ms (compile: 5ms, render: 12ms)
- GET /login 200 in 153ms (compile: 58ms, render: 95ms)
- GET /icon?d878d31cd40b5385 200 in 19ms (compile: 1769µs, render: 18ms)
-[?25h
+✓ Ready in 835ms
+ GET /login 200 in 907ms (compile: 682ms, render: 225ms)
+ GET /icon?d878d31cd40b5385 200 in 142ms (compile: 53ms, render: 89ms)
+ GET /login 200 in 67ms (compile: 11ms, render: 56ms)
+ GET /icon?d878d31cd40b5385 200 in 26ms (compile: 8ms, render: 18ms)
+ GET /super-admin 200 in 2.7s (compile: 2.7s, render: 44ms)
+ GET /super-admin/users 200 in 184ms (compile: 98ms, render: 86ms)
+ GET /login 200 in 86ms (compile: 18ms, render: 68ms)
