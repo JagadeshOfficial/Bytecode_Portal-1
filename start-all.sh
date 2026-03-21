@@ -96,7 +96,7 @@ verify_prerequisites() {
   require_command "node" "Install Node.js and ensure it is on PATH."
   require_command "npm" "Install npm and ensure it is on PATH."
 
-  check_mongodb
+#  check_mongodb
 
   if [[ ! -d "$FRONTEND_DIR/node_modules" ]]; then
     echo "Error: frontend dependencies are missing at $FRONTEND_DIR/node_modules."

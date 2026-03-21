@@ -1614,3 +1614,7 @@
  GET /super-admin/users 200 in 34ms (compile: 3ms, render: 31ms)
  GET /super-admin/users 200 in 19ms (compile: 3ms, render: 16ms)
  GET /icon?d878d31cd40b5385 200 in 70ms (compile: 50ms, render: 20ms)
+ GET / 200 in 5.6s (compile: 2.6s, render: 3.0s)
+ GET /icon?d878d31cd40b5385 200 in 55ms (compile: 5ms, render: 50ms)
+ GET / 200 in 382ms (compile: 42ms, render: 340ms)
+ GET /login 200 in 378ms (compile: 329ms, render: 49ms)
