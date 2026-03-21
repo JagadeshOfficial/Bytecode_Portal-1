@@ -32,6 +32,8 @@ export default function AcademicHub() {
     const [newFolderName, setNewFolderName] = useState('');
     const [sharingTarget, setSharingTarget] = useState<any>(null);
     const [userSearchTerm, setUserSearchTerm] = useState('');
+    const [isTutorModalOpen, setIsTutorModalOpen] = useState(false);
+    const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -129,6 +131,46 @@ export default function AcademicHub() {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const handleAssignTutor = async (trainerId: string) => {
+        const updatedBatch = { ...selectedBatch, trainerId };
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                const savedBatch = await res.json();
+                setSelectedBatch(savedBatch);
+                setBatches(batches.map(b => b.id === savedBatch.id ? savedBatch : b));
+                setIsTutorModalOpen(false);
+            }
+        } catch(err) { console.error(err); }
+    };
+
+    const handleToggleStudent = async (studentId: string) => {
+        let currentStudentIds = selectedBatch.studentIds || [];
+        if (currentStudentIds.includes(studentId)) {
+            currentStudentIds = currentStudentIds.filter((id: string) => id !== studentId);
+        } else {
+            currentStudentIds = [...currentStudentIds, studentId];
+        }
+        
+        const updatedBatch = { ...selectedBatch, studentIds: currentStudentIds, totalStudents: currentStudentIds.length };
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                const savedBatch = await res.json();
+                setSelectedBatch(savedBatch);
+                setBatches(batches.map(b => b.id === savedBatch.id ? savedBatch : b));
+            }
+        } catch(err) { console.error(err); }
     };
 
     const handleCourseClick = (course: any) => {
@@ -277,10 +319,14 @@ export default function AcademicHub() {
                                  <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
                                       <h4 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Batch Context</h4>
                                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                           <InfoSnippet icon={<User size={18} />} label="Assigned Tutor" value={tutor?.fullName || 'Pending'} />
+                                           <InfoSnippet icon={<User size={18} />} label="Assigned Tutor" value={tutor?.fullName || tutor?.email || 'Pending'} />
                                            <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
-                                           <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={new Date(selectedBatch?.createdAt).toLocaleDateString()} />
-                                      </div>
+                                           <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : 'Just Now'} />
+                                       </div>
+                                       <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                           <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
+                                           <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', background: 'var(--secondary)', width: '100%' }}>MANAGE BATCH STUDENTS</button>
+                                       </div>
                                  </div>
                             </div>
                         </motion.div>
@@ -366,6 +412,73 @@ export default function AcademicHub() {
 
                                <div style={{ padding: '2rem 2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
                                     <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontWeight: 800, cursor: 'pointer' }}>CLOSE</button>
+                               </div>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- ASSIGN TUTOR MODAL --- */}
+            <AnimatePresence>
+                 {isTutorModalOpen && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '2.5rem', borderRadius: '40px' }}>
+                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                   <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Assign Tutor</h2>
+                                   <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }}><XCircle size={24} /></button>
+                               </div>
+                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+                                   {allUsers.filter(u => u.role === 'TRAINER').map((trainer: any, idx: number) => (
+                                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+                                           <div>
+                                               <div style={{ fontWeight: 800 }}>{trainer.fullName || trainer.email}</div>
+                                               <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Expert Instructor</div>
+                                           </div>
+                                           <button onClick={() => handleAssignTutor(trainer.id)} style={{ background: selectedBatch?.trainerId === trainer.id ? '#10b981' : 'var(--primary)', color: '#000', padding: '6px 15px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>
+                                               {selectedBatch?.trainerId === trainer.id ? 'ASSIGNED' : 'ASSIGN'}
+                                           </button>
+                                       </div>
+                                   ))}
+                               </div>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- MANAGE STUDENTS MODAL --- */}
+            <AnimatePresence>
+                 {isStudentModalOpen && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
+                               <div style={{ background: 'var(--secondary)', padding: '2.5rem', color: '#000' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={24} /> Add/Remove Students</h2>
+                                         <button onClick={() => setIsStudentModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}><XCircle size={28} /></button>
+                                    </div>
+                                    <p style={{ marginTop: '0.5rem', fontWeight: 700, opacity: 0.8 }}>Grant or revoke batch drive access directly.</p>
+                               </div>
+
+                               <div style={{ padding: '2rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
+                                   {allUsers.filter(u => u.role === 'STUDENT').map((student: any, idx: number) => {
+                                       const hasAccess = selectedBatch?.studentIds?.includes(student.id);
+                                       return (
+                                           <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: hasAccess ? '1px solid var(--secondary)' : '1px solid transparent' }}>
+                                               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--secondary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{student.email?.charAt(0).toUpperCase()}</div>
+                                                    <div>
+                                                         <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{student.fullName || student.email.split('@')[0]}</div>
+                                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email}</div>
+                                                    </div>
+                                               </div>
+                                               <button onClick={() => handleToggleStudent(student.id)} style={{ background: hasAccess ? 'rgba(239, 68, 68, 0.1)' : 'var(--secondary)', color: hasAccess ? '#ef4444' : '#000', border: hasAccess ? '1px solid #ef4444' : 'none', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
+                                                   {hasAccess ? 'REMOVE ACCESS' : 'GRANT ACCESS'}
+                                               </button>
+                                           </div>
+                                       )
+                                   })}
+                               </div>
+                               <div style={{ padding: '1.5rem 2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>
+                                    <button onClick={() => setIsStudentModalOpen(false)} className="btn-quantum" style={{ padding: '10px 20px' }}>DONE</button>
                                </div>
                           </motion.div>
                      </div>

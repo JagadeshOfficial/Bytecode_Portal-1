@@ -14,11 +14,24 @@
 - Network:       http://192.168.29.221:3000
 
 ✓ Starting...
-✓ Ready in 835ms
- GET /login 200 in 907ms (compile: 682ms, render: 225ms)
- GET /icon?d878d31cd40b5385 200 in 142ms (compile: 53ms, render: 89ms)
- GET /login 200 in 67ms (compile: 11ms, render: 56ms)
- GET /icon?d878d31cd40b5385 200 in 26ms (compile: 8ms, render: 18ms)
- GET /super-admin 200 in 2.7s (compile: 2.7s, render: 44ms)
- GET /super-admin/users 200 in 184ms (compile: 98ms, render: 86ms)
- GET /login 200 in 86ms (compile: 18ms, render: 68ms)
+✓ Ready in 957ms
+ GET /login 200 in 580ms (compile: 378ms, render: 202ms)
+ GET /icon?d878d31cd40b5385 200 in 140ms (compile: 52ms, render: 89ms)
+ GET /super-admin 200 in 386ms (compile: 362ms, render: 24ms)
+ GET /super-admin/users 200 in 42ms (compile: 22ms, render: 20ms)
+ GET /login 200 in 84ms (compile: 12ms, render: 72ms)
+ GET /icon?d878d31cd40b5385 200 in 59ms (compile: 10ms, render: 49ms)
+✓ Compiled in 241ms
+✓ Compiled in 991ms
+ GET /super-admin/users 200 in 305ms (compile: 132ms, render: 174ms)
+ GET /icon?d878d31cd40b5385 200 in 29ms (compile: 11ms, render: 18ms)
+ GET /super-admin/academic 200 in 225ms (compile: 202ms, render: 24ms)
+ GET /super-admin/live 200 in 274ms (compile: 239ms, render: 36ms)
+ GET /super-admin/users 200 in 43ms (compile: 11ms, render: 32ms)
+ GET /super-admin 200 in 105ms (compile: 60ms, render: 44ms)
+ GET /super-admin/crm 200 in 222ms (compile: 196ms, render: 26ms)
+ GET /super-admin/tracking 200 in 136ms (compile: 116ms, render: 20ms)
+ GET /super-admin/users 200 in 40ms (compile: 11ms, render: 30ms)
+ GET /super-admin/academic 200 in 29ms (compile: 7ms, render: 22ms)
+ GET /super-admin/users 200 in 44ms (compile: 16ms, render: 27ms)
+✓ Compiled in 191ms

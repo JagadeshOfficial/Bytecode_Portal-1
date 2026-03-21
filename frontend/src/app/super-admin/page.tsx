@@ -33,8 +33,33 @@ const revenueTrend = [
 export default function SuperAdminHome() {
     const [isMounted, setIsMounted] = useState(false);
 
+    const [metrics, setMetrics] = useState({
+        totalStudents: 0,
+        activeBatches: 0,
+        trainers: 0
+    });
+
     useEffect(() => {
         setIsMounted(true);
+        fetch('http://localhost:8080/api/users')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const students = data.filter((u: any) => u.role === 'STUDENT').length;
+                    const trainers = data.filter((u: any) => u.role === 'TRAINER').length;
+                    setMetrics(prev => ({ ...prev, totalStudents: students, trainers }));
+                }
+            })
+            .catch(console.error);
+
+        fetch('http://localhost:8080/api/academic/batches')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setMetrics(prev => ({ ...prev, activeBatches: data.length }));
+                }
+            })
+            .catch(console.error);
     }, []);
 
     return (
@@ -43,10 +68,10 @@ export default function SuperAdminHome() {
                 
                 {/* --- OVERVIEW CARDS --- */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
-                    <HomeMetricCard icon={<Users />} title="Total Students" value="4,852" trend="+124 new" color="#8b5cf6" />
+                    <HomeMetricCard icon={<Users />} title="Total Students" value={metrics.totalStudents} trend="Active Students" color="#8b5cf6" />
                     <HomeMetricCard icon={<Target />} title="Conversion" value="36.4%" trend="Good" color="#3b82f6" />
                     <HomeMetricCard icon={<DollarSign />} title="Monthly Income" value="$142,500" trend="22% Growth" color="#10b981" />
-                    <HomeMetricCard icon={<Layers />} title="Active Batches" value="18" sub="4 Main Courses" color="#f59e0b" />
+                    <HomeMetricCard icon={<Layers />} title="Active Batches" value={metrics.activeBatches} sub="Current Focus" color="#f59e0b" />
                     <HomeMetricCard icon={<Award />} title="Job Placements" value="92.4%" sub="Industry Best" color="#ec4899" />
                 </div>
 

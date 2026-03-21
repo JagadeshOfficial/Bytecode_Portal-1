@@ -7,7 +7,7 @@ import {
     Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar, 
     Video, FileText, CheckCircle, Target, Search, Phone, DollarSign, 
     BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap, 
-    HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool
+    HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool, Edit2, XCircle
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
@@ -85,8 +85,11 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [userName, setUserName] = useState('User');
-    const menuItems = MENUS[role] || [];
+    const [loggedUser, setLoggedUser] = useState<any>(null);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [profileForm, setProfileForm] = useState({ fullName: '', email: '', password: '' });
 
+    const menuItems = MENUS[role] || [];
     const roleDisplay = role.replace(/_/g, ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
     const handleLogout = () => {
@@ -94,20 +97,65 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
         window.location.href = '/login';
     };
 
-    const getUserName = () => {
+    const fetchUserProfile = async () => {
         if (typeof window !== 'undefined') {
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const parsed = JSON.parse(storedUser);
-                return parsed.name || parsed.fullName || parsed.email || 'User';
+                setLoggedUser(parsed);
+                if (parsed.id) {
+                    try {
+                        const res = await fetch(`http://localhost:8080/api/users/${parsed.id}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
+                            setUserName(actualName);
+                            // Update local storage so it stays fresh
+                            localStorage.setItem('user', JSON.stringify({ ...parsed, name: actualName, email: data.email }));
+                            setProfileForm({ fullName: actualName, email: data.email || '', password: data.password || '' });
+                            setLoggedUser({ ...parsed, ...data });
+                        } else {
+                            setUserName(parsed.name || parsed.fullName || parsed.email || 'User');
+                        }
+                    } catch (e) {
+                        setUserName(parsed.name || parsed.fullName || parsed.email || 'User');
+                    }
+                } else {
+                    setUserName(parsed.name || 'User');
+                }
             }
         }
-        return 'User';
     };
 
     useEffect(() => {
-        setUserName(getUserName());
+        fetchUserProfile();
     }, []);
+
+    const handleProfileSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!loggedUser || !loggedUser.id) return;
+        try {
+            const res = await fetch(`http://localhost:8080/api/users/${loggedUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...loggedUser,
+                    fullName: profileForm.fullName,
+                    email: profileForm.email,
+                    password: profileForm.password
+                })
+            });
+            if (res.ok) {
+                setIsProfileModalOpen(false);
+                fetchUserProfile(); // refresh the header immediately
+                alert('Profile updated successfully!');
+            } else {
+                alert('Error updating profile');
+            }
+        } catch (e) {
+            alert('Failed to connect to server');
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -143,7 +191,11 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                         
                         <li className={styles.menuItem} style={{ marginTop: '2rem' }}>
                             <div className={styles.menuSection}>Account</div>
-                            <button onClick={handleLogout} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
+                            <button onClick={() => setIsProfileModalOpen(true)} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
+                                <Settings size={18} style={{ opacity: 0.8 }} />
+                                My Profile Settings
+                            </button>
+                            <button onClick={handleLogout} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', marginTop: '5px' }}>
                                 <LogOut size={18} style={{ opacity: 0.8 }} />
                                 Logout
                             </button>
@@ -161,9 +213,11 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                         <h2 className={styles.headerTitle}>{roleDisplay} Panel</h2>
                     </div>
                     
-                    <div className={styles.userProfile}>
+                    <div className={styles.userProfile} onClick={() => setIsProfileModalOpen(true)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <span>{userName}</span>
-                        <div className={styles.avatar}>{userName.charAt(0)}</div>
+                        <div className={styles.avatar} style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', border: '2px solid rgba(255,255,255,0.2)' }}>
+                            {userName.charAt(0).toUpperCase()}
+                        </div>
                     </div>
                 </header>
                 
@@ -171,6 +225,61 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     {children}
                 </div>
             </main>
+
+            {/* --- MY PROFILE MODAL --- */}
+            {isProfileModalOpen && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
+                    <div className="glass-panel" style={{ width: '95%', maxWidth: '500px', padding: '2.5rem', borderRadius: '32px', position: 'relative' }}>
+                        <button onClick={() => setIsProfileModalOpen(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}>
+                            <XCircle size={20} />
+                        </button>
+                        
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Edit2 size={24} color="var(--primary)" /> Edit My Profile
+                        </h2>
+
+                        <form onSubmit={handleProfileSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>FULL NAME</label>
+                                <input 
+                                    value={profileForm.fullName} 
+                                    onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} 
+                                    style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none' }} 
+                                    required 
+                                />
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>EMAIL ADDRESS</label>
+                                <input 
+                                    value={profileForm.email} 
+                                    onChange={e => setProfileForm({...profileForm, email: e.target.value})} 
+                                    style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none' }} 
+                                    required 
+                                    type="email"
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>UPDATE PASSWORD</label>
+                                <input 
+                                    value={profileForm.password} 
+                                    onChange={e => setProfileForm({...profileForm, password: e.target.value})} 
+                                    style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none' }} 
+                                />
+                            </div>
+
+                            <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                                <strong style={{ color: 'var(--primary)' }}>Note:</strong> Updates to your profile are reflected immediately in the system. Changing your role is prohibited from this self-service modal.
+                            </div>
+
+                            <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '14px', fontWeight: 900, fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <CheckCircle size={18} /> SAVE CHANGES
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
