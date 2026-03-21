@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "*")
+// @CrossOrigin removed to avoid duplicate headers with Gateway
 public class UserController {
 
     private final UserService userService;

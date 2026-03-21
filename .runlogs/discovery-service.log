@@ -100,3 +100,21 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-03-21T22:36:28.039+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
 2026-03-21T22:37:28.042+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
 2026-03-21T22:38:28.050+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-21T22:39:28.052+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-21T22:40:28.053+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-21T22:41:28.055+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-21T22:42:28.058+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-03-21T22:43:28.062+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-03-21T22:44:28.064+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-21T22:45:28.064+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-21T22:46:28.066+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-21T22:47:28.067+05:30  INFO 86360 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-21T22:48:09.607+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.s.EurekaServiceRegistry        : Unregistering application DISCOVERY-SERVICE with eureka with status DOWN
+2026-03-21T22:48:09.624+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.server.EurekaServerBootstrap   : Shutting down Eureka Server..
+2026-03-21T22:48:09.629+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shutting down ...
+2026-03-21T22:48:09.651+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shut down
+2026-03-21T22:48:09.651+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] o.s.c.n.e.server.EurekaServerBootstrap   : Eureka Service is now shutdown...
+2026-03-21T22:48:09.651+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shutting down ...
+2026-03-21T22:48:09.653+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] c.n.eureka.DefaultEurekaServerContext    : Shut down
+2026-03-21T22:48:09.658+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] com.netflix.discovery.DiscoveryClient    : Shutting down DiscoveryClient ...
+2026-03-21T22:48:09.659+05:30  INFO 86360 --- [discovery-service] [ionShutdownHook] com.netflix.discovery.DiscoveryClient    : Completed shut down of DiscoveryClient

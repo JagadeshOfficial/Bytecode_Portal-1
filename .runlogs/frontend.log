@@ -19,3 +19,8 @@
  GET /icon?d878d31cd40b5385 200 in 138ms (compile: 56ms, render: 82ms)
  GET /login 200 in 77ms (compile: 10ms, render: 68ms)
  GET /icon?d878d31cd40b5385 200 in 13ms (compile: 2ms, render: 11ms)
+ GET /login 200 in 98ms (compile: 30ms, render: 69ms)
+ GET /icon?d878d31cd40b5385 200 in 17ms (compile: 5ms, render: 12ms)
+ GET /login 200 in 153ms (compile: 58ms, render: 95ms)
+ GET /icon?d878d31cd40b5385 200 in 19ms (compile: 1769µs, render: 18ms)
+[?25h

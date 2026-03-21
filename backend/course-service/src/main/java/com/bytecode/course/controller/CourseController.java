@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "*")
+// @CrossOrigin removed to avoid duplicate headers with Gateway
 public class CourseController {
 
     private final CourseService courseService;
