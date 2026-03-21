@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor
@@ -34,5 +36,9 @@ public class User {
     private Integer leavesTotal;
     private Integer leavesAccepted;
     private Integer leavesRejected;
+    @Builder.Default
+    private List<String> leaveHistory = new ArrayList<>();
+    @Builder.Default
+    private List<String> requirementRequests = new ArrayList<>();
     private Date createdAt;
 }

@@ -29,8 +29,7 @@ const MENUS: Record<string, MenuItem[]> = {
     super_admin: [
         { section: 'Overview', label: 'Dashboard Home', href: '/super-admin', icon: <LayoutDashboard size={18} /> },
         { section: 'User Management', label: 'Users List', href: '/super-admin/users', icon: <Users size={18} /> },
-        { label: 'Courses & Modules', href: '/super-admin/modules', icon: <BookOpen size={18} /> },
-        { label: 'Batch Management', href: '/super-admin/batches', icon: <Layers size={18} /> },
+        { section: 'Academic Hub', label: 'Curriculum & Batches', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
         { section: 'Class Activities', label: 'Live Classes', href: '/super-admin/live', icon: <Video size={18} /> },
         { label: 'Recorded Classes', href: '/super-admin/recordings', icon: <Activity size={18} /> },
         { label: 'Assignments', href: '/super-admin/assignments', icon: <FileText size={18} /> },

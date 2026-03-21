@@ -51,6 +51,8 @@ public class UserService {
             if (tempUser.getLeavesTotal() != null) user.setLeavesTotal(tempUser.getLeavesTotal());
             if (tempUser.getLeavesAccepted() != null) user.setLeavesAccepted(tempUser.getLeavesAccepted());
             if (tempUser.getLeavesRejected() != null) user.setLeavesRejected(tempUser.getLeavesRejected());
+            if (tempUser.getLeaveHistory() != null) user.setLeaveHistory(tempUser.getLeaveHistory());
+            if (tempUser.getRequirementRequests() != null) user.setRequirementRequests(tempUser.getRequirementRequests());
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }

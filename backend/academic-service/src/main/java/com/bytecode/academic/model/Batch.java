@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor
@@ -34,6 +35,8 @@ public class Batch {
     private String branch;
     private Integer maxCapacity;
     private String description;
+    @Builder.Default
+    private List<BatchFolder> folders = new ArrayList<>();
     private Date createdAt;
     private Date updatedAt;
 }

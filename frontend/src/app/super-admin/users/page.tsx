@@ -6,7 +6,10 @@ import { useState, useEffect } from 'react';
 import { 
     Users, Plus, Search, Edit2, Trash2, 
     CheckCircle, XCircle, Filter, ChevronDown, 
-    MoreHorizontal, Shield, UserCheck, Mail
+    MoreHorizontal, Shield, UserCheck, Mail,
+    Eye, BookOpen, Clock, DollarSign, Calendar,
+    FileText, User as UserIcon, Book, MessageSquare,
+    HelpCircle, Inbox
 } from 'lucide-react';
 
 const USER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'HR', 'COUNSELOR', 'FINANCE', 'STUDENT'];
@@ -16,9 +19,18 @@ export default function UserManagement() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    // Modals
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [formData, setFormData] = useState({ fullName: '', email: '', password: 'Bytecode@1354', role: 'STUDENT', active: true });
+    const [trainerBatches, setTrainerBatches] = useState<any[]>([]);
+    
+    const [formData, setFormData] = useState({ 
+        fullName: '', email: '', password: 'Bytecode@1354', role: 'STUDENT', active: true,
+        salary: 0, deductions: 0, leavesTotal: 0, leavesAccepted: 0, leavesRejected: 0,
+        leaveHistory: [], requirementRequests: []
+    });
     const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
     const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -44,7 +56,19 @@ export default function UserManagement() {
         fetchUsers();
     }, []);
 
-    const handleOpenModal = (user: any = null) => {
+    const fetchTrainerBatches = async (trainerId: string) => {
+        try {
+            const res = await fetch(`http://localhost:8089/api/academic/batches/trainer/${trainerId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setTrainerBatches(data);
+            }
+        } catch (err) {
+            console.error("Error fetching trainer batches:", err);
+        }
+    };
+
+    const handleOpenEditModal = (user: any = null) => {
         if (user) {
             setSelectedUser(user);
             setFormData({ 
@@ -52,13 +76,32 @@ export default function UserManagement() {
                 email: user.email || '', 
                 password: user.password || 'Bytecode@1354', 
                 role: user.role || 'STUDENT', 
-                active: user.active !== undefined ? user.active : true 
+                active: user.active !== undefined ? user.active : true,
+                salary: user.salary || 0,
+                deductions: user.deductions || 0,
+                leavesTotal: user.leavesTotal || 0,
+                leavesAccepted: user.leavesAccepted || 0,
+                leavesRejected: user.leavesRejected || 0,
+                leaveHistory: user.leaveHistory || [],
+                requirementRequests: user.requirementRequests || []
             });
         } else {
             setSelectedUser(null);
-            setFormData({ fullName: '', email: '', password: 'Bytecode@1354', role: 'STUDENT', active: true });
+            setFormData({ 
+                fullName: '', email: '', password: 'Bytecode@1354', role: 'STUDENT', active: true,
+                salary: 0, deductions: 0, leavesTotal: 0, leavesAccepted: 0, leavesRejected: 0,
+                leaveHistory: [], requirementRequests: []
+            });
         }
-        setIsModalOpen(true);
+        setIsEditModalOpen(true);
+    };
+
+    const handleViewDetails = (user: any) => {
+        setSelectedUser(user);
+        setIsDetailModalOpen(true);
+        if (user.role === 'TRAINER') {
+            fetchTrainerBatches(user.id);
+        }
     };
 
     const handleSave = async (e: React.FormEvent) => {
@@ -74,16 +117,15 @@ export default function UserManagement() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    attendanceRate: selectedUser?.attendanceRate || 0.0 // Ensure primitive double isn't null
+                    attendanceRate: selectedUser?.attendanceRate || 92.5
                 })
             });
             if (res.ok) {
-                setIsModalOpen(false);
+                setIsEditModalOpen(false);
                 fetchUsers();
                 showNotification(selectedUser ? 'User updated successfully!' : 'New user added successfully!');
             } else {
-                const err = await res.json();
-                showNotification('Error saving user: ' + (err.error || 'System error.'), 'error');
+                showNotification('Error saving user.', 'error');
             }
         } catch (err) {
             console.error(err);
@@ -131,7 +173,7 @@ export default function UserManagement() {
                     <motion.button 
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleOpenModal()}
+                        onClick={() => handleOpenEditModal()}
                         className="btn-quantum" 
                         style={{ padding: '14px 28px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
@@ -222,16 +264,16 @@ export default function UserManagement() {
                                         <td style={{ padding: '20px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', overflow: 'hidden' }}>
-                                                     {u.profileImage ? (
-                                                          <img src={u.profileImage} alt={u.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                     ) : (
-                                                          u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
-                                                     )}
+                                                      {u.profileImage ? (
+                                                           <img src={u.profileImage} alt={u.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                      ) : (
+                                                           u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
+                                                      )}
                                                  </div>
                                                  <div>
                                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                         <span style={{ fontWeight: 800, color: '#1e293b' }}>{u.fullName || u.name || 'Anonymous User'}</span>
-                                                         <span style={{ fontSize: '0.75rem', color: '#64748b' }}> ({u.email})</span>
+                                                         <span style={{ fontWeight: 800, color: 'var(--text-bright)' }}>{u.fullName || u.name || 'Anonymous User'}</span>
+                                                         <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}> ({u.email})</span>
                                                      </div>
                                                  </div>
                                             </div>
@@ -263,7 +305,8 @@ export default function UserManagement() {
                                         </td>
                                         <td style={{ padding: '20px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <ActionButton icon={<Edit2 size={16} />} onClick={() => handleOpenModal(u)} />
+                                                <ActionButton icon={<Eye size={16} />} color="var(--primary)" onClick={() => handleViewDetails(u)} />
+                                                <ActionButton icon={<Edit2 size={16} />} onClick={() => handleOpenEditModal(u)} />
                                                 <ActionButton icon={<Trash2 size={16} />} color="#ef4444" onClick={() => handleDelete(u.id)} />
                                             </div>
                                         </td>
@@ -276,20 +319,130 @@ export default function UserManagement() {
                 </div>
             </motion.div>
 
-            {/* --- USER MODAL --- */}
+            {/* --- DETAILED VIEW MODAL --- */}
             <AnimatePresence>
-                {isModalOpen && (
+                {isDetailModalOpen && selectedUser && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
+                            <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: '3rem', position: 'relative' }}>
+                                <button onClick={() => setIsDetailModalOpen(false)} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(0,0,0,0.2)', border: 'none', color: '#fff', padding: '10px', borderRadius: '50%', cursor: 'pointer' }}><XCircle size={24} /></button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                                    <div style={{ width: '120px', height: '120px', borderRadius: '30px', background: '#fff', padding: '5px' }}>
+                                        <div style={{ width: '100%', height: '100%', borderRadius: '25px', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                            {selectedUser.profileImage ? <img src={selectedUser.profileImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserIcon size={64} color="#ccc" />}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#000', letterSpacing: '-1px' }}>{selectedUser.fullName}</h2>
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <span style={{ background: '#000', color: 'var(--primary)', padding: '5px 15px', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900 }}>{selectedUser.role}</span>
+                                            <span style={{ background: 'rgba(0,0,0,0.1)', color: '#000', padding: '5px 15px', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900 }}>{selectedUser.email}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '3rem', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                                {/* --- STATS GRID --- */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--primary)', paddingLeft: '1rem' }}>Employment Details</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <InfoCard icon={<DollarSign size={18} />} label="Monthly Salary" value={`₹${selectedUser.salary || '0.00'}`} />
+                                        <InfoCard icon={<FileText size={18} />} label="Deductions" value={`₹${selectedUser.deductions || '0.00'}`} />
+                                        <InfoCard icon={<UserCheck size={18} />} label="Attendance" value={`${selectedUser.attendanceRate || '92.5'}%`} />
+                                        <InfoCard icon={<Calendar size={18} />} label="Total Leaves" value={selectedUser.leavesTotal || 0} />
+                                    </div>
+                                    
+                                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '20px', display: 'flex', justifyContent: 'space-around' }}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>ACCEPTED</div>
+                                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#10b981' }}>{selectedUser.leavesAccepted || 0}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>REJECTED</div>
+                                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ef4444' }}>{selectedUser.leavesRejected || 0}</div>
+                                        </div>
+                                    </div>
+
+                                    {/* --- COMMUNICATION SECTION --- */}
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--primary)', paddingLeft: '1rem', marginTop: '1rem' }}>Requirements & Questions</h3>
+                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '20px', minHeight: '100px' }}>
+                                         {selectedUser.requirementRequests?.length > 0 ? (
+                                              selectedUser.requirementRequests.map((req: string, i: number) => (
+                                                  <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', fontSize: '0.85rem' }}>
+                                                      <HelpCircle size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+                                                      <p>{req}</p>
+                                                  </div>
+                                              ))
+                                         ) : (
+                                              <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', textAlign: 'center', marginTop: '1rem' }}>No pending requests or questions.</p>
+                                         )}
+                                    </div>
+                                </div>
+
+                                {/* --- ROLE SPECIFIC SECTION --- */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {selectedUser.role === 'TRAINER' ? (
+                                        <>
+                                            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--secondary)', paddingLeft: '1rem' }}>Assigned Batches</h3>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
+                                                {trainerBatches.length > 0 ? trainerBatches.map((b, idx) => (
+                                                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <div>
+                                                            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{b.name}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                                <Clock size={12} /> {b.startTime} - {b.endTime}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ background: 'rgba(124, 58, 237, 0.1)', color: 'var(--primary)', padding: '5px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900 }}>
+                                                            <BookOpen size={12} style={{ marginRight: '5px' }} /> ACADEMIC
+                                                        </div>
+                                                    </div>
+                                                )) : <p style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '2rem' }}>No batches assigned yet.</p>}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--secondary)', paddingLeft: '1rem' }}>Leave History</h3>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
+                                                {selectedUser.leaveHistory?.length > 0 ? selectedUser.leaveHistory.map((leave: string, idx: number) => (
+                                                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                            <Inbox size={18} color="var(--primary)" />
+                                                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{leave}</div>
+                                                        </div>
+                                                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-dim)' }}>PROCESSED</span>
+                                                    </div>
+                                                )) : (
+                                                    <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.01)', borderRadius: '20px' }}>
+                                                        <MessageSquare size={32} color="var(--text-dim)" style={{ marginBottom: '10px' }} />
+                                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>No historical leave records found.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                         </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* --- EDIT MODAL --- */}
+            <AnimatePresence>
+                {isEditModalOpen && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
                         <motion.div 
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             className="glass-panel"
-                            style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', borderRadius: '32px' }}
+                            style={{ width: '95%', maxWidth: '700px', padding: '2.5rem', borderRadius: '32px', maxHeight: '90vh', overflowY: 'auto' }}
                         >
-                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>{selectedUser ? 'Edit User' : 'Create New User'}</h2>
-                            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>{selectedUser ? 'Edit User Details' : 'Create New User'}</h2>
+                            <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: '1/-1' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>FULL NAME</label>
                                     <input value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} placeholder="e.g. John Doe" style={inputStyle} />
                                 </div>
@@ -297,31 +450,48 @@ export default function UserManagement() {
                                     <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>EMAIL ADDRESS</label>
                                     <input value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="email@bytecode.com" style={inputStyle} />
                                 </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>USER ROLE</label>
-                                        <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} style={inputStyle}>
-                                            {USER_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                                        </select>
-                                    </div>
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>PASSWORD</label>
-                                        <input type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="••••••••" style={inputStyle} />
-                                    </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>USER ROLE</label>
+                                    <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} style={inputStyle}>
+                                        {USER_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+
+                                <h3 style={{ gridColumn: '1/-1', fontSize: '0.85rem', fontWeight: 900, marginTop: '1rem', color: 'var(--primary)', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '5px' }}>HR & FINANCE SETTINGS</h3>
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>MONTHLY SALARY (₹)</label>
+                                    <input type="number" value={formData.salary} onChange={(e) => setFormData({...formData, salary: parseFloat(e.target.value)})} style={inputStyle} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>DEDUCTIONS (₹)</label>
+                                    <input type="number" value={formData.deductions} onChange={(e) => setFormData({...formData, deductions: parseFloat(e.target.value)})} style={inputStyle} />
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>TOTAL LEAVES</label>
+                                    <input type="number" value={formData.leavesTotal} onChange={(e) => setFormData({...formData, leavesTotal: parseInt(e.target.value)})} style={inputStyle} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>ACCEPTED LEAVES</label>
+                                    <input type="number" value={formData.leavesAccepted} onChange={(e) => setFormData({...formData, leavesAccepted: parseInt(e.target.value)})} style={inputStyle} />
+                                </div>
+
+                                <div style={{ gridColumn: '1/-1', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <input type="checkbox" checked={formData.active} onChange={(e) => setFormData({...formData, active: e.target.checked})} />
                                     <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Account Active</span>
                                 </div>
-                                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                    <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}>CANCEL</button>
-                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', fontWeight: 800 }}>{selectedUser ? 'UPDATE USER' : 'SAVE USER'}</button>
+
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', gridColumn: '1/-1' }}>
+                                    <button type="button" onClick={() => setIsEditModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', fontWeight: 800 }}>{selectedUser ? 'UPDATE PROFILE' : 'SAVE USER'}</button>
                                 </div>
                             </form>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
+
             {/* --- NOTIFICATION TOAST --- */}
             <AnimatePresence>
                 {notification && (
@@ -358,6 +528,18 @@ export default function UserManagement() {
     );
 }
 
+function InfoCard({ icon, label, value }: any) {
+    return (
+        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {icon}
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase' }}>{label}</span>
+            </div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>{value}</div>
+        </div>
+    );
+}
+
 function ActionButton({ icon, color, onClick }: any) {
     return (
         <button 
@@ -383,5 +565,6 @@ const inputStyle = {
     border: '1px solid rgba(255,255,255,0.1)',
     color: '#fff',
     outline: 'none',
-    width: '100%'
+    width: '100%',
+    fontFamily: 'inherit'
 };
