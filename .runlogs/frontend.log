@@ -2,23 +2,37 @@
 > Bytecode-trainings-platform@0.1.0 dev
 > next dev
 
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/frontend/package-lock.json
+
 ▲ Next.js 16.1.4 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.207:3000
 
 ✓ Starting...
-✓ Ready in 1025ms
- GET /super-admin/users 200 in 904ms (compile: 680ms, render: 224ms)
- GET /login 200 in 867ms (compile: 774ms, render: 93ms)
- GET /icon?d878d31cd40b5385 200 in 152ms (compile: 71ms, render: 80ms)
- GET /icon?d878d31cd40b5385 200 in 7ms (compile: 1213µs, render: 6ms)
- GET /super-admin 200 in 289ms (compile: 251ms, render: 38ms)
-✓ Compiled in 99ms
-✓ Compiled in 61ms
-✓ Compiled in 109ms
-✓ Compiled in 39ms
-✓ Compiled in 337ms
-✓ Compiled in 28ms
- GET /super-admin/users 200 in 121ms (compile: 82ms, render: 39ms)
- GET /super-admin/users 200 in 152ms (compile: 18ms, render: 134ms)
- GET /icon?d878d31cd40b5385 200 in 22ms (compile: 2ms, render: 20ms)
+✓ Ready in 1972ms
+○ Compiling /super-admin/users ...
+ GET /super-admin/users 200 in 4.4s (compile: 4.2s, render: 261ms)
+ GET /super-admin/users 200 in 5.4s (compile: 5.3s, render: 166ms)
+ GET /icon?d878d31cd40b5385 200 in 894ms (compile: 710ms, render: 184ms)
+ GET /icon?d878d31cd40b5385 200 in 26ms (compile: 3ms, render: 23ms)
+ GET /super-admin/users 200 in 109ms (compile: 34ms, render: 74ms)
+ GET /icon?d878d31cd40b5385 200 in 44ms (compile: 8ms, render: 36ms)
+ GET /super-admin/settings 200 in 976ms (compile: 928ms, render: 48ms)
+ GET /super-admin/live 200 in 361ms (compile: 326ms, render: 35ms)
+ GET /super-admin/recordings 200 in 589ms (compile: 569ms, render: 20ms)
+ GET /super-admin/assignments 200 in 322ms (compile: 305ms, render: 17ms)
+ GET /super-admin/tests 200 in 396ms (compile: 383ms, render: 13ms)
+ GET /super-admin/mocks 200 in 417ms (compile: 396ms, render: 21ms)
+ GET /super-admin/crm 200 in 472ms (compile: 455ms, render: 17ms)
+ GET /super-admin/followup 404 in 796ms (compile: 735ms, render: 61ms)
+ GET /super-admin/followup 404 in 71ms (compile: 8ms, render: 63ms)
+ GET /super-admin/crm 200 in 71ms (compile: 8ms, render: 62ms)
+ GET /super-admin/finance 200 in 794ms (compile: 749ms, render: 46ms)
+ GET /super-admin/tracking 200 in 460ms (compile: 418ms, render: 42ms)
+ GET /super-admin/salary 200 in 450ms (compile: 424ms, render: 26ms)
+ GET /super-admin/marketing 200 in 431ms (compile: 411ms, render: 20ms)

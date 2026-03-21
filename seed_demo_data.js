@@ -99,6 +99,7 @@ async function seed() {
             role: "STUDENT",
             phoneNumber: "+91 9000000000",
             password: "password123",
+            profileImage: p.image,
             active: true
         };
         try {

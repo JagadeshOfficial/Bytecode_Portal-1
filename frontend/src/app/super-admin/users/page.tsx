@@ -179,9 +179,13 @@ export default function UserManagement() {
                                     >
                                         <td style={{ padding: '20px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff' }}>
-                                                    {u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()}
-                                                </div>
+                                                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', overflow: 'hidden' }}>
+                                                     {u.profileImage ? (
+                                                         <img src={u.profileImage} alt={u.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                     ) : (
+                                                         u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
+                                                     )}
+                                                 </div>
                                                 <div>
                                                     <div style={{ fontWeight: 800, color: '#fff' }}>{u.fullName || 'Anonymous User'}</div>
                                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>

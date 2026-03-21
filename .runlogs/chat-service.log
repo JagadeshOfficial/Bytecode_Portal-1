@@ -35,40 +35,46 @@
 
  :: Spring Boot ::                (v4.0.2)
 
-2026-03-21T09:57:40.759+05:30  INFO 23108 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Starting ChatServiceApplication using Java 21.0.7 with PID 23108 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service)
-2026-03-21T09:57:40.763+05:30  INFO 23108 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : No active profile set, falling back to 1 default profile: "default"
-2026-03-21T09:57:41.582+05:30  INFO 23108 --- [chat-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2e47f5e9-286c-3783-9967-f67823f363e0
-2026-03-21T09:57:41.795+05:30  INFO 23108 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
-2026-03-21T09:57:41.807+05:30  INFO 23108 --- [chat-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-21T09:57:41.807+05:30  INFO 23108 --- [chat-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.15]
-2026-03-21T09:57:41.846+05:30  INFO 23108 --- [chat-service] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1015 ms
-2026-03-21T09:57:42.443+05:30  INFO 23108 --- [chat-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestClient.
-2026-03-21T09:57:42.469+05:30  WARN 23108 --- [chat-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2026-03-21T09:57:42.482+05:30  INFO 23108 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
-2026-03-21T09:57:42.483+05:30  INFO 23108 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@5627cb29]]
-2026-03-21T09:57:42.483+05:30  INFO 23108 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
-2026-03-21T09:57:42.488+05:30  INFO 23108 --- [chat-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
-2026-03-21T09:57:42.504+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
-2026-03-21T09:57:42.506+05:30  INFO 23108 --- [chat-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T09:57:42.512+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
-2026-03-21T09:57:42.512+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
-2026-03-21T09:57:42.513+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
-2026-03-21T09:57:42.513+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
-2026-03-21T09:57:42.513+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
-2026-03-21T09:57:42.513+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
-2026-03-21T09:57:42.513+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
-2026-03-21T09:57:43.101+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
-2026-03-21T09:57:43.106+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
-2026-03-21T09:57:43.107+05:30  INFO 23108 --- [chat-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
-2026-03-21T09:57:43.108+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774067263108 with initial instances count: 2
-2026-03-21T09:57:43.111+05:30  INFO 23108 --- [chat-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application CHAT-SERVICE with eureka with status UP
-2026-03-21T09:57:43.111+05:30  INFO 23108 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1774067263111, current=UP, previous=STARTING]
-2026-03-21T09:57:43.112+05:30  INFO 23108 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085: registering service...
-2026-03-21T09:57:43.136+05:30  INFO 23108 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
-2026-03-21T09:57:43.140+05:30  INFO 23108 --- [chat-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8085
-2026-03-21T09:57:43.165+05:30  INFO 23108 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Started ChatServiceApplication in 2.988 seconds (process running for 3.499)
-2026-03-21T09:57:43.173+05:30  INFO 23108 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085 - registration status: 204
-2026-03-21T09:58:42.501+05:30  INFO 23108 --- [chat-service] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
-2026-03-21T10:02:42.514+05:30  INFO 23108 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T10:07:42.520+05:30  INFO 23108 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-21T10:12:42.537+05:30  INFO 23108 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-21T10:14:10.571+05:30  INFO 27617 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Starting ChatServiceApplication using Java 21.0.7 with PID 27617 (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service/target/classes started by bytecode in /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/backend/chat-service)
+2026-03-21T10:14:10.573+05:30  INFO 27617 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-03-21T10:14:12.093+05:30  INFO 27617 --- [chat-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2e47f5e9-286c-3783-9967-f67823f363e0
+2026-03-21T10:14:12.996+05:30  INFO 27617 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
+2026-03-21T10:14:13.042+05:30  INFO 27617 --- [chat-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-21T10:14:13.043+05:30  INFO 27617 --- [chat-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-03-21T10:14:13.657+05:30  INFO 27617 --- [chat-service] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2895 ms
+2026-03-21T10:14:15.805+05:30  INFO 27617 --- [chat-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestClient.
+2026-03-21T10:14:15.887+05:30  WARN 27617 --- [chat-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-03-21T10:14:15.911+05:30  INFO 27617 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2026-03-21T10:14:15.911+05:30  INFO 27617 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@404ced67]]
+2026-03-21T10:14:15.912+05:30  INFO 27617 --- [chat-service] [           main] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2026-03-21T10:14:15.976+05:30  INFO 27617 --- [chat-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-03-21T10:14:16.021+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-03-21T10:14:16.026+05:30  INFO 27617 --- [chat-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-21T10:14:16.037+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T10:14:16.037+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T10:14:16.038+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T10:14:16.038+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T10:14:16.038+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T10:14:16.038+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-03-21T10:14:16.038+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T10:14:16.723+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T10:14:16.724+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-03-21T10:14:16.726+05:30  INFO 27617 --- [chat-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-03-21T10:14:16.729+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1774068256727 with initial instances count: 0
+2026-03-21T10:14:16.735+05:30  INFO 27617 --- [chat-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application CHAT-SERVICE with eureka with status UP
+2026-03-21T10:14:16.735+05:30  INFO 27617 --- [chat-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1774068256735, current=UP, previous=STARTING]
+2026-03-21T10:14:16.737+05:30  INFO 27617 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085: registering service...
+2026-03-21T10:14:16.761+05:30  INFO 27617 --- [chat-service] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
+2026-03-21T10:14:16.762+05:30  INFO 27617 --- [chat-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8085
+2026-03-21T10:14:16.776+05:30  INFO 27617 --- [chat-service] [           main] c.bytecode.chat.ChatServiceApplication   : Started ChatServiceApplication in 6.865 seconds (process running for 7.54)
+2026-03-21T10:14:16.784+05:30  INFO 27617 --- [chat-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CHAT-SERVICE/192.168.0.207:chat-service:8085 - registration status: 204
+2026-03-21T10:14:46.739+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-21T10:14:46.747+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-21T10:14:46.747+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-21T10:14:46.747+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-21T10:14:46.747+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-21T10:14:46.748+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
+2026-03-21T10:14:46.748+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-21T10:14:46.865+05:30  INFO 27617 --- [chat-service] [reshExecutor-%d] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-21T10:15:15.938+05:30  INFO 27617 --- [chat-service] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2026-03-21T10:19:16.041+05:30  INFO 27617 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
