@@ -63,7 +63,7 @@ public class DataSeeder implements CommandLineRunner {
                 user.setCheckInTime("09:15 AM");
                 updated = true;
             }
-            if (user.getAttendanceRate() == 0) {
+            if (user.getAttendanceRate() == null || user.getAttendanceRate() == 0) {
                 user.setAttendanceRate(92.5);
                 updated = true;
             }

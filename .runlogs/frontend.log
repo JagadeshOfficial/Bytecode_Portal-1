@@ -14,26 +14,28 @@
 - Network:       http://192.168.0.207:3000
 
 ✓ Starting...
-✓ Ready in 1972ms
-○ Compiling /super-admin/users ...
- GET /super-admin/users 200 in 4.4s (compile: 4.2s, render: 261ms)
- GET /super-admin/users 200 in 5.4s (compile: 5.3s, render: 166ms)
- GET /icon?d878d31cd40b5385 200 in 894ms (compile: 710ms, render: 184ms)
- GET /icon?d878d31cd40b5385 200 in 26ms (compile: 3ms, render: 23ms)
- GET /super-admin/users 200 in 109ms (compile: 34ms, render: 74ms)
- GET /icon?d878d31cd40b5385 200 in 44ms (compile: 8ms, render: 36ms)
- GET /super-admin/settings 200 in 976ms (compile: 928ms, render: 48ms)
- GET /super-admin/live 200 in 361ms (compile: 326ms, render: 35ms)
- GET /super-admin/recordings 200 in 589ms (compile: 569ms, render: 20ms)
- GET /super-admin/assignments 200 in 322ms (compile: 305ms, render: 17ms)
- GET /super-admin/tests 200 in 396ms (compile: 383ms, render: 13ms)
- GET /super-admin/mocks 200 in 417ms (compile: 396ms, render: 21ms)
- GET /super-admin/crm 200 in 472ms (compile: 455ms, render: 17ms)
- GET /super-admin/followup 404 in 796ms (compile: 735ms, render: 61ms)
- GET /super-admin/followup 404 in 71ms (compile: 8ms, render: 63ms)
- GET /super-admin/crm 200 in 71ms (compile: 8ms, render: 62ms)
- GET /super-admin/finance 200 in 794ms (compile: 749ms, render: 46ms)
- GET /super-admin/tracking 200 in 460ms (compile: 418ms, render: 42ms)
- GET /super-admin/salary 200 in 450ms (compile: 424ms, render: 26ms)
- GET /super-admin/marketing 200 in 431ms (compile: 411ms, render: 20ms)
-[?25h
+✓ Ready in 1388ms
+ GET /super-admin/salary 200 in 643ms (compile: 460ms, render: 183ms)
+ GET /icon?d878d31cd40b5385 200 in 406ms (compile: 314ms, render: 92ms)
+ GET /super-admin/users 200 in 106ms (compile: 31ms, render: 75ms)
+ GET /icon?d878d31cd40b5385 200 in 8ms (compile: 1574µs, render: 7ms)
+ GET /super-admin/users 200 in 19ms (compile: 6ms, render: 13ms)
+ GET /super-admin/users 200 in 111ms (compile: 46ms, render: 64ms)
+ GET /icon?d878d31cd40b5385 200 in 37ms (compile: 4ms, render: 34ms)
+ GET /super-admin/users 200 in 86ms (compile: 16ms, render: 70ms)
+ GET /icon?d878d31cd40b5385 200 in 17ms (compile: 1581µs, render: 15ms)
+✓ Compiled in 641ms
+✓ Compiled in 28ms
+✓ Compiled in 57ms
+✓ Compiled in 46ms
+✓ Compiled in 117ms
+✓ Compiled in 267ms
+ GET / 200 in 3.0s (compile: 2.5s, render: 490ms)
+✓ Compiled in 445ms
+✓ Compiled in 218ms
+ GET / 200 in 366ms (compile: 66ms, render: 299ms)
+ GET / 200 in 282ms (compile: 51ms, render: 231ms)
+✓ Compiled in 314ms
+✓ Compiled in 124ms
+✓ Compiled in 106ms
+ GET / 200 in 520ms (compile: 96ms, render: 423ms)

@@ -12,12 +12,19 @@ import {
 const USER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'HR', 'COUNSELOR', 'FINANCE', 'STUDENT'];
 
 export default function UserManagement() {
+    const [activeTab, setActiveTab] = useState('ALL');
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [formData, setFormData] = useState({ fullName: '', email: '', password: 'Bytecode@1354', role: 'STUDENT', active: true });
+    const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 4000);
+    };
 
     const fetchUsers = () => {
         setLoading(true);
@@ -73,12 +80,14 @@ export default function UserManagement() {
             if (res.ok) {
                 setIsModalOpen(false);
                 fetchUsers();
+                showNotification(selectedUser ? 'ENTITY_RECONFIGURED: Secure parameters updated successfully.' : 'ENTITY_INITIALIZED: New record added to the ecosystem.');
             } else {
                 const err = await res.json();
-                alert('Error processing user: ' + (err.error || 'Unknown error'));
+                showNotification('PROTOCOL_FAILURE: ' + (err.error || 'Check infrastructure logs.'), 'error');
             }
         } catch (err) {
             console.error(err);
+            showNotification('CONNECTION_REFUSED: System offline.', 'error');
         }
     };
 
@@ -86,17 +95,29 @@ export default function UserManagement() {
         if (!confirm('Are you sure you want to delete this user? This action is irreversible.')) return;
         try {
             const res = await fetch(`http://localhost:8082/api/users/${id}`, { method: 'DELETE' });
-            if (res.ok) fetchUsers();
+            if (res.ok) {
+                fetchUsers();
+                showNotification('ENTITY_PURGED: Record has been removed from the registry.');
+            }
         } catch (err) {
             console.error(err);
         }
     };
 
-    const filteredUsers = users.filter(u => 
-        (u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-         u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         u.role?.toString().includes(searchTerm.toUpperCase()))
-    );
+    const filteredUsers = users.filter(u => {
+        const matchesSearch = (
+            (u.fullName || u.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+            (u.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        if (activeTab === 'ALL') return matchesSearch;
+        if (activeTab === 'STUDENT') return matchesSearch && u.role === 'STUDENT';
+        if (activeTab === 'TRAINER') return matchesSearch && u.role === 'TRAINER';
+        if (activeTab === 'STAFF') {
+            return matchesSearch && ['HR', 'COUNSELOR', 'FINANCE', 'ADMIN', 'SUPER_ADMIN'].includes(u.role);
+        }
+        return matchesSearch;
+    });
 
     return (
         <DashboardLayout role="super_admin">
@@ -116,6 +137,30 @@ export default function UserManagement() {
                     >
                         <Plus size={18} /> CREATE SYSTEM USER
                     </motion.button>
+                </div>
+
+                {/* --- ROLE FILTER TABS --- */}
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '10px' }}>
+                    {['ALL', 'STUDENT', 'TRAINER', 'STAFF'].map(role => (
+                        <button 
+                            key={role}
+                            onClick={() => setActiveTab(role)}
+                            style={{
+                                padding: '10px 20px',
+                                borderRadius: '12px',
+                                background: activeTab === role ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
+                                border: activeTab === role ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                                color: activeTab === role ? '#000' : 'var(--text-dim)',
+                                fontWeight: 800,
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
+                            {role === 'TRAINER' ? 'TUTORS' : role === 'STAFF' ? 'STAFF / HR / ADMIN' : role}
+                        </button>
+                    ))}
                 </div>
 
                 {/* --- FILTER & SEARCH BAR --- */}
@@ -147,9 +192,6 @@ export default function UserManagement() {
                             }} 
                         />
                     </div>
-                    <button style={{ padding: '0 1.5rem', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', color: 'var(--text-dim)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <Filter size={18} /> FILTER
-                    </button>
                 </div>
 
                 {/* --- USERS TABLE --- */}
@@ -186,12 +228,12 @@ export default function UserManagement() {
                                                          u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
                                                      )}
                                                  </div>
-                                                <div>
-                                                    <div style={{ fontWeight: 800, color: '#fff' }}>{u.fullName || 'Anonymous User'}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <Mail size={12} /> {u.email}
-                                                    </div>
-                                                </div>
+                                                 <div>
+                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                         <span style={{ fontWeight: 800, color: '#1e293b' }}>{u.fullName || u.name || 'Anonymous User'}</span>
+                                                         <span style={{ fontSize: '0.75rem', color: '#64748b' }}> ({u.email})</span>
+                                                     </div>
+                                                 </div>
                                             </div>
                                         </td>
                                         <td style={{ padding: '20px' }}>
@@ -273,6 +315,38 @@ export default function UserManagement() {
                             </form>
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+            {/* --- NOTIFICATION TOAST --- */}
+            <AnimatePresence>
+                {notification && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 50, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: 20, x: '-50%' }}
+                        style={{ 
+                            position: 'fixed', 
+                            bottom: '2rem', 
+                            left: '50%', 
+                            transform: 'translateX(-50%)',
+                            zIndex: 10001,
+                            background: notification.type === 'success' ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)',
+                            color: '#fff',
+                            padding: '12px 24px',
+                            borderRadius: '12px',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        {notification.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                        {notification.message}
+                    </motion.div>
                 )}
             </AnimatePresence>
         </DashboardLayout>
