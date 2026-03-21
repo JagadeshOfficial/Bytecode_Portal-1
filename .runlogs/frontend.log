@@ -11,9 +11,11 @@
 
 ▲ Next.js 16.1.4 (Turbopack)
 - Local:         http://localhost:3000
-- Network:       http://192.168.1.38:3000
+- Network:       http://192.168.29.221:3000
 
 ✓ Starting...
-✓ Ready in 845ms
- GET /login 200 in 828ms (compile: 614ms, render: 214ms)
- GET /icon?d878d31cd40b5385 200 in 160ms (compile: 77ms, render: 83ms)
+✓ Ready in 792ms
+ GET /login 200 in 765ms (compile: 584ms, render: 181ms)
+ GET /icon?d878d31cd40b5385 200 in 138ms (compile: 56ms, render: 82ms)
+ GET /login 200 in 77ms (compile: 10ms, render: 68ms)
+ GET /icon?d878d31cd40b5385 200 in 13ms (compile: 2ms, render: 11ms)
