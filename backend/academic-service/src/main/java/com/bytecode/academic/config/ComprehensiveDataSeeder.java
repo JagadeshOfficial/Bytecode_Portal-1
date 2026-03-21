@@ -35,9 +35,8 @@ public class ComprehensiveDataSeeder implements CommandLineRunner {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String API_GATEWAY_URL = "http://localhost:8080/api";
-    private static final String USER_SERVICE_URL = API_GATEWAY_URL + "/users";
-    private static final String COURSE_SERVICE_URL = API_GATEWAY_URL + "/courses";
+    private static final String USER_SERVICE_URL = "http://localhost:8082/api/users";
+    private static final String COURSE_SERVICE_URL = "http://localhost:8081/api/courses";
 
     @Override
     public void run(String... args) {
