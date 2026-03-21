@@ -42,7 +42,7 @@ export default function SuperAdminHome() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                 
                 {/* --- OVERVIEW CARDS --- */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
                     <HomeMetricCard icon={<Users />} title="Total Students" value="4,852" trend="+124 new" color="#8b5cf6" />
                     <HomeMetricCard icon={<Target />} title="Conversion Rate" value="36.4%" trend="Optimized" color="#3b82f6" />
                     <HomeMetricCard icon={<DollarSign />} title="Monthly Revenue" value="$142,500" trend="22% Growth" color="#10b981" />
@@ -144,11 +144,11 @@ export default function SuperAdminHome() {
 
 function HomeMetricCard({ icon, title, value, trend, sub, color }: any) {
     return (
-        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', borderBottom: `3px solid ${color}` }}>
-            <div style={{ color: color, marginBottom: '0.75rem' }}>{icon}</div>
-            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-dim)', letterSpacing: '1px' }}>{title.toUpperCase()}</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 900, margin: '0.25rem 0' }}>{value}</div>
-            <div style={{ fontSize: '0.75rem', color: trend ? '#10b981' : 'var(--text-dim)', fontWeight: 700 }}>{trend || sub}</div>
+        <div className="glass-panel" style={{ padding: '1.25rem', borderRadius: '20px', borderBottom: `3px solid ${color}` }}>
+            <div style={{ color: color, marginBottom: '0.6rem' }}>{icon}</div>
+            <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-dim)', letterSpacing: '1px' }}>{title.toUpperCase()}</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 900, margin: '0.2rem 0' }}>{value}</div>
+            <div style={{ fontSize: '0.7rem', color: trend ? '#10b981' : 'var(--text-dim)', fontWeight: 700 }}>{trend || sub}</div>
         </div>
     );
 }

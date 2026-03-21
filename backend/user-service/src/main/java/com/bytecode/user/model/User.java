@@ -24,7 +24,7 @@ public class User {
     private String department;
     private String userStatus; // Present, Absent, On Leave, Remote
     private String checkInTime;
-    private double attendanceRate;
+    private Double attendanceRate;
     private String password;
     private String phoneNumber;
     private String profileImage;

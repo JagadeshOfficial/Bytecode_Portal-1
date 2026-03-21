@@ -126,7 +126,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     </button>
                 </div>
                 
-                <div className={styles.sidebarContent} style={{ flex: 1, overflowY: 'scroll', paddingBottom: '2rem' }}>
+                <div className={styles.sidebarContent}>
                     <ul className={styles.menu}>
                         {menuItems.map((item, index) => (
                             <li key={item.href} className={styles.menuItem}>
