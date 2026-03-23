@@ -105,3 +105,7 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-03-23T12:08:48.126+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.0.207:user-service:8082 with status UP (replication=false)
 2026-03-23T12:08:48.644+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance USER-SERVICE/192.168.0.207:user-service:8082 with status UP (replication=true)
 2026-03-23T12:08:57.307+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-23T12:09:57.308+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T12:10:57.311+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-23T12:11:57.311+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T12:12:57.312+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms

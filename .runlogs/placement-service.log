@@ -86,3 +86,4 @@
 2026-03-23T12:02:57.122+05:30  INFO 19012 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
 2026-03-23T12:02:57.161+05:30  INFO 19012 --- [placement-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
 2026-03-23T12:07:26.931+05:30  INFO 19012 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-23T12:12:26.935+05:30  INFO 19012 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
