@@ -14,23 +14,7 @@
 - Network:       http://192.168.0.207:3000
 
 ✓ Starting...
-✓ Ready in 1013ms
- GET /super-admin/academic 200 in 665ms (compile: 490ms, render: 175ms)
- GET /icon?d878d31cd40b5385 200 in 151ms (compile: 58ms, render: 93ms)
- GET /super-admin/academic 200 in 71ms (compile: 14ms, render: 57ms)
- GET /icon?d878d31cd40b5385 200 in 26ms (compile: 2ms, render: 24ms)
- GET /super-admin/academic 200 in 71ms (compile: 4ms, render: 66ms)
- GET /icon?d878d31cd40b5385 200 in 17ms (compile: 3ms, render: 14ms)
- GET /super-admin/users 200 in 57ms (compile: 31ms, render: 26ms)
- GET /super-admin/academic 200 in 47ms (compile: 13ms, render: 35ms)
- GET /super-admin/users 200 in 38ms (compile: 7ms, render: 31ms)
- GET /super-admin/users 200 in 120ms (compile: 26ms, render: 94ms)
- GET /icon?d878d31cd40b5385 200 in 42ms (compile: 1703µs, render: 40ms)
- GET /super-admin/users 200 in 156ms (compile: 67ms, render: 89ms)
- GET /icon?d878d31cd40b5385 200 in 33ms (compile: 2ms, render: 31ms)
- GET /super-admin/users 200 in 101ms (compile: 44ms, render: 57ms)
- GET /icon?d878d31cd40b5385 200 in 38ms (compile: 14ms, render: 24ms)
- GET /super-admin/academic 200 in 52ms (compile: 20ms, render: 32ms)
- GET /super-admin/academic 200 in 83ms (compile: 12ms, render: 70ms)
- GET /icon?d878d31cd40b5385 200 in 15ms (compile: 3ms, render: 12ms)
-[?25h
+✓ Ready in 942ms
+ GET /super-admin/academic 200 in 700ms (compile: 539ms, render: 161ms)
+ GET /icon?d878d31cd40b5385 200 in 169ms (compile: 53ms, render: 116ms)
+ GET /super-admin/academic 200 in 188ms (compile: 49ms, render: 139ms)
