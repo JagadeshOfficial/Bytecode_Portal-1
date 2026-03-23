@@ -36,21 +36,28 @@ export default function AcademicHub() {
     const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
     const [tutorSearchTerm, setTutorSearchTerm] = useState('');
     const [studentSearchTerm, setStudentSearchTerm] = useState('');
+    const [renameTarget, setRenameTarget] = useState<{ type: 'folder' | 'file', oldName: string, folderName?: string } | null>(null);
+    const [renameValue, setRenameValue] = useState('');
+    const [viewFileTarget, setViewFileTarget] = useState<any>(null);
 
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [cRes, bRes, uRes] = await Promise.all([
-                fetch('http://localhost:8080/api/courses'),
-                fetch('http://localhost:8080/api/academic/batches'),
-                fetch('http://localhost:8080/api/users')
+            const safeFetch = async (url: string) => {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) return await res.json();
+                } catch(e) {}
+                return null;
+            };
+
+            const [cData, bData, uData] = await Promise.all([
+                safeFetch('http://localhost:8080/api/courses'),
+                safeFetch('http://localhost:8080/api/academic/batches'),
+                safeFetch('http://localhost:8080/api/users')
             ]);
-            
-            const cData = await cRes.json();
-            const bData = await bRes.json();
-            const uData = await uRes.json();
 
             if (Array.isArray(cData)) setCourses(cData);
             if (Array.isArray(bData)) setBatches(bData);
@@ -200,6 +207,79 @@ export default function AcademicHub() {
         }
     };
 
+    const updateBatchInDb = async (updatedBatch: any, newSelectedFolderName?: string | null) => {
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                const savedBatch = await res.json();
+                setSelectedBatch(savedBatch);
+                setBatches(batches.map((b: any) => b.id === savedBatch.id ? savedBatch : b));
+                
+                if (newSelectedFolderName) {
+                    const freshFolder = savedBatch.folders?.find((f: any) => f.name === newSelectedFolderName);
+                    setSelectedFolder(freshFolder);
+                } else if (newSelectedFolderName === null && selectedFolder) {
+                   setSelectedFolder(null);
+                } else if (selectedFolder) {
+                   const freshFolder = savedBatch.folders?.find((f: any) => f.name === selectedFolder.name);
+                   setSelectedFolder(freshFolder);
+                }
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const handleDeleteFolder = async (folderName: string, e: any) => {
+        e.stopPropagation();
+        if (!window.confirm(`Are you sure you want to delete folder "${folderName}" and all its contents?`)) return;
+        const updatedBatch = { ...selectedBatch };
+        updatedBatch.folders = updatedBatch.folders.filter((f: any) => f.name !== folderName);
+        await updateBatchInDb(updatedBatch, null);
+    };
+
+    const handleRenameSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!renameTarget || !renameValue.trim()) return;
+
+        const updatedBatch = { ...selectedBatch };
+        
+        if (renameTarget.type === 'folder') {
+            updatedBatch.folders = updatedBatch.folders.map((f: any) => {
+                if (f.name === renameTarget.oldName) return { ...f, name: renameValue.trim() };
+                return f;
+            });
+        } else if (renameTarget.type === 'file') {
+            updatedBatch.folders = updatedBatch.folders.map((f: any) => {
+                if (f.name === renameTarget.folderName) {
+                    return {
+                        ...f,
+                        files: f.files.map((file: any) => file.name === renameTarget.oldName ? { ...file, name: renameValue.trim() } : file)
+                    };
+                }
+                return f;
+            });
+        }
+
+        await updateBatchInDb(updatedBatch, renameTarget.type === 'folder' && selectedFolder?.name === renameTarget.oldName ? renameValue.trim() : selectedFolder?.name);
+        setRenameTarget(null);
+        setRenameValue('');
+    };
+
+    const handleDeleteFile = async (fileName: string) => {
+        if (!window.confirm(`Are you sure you want to delete file "${fileName}"?`)) return;
+        const updatedBatch = { ...selectedBatch };
+        updatedBatch.folders = updatedBatch.folders.map((f: any) => {
+            if (f.name === selectedFolder.name) {
+                return { ...f, files: f.files.filter((file: any) => file.name !== fileName) };
+            }
+            return f;
+        });
+        await updateBatchInDb(updatedBatch, selectedFolder.name);
+    };
+
     const handleToggleStudent = async (studentId: string) => {
         let currentStudentIds = selectedBatch.studentIds || [];
         if (currentStudentIds.includes(studentId)) {
@@ -296,20 +376,39 @@ export default function AcademicHub() {
                 <AnimatePresence mode="wait">
                     {/* --- COURSES GRID --- */}
                     {viewMode === 'COURSES' && (
-                        <motion.div key="courses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
-                            {courses.map((c, i) => (
-                                <CourseCard key={c.id || i} course={c} onClick={() => handleCourseClick(c)} delay={i * 0.05} />
-                            ))}
-                        </motion.div>
+                        <>
+                            {courses.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                    <Book size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', fontWeight: 800 }}>No courses available.</p>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', opacity: 0.7 }}>Please ensure your Course Service is running, or create courses to begin.</p>
+                                </div>
+                            ) : (
+                                <motion.div key="courses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                                    {courses.map((c, i) => (
+                                        <CourseCard key={c.id || i} course={c} onClick={() => handleCourseClick(c)} delay={i * 0.05} />
+                                    ))}
+                                </motion.div>
+                            )}
+                        </>
                     )}
 
                     {/* --- BATCHES GRID --- */}
                     {viewMode === 'BATCHES' && (
-                        <motion.div key="batches" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
-                            {filteredBatches.map((b, i) => (
-                                <BatchCard key={b.id || i} batch={b} onClick={() => handleBatchClick(b)} delay={i * 0.05} />
-                            ))}
-                        </motion.div>
+                        <>
+                            {filteredBatches.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                    <Layers size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', fontWeight: 800 }}>No batches found for this course.</p>
+                                </div>
+                            ) : (
+                                <motion.div key="batches" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                                    {filteredBatches.map((b, i) => (
+                                        <BatchCard key={b.id || i} batch={b} onClick={() => handleBatchClick(b)} delay={i * 0.05} />
+                                    ))}
+                                </motion.div>
+                            )}
+                        </>
                     )}
 
                     {/* --- DRIVE WORKSPACE --- */}
@@ -345,6 +444,8 @@ export default function AcademicHub() {
                                                      folder={folder} 
                                                      onClick={() => setSelectedFolder(folder)} 
                                                      onShare={(e: any) => { e.stopPropagation(); setSharingTarget(folder); setIsShareModalOpen(true); }} 
+                                                     onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
+                                                     onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
                                                   />
                                               ))}
                                               {(!selectedBatch?.folders || selectedBatch.folders.length === 0) && (
@@ -357,7 +458,16 @@ export default function AcademicHub() {
                                     ) : (
                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                               {selectedFolder.files?.length > 0 ? selectedFolder.files.map((file: any, fIdx: number) => (
-                                                  <FileItem key={fIdx} name={file.name} type={file.type} size={file.size} date={new Date(file.uploadDate).toLocaleDateString()} />
+                                                  <FileItem 
+                                                     key={fIdx} 
+                                                     name={file.name} 
+                                                     type={file.type} 
+                                                     size={file.size} 
+                                                     date={new Date(file.uploadDate).toLocaleDateString()} 
+                                                     onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
+                                                     onDelete={() => handleDeleteFile(file.name)}
+                                                     onView={() => setViewFileTarget(file)}
+                                                  />
                                               )) : (
                                                   <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
                                                       <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
@@ -573,20 +683,70 @@ export default function AcademicHub() {
                  )}
             </AnimatePresence>
 
+            {/* --- RENAME MODAL --- */}
+            <AnimatePresence>
+                 {renameTarget && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '3rem', borderRadius: '40px' }}>
+                               <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem' }}>Rename {renameTarget.type === 'folder' ? 'Folder' : 'File'}</h2>
+                               <form onSubmit={handleRenameSubmit}>
+                                    <input value={renameValue} onChange={(e) => setRenameValue(e.target.value)} autoFocus placeholder="New Name" style={inputStyle} />
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                                         <button type="button" onClick={() => setRenameTarget(null)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>SAVE</button>
+                                    </div>
+                               </form>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- VIEW FILE MODAL --- */}
+            <AnimatePresence>
+                 {viewFileTarget && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(15px)' }}>
+                          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: '95%', maxWidth: '1000px', height: '80vh', display: 'flex', flexDirection: 'column' }}>
+                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '24px 24px 0 0' }}>
+                                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                       {viewFileTarget.type === 'pdf' || viewFileTarget.type === 'doc' || viewFileTarget.type === 'txt' ? <FileText color="var(--primary)" /> : <Play color="var(--primary)" />}
+                                       <h2 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{viewFileTarget.name}</h2>
+                                   </div>
+                                   <button onClick={() => setViewFileTarget(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={28} /></button>
+                               </div>
+                               <div style={{ flex: 1, background: '#000', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                                    {['mp4', 'mkv', 'webm', 'mov'].includes(viewFileTarget.type) ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+                                            <Play size={80} color="var(--primary)" style={{ opacity: 0.5 }} />
+                                            <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>Video Preview Player</p>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+                                            <FileText size={80} color="var(--primary)" style={{ opacity: 0.5 }} />
+                                            <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>Document Preview Viewer</p>
+                                        </div>
+                                    )}
+                               </div>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
         </DashboardLayout>
     );
 }
 
-function DriveFolder({ folder, onClick, onShare }: any) {
+function DriveFolder({ folder, onClick, onShare, onRename, onDelete }: any) {
     return (
         <motion.div 
             whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.03)' }}
             onClick={onClick}
             style={{ padding: '1.5rem', borderRadius: '24px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', cursor: 'pointer', position: 'relative' }}
         >
-            <button onClick={onShare} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.6, cursor: 'pointer' }}>
-                 <Share2 size={16} />
-            </button>
+            <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '5px' }}>
+                <button onClick={onShare} title="Share" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Share2 size={16} /></button>
+                <button onClick={onRename} title="Rename" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Edit2 size={16} /></button>
+                <button onClick={onDelete} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', opacity: 0.9, cursor: 'pointer' }}><Trash2 size={16} /></button>
+            </div>
             <Folder size={64} fill="rgba(124, 58, 237, 0.2)" color="var(--primary)" />
             <div>
                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{folder.name}</div>
@@ -596,19 +756,24 @@ function DriveFolder({ folder, onClick, onShare }: any) {
     );
 }
 
-function FileItem({ name, type, size, date }: any) {
+function FileItem({ name, type, size, date, onRename, onDelete, onView }: any) {
     return (
         <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.03)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                 <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', color: 'var(--primary)' }}>
-                    {type === 'pdf' ? <FileText size={20} /> : <Play size={20} />}
+                    {type === 'pdf' || type === 'doc' || type === 'txt' ? <FileText size={20} /> : <Play size={20} />}
                 </div>
                 <div>
                     <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>{name}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{size} • {date}</div>
                 </div>
             </div>
-            <button style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}><Download size={18} /></button>
+            <div style={{ display: 'flex', gap: '15px' }}>
+                <button onClick={onView} title="View" style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><Eye size={18} /></button>
+                <button onClick={onRename} title="Rename" style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={18} /></button>
+                <button onClick={onDelete} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                <button title="Download" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}><Download size={18} /></button>
+            </div>
         </div>
     );
 }
