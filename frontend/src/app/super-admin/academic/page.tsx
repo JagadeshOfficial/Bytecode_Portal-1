@@ -34,6 +34,8 @@ export default function AcademicHub() {
     const [userSearchTerm, setUserSearchTerm] = useState('');
     const [isTutorModalOpen, setIsTutorModalOpen] = useState(false);
     const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
+    const [tutorSearchTerm, setTutorSearchTerm] = useState('');
+    const [studentSearchTerm, setStudentSearchTerm] = useState('');
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -133,7 +135,7 @@ export default function AcademicHub() {
         }
     };
 
-    const handleAssignTutor = async (trainerId: string) => {
+    const handleAssignTutor = async (trainerId: string | null) => {
         const updatedBatch = { ...selectedBatch, trainerId };
         try {
             const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
@@ -145,9 +147,57 @@ export default function AcademicHub() {
                 const savedBatch = await res.json();
                 setSelectedBatch(savedBatch);
                 setBatches(batches.map(b => b.id === savedBatch.id ? savedBatch : b));
-                setIsTutorModalOpen(false);
             }
         } catch(err) { console.error(err); }
+    };
+
+    const handleFileUpload = async (event: any) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        let targetFolder = selectedFolder;
+        let updatedBatch = { ...selectedBatch };
+
+        if (!targetFolder) {
+            targetFolder = updatedBatch.folders?.find((f: any) => f.name === 'General Files');
+            if (!targetFolder) {
+                targetFolder = { name: 'General Files', files: [], sharedWith: [] };
+                updatedBatch.folders = [...(updatedBatch.folders || []), targetFolder];
+            }
+        }
+
+        const newFileObj = {
+            name: file.name,
+            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+            type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
+            uploadDate: new Date().toISOString()
+        };
+
+        updatedBatch.folders = updatedBatch.folders.map((f: any) => {
+            if (f.name === targetFolder.name) {
+                return { ...f, files: [...(f.files || []), newFileObj] };
+            }
+            return f;
+        });
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                const savedBatch = await res.json();
+                setSelectedBatch(savedBatch);
+                setBatches(batches.map(b => b.id === savedBatch.id ? savedBatch : b));
+                if (selectedFolder) {
+                    const freshFolder = savedBatch.folders.find((f: any) => f.name === selectedFolder.name);
+                    setSelectedFolder(freshFolder);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleToggleStudent = async (studentId: string) => {
@@ -233,7 +283,7 @@ export default function AcademicHub() {
                             {selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Academic Drive' : viewMode === 'BATCHES' ? 'Select Cohort' : 'Shared Workspace'}
                         </h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem' }}>
-                            {selectedFolder ? `Exploring learning resources inside the folder.` : viewMode === 'COURSES' ? 'Cloud-powered educational resource hub.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name}.`}
+                            {selectedFolder ? `Exploring learning resources inside the folder.` : viewMode === 'COURSES' ? 'Cloud-powered educational resource hub.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
                         </p>
                     </div>
                     {viewMode !== 'COURSES' && (
@@ -274,12 +324,18 @@ export default function AcademicHub() {
                                              {selectedFolder ? <Folder color="var(--primary)" /> : <HardDrive color="var(--primary)" />} 
                                              {selectedFolder ? selectedFolder.name : "My Drive"}
                                          </h3>
-                                         {!selectedFolder && (
-                                              <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-                                                   <Plus size={16} /> NEW FOLDER
+                                         <div style={{ display: 'flex', gap: '10px' }}>
+                                              {!selectedFolder && (
+                                                  <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
+                                                       <Plus size={16} /> NEW FOLDER
+                                                  </button>
+                                              )}
+                                              <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                              <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'var(--secondary)' }}>
+                                                   <Upload size={16} /> UPLOAD FILE
                                               </button>
-                                         )}
-                                    </div>
+                                          </div>
+                                     </div>
 
                                     {!selectedFolder ? (
                                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}>
@@ -306,7 +362,7 @@ export default function AcademicHub() {
                                                   <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
                                                       <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
                                                       <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>No files found in this folder.</p>
-                                                      <button className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
+                                                      <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
                                                   </div>
                                               )}
                                          </div>
@@ -422,23 +478,43 @@ export default function AcademicHub() {
             <AnimatePresence>
                  {isTutorModalOpen && (
                      <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '2.5rem', borderRadius: '40px' }}>
-                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                   <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Assign Tutor</h2>
-                                   <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }}><XCircle size={24} /></button>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '450px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
+                               <div style={{ background: 'var(--primary)', padding: '2rem', color: '#000' }}>
+                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                       <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Assign Tutor</h2>
+                                       <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}><XCircle size={24} /></button>
+                                   </div>
+                                    <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                         <Search size={18} />
+                                         <input 
+                                            value={tutorSearchTerm}
+                                            onChange={(e) => setTutorSearchTerm(e.target.value)}
+                                            placeholder="Search name, email, number..." 
+                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }} 
+                                         />
+                                    </div>
                                </div>
-                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-                                   {allUsers.filter(u => u.role === 'TRAINER').map((trainer: any, idx: number) => (
-                                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+                               <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto' }}>
+                                   {allUsers.filter(u => u.role === 'TRAINER' && (
+                                       (u.fullName || '').toLowerCase().includes(tutorSearchTerm.toLowerCase()) ||
+                                       (u.email || '').toLowerCase().includes(tutorSearchTerm.toLowerCase()) ||
+                                       (u.phone || '').toLowerCase().includes(tutorSearchTerm.toLowerCase())
+                                   )).map((trainer: any, idx: number) => {
+                                       const isAssigned = selectedBatch?.trainerId === trainer.id;
+                                       return (
+                                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: isAssigned ? '1px solid var(--primary)' : '1px solid transparent' }}>
                                            <div>
-                                               <div style={{ fontWeight: 800 }}>{trainer.fullName || trainer.email}</div>
-                                               <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Expert Instructor</div>
+                                               <div style={{ fontWeight: 800 }}>{trainer.fullName || trainer.email.split('@')[0]}</div>
+                                               <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{trainer.email} • {trainer.phone || 'No phone'}</div>
                                            </div>
-                                           <button onClick={() => handleAssignTutor(trainer.id)} style={{ background: selectedBatch?.trainerId === trainer.id ? '#10b981' : 'var(--primary)', color: '#000', padding: '6px 15px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>
-                                               {selectedBatch?.trainerId === trainer.id ? 'ASSIGNED' : 'ASSIGN'}
+                                           <button onClick={() => handleAssignTutor(isAssigned ? null : trainer.id)} style={{ background: isAssigned ? 'rgba(239, 68, 68, 0.1)' : 'var(--primary)', color: isAssigned ? '#ef4444' : '#000', border: isAssigned ? '1px solid #ef4444' : 'none', padding: '6px 15px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}>
+                                               {isAssigned ? 'UNASSIGN' : 'ASSIGN'}
                                            </button>
                                        </div>
-                                   ))}
+                                   )})}
+                               </div>
+                               <div style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>
+                                    <button onClick={() => setIsTutorModalOpen(false)} className="btn-quantum" style={{ padding: '10px 20px' }}>DONE</button>
                                </div>
                           </motion.div>
                      </div>
@@ -451,15 +527,27 @@ export default function AcademicHub() {
                      <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
                           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
                                <div style={{ background: 'var(--secondary)', padding: '2.5rem', color: '#000' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={24} /> Add/Remove Students</h2>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={24} /> Edit Batch Students</h2>
                                          <button onClick={() => setIsStudentModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}><XCircle size={28} /></button>
                                     </div>
-                                    <p style={{ marginTop: '0.5rem', fontWeight: 700, opacity: 0.8 }}>Grant or revoke batch drive access directly.</p>
+                                    <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                         <Search size={18} />
+                                         <input 
+                                            value={studentSearchTerm}
+                                            onChange={(e) => setStudentSearchTerm(e.target.value)}
+                                            placeholder="Search name, email, number..." 
+                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }} 
+                                         />
+                                    </div>
                                </div>
 
                                <div style={{ padding: '2rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
-                                   {allUsers.filter(u => u.role === 'STUDENT').map((student: any, idx: number) => {
+                                   {allUsers.filter(u => u.role === 'STUDENT' && (
+                                       (u.fullName || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
+                                       (u.email || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
+                                       (u.phone || '').toLowerCase().includes(studentSearchTerm.toLowerCase())
+                                   )).map((student: any, idx: number) => {
                                        const hasAccess = selectedBatch?.studentIds?.includes(student.id);
                                        return (
                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: hasAccess ? '1px solid var(--secondary)' : '1px solid transparent' }}>
@@ -467,11 +555,11 @@ export default function AcademicHub() {
                                                     <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--secondary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{student.email?.charAt(0).toUpperCase()}</div>
                                                     <div>
                                                          <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{student.fullName || student.email.split('@')[0]}</div>
-                                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email}</div>
+                                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email} • {student.phone || 'No phone'}</div>
                                                     </div>
                                                </div>
                                                <button onClick={() => handleToggleStudent(student.id)} style={{ background: hasAccess ? 'rgba(239, 68, 68, 0.1)' : 'var(--secondary)', color: hasAccess ? '#ef4444' : '#000', border: hasAccess ? '1px solid #ef4444' : 'none', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
-                                                   {hasAccess ? 'REMOVE ACCESS' : 'GRANT ACCESS'}
+                                                   {hasAccess ? 'UNASSIGN' : 'ASSIGN'}
                                                </button>
                                            </div>
                                        )

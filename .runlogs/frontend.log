@@ -35,3 +35,11 @@
  GET /super-admin/academic 200 in 29ms (compile: 7ms, render: 22ms)
  GET /super-admin/users 200 in 44ms (compile: 16ms, render: 27ms)
 ✓ Compiled in 191ms
+ GET /super-admin/academic 200 in 121ms (compile: 64ms, render: 58ms)
+ GET /super-admin/users 200 in 53ms (compile: 23ms, render: 30ms)
+✓ Compiled in 81ms
+✓ Compiled in 76ms
+ GET /super-admin/academic 200 in 115ms (compile: 64ms, render: 51ms)
+✓ Compiled in 85ms
+ GET /super-admin/academic 200 in 277ms (compile: 71ms, render: 206ms)
+ GET /icon?d878d31cd40b5385 200 in 57ms (compile: 5ms, render: 52ms)
