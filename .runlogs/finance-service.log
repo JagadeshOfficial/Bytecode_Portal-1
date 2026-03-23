@@ -85,3 +85,4 @@
 2026-03-23T12:02:56.027+05:30  INFO 19007 --- [finance-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
 2026-03-23T12:02:56.027+05:30  INFO 19007 --- [finance-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
 2026-03-23T12:02:56.081+05:30  INFO 19007 --- [finance-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-23T12:07:25.775+05:30  INFO 19007 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

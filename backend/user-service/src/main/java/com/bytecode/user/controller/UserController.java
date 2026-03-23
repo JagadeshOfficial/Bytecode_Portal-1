@@ -26,7 +26,21 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{email}")
+    // GET by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable("id") String id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> {
+                     // Fallback check if ID might be an email for legacy clients
+                     return userService.getUserByEmail(id)
+                             .map(ResponseEntity::ok)
+                             .orElse(ResponseEntity.notFound().build());
+                });
+    }
+
+    // Explicit GET by email for clarity
+    @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable("email") String email) {
         return userService.getUserByEmail(email)
                 .map(ResponseEntity::ok)

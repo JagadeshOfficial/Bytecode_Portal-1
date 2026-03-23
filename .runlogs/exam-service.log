@@ -86,3 +86,4 @@
 2026-03-23T12:02:57.288+05:30  INFO 19015 --- [exam-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
 2026-03-23T12:02:57.288+05:30  INFO 19015 --- [exam-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
 2026-03-23T12:02:57.315+05:30  INFO 19015 --- [exam-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-23T12:07:27.150+05:30  INFO 19015 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

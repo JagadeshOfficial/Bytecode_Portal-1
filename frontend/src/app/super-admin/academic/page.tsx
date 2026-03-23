@@ -362,8 +362,16 @@ export default function AcademicHub() {
                         <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
                             {selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Academic Drive' : viewMode === 'BATCHES' ? 'Select Cohort' : 'Shared Workspace'}
                         </h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem' }}>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
                             {selectedFolder ? `Exploring learning resources inside the folder.` : viewMode === 'COURSES' ? 'Cloud-powered educational resource hub.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
+                            
+                            {viewMode === 'COURSES' && !selectedFolder && (
+                                <div style={{ display: 'flex', gap: '20px', marginLeft: '10px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '20px' }}>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary)' }}>{allUsers.filter(u => u.role === 'STUDENT').length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>STUDENTS</span></span>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--secondary)' }}>{allUsers.filter(u => u.role === 'TRAINER').length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>TRAINERS</span></span>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>{courses.length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>COURSES</span></span>
+                                </div>
+                            ) }
                         </p>
                     </div>
                     {viewMode !== 'COURSES' && (
