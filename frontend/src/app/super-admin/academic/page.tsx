@@ -362,7 +362,7 @@ export default function AcademicHub() {
                         <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
                             {selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Academic Drive' : viewMode === 'BATCHES' ? 'Select Cohort' : 'Shared Workspace'}
                         </h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <div style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
                             {selectedFolder ? `Exploring learning resources inside the folder.` : viewMode === 'COURSES' ? 'Cloud-powered educational resource hub.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
                             
                             {viewMode === 'COURSES' && !selectedFolder && (
@@ -372,7 +372,7 @@ export default function AcademicHub() {
                                     <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>{courses.length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>COURSES</span></span>
                                 </div>
                             ) }
-                        </p>
+                        </div>
                     </div>
                     {viewMode !== 'COURSES' && (
                         <button onClick={goBack} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 900, cursor: 'pointer' }}>

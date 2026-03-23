@@ -109,3 +109,48 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-03-23T12:10:57.311+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
 2026-03-23T12:11:57.311+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
 2026-03-23T12:12:57.312+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-23T12:13:57.317+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-03-23T12:14:57.338+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-03-23T12:15:57.340+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T12:16:57.274+05:30  INFO 17943 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-03-23T12:16:57.340+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-23T12:17:57.341+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T12:18:57.344+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-23T12:19:57.344+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-23T12:20:57.347+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-03-23T12:21:57.349+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-03-23T12:22:57.350+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T12:23:57.349+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-03-23T12:24:57.349+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-03-23T12:25:57.356+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 8ms
+2026-03-23T12:26:57.357+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T12:27:57.363+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 7ms
+2026-03-23T12:58:54.215+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 6ms
+2026-03-23T12:58:54.228+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Evicting 2 items (expired=9, evictionLimit=2)
+2026-03-23T12:58:54.231+05:30  WARN 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for ASSESSMENT-SERVICE/192.168.0.207:assessment-service:8083
+2026-03-23T12:58:54.257+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance ASSESSMENT-SERVICE/192.168.0.207:assessment-service:8083 (replication=false)
+2026-03-23T12:58:54.257+05:30  WARN 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for ACADEMIC-SERVICE/192.168.0.207:academic-service:8089
+2026-03-23T12:58:54.260+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance ACADEMIC-SERVICE/192.168.0.207:academic-service:8089 (replication=false)
+2026-03-23T12:58:55.194+05:30  WARN 17943 --- [discovery-service] [io-8761-exec-11] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: ASSESSMENT-SERVICE - 192.168.0.207:assessment-service:8083
+2026-03-23T12:58:55.195+05:30  WARN 17943 --- [discovery-service] [io-8761-exec-11] c.n.eureka.resources.InstanceResource    : Not Found (Renew): ASSESSMENT-SERVICE - 192.168.0.207:assessment-service:8083
+2026-03-23T12:58:55.198+05:30  WARN 17943 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: ACADEMIC-SERVICE - 192.168.0.207:academic-service:8089
+2026-03-23T12:58:55.199+05:30  WARN 17943 --- [discovery-service] [nio-8761-exec-5] c.n.eureka.resources.InstanceResource    : Not Found (Renew): ACADEMIC-SERVICE - 192.168.0.207:academic-service:8089
+2026-03-23T12:58:55.329+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ASSESSMENT-SERVICE/192.168.0.207:assessment-service:8083 with status UP (replication=false)
+2026-03-23T12:58:55.332+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.0.207:academic-service:8089 with status UP (replication=false)
+2026-03-23T12:58:55.340+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ASSESSMENT-SERVICE/192.168.0.207:assessment-service:8083 with status UP (replication=true)
+2026-03-23T12:58:55.340+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ACADEMIC-SERVICE/192.168.0.207:academic-service:8089 with status UP (replication=true)
+2026-03-23T13:03:41.145+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-03-23T13:03:41.146+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Evicting 2 items (expired=7, evictionLimit=2)
+2026-03-23T13:03:41.146+05:30  WARN 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for FINANCE-SERVICE/192.168.0.207:finance-service:8087
+2026-03-23T13:03:41.147+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance FINANCE-SERVICE/192.168.0.207:finance-service:8087 (replication=false)
+2026-03-23T13:03:41.147+05:30  WARN 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for EXAM-SERVICE/192.168.0.207:exam-service:8086
+2026-03-23T13:03:41.147+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance EXAM-SERVICE/192.168.0.207:exam-service:8086 (replication=false)
+2026-03-23T13:03:41.255+05:30  WARN 17943 --- [discovery-service] [nio-8761-exec-8] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: FINANCE-SERVICE - 192.168.0.207:finance-service:8087
+2026-03-23T13:03:41.256+05:30  WARN 17943 --- [discovery-service] [nio-8761-exec-8] c.n.eureka.resources.InstanceResource    : Not Found (Renew): FINANCE-SERVICE - 192.168.0.207:finance-service:8087
+2026-03-23T13:03:41.275+05:30  INFO 17943 --- [discovery-service] [io-8761-exec-13] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.0.207:finance-service:8087 with status UP (replication=false)
+2026-03-23T13:03:41.782+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance FINANCE-SERVICE/192.168.0.207:finance-service:8087 with status UP (replication=true)
+2026-03-23T13:03:42.165+05:30  WARN 17943 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: EXAM-SERVICE - 192.168.0.207:exam-service:8086
+2026-03-23T13:03:42.165+05:30  WARN 17943 --- [discovery-service] [nio-8761-exec-6] c.n.eureka.resources.InstanceResource    : Not Found (Renew): EXAM-SERVICE - 192.168.0.207:exam-service:8086
+2026-03-23T13:03:42.193+05:30  INFO 17943 --- [discovery-service] [nio-8761-exec-5] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.0.207:exam-service:8086 with status UP (replication=false)
+2026-03-23T13:03:42.326+05:30  INFO 17943 --- [discovery-service] [io-8761-exec-13] c.n.e.registry.AbstractInstanceRegistry  : Registered instance EXAM-SERVICE/192.168.0.207:exam-service:8086 with status UP (replication=true)
+2026-03-23T13:04:45.528+05:30  INFO 17943 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 10ms

@@ -39,3 +39,4 @@
  GET /super-admin/academic 200 in 64ms (compile: 10ms, render: 54ms)
  GET /icon?d878d31cd40b5385 200 in 26ms (compile: 8ms, render: 18ms)
  GET /icon?d878d31cd40b5385 200 in 25ms (compile: 4ms, render: 21ms)
+✓ Compiled in 285ms
