@@ -183,22 +183,22 @@ main() {
   verify_prerequisites
   check_existing_runtime_state
 
-  start_background_process "discovery-service" "$BACKEND_DIR/discovery-service" "./mvnw spring-boot:run"
+  start_background_process "discovery-service" "$BACKEND_DIR/discovery-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
   wait_phase 15 "Discovery Service"
 
-  start_background_process "user-service" "$BACKEND_DIR/user-service" "./mvnw spring-boot:run"
-  start_background_process "course-service" "$BACKEND_DIR/course-service" "./mvnw spring-boot:run"
+  start_background_process "user-service" "$BACKEND_DIR/user-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
+  start_background_process "course-service" "$BACKEND_DIR/course-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
   wait_phase 10 "Core Services"
 
-  start_background_process "academic-service" "$BACKEND_DIR/academic-service" "./mvnw spring-boot:run"
-  start_background_process "finance-service" "$BACKEND_DIR/finance-service" "./mvnw spring-boot:run"
-  start_background_process "placement-service" "$BACKEND_DIR/placement-service" "./mvnw spring-boot:run"
-  start_background_process "exam-service" "$BACKEND_DIR/exam-service" "./mvnw spring-boot:run"
-  start_background_process "assessment-service" "$BACKEND_DIR/assessment-service" "./mvnw spring-boot:run"
-  start_background_process "chat-service" "$BACKEND_DIR/chat-service" "./mvnw spring-boot:run"
+  start_background_process "academic-service" "$BACKEND_DIR/academic-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
+  start_background_process "finance-service" "$BACKEND_DIR/finance-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
+  start_background_process "placement-service" "$BACKEND_DIR/placement-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
+  start_background_process "exam-service" "$BACKEND_DIR/exam-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
+  start_background_process "assessment-service" "$BACKEND_DIR/assessment-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
+  start_background_process "chat-service" "$BACKEND_DIR/chat-service" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
   wait_phase 10 "Functional Services"
 
-  start_background_process "api-gateway" "$BACKEND_DIR/api-gateway" "./mvnw spring-boot:run"
+  start_background_process "api-gateway" "$BACKEND_DIR/api-gateway" "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Djava.net.preferIPv4Stack=true\""
   wait_phase 5 "API Gateway"
 
   start_background_process "$FRONTEND_NAME" "$FRONTEND_DIR" "npm run dev"
