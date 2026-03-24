@@ -68,7 +68,13 @@ public class ComprehensiveDataSeeder implements CommandLineRunner {
                 return;
             }
 
-            // Clear existing data
+            // Check if data already exists
+            if (batchRepository.count() > 0) {
+                log.info("ℹ️ Database already contains data. Skipping seeding to prevent data loss.");
+                return;
+            }
+
+            // Clear existing data (only if we are seeding)
             batchRepository.deleteAll();
             liveSessionRepository.deleteAll();
             assignmentRepository.deleteAll();
@@ -141,6 +147,17 @@ public class ComprehensiveDataSeeder implements CommandLineRunner {
                 .mode(batchNumber == 1 ? "ONLINE" : "HYBRID")
                 .branch("Main Campus")
                 .maxCapacity(30)
+                .folders(new ArrayList<>(List.of(
+                    BatchFolder.builder()
+                        .name("General Resources")
+                        .createdBy("System Seeder")
+                        .files(new ArrayList<>(List.of(
+                            BatchFile.builder().name("Course Overview.pdf").type("PDF").size("512 KB").url("https://example.com/syllabus.pdf").uploadedBy("Mahendra Nath").uploadDate(new Date()).build(),
+                            BatchFile.builder().name("Training Guide.mp4").type("VIDEO").size("10 MB").url("https://example.com/intro.mp4").uploadedBy("Mahendra Nath").uploadDate(new Date()).build()
+                        )))
+                        .sharedWith(new ArrayList<>())
+                        .build()
+                )))
                 .build();
 
         return batchRepository.save(batch);

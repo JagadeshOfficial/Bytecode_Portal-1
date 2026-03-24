@@ -549,25 +549,47 @@ export default function AcademicHub() {
 
                                <div style={{ padding: '2.5rem' }}>
                                     {/* --- SEARCH RESULTS --- */}
-                                    {userSearchTerm && (
-                                         <div style={{ marginBottom: '2rem' }}>
-                                              <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Search Results</h4>
-                                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                   {usersToShareWith.map((u: any, idx: number) => (
-                                                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
-                                                             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                                  <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
-                                                                  <div>
-                                                                       <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
-                                                                       <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
-                                                                  </div>
-                                                             </div>
-                                                             <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'var(--primary)', color: '#000', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
-                                                        </div>
-                                                   ))}
-                                              </div>
-                                         </div>
-                                    )}
+                                     {userSearchTerm && (
+                                          <div style={{ marginBottom: '2rem' }}>
+                                               <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Search Results</h4>
+                                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                    {usersToShareWith.map((u: any, idx: number) => (
+                                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+                                                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                                   <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
+                                                                   <div>
+                                                                        <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
+                                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
+                                                                   </div>
+                                                              </div>
+                                                              <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'var(--primary)', color: '#000', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
+                                                         </div>
+                                                    ))}
+                                               </div>
+                                          </div>
+                                     )}
+
+                                     {/* --- SUGGESTED USERS (All Students of Batch) --- */}
+                                     {!userSearchTerm && (
+                                          <div style={{ marginBottom: '2rem' }}>
+                                               <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Suggested Users (Batch {selectedBatch.batchName})</h4>
+                                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                                    {students.filter(s => !sharingTarget.sharedWith?.find((sw: any) => sw.userId === s.id)).map((u: any, idx: number) => (
+                                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+                                                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                                   <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
+                                                                   <div>
+                                                                        <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
+                                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
+                                                                   </div>
+                                                              </div>
+                                                              <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
+                                                         </div>
+                                                    ))}
+                                                    {students.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', padding: '10px' }}>No students found in this batch.</div>}
+                                               </div>
+                                          </div>
+                                     )}
 
                                     {/* --- CURRENT ACCESS LIST --- */}
                                     <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>People with access</h4>

@@ -100,6 +100,7 @@ export default function RootLayout({
              })
           }}
         />
+        <script src="https://meet.jit.si/external_api.js" async></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${inter.variable}`}>
         <TopBanner />
