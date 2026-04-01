@@ -16,6 +16,16 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.count() <= 1) {
             // Seed more users if only Super Admin exists
             userRepository.save(com.bytecode.user.model.User.builder()
+                    .fullName("Mewin")
+                    .email("mewin@bytecode.com")
+                    .role(com.bytecode.user.model.UserRole.SUPER_ADMIN)
+                    .department("Management")
+                    .userStatus("Active")
+                    .checkInTime("10:00 AM")
+                    .attendanceRate(100.0)
+                    .active(true)
+                    .build());
+            userRepository.save(com.bytecode.user.model.User.builder()
                     .fullName("Dr. Aris")
                     .email("aris@bytecode.com")
                     .role(com.bytecode.user.model.UserRole.TRAINER)

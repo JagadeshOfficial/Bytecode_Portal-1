@@ -26,3 +26,186 @@
  GET /super-admin/academic 200 in 47ms (compile: 23ms, render: 24ms)
  GET /super-admin/academic 200 in 94ms (compile: 7ms, render: 87ms)
  GET /icon?d878d31cd40b5385 200 in 33ms (compile: 14ms, render: 19ms)
+✓ Compiled in 1908ms
+✓ Compiled in 608ms
+ GET / 200 in 428ms (compile: 47ms, render: 380ms)
+⨯ ReferenceError: Video is not defined
+    at AcademicHub (src/app/super-admin/academic/page.tsx:421:69)
+  419 |                     {[
+  420 |                         { id: 'DRIVE', label: 'Curriculum & Drive', icon: <HardDrive size={18} /> },
+> 421 |                         { id: 'LIVE', label: 'Live Classes', icon: <Video size={18} /> },
+      |                                                                     ^
+  422 |                         { id: 'RECORDINGS', label: 'Recorded Hub', icon: <Play size={18} /> },
+  423 |                         { id: 'ASSIGNMENTS', label: 'Assignment Desk', icon: <FileText size={18} /> },
+  424 |                     ].map(tab => ( {
+  digest: '2856925003'
+}
+ GET /icon?d878d31cd40b5385 200 in 35ms (compile: 11ms, render: 25ms)
+✓ Compiled in 0ms
+ GET /super-admin/academic 200 in 1299ms (compile: 923ms, render: 376ms)
+ GET /super-admin/academic 500 in 854ms (compile: 350ms, render: 505ms)
+ GET /icon?d878d31cd40b5385 200 in 78ms (compile: 40ms, render: 39ms)
+⨯ ReferenceError: Video is not defined
+    at AcademicHub (src/app/super-admin/academic/page.tsx:421:69)
+  419 |                     {[
+  420 |                         { id: 'DRIVE', label: 'Curriculum & Drive', icon: <HardDrive size={18} /> },
+> 421 |                         { id: 'LIVE', label: 'Live Classes', icon: <Video size={18} /> },
+      |                                                                     ^
+  422 |                         { id: 'RECORDINGS', label: 'Recorded Hub', icon: <Play size={18} /> },
+  423 |                         { id: 'ASSIGNMENTS', label: 'Assignment Desk', icon: <FileText size={18} /> },
+  424 |                     ].map(tab => ( {
+  digest: '2856925003'
+}
+ GET /super-admin/academic 500 in 112ms (compile: 16ms, render: 96ms)
+✓ Compiled in 199ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /super-admin/academic 200 in 368ms (compile: 101ms, render: 267ms)
+ GET /super-admin/academic 200 in 360ms (compile: 321ms, render: 38ms)
+ GET /icon?d878d31cd40b5385 200 in 23ms (compile: 4ms, render: 18ms)
+ GET /icon?d878d31cd40b5385 200 in 26ms (compile: 8ms, render: 18ms)
+✓ Compiled in 116ms
+ GET /super-admin/academic 200 in 237ms (compile: 91ms, render: 146ms)
+✓ Compiled in 312ms
+✓ Compiled in 54ms
+ GET /super-admin/academic 200 in 319ms (compile: 99ms, render: 220ms)
+ GET /icon?d878d31cd40b5385 200 in 62ms (compile: 15ms, render: 47ms)
+ GET /super-admin/academic 200 in 133ms (compile: 46ms, render: 87ms)
+ GET /icon?d878d31cd40b5385 200 in 25ms (compile: 5ms, render: 20ms)
+ GET /super-admin/academic 200 in 242ms (compile: 110ms, render: 131ms)
+ GET /icon?d878d31cd40b5385 200 in 73ms (compile: 31ms, render: 42ms)
+✓ Compiled in 632ms
+✓ Compiled in 411ms
+ GET /super-admin/academic 200 in 514ms (compile: 399ms, render: 114ms)
+ GET /super-admin/academic 200 in 33ms (compile: 9ms, render: 23ms)
+ GET /icon?d878d31cd40b5385 200 in 52ms (compile: 5ms, render: 46ms)
+ GET /icon?d878d31cd40b5385 200 in 8ms (compile: 2ms, render: 6ms)
+ GET /super-admin/academic 200 in 233ms (compile: 43ms, render: 190ms)
+ GET /icon?d878d31cd40b5385 200 in 18ms (compile: 5ms, render: 12ms)
+✓ Compiled in 268ms
+✓ Compiled in 98ms
+✓ Compiled in 76ms
+✓ Compiled in 253ms
+✓ Compiled in 160ms
+✓ Compiled in 121ms
+✓ Compiled in 185ms
+✓ Compiled in 285ms
+✓ Compiled in 397ms
+ GET /super-admin/academic 200 in 547ms (compile: 268ms, render: 279ms)
+ GET /super-admin/academic 200 in 487ms (compile: 321ms, render: 166ms)
+ GET /super-admin/academic 200 in 148ms (compile: 5ms, render: 143ms)
+ GET /super-admin/academic 200 in 150ms (compile: 27ms, render: 124ms)
+ GET /super-admin/academic 200 in 107ms (compile: 5ms, render: 102ms)
+ GET /super-admin/academic 200 in 107ms (compile: 28ms, render: 78ms)
+ GET /super-admin/academic 200 in 46ms (compile: 17ms, render: 29ms)
+ GET /super-admin/academic 200 in 49ms (compile: 6ms, render: 43ms)
+ GET /icon?d878d31cd40b5385 200 in 52ms (compile: 13ms, render: 39ms)
+ GET /icon?d878d31cd40b5385 200 in 13ms (compile: 2ms, render: 10ms)
+ GET /super-admin/academic 200 in 45ms (compile: 13ms, render: 33ms)
+ GET /icon?d878d31cd40b5385 200 in 13ms (compile: 3ms, render: 11ms)
+ GET /super-admin/academic 200 in 221ms (compile: 31ms, render: 190ms)
+ GET /icon?d878d31cd40b5385 200 in 13ms (compile: 3ms, render: 10ms)
+ GET /super-admin/users 200 in 97ms (compile: 72ms, render: 25ms)
+ GET /super-admin/academic 200 in 33ms (compile: 14ms, render: 18ms)
+✓ Compiled in 116ms
+✓ Compiled in 129ms
+ GET /super-admin/academic 200 in 789ms (compile: 382ms, render: 407ms)
+ GET /super-admin/academic 200 in 795ms (compile: 724ms, render: 70ms)
+ GET /icon?d878d31cd40b5385 200 in 21ms (compile: 5ms, render: 16ms)
+ GET /super-admin/academic 200 in 30ms (compile: 11ms, render: 19ms)
+✓ Compiled in 179ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /super-admin/academic 200 in 528ms (compile: 231ms, render: 297ms)
+ GET /icon?d878d31cd40b5385 200 in 35ms (compile: 12ms, render: 23ms)
+✓ Compiled in 332ms
+✓ Compiled in 143ms
+✓ Compiled in 325ms
+✓ Compiled in 187ms
+ GET /super-admin/academic 200 in 593ms (compile: 256ms, render: 337ms)
+ GET /icon?d878d31cd40b5385 200 in 27ms (compile: 6ms, render: 21ms)
+✓ Compiled in 788ms
+✓ Compiled in 517ms
+✓ Compiled in 157ms
+✓ Compiled in 262ms
+✓ Compiled in 264ms
+ GET / 200 in 628ms (compile: 71ms, render: 557ms)
+ GET /login 200 in 43ms (compile: 22ms, render: 21ms)
+ GET /super-admin 200 in 951ms (compile: 897ms, render: 53ms)
+ GET /super-admin/academic 200 in 160ms (compile: 111ms, render: 49ms)
+✓ Compiled in 139ms
+✓ Compiled in 105ms
+✓ Compiled in 367ms
+✓ Compiled in 226ms
+✓ Compiled in 707ms
+✓ Compiled in 142ms
+✓ Compiled in 106ms
+✓ Compiled in 148ms
+✓ Compiled in 168ms
+✓ Compiled in 162ms
+✓ Compiled in 294ms
+✓ Compiled in 120ms
+✓ Compiled in 151ms
+ GET /super-admin/academic 200 in 771ms (compile: 380ms, render: 391ms)
+ GET /super-admin/academic 200 in 94ms (compile: 43ms, render: 50ms)
+ GET /super-admin/academic/schedules 404 in 589ms (compile: 450ms, render: 139ms)
+ GET /super-admin/academic 200 in 137ms (compile: 18ms, render: 119ms)
+ GET /icon?d878d31cd40b5385 200 in 40ms (compile: 4ms, render: 35ms)
+ GET /super-admin/academic 200 in 281ms (compile: 109ms, render: 171ms)
+✓ Compiled in 242ms
+ GET /super-admin/academic 200 in 545ms (compile: 237ms, render: 308ms)
+ GET /icon?d878d31cd40b5385 200 in 47ms (compile: 8ms, render: 39ms)
+✓ Compiled in 178ms
+✓ Compiled in 213ms
+✓ Compiled in 110ms
+✓ Compiled in 277ms
+✓ Compiled in 176ms
+ GET /super-admin/academic 200 in 448ms (compile: 327ms, render: 121ms)
+✓ Compiled in 107ms
+✓ Compiled in 254ms
+✓ Compiled in 157ms
+✓ Compiled in 209ms
+✓ Compiled in 144ms
+✓ Compiled in 113ms
+✓ Compiled in 207ms
+✓ Compiled in 168ms
+✓ Compiled in 211ms
+✓ Compiled in 280ms
+✓ Compiled in 169ms
+ GET /super-admin/academic 200 in 761ms (compile: 374ms, render: 387ms)
+✓ Compiled in 561ms
+✓ Compiled in 227ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /super-admin/academic 200 in 1432ms (compile: 855ms, render: 577ms)
+ GET /icon?d878d31cd40b5385 200 in 62ms (compile: 12ms, render: 49ms)
+✓ Compiled in 387ms
+✓ Compiled in 322ms
+✓ Compiled in 197ms
+ GET /super-admin/academic 200 in 867ms (compile: 598ms, render: 269ms)
+ GET /icon?d878d31cd40b5385 200 in 156ms (compile: 29ms, render: 127ms)
+✓ Compiled in 188ms
+✓ Compiled in 215ms
+✓ Compiled in 255ms
+ GET /super-admin/academic 200 in 853ms (compile: 463ms, render: 391ms)
+ GET /icon?d878d31cd40b5385 200 in 35ms (compile: 5ms, render: 30ms)
+ GET /super-admin/academic 200 in 128ms (compile: 48ms, render: 80ms)
+ GET /icon?d878d31cd40b5385 200 in 20ms (compile: 5ms, render: 15ms)
+✓ Compiled in 191ms
+ GET / 200 in 847ms (compile: 151ms, render: 696ms)
+ GET / 200 in 459ms (compile: 89ms, render: 370ms)
+✓ Compiled in 815ms
+✓ Compiled in 357ms
+✓ Compiled in 276ms
+ GET /super-admin/academic 200 in 517ms (compile: 400ms, render: 117ms)
+ GET /icon?d878d31cd40b5385 200 in 71ms (compile: 6ms, render: 65ms)
+✓ Compiled in 790ms
+✓ Compiled in 177ms
+✓ Compiled in 1119ms
+ GET /super-admin/academic 200 in 506ms (compile: 364ms, render: 141ms)
+ GET /icon?d878d31cd40b5385 200 in 49ms (compile: 24ms, render: 25ms)
+✓ Compiled in 226ms
+✓ Compiled in 302ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /icon?d878d31cd40b5385 200 in 77ms (compile: 15ms, render: 62ms)
+ GET /super-admin/academic 200 in 1722ms (compile: 489ms, render: 1232ms)
+ GET /icon?d878d31cd40b5385 200 in 34ms (compile: 10ms, render: 24ms)
+ GET /admin 200 in 2.6s (compile: 2.3s, render: 296ms)

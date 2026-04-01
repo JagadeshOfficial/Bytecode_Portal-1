@@ -68,30 +68,21 @@ public class ComprehensiveDataSeeder implements CommandLineRunner {
                 return;
             }
 
-            // Check if data already exists
-            if (batchRepository.count() > 0) {
-                log.info("ℹ️ Database already contains data. Skipping seeding to prevent data loss.");
-                return;
-            }
-
-            // Clear existing data (only if we are seeding)
+            // Clearing all existing data once as requested by user to remove demo data
             batchRepository.deleteAll();
             liveSessionRepository.deleteAll();
             assignmentRepository.deleteAll();
             learningMaterialRepository.deleteAll();
-
-            // Create 2 batches per course
-            for (CourseDTO course : courses) {
-                createBatchesForCourse(course, students, trainers);
-            }
-
-            log.info("✅ Comprehensive Data Seeding Completed Successfully!");
+            
+            log.info("✅ ALL DEMO DATA REMOVED. Database is now clean for use.");
+            return;
 
         } catch (Exception e) {
             log.error("❌ Error during data seeding: {}", e.getMessage(), e);
         }
     }
 
+    @SuppressWarnings("unused")
     private void createBatchesForCourse(CourseDTO course, List<UserDTO> students, List<UserDTO> trainers) {
         log.info("📚 Creating batches for course: {}", course.getTitle());
 

@@ -1,8 +1,9 @@
 "use client";
 
 import DashboardLayout from '@/components/DashboardLayout';
+import BytecodeMeetingRoom from '@/components/BytecodeMeetingRoom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     Book, Plus, Search, Edit2, Trash2, 
     Layers, Users, Clock, User, BookOpen, 
@@ -11,14 +12,16 @@ import {
     CheckCircle, Calendar, Play, FileText,
     ExternalLink, Share2, Lock, Globe,
     Settings, HardDrive, Filter, XCircle,
-    ShieldCheck, UserPlus, Send
+    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip
 } from 'lucide-react';
 
 export default function AcademicHub() {
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS'>('COURSES');
+    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS'>('DRIVE');
     const [courses, setCourses] = useState<any[]>([]);
     const [batches, setBatches] = useState<any[]>([]);
     const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [liveSessions, setLiveSessions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     
     // Selection state
@@ -28,8 +31,45 @@ export default function AcademicHub() {
 
     // Modals
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+    const [isCreateBatchOpen, setIsCreateBatchOpen] = useState(false);
+    const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+    const [isScheduleLiveModalOpen, setIsScheduleLiveModalOpen] = useState(false);
+    const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
+    const [editingSession, setEditingSession] = useState<any>(null);
+    const [activeMeetingRoom, setActiveMeetingRoom] = useState<any | null>(null);
+    const [newLiveSession, setNewLiveSession] = useState({ 
+        title: '', startTime: '', endDate: '', durationHours: 1, durationMinutes: 0, tutorId: '', platform: 'Bytecode Meetings', meetingLink: '' 
+    });
+    const [isEditBatchOpen, setIsEditBatchOpen] = useState(false);
+    const [editBatchData, setEditBatchData] = useState<any>(null);
+
+    // --- Share Recording Modal Multi-step States ---
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [shareTarget, setShareTarget] = useState<any>(null);
+    const [shareStep, setShareStep] = useState(1); // 1: Select Course, 2: Select Batch, 3: Select Folder
+    const [allCourses, setAllCourses] = useState<any[]>([]);
+    const [allBatchesForCourse, setAllBatchesForCourse] = useState<any[]>([]);
+    const [shareSelectedCourse, setShareSelectedCourse] = useState<any>(null);
+    const [shareSelectedBatch, setShareSelectedBatch] = useState<any>(null);
+    const [shareNewFolderName, setShareNewFolderName] = useState('');
+    const [isCreatingNewFolderInShare, setIsCreatingNewFolderInShare] = useState(false);
+    const [newBatch, setNewBatch] = useState({
+        batchCode: '', batchName: '', trainerId: '', startDate: '', endDate: '', status: 'UPCOMING', 
+        schedule: '', mode: 'ONLINE', branch: '', maxCapacity: 50, description: ''
+    });
     const [newFolderName, setNewFolderName] = useState('');
+    const [assignments, setAssignments] = useState<any[]>([]);
+    const [isCreateAssignmentModalOpen, setIsCreateAssignmentModalOpen] = useState(false);
+    const [newAssignment, setNewAssignment] = useState({
+        title: '', description: '', attachments: [] as string[], 
+        difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE'
+    });
+    const [viewingAssignment, setViewingAssignment] = useState<any>(null);
+    const [viewingSubmissionsAssignment, setViewingSubmissionsAssignment] = useState<any>(null);
+    const [activeSubmission, setActiveSubmission] = useState<any>(null);
+    const [gradingData, setGradingData] = useState({ marks: 0, feedback: '', status: 'ACCEPTED' });
+    const [isEditAssignmentModalOpen, setIsEditAssignmentModalOpen] = useState(false);
+    const [editingAssignment, setEditingAssignment] = useState<any>(null);
     const [sharingTarget, setSharingTarget] = useState<any>(null);
     const [userSearchTerm, setUserSearchTerm] = useState('');
     const [isTutorModalOpen, setIsTutorModalOpen] = useState(false);
@@ -53,15 +93,17 @@ export default function AcademicHub() {
                 return null;
             };
 
-            const [cData, bData, uData] = await Promise.all([
+            const [cData, bData, uData, aData] = await Promise.all([
                 safeFetch('http://localhost:8080/api/courses'),
                 safeFetch('http://localhost:8080/api/academic/batches'),
-                safeFetch('http://localhost:8080/api/users')
+                safeFetch('http://localhost:8080/api/users'),
+                safeFetch('http://localhost:8080/api/academic/assignments')
             ]);
 
             if (Array.isArray(cData)) setCourses(cData);
             if (Array.isArray(bData)) setBatches(bData);
             if (Array.isArray(uData)) setAllUsers(uData);
+            if (Array.isArray(aData)) setAssignments(aData);
         } catch (err) {
             console.error(err);
         }
@@ -140,6 +182,156 @@ export default function AcademicHub() {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const handleCreateBatch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const selectedMentor = allUsers.find(u => u.id === newBatch.trainerId);
+        const payload = {
+            ...newBatch,
+            courseId: selectedCourse?.id,
+            courseName: selectedCourse?.title,
+            trainerName: selectedMentor?.fullName,
+            studentIds: [],
+            totalStudents: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setBatches([...batches, saved]);
+                setIsCreateBatchOpen(false);
+                setNewBatch({
+                    batchCode: '', batchName: '', trainerId: '', startDate: '', endDate: '', status: 'UPCOMING', 
+                    schedule: '', mode: 'ONLINE', branch: '', maxCapacity: 50, description: ''
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleUpdateBatchSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const selectedMentor = allUsers.find(u => u.id === editBatchData.trainerId);
+        const payload = {
+            ...editBatchData,
+            trainerName: selectedMentor?.fullName || editBatchData.trainerName,
+            updatedAt: new Date()
+        };
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${editBatchData.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setBatches(batches.map(b => b.id === saved.id ? saved : b));
+                setSelectedBatch(saved);
+                setIsEditBatchOpen(false);
+                setEditBatchData(null);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteBatch = async (id: string, e: any) => {
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this batch and all its resources?")) return;
+        try {
+            await fetch(`http://localhost:8080/api/academic/batches/${id}`, { method: 'DELETE' });
+            setBatches(batches.filter((b: any) => b.id !== id));
+            if (selectedBatch?.id === id) setSelectedBatch(null);
+        } catch (e) {
+            console.error("Failed to delete batch", e);
+        }
+    };
+
+    const handleDeleteRecording = async (sessionId: string, e: any) => {
+        e.stopPropagation();
+        if (!confirm("Remove this recording? This will detach the recording link from the session.")) return;
+        try {
+            const ls = liveSessions.find((s: any) => s.id === sessionId);
+            if (!ls) return;
+            const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...ls, recordingUrl: null })
+            });
+            if (res.ok) {
+                setLiveSessions(liveSessions.map((s: any) => s.id === sessionId ? { ...s, recordingUrl: null } : s));
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const initiateShare = async (ls: any) => {
+        setShareTarget(ls);
+        setIsShareModalOpen(true);
+        setShareStep(1);
+        try {
+            const res = await fetch(`http://localhost:8081/api/courses`);
+            const data = await res.json();
+            setAllCourses(data);
+        } catch (e) { console.error(e); }
+    };
+
+    const handleSelectCourseForShare = async (course: any) => {
+        setShareSelectedCourse(course);
+        setShareStep(2);
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/course/${course.id}`);
+            const data = await res.json();
+            setAllBatchesForCourse(data);
+        } catch (e) { console.error(e); }
+    };
+
+    const handleConfirmShare = async (folderName?: string) => {
+        if (!shareSelectedBatch || !shareTarget) return;
+        
+        const newFile = {
+            name: `${shareTarget.batchName}_${shareTarget.title}.webm`,
+            type: 'VIDEO',
+            size: 'Captured Stream',
+            uploadDate: new Date().toISOString(),
+            url: shareTarget.recordingUrl
+        };
+
+        const updatedBatch = { ...shareSelectedBatch, updatedAt: new Date() };
+        const targetFolderName = folderName || 'Shared Recordings';
+        
+        if (!updatedBatch.folders) updatedBatch.folders = [];
+        let folder = updatedBatch.folders.find((f: any) => f.name === targetFolderName);
+        
+        if (!folder) {
+            folder = { name: targetFolderName, files: [], createdBy: 'Stream Capture', createdAt: new Date() };
+            updatedBatch.folders.push(folder);
+        }
+        if (!folder.files) folder.files = [];
+        folder.files.push(newFile);
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${shareSelectedBatch.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+               alert(`Recording shared successfully to ${targetFolderName}!`);
+               setIsShareModalOpen(false);
+            }
+        } catch (e) { console.error(e); }
     };
 
     const handleAssignTutor = async (trainerId: string | null) => {
@@ -308,10 +500,23 @@ export default function AcademicHub() {
         setViewMode('BATCHES');
     };
 
-    const handleBatchClick = (batch: any) => {
+    const handleBatchClick = async (batch: any) => {
         setSelectedBatch(batch);
+        setSelectedFolder(null); // Reset folder view
         setViewMode('DETAILS');
-        setSelectedFolder(null);
+        
+        // Fetch Live Sessions for this batch
+        if (batch.id) {
+            try {
+                const res = await fetch(`http://localhost:8080/api/academic/sessions/batch/${batch.id}`);
+                if (res.ok) {
+                    const sessions = await res.json();
+                    setLiveSessions(sessions);
+                }
+            } catch (e) {
+                console.error("Failed to fetch live sessions", e);
+            }
+        }
     };
 
     const goBack = () => {
@@ -320,8 +525,186 @@ export default function AcademicHub() {
         else if (viewMode === 'BATCHES') setViewMode('COURSES');
     };
 
+    const handleScheduleLiveClass = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedBatch) return;
+
+        // Auto-generate Jitsi link if Bytecode Meetings is selected
+        let finalLink = newLiveSession.meetingLink;
+        if (newLiveSession.platform === 'Bytecode Meetings' && !finalLink) {
+            const roomName = `bytecode-${selectedBatch.batchCode}-${Date.now()}`;
+            finalLink = `https://meet.jit.si/${roomName}`;
+        }
+
+        const payload = {
+            title: newLiveSession.title,
+            courseId: selectedCourse.id,
+            courseName: selectedCourse.title,
+            batchId: selectedBatch.id,
+            batchName: selectedBatch.batchName,
+            mentorId: newLiveSession.tutorId,
+            mentorName: allUsers.find(u => u.id === newLiveSession.tutorId)?.fullName || allUsers.find(u => u.id === newLiveSession.tutorId)?.email || 'Unassigned',
+            startTime: newLiveSession.startTime ? new Date(newLiveSession.startTime).toISOString() : new Date().toISOString(),
+            endTime: newLiveSession.endDate ? new Date(newLiveSession.endDate).toISOString() : undefined,
+            duration: (Number(newLiveSession.durationHours) * 60) + Number(newLiveSession.durationMinutes),
+            platform: newLiveSession.platform,
+            meetingLink: finalLink,
+            status: 'UPCOMING'
+        };
+
+        try {
+            const res = await fetch('http://localhost:8080/api/academic/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const created = await res.json();
+                setLiveSessions([...liveSessions, created]);
+                setIsScheduleLiveModalOpen(false);
+                setNewLiveSession({ 
+                    title: '', startTime: '', endDate: '', 
+                    durationHours: 1, durationMinutes: 0, 
+                    tutorId: '', platform: 'Bytecode Meetings', meetingLink: '' 
+                });
+            }
+        } catch (e) {
+            console.error("Failed to schedule live class", e);
+        }
+    };
+
+    const handleDeleteSession = async (id: string, e: any) => {
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this live session?")) return;
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/sessions/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setLiveSessions(liveSessions.filter(s => s.id !== id));
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleOpenEditSession = (session: any, e: any) => {
+        e.stopPropagation();
+        setEditingSession(session);
+        setIsEditSessionModalOpen(true);
+    };
+
+    const handleUpdateSession = async (e: any) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/sessions/${editingSession.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editingSession)
+            });
+            if (res.ok) {
+                setLiveSessions(liveSessions.map(s => s.id === editingSession.id ? editingSession : s));
+                setIsEditSessionModalOpen(false);
+                setEditingSession(null);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleCreateAssignment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if(!selectedBatch) return;
+
+        const payload = {
+            ...newAssignment,
+            batchId: selectedBatch.id,
+            batchName: selectedBatch.batchName,
+            courseId: selectedCourse.id,
+            courseName: selectedCourse.title,
+            trainerId: selectedBatch.trainerId,
+            trainerName: tutor?.fullName || 'Unassigned',
+            assignedDate: new Date(),
+            submissions: []
+        };
+
+        try {
+            const res = await fetch('http://localhost:8080/api/academic/assignments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const created = await res.json();
+                setAssignments([...assignments, created]);
+                setIsCreateAssignmentModalOpen(false);
+                setNewAssignment({
+                    title: '', description: '', dueDate: '', 
+                    totalMarks: 100, difficulty: 'MEDIUM', 
+                    instructions: '', status: 'ACTIVE'
+                });
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleDeleteAssignment = async (id: string, e: any) => {
+        e.stopPropagation();
+        if (!confirm("Remove this assignment? Students will no longer be able to submit.")) return;
+        try {
+            await fetch(`http://localhost:8080/api/academic/assignments/${id}`, { method: 'DELETE' });
+            setAssignments(assignments.filter(a => a.id !== id));
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleGradeSubmission = async () => {
+        if (!viewingSubmissionsAssignment || !activeSubmission) return;
+
+        const updatedSubmissions = viewingSubmissionsAssignment.submissions.map((s: any) => {
+            if (s.studentId === activeSubmission.studentId) {
+                return { ...s, marksObtained: gradingData.marks, feedback: gradingData.feedback, status: gradingData.status };
+            }
+            return s;
+        });
+
+        const updatedAssignment = { ...viewingSubmissionsAssignment, submissions: updatedSubmissions };
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/assignments/${viewingSubmissionsAssignment.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedAssignment)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setAssignments(assignments.map(a => a.id === saved.id ? saved : a));
+                setViewingSubmissionsAssignment(saved);
+                setActiveSubmission(null);
+                setGradingData({ marks: 0, feedback: '', status: 'GRADED' });
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleUpdateAssignment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingAssignment) return;
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/assignments/${editingAssignment.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editingAssignment)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setAssignments(assignments.map(a => a.id === saved.id ? saved : a));
+                setIsEditAssignmentModalOpen(false);
+                setEditingAssignment(null);
+            }
+        } catch (e) { console.error(e); }
+    };
     const filteredBatches = batches.filter(b => b.courseId === selectedCourse?.id);
     const tutor = allUsers.find(u => u.id === selectedBatch?.trainerId);
+    const batchAssignments = assignments.filter(a => a.batchId === selectedBatch?.id);
     const students = allUsers.filter(u => u.role === 'STUDENT' && (selectedBatch?.studentIds?.includes(u.id) || selectedBatch?.studentIds?.includes(u.email)));
 
     const usersToShareWith = allUsers.filter(u => 
@@ -375,9 +758,16 @@ export default function AcademicHub() {
                         </div>
                     </div>
                     {viewMode !== 'COURSES' && (
-                        <button onClick={goBack} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 900, cursor: 'pointer' }}>
-                            <ChevronLeft size={18} /> GO BACK
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            {viewMode === 'BATCHES' && (
+                                <button onClick={() => setIsCreateBatchOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
+                                    <Plus size={16} /> NEW BATCH
+                                </button>
+                            )}
+                            <button onClick={goBack} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 900, cursor: 'pointer' }}>
+                                <ChevronLeft size={18} /> GO BACK
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -424,68 +814,252 @@ export default function AcademicHub() {
                         <motion.div key="details" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2.5rem' }}>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                {/* --- DRIVE CONTENT --- */}
-                                <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                         <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                             {selectedFolder ? <Folder color="var(--primary)" /> : <HardDrive color="var(--primary)" />} 
-                                             {selectedFolder ? selectedFolder.name : "My Drive"}
-                                         </h3>
-                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                              {!selectedFolder && (
-                                                  <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-                                                       <Plus size={16} /> NEW FOLDER
-                                                  </button>
-                                              )}
-                                              <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                              <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'var(--secondary)' }}>
-                                                   <Upload size={16} /> UPLOAD FILE
-                                              </button>
-                                          </div>
-                                     </div>
-
-                                    {!selectedFolder ? (
-                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}>
-                                              {selectedBatch?.folders?.map((folder: any, fIdx: number) => (
-                                                  <DriveFolder 
-                                                     key={fIdx} 
-                                                     folder={folder} 
-                                                     onClick={() => setSelectedFolder(folder)} 
-                                                     onShare={(e: any) => { e.stopPropagation(); setSharingTarget(folder); setIsShareModalOpen(true); }} 
-                                                     onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
-                                                     onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
-                                                  />
-                                              ))}
-                                              {(!selectedBatch?.folders || selectedBatch.folders.length === 0) && (
-                                                   <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
-                                                       <Folder size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.1 }} />
-                                                       <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>This batch has no resources yet.</p>
-                                                   </div>
-                                              )}
-                                         </div>
-                                    ) : (
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                              {selectedFolder.files?.length > 0 ? selectedFolder.files.map((file: any, fIdx: number) => (
-                                                  <FileItem 
-                                                     key={fIdx} 
-                                                     name={file.name} 
-                                                     type={file.type} 
-                                                     size={file.size} 
-                                                     date={new Date(file.uploadDate).toLocaleDateString()} 
-                                                     onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
-                                                     onDelete={() => handleDeleteFile(file.name)}
-                                                     onView={() => setViewFileTarget(file)}
-                                                  />
-                                              )) : (
-                                                  <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
-                                                      <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                                                      <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>No files found in this folder.</p>
-                                                      <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
-                                                  </div>
-                                              )}
-                                         </div>
-                                    )}
+                                {/* --- BATCH TABS NAVIGATION --- */}
+                                <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <button onClick={() => setBatchTab('DRIVE')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'DRIVE' ? 'var(--primary)' : 'transparent', color: batchTab === 'DRIVE' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
+                                        <Folder size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> DRIVE WORKSPACE
+                                    </button>
+                                    <button onClick={() => setBatchTab('LIVE')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'LIVE' ? 'var(--primary)' : 'transparent', color: batchTab === 'LIVE' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
+                                        <Video size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> LIVE SESSIONS
+                                    </button>
+                                    <button onClick={() => setBatchTab('RECORDINGS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'RECORDINGS' ? 'var(--primary)' : 'transparent', color: batchTab === 'RECORDINGS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
+                                        <Play size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> RECORDINGS
+                                    </button>
+                                    <button onClick={() => setBatchTab('ASSIGNMENTS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'ASSIGNMENTS' ? 'var(--primary)' : 'transparent', color: batchTab === 'ASSIGNMENTS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
+                                        <FileText size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> ASSIGNMENTS
+                                    </button>
                                 </div>
+
+                                {/* --- DRIVE CONTENT --- */}
+                                {batchTab === 'DRIVE' && (
+                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                 {selectedFolder ? <Folder color="var(--primary)" /> : <HardDrive color="var(--primary)" />} 
+                                                 {selectedFolder ? selectedFolder.name : "My Drive"}
+                                             </h3>
+                                             <div style={{ display: 'flex', gap: '10px' }}>
+                                                  {!selectedFolder && (
+                                                      <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
+                                                           <Plus size={16} /> NEW FOLDER
+                                                      </button>
+                                                  )}
+                                                  <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                                  <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'var(--secondary)' }}>
+                                                       <Upload size={16} /> UPLOAD FILE
+                                                  </button>
+                                              </div>
+                                         </div>
+
+                                        {!selectedFolder ? (
+                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}>
+                                                  {selectedBatch?.folders?.map((folder: any, fIdx: number) => (
+                                                      <DriveFolder 
+                                                         key={fIdx} 
+                                                         folder={folder} 
+                                                         onClick={() => setSelectedFolder(folder)} 
+                                                         onShare={(e: any) => { e.stopPropagation(); setSharingTarget(folder); setIsShareModalOpen(true); }} 
+                                                         onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
+                                                         onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
+                                                      />
+                                                  ))}
+                                                  {(!selectedBatch?.folders || selectedBatch.folders.length === 0) && (
+                                                       <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
+                                                           <Folder size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.1 }} />
+                                                           <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>This batch has no resources yet.</p>
+                                                       </div>
+                                                  )}
+                                             </div>
+                                        ) : (
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                  {selectedFolder.files?.length > 0 ? selectedFolder.files.map((file: any, fIdx: number) => (
+                                                      <FileItem 
+                                                         key={fIdx} 
+                                                         name={file.name} 
+                                                         type={file.type} 
+                                                         size={file.size} 
+                                                         date={new Date(file.uploadDate).toLocaleDateString()} 
+                                                         onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
+                                                         onDelete={() => handleDeleteFile(file.name)}
+                                                         onView={() => setViewFileTarget(file)}
+                                                      />
+                                                  )) : (
+                                                      <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
+                                                          <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
+                                                          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>No files found in this folder.</p>
+                                                          <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
+                                                      </div>
+                                                  )}
+                                             </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {/* --- LIVE SESSIONS CONTENT --- */}
+                                {batchTab === 'LIVE' && (
+                                    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                 <Video color="var(--primary)" /> Live Sessions Hub
+                                             </h3>
+                                             <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
+                                                 <Plus size={16} /> SCHEDULE SESSION
+                                             </button>
+                                        </div>
+
+                                        {liveSessions.length === 0 ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
+                                                <Video size={64} color="var(--secondary)" style={{ marginBottom: '1.5rem', WebkitFilter: 'drop-shadow(0 0 20px rgba(168,85,247,0.4))' }} />
+                                                <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>No Upcoming Live Sessions</h2>
+                                                <p style={{ color: 'var(--text-dim)', fontSize: '1rem', textAlign: 'center', maxWidth: '400px' }}>Schedule virtual classes and they will appear here.</p>
+                                                <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ marginTop: '2rem', padding: '12px 24px', fontSize: '0.9rem' }}>SCHEDULE LIVE CLASS</button>
+                                            </div>
+                                        ) : (
+                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                                 {liveSessions.map((ls, idx) => (
+                                                     <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', overflow: 'hidden' }}>
+                                                         <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)' }} />
+                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                             <h4 style={{ fontSize: '1.1rem', fontWeight: 900, maxWidth: '80%' }}>{ls.title}</h4>
+                                                             <div style={{ display: 'flex', gap: '8px' }}>
+                                                                 <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '4px' }}><Edit2 size={16} /></button>
+                                                                 <button onClick={(e) => handleDeleteSession(ls.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}><Trash2 size={16} /></button>
+                                                             </div>
+                                                         </div>
+                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800 }}>
+                                                             <Users size={14} /> Trainer: {ls.mentorName || 'Unassigned'}
+                                                         </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+                                                            <Calendar size={14} /> {new Date(ls.startTime).toLocaleString()}
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+                                                            <Clock size={14} /> {ls.duration} Minutes • {ls.platform}
+                                                        </div>
+                                                        {ls.platform === 'Bytecode Meetings' ? (
+                                                            <button onClick={() => setActiveMeetingRoom(ls)} className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', border: 'none', cursor: 'pointer' }}>
+                                                                JOIN INTERNAL ROOM
+                                                            </button>
+                                                        ) : (
+                                                            <a href={ls.meetingLink} target="_blank" rel="noreferrer" className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', textDecoration: 'none' }}>
+                                                                LAUNCH {ls.platform}
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {/* --- RECORDINGS CONTENT --- */}
+                                {batchTab === 'RECORDINGS' && (
+                                    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                 <Play color="var(--primary)" /> Class Recordings
+                                             </h3>
+                                        </div>
+
+                                        {liveSessions.filter(ls => ls.recordingUrl).length === 0 ? (
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Play size={64} color="var(--primary)" style={{ marginBottom: '1.5rem', WebkitFilter: 'drop-shadow(0 0 20px rgba(139,92,246,0.4))' }} />
+                                                <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>No Recordings Found</h2>
+                                                <p style={{ color: 'var(--text-dim)', fontSize: '1rem', textAlign: 'center', maxWidth: '400px' }}>Post-session recordings and related transcripts are stored here.</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+                                                {liveSessions.filter(ls => ls.recordingUrl).map((ls, idx) => (
+                                                    <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                                        <div style={{ aspectRatio: '16/9', borderRadius: '12px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                                                            <Play size={32} color="var(--primary)" />
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.1rem', fontWeight: 900 }}>{ls.courseName}</h4>
+                                                        <p style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>{ls.batchName} - {ls.title}</p>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} /> {new Date(ls.startTime).toLocaleDateString()}</span>
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {ls.duration} Mins</span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '8px', marginTop: '0.5rem' }}>
+                                                            <a href={ls.recordingUrl} target="_blank" className="btn-quantum" style={{ flex: 2, padding: '10px', textAlign: 'center', fontSize: '0.8rem', textDecoration: 'none' }}>
+                                                                WATCH
+                                                            </a>
+                                                            <button onClick={() => initiateShare(ls)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} title="Share to Batch Drive">
+                                                                <Share2 size={16} />
+                                                            </button>
+                                                            <button onClick={(e) => handleDeleteRecording(ls.id, e)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }}>
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {/* --- ASSIGNMENTS CONTENT --- */}
+                                {batchTab === 'ASSIGNMENTS' && (
+                                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                 <FileText color="#10b981" /> Academic Assignments
+                                             </h3>
+                                             <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', background: '#10b981' }}>NEW ASSIGNMENT</button>
+                                        </div>
+
+                                        {batchAssignments.length === 0 ? (
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '40px', padding: '4rem' }}>
+                                                <FileText size={64} color="#10b981" style={{ marginBottom: '1.5rem', opacity: 0.3 }} />
+                                                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dim)' }}>Queue Empty</h2>
+                                                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', textAlign: 'center', maxWidth: '300px' }}>No assignments have been distributed to this batch yet.</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                                                {batchAssignments.map((a, idx) => (
+                                                    <motion.div 
+                                                        key={idx} 
+                                                        className="glass-panel" 
+                                                        whileHover={{ y: -5 }}
+                                                        style={{ padding: '1.8rem', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem', cursor: 'pointer' }}
+                                                        onClick={() => setViewingAssignment(a)}
+                                                    >
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                            <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900 }}>
+                                                                {a.difficulty}
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                                <button onClick={(e) => { e.stopPropagation(); setEditingAssignment(a); setIsEditAssignmentModalOpen(true); }} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={18} /></button>
+                                                                <button onClick={(e) => handleDeleteAssignment(a.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                                                            </div>
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{a.title}</h4>
+                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{a.description}</p>
+                                                        
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.5rem 0' }} />
+                                                        
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 800 }}>Due Date</span>
+                                                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}><Calendar size={12} /> {new Date(a.dueDate).toLocaleDateString()}</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 800 }}>Submissions</span>
+                                                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>{a.submissions?.length || 0} Turned In</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '0.5rem' }}>
+                                                            <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                                                <div style={{ width: `${((a.submissions?.length || 0) / 50) * 100}%`, height: '100%', background: '#10b981' }} />
+                                                            </div>
+                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>{Math.round(((a.submissions?.length || 0) / 50) * 100)}%</span>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
                             </div>
 
                             {/* --- RIGHT INFO PANEL --- */}
@@ -498,8 +1072,17 @@ export default function AcademicHub() {
                                            <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : 'Just Now'} />
                                        </div>
                                        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            <button onClick={() => {
+                                                setEditBatchData({
+                                                    ...selectedBatch,
+                                                    startDate: selectedBatch.startDate ? selectedBatch.startDate.split('T')[0] : '',
+                                                    endDate: selectedBatch.endDate ? selectedBatch.endDate.split('T')[0] : ''
+                                                });
+                                                setIsEditBatchOpen(true);
+                                            }} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%', background: 'var(--primary)' }}>EDIT BATCH</button>
                                            <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
                                            <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', background: 'var(--secondary)', width: '100%' }}>MANAGE BATCH STUDENTS</button>
+                                           <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', background: '#ef4444', width: '100%', border: 'none' }}>DELETE BATCH</button>
                                        </div>
                                  </div>
                             </div>
@@ -519,6 +1102,94 @@ export default function AcademicHub() {
                                     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                                          <button type="button" onClick={() => setIsCreateFolderOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
                                          <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>CREATE</button>
+                                    </div>
+                               </form>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- CREATE BATCH MODAL --- */}
+            <AnimatePresence>
+                 {isCreateBatchOpen && selectedCourse && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>New Batch for {selectedCourse.title}</h2>
+                               <form onSubmit={handleCreateBatch} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input value={newBatch.batchCode} onChange={(e) => setNewBatch({...newBatch, batchCode: e.target.value})} placeholder="Batch Code (e.g. J1_APRIL)" style={inputStyle} required />
+                                        <input value={newBatch.batchName} onChange={(e) => setNewBatch({...newBatch, batchName: e.target.value})} placeholder="Batch Name" style={inputStyle} required />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input type="date" value={newBatch.startDate} onChange={(e) => setNewBatch({...newBatch, startDate: e.target.value})} style={inputStyle} required />
+                                        <input type="date" value={newBatch.endDate} onChange={(e) => setNewBatch({...newBatch, endDate: e.target.value})} style={inputStyle} required />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <select value={newBatch.trainerId} onChange={(e) => setNewBatch({...newBatch, trainerId: e.target.value})} style={inputStyle} required>
+                                            <option value="">Select Trainer / Admin</option>
+                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map(u => (
+                                                <option key={u.id} value={u.id}>{u.fullName}</option>
+                                            ))}
+                                        </select>
+                                        <select value={newBatch.mode} onChange={(e) => setNewBatch({...newBatch, mode: e.target.value})} style={inputStyle}>
+                                            <option value="ONLINE">Online</option>
+                                            <option value="OFFLINE">Offline</option>
+                                            <option value="HYBRID">Hybrid</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input value={newBatch.schedule} onChange={(e) => setNewBatch({...newBatch, schedule: e.target.value})} placeholder="Schedule (e.g. Mon-Fri 10AM-1PM)" style={inputStyle} />
+                                        <input type="number" value={newBatch.maxCapacity} onChange={(e) => setNewBatch({...newBatch, maxCapacity: parseInt(e.target.value)})} placeholder="Max Capacity" style={inputStyle} />
+                                    </div>
+                                    <textarea value={newBatch.description} onChange={(e) => setNewBatch({...newBatch, description: e.target.value})} placeholder="Description" rows={3} style={{...inputStyle, resize: 'none'}} />
+                                    
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                         <button type="button" onClick={() => setIsCreateBatchOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>CREATE BATCH</button>
+                                    </div>
+                               </form>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- EDIT BATCH MODAL --- */}
+            <AnimatePresence>
+                 {isEditBatchOpen && editBatchData && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Edit Batch {editBatchData.batchName}</h2>
+                               <form onSubmit={handleUpdateBatchSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input value={editBatchData.batchCode} onChange={(e) => setEditBatchData({...editBatchData, batchCode: e.target.value})} placeholder="Batch Code" style={inputStyle} required />
+                                        <input value={editBatchData.batchName} onChange={(e) => setEditBatchData({...editBatchData, batchName: e.target.value})} placeholder="Batch Name" style={inputStyle} required />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input type="date" value={editBatchData.startDate} onChange={(e) => setEditBatchData({...editBatchData, startDate: e.target.value})} style={inputStyle} required />
+                                        <input type="date" value={editBatchData.endDate} onChange={(e) => setEditBatchData({...editBatchData, endDate: e.target.value})} style={inputStyle} required />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <select value={editBatchData.trainerId || ''} onChange={(e) => setEditBatchData({...editBatchData, trainerId: e.target.value})} style={inputStyle} required>
+                                            <option value="">Select Trainer / Admin</option>
+                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map(u => (
+                                                <option key={u.id} value={u.id}>{u.fullName}</option>
+                                            ))}
+                                        </select>
+                                        <select value={editBatchData.mode || 'ONLINE'} onChange={(e) => setEditBatchData({...editBatchData, mode: e.target.value})} style={inputStyle}>
+                                            <option value="ONLINE">Online</option>
+                                            <option value="OFFLINE">Offline</option>
+                                            <option value="HYBRID">Hybrid</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input value={editBatchData.schedule || ''} onChange={(e) => setEditBatchData({...editBatchData, schedule: e.target.value})} placeholder="Schedule (e.g. Mon-Fri 10AM-1PM)" style={inputStyle} />
+                                        <input type="number" value={editBatchData.maxCapacity || 50} onChange={(e) => setEditBatchData({...editBatchData, maxCapacity: parseInt(e.target.value)})} placeholder="Max Capacity" style={inputStyle} />
+                                    </div>
+                                    <textarea value={editBatchData.description || ''} onChange={(e) => setEditBatchData({...editBatchData, description: e.target.value})} placeholder="Description" rows={3} style={{...inputStyle, resize: 'none'}} />
+                                    
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                         <button type="button" onClick={() => setIsEditBatchOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)' }}>SAVE CHANGES</button>
                                     </div>
                                </form>
                           </motion.div>
@@ -756,6 +1427,544 @@ export default function AcademicHub() {
                                         </div>
                                     )}
                                </div>
+                  </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- SCHEDULE LIVE SESSION MODAL --- */}
+            {isScheduleLiveModalOpen && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)' }}>
+                    <div className="glass-panel" style={{ width: '90%', maxWidth: '750px', padding: '2.5rem', borderRadius: '40px', position: 'relative' }}>
+                        <button onClick={() => setIsScheduleLiveModalOpen(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}>
+                            <XCircle size={24} />
+                        </button>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Video size={24} color="var(--primary)" /> Schedule Live Class
+                        </h2>
+
+                        <form onSubmit={handleScheduleLiveClass} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SESSION TITLE</label>
+                                <input value={newLiveSession.title} onChange={e => setNewLiveSession({...newLiveSession, title: e.target.value})} placeholder="e.g. FullStack Development Introduction" required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>START DATE & TIME</label>
+                                    <input type="datetime-local" value={newLiveSession.startTime} onChange={e => setNewLiveSession({...newLiveSession, startTime: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>END DATE & TIME (OPTIONAL)</label>
+                                    <input type="datetime-local" value={newLiveSession.endDate} onChange={e => setNewLiveSession({...newLiveSession, endDate: e.target.value})} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>DURATION</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ position: 'relative' }}>
+                                        <input type="number" min="0" value={newLiveSession.durationHours} onChange={e => setNewLiveSession({...newLiveSession, durationHours: parseInt(e.target.value) || 0})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', width: '100%' }} />
+                                        <span style={{ position: 'absolute', right: '12px', top: '12px', fontSize: '0.7rem', color: 'var(--secondary)', fontWeight: 900 }}>HOURS</span>
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <input type="number" min="0" max="59" value={newLiveSession.durationMinutes} onChange={e => setNewLiveSession({...newLiveSession, durationMinutes: parseInt(e.target.value) || 0})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', width: '100%' }} />
+                                        <span style={{ position: 'absolute', right: '12px', top: '12px', fontSize: '0.7rem', color: 'var(--secondary)', fontWeight: 900 }}>MINS</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SELECT TUTOR</label>
+                                    <select value={newLiveSession.tutorId} onChange={e => setNewLiveSession({...newLiveSession, tutorId: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                        <option value="">- Select Trainer/Admin -</option>
+                                        {allUsers.filter(u => ['TRAINER', 'ADMIN', 'SUPER_ADMIN', 'TUTOR', 'EMPLOYEE'].includes(u.role)).map(u => (
+                                            <option key={u.id} value={u.id}>{u.fullName || u.name || u.email || 'Unnamed User'} ({u.role})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>PLATFORM</label>
+                                    <select value={newLiveSession.platform} onChange={e => setNewLiveSession({...newLiveSession, platform: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                        <option value="Bytecode Meetings">Bytecode Meetings</option>
+                                        <option value="ZOOM">Zoom Cloud Meeting</option>
+                                        <option value="GOOGLE_MEET">Google Meet</option>
+                                        <option value="MS_TEAMS">Microsoft Teams</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {newLiveSession.platform !== 'Bytecode Meetings' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>MEETING LINK URL</label>
+                                    <input value={newLiveSession.meetingLink} onChange={e => setNewLiveSession({...newLiveSession, meetingLink: e.target.value})} placeholder={`https://${newLiveSession.platform.toLowerCase()}...`} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                </div>
+                            )}
+
+                            <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '0.5rem' }}>
+                                <strong style={{ color: 'var(--primary)' }}>Note:</strong> Using Bytecode Meetings automatically provisions a secure, 1-click launch room for this class.
+                            </div>
+
+                            <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '12px', fontWeight: 900, marginTop: '1rem' }}>
+                                CREATE SESSION
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- EDIT LIVE SESSION MODAL --- */}
+            <AnimatePresence>
+                {isEditSessionModalOpen && editingSession && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)' }}>
+                        <div className="glass-panel" style={{ width: '90%', maxWidth: '750px', padding: '2.5rem', borderRadius: '40px', position: 'relative' }}>
+                            <button onClick={() => setIsEditSessionModalOpen(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}>
+                                <XCircle size={24} />
+                            </button>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Edit2 size={24} color="var(--primary)" /> Edit Live Session
+                            </h2>
+
+                            <form onSubmit={handleUpdateSession} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SESSION TITLE</label>
+                                    <input value={editingSession.title} onChange={e => setEditingSession({...editingSession, title: e.target.value})} placeholder="e.g. React Hooks Deep Dive" required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>START DATE & TIME</label>
+                                        <input type="datetime-local" value={editingSession.startTime?.slice(0, 16)} onChange={e => setEditingSession({...editingSession, startTime: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>DURATION (MINUTES)</label>
+                                        <input type="number" min="1" value={editingSession.duration} onChange={e => setEditingSession({...editingSession, duration: parseInt(e.target.value) || 60})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>PLATFORM</label>
+                                        <select value={editingSession.platform} onChange={e => setEditingSession({...editingSession, platform: e.target.value})} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                            <option value="Bytecode Meetings">Bytecode Meetings</option>
+                                            <option value="ZOOM">Zoom</option>
+                                            <option value="GOOGLE_MEET">Google Meet</option>
+                                            <option value="MS_TEAMS">Microsoft Teams</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>STATUS</label>
+                                        <select value={editingSession.status} onChange={e => setEditingSession({...editingSession, status: e.target.value})} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                            <option value="UPCOMING">Upcoming</option>
+                                            <option value="LIVE">Live Now</option>
+                                            <option value="COMPLETED">Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>MEETING LINK URL</label>
+                                    <input value={editingSession.meetingLink} onChange={e => setEditingSession({...editingSession, meetingLink: e.target.value})} placeholder="https://..." style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                </div>
+
+                                <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '12px', fontWeight: 900, marginTop: '1rem' }}>
+                                    UPDATE SESSION
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* --- INTERNAL MEETING ROOM ENGINES --- */}
+            {activeMeetingRoom && (() => {
+                const tutorUser = allUsers.find((u: any) => u.id === activeMeetingRoom.mentorId);
+                const tutorName = activeMeetingRoom.mentorName || tutorUser?.fullName || tutorUser?.name || 'Trainer';
+                
+                // FALLBACK TO BATCH TRAINER IF NOT FOUND IN SESSION
+                const batchTrainer = allUsers.find((u: any) => u.id === selectedBatch?.trainerId);
+                const finalTutorName = tutorName !== 'Trainer' ? tutorName : (batchTrainer?.fullName || 'Academic Host');
+                
+                return (
+                    <BytecodeMeetingRoom
+                        session={activeMeetingRoom}
+                        roomName={activeMeetingRoom.title || 'Bytecode Live Class'}
+                        currentUserName={finalTutorName}
+                        students={students}
+                        onLeave={() => setActiveMeetingRoom(null)}
+                        onRecordingSaved={(recordingUrl: string) => {
+                            setLiveSessions(liveSessions.map((s: any) => s.id === activeMeetingRoom.id ? { ...s, recordingUrl } : s));
+                        }}
+                    />
+                );
+            })()}
+
+            {/* --- MULTI-STEP SHARE RECORDING MODAL --- */}
+            <AnimatePresence>
+                {isShareModalOpen && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ backdropFilter: 'blur(15px)' }}>
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="glass-panel" style={{ width: '90%', maxWidth: '550px', padding: '2.5rem', borderRadius: '40px', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <div>
+                                    <span style={{ color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Share Workflow • Step {shareStep} of 3</span>
+                                    <h2 style={{ fontSize: '1.6rem', fontWeight: 900, marginTop: '5px' }}>
+                                        {shareStep === 1 && "Target Course"}
+                                        {shareStep === 2 && "Target Batch"}
+                                        {shareStep === 3 && "Drive Destination"}
+                                    </h2>
+                                </div>
+                                <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={24} /></button>
+                            </div>
+
+                            {/* Step 1: Courses */}
+                            {shareStep === 1 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
+                                    {allCourses.map((c: any) => (
+                                        <button key={c.id} onClick={() => handleSelectCourseForShare(c)} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', transition: 'all 0.3s' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                <div style={{ padding: '10px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px' }}><BookOpen size={20} color="var(--primary)" /></div>
+                                                <span style={{ fontWeight: 700 }}>{c.title}</span>
+                                            </div>
+                                            <ChevronRight size={18} color="var(--text-dim)" />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Step 2: Batches */}
+                            {shareStep === 2 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
+                                    <button onClick={() => setShareStep(1)} style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 800, marginBottom: '10px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>← BACK TO COURSES</button>
+                                    {allBatchesForCourse.length > 0 ? allBatchesForCourse.map((b: any) => (
+                                        <button key={b.id} onClick={() => { setShareSelectedBatch(b); setShareStep(3); }} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                <div style={{ padding: '10px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px' }}><Layers size={20} color="#10b981" /></div>
+                                                <div>
+                                                    <div style={{ fontWeight: 800 }}>{b.batchName}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{b.batchCode} • {b.mode}</div>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={18} color="var(--text-dim)" />
+                                        </button>
+                                    )) : <p style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>No active batches for this course.</p>}
+                                </div>
+                            )}
+
+                            {/* Step 3: Destination (Folders) */}
+                            {shareStep === 3 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <button onClick={() => setShareStep(2)} style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>← BACK TO BATCHES</button>
+                                    
+                                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', display: 'block', marginBottom: '10px' }}>Target Folder</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
+                                            {shareSelectedBatch.folders?.map((f: any) => (
+                                                <button key={f.name} onClick={() => handleConfirmShare(f.name)} style={{ padding: '12px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
+                                                    📁 {f.name}
+                                                </button>
+                                            ))}
+                                            <button onClick={() => handleConfirmShare('Shared Recordings')} style={{ padding: '12px', borderRadius: '14px', border: '1px solid var(--primary)', background: 'rgba(139, 92, 246, 0.1)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
+                                                ✨ Recordings Folder
+                                            </button>
+                                        </div>
+
+                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginTop: '1rem' }}>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', display: 'block', marginBottom: '10px' }}>OR CREATE NEW FOLDER</label>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <input value={shareNewFolderName} onChange={(e) => setShareNewFolderName(e.target.value)} placeholder="Folder Name..." style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '10px', color: '#fff' }} />
+                                                <button onClick={() => handleConfirmShare(shareNewFolderName)} disabled={!shareNewFolderName} className="btn-quantum" style={{ padding: '10px 15px', fontSize: '0.8rem' }}><FolderPlus size={16} /></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* --- CREATE ASSIGNMENT MODAL --- */}
+            <AnimatePresence>
+                 {isCreateAssignmentModalOpen && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Distribute Assignment</h2>
+                               <form onSubmit={handleCreateAssignment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <input value={newAssignment.title} onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})} placeholder="Assignment Title (e.g. Build a Netflix Clone)" style={inputStyle} required />
+                                    <textarea value={newAssignment.description} onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})} placeholder="Abstract Description" rows={3} style={{...inputStyle, resize: 'none'}} required />
+                                    
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DIFFICULTY</label>
+                                            <select value={newAssignment.difficulty} onChange={(e) => setNewAssignment({...newAssignment, difficulty: e.target.value})} style={inputStyle}>
+                                                <option value="EASY">Easy</option>
+                                                <option value="MEDIUM">Medium</option>
+                                                <option value="HARD">Hard</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>STATUS</label>
+                                            <select value={newAssignment.status} onChange={(e) => setNewAssignment({...newAssignment, status: e.target.value})} style={inputStyle}>
+                                                <option value="ACTIVE">Active</option>
+                                                <option value="UPCOMING">Upcoming</option>
+                                                <option value="CLOSED">Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                         <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, display: 'block' }}>ATTACHMENTS (RESOURCES/DOCS)</label>
+                                         <div style={{ display: 'flex', gap: '10px' }}>
+                                              <input value={newAssignment.attachments[0] || ''} onChange={(e) => setNewAssignment({...newAssignment, attachments: [e.target.value]})} placeholder="Paste Resource URL..." style={inputStyle} />
+                                              <button type="button" onClick={() => alert('Industrial Browser Service: Mock Upload Triggered')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0 20px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer' }}>UPLOAD</button>
+                                         </div>
+                                    </div>
+
+                                    <textarea value={newAssignment.instructions} onChange={(e) => setNewAssignment({...newAssignment, instructions: e.target.value})} placeholder="Specific Instructions / Requirements" rows={4} style={{...inputStyle, resize: 'none'}} />
+
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                         <button type="button" onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: '#10b981' }}>LAUNCH ASSIGNMENT</button>
+                                    </div>
+                               </form>
+                          </motion.div>
+                     </div>
+                 )}
+            </AnimatePresence>
+
+            {/* --- ASSIGNMENT DETAIL VIEW MODAL --- */}
+            <AnimatePresence>
+                {viewingAssignment && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', height: '80vh', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden' }}>
+                            <div style={{ padding: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900 }}>{viewingAssignment.title}</h2>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Created by {viewingAssignment.trainerName} • Due {new Date(viewingAssignment.dueDate).toLocaleDateString()}</p>
+                                </div>
+                                <button onClick={() => setViewingAssignment(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={32} /></button>
+                            </div>
+                            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 350px', overflow: 'hidden' }}>
+                                <div style={{ padding: '3rem', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.5rem', textTransform: 'uppercase' }}>Description & Scope</h5>
+                                    <p style={{ color: '#fff', lineHeight: 1.8, marginBottom: '2.5rem' }}>{viewingAssignment.description}</p>
+                                    
+                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.5rem', textTransform: 'uppercase' }}>Instructions</h5>
+                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <p style={{ whiteSpace: 'pre-wrap', color: 'var(--text-dim)', lineHeight: 1.6 }}>{viewingAssignment.instructions || 'No specific instructions provided.'}</p>
+                                    </div>
+                                </div>
+                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase' }}>Grading Analytics</h5>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                            <h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{viewingAssignment.submissions?.length || 0}</h3>
+                                            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>SUBMISSIONS</p>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '3rem' }}>
+                                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)' }}>{viewingAssignment.attachments?.length || 0}</h3>
+                                                <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>ATTACHMENTS</p>
+                                            </div>
+                                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)', flex: 1 }}>
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{viewingAssignment.attachments?.[0]?.split('/').pop() || 'Standard Protocol'}</h3>
+                                                <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>PRIMARY RESOURCE</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => {
+                                        setViewingSubmissionsAssignment(viewingAssignment);
+                                        setViewingAssignment(null);
+                                    }} className="btn-quantum" style={{ width: '100%', padding: '15px', background: '#10b981' }}>VIEW ALL SUBMISSIONS</button>
+                                    <button className="btn-quantum" style={{ width: '100%', padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>MARK AS COMPLETED</button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* --- VIEW ALL SUBMISSIONS MODAL --- */}
+            <AnimatePresence>
+                {viewingSubmissionsAssignment && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '1000px', height: '85vh', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden' }}>
+                            <div style={{ padding: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.05)' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Submissions Explorer</h2>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Assignment: {viewingSubmissionsAssignment.title} • {students.length} Total Students</p>
+                                </div>
+                                <button onClick={() => setViewingSubmissionsAssignment(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={32} /></button>
+                            </div>
+                            
+                            <div style={{ flex: 1, padding: '3rem', overflowY: 'auto' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                    {students.map((student: any, idx: number) => {
+                                        const submission = viewingSubmissionsAssignment.submissions?.find((s: any) => s.studentId === student.id);
+                                        return (
+                                            <div key={idx} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', border: submission ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: submission ? '#10b981' : 'rgba(255,255,255,0.05)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 900 }}>
+                                                        {student.fullName?.charAt(0) || 'S'}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: submission ? '#10b981' : 'var(--text-dim)', padding: '4px 8px', background: submission ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                                                        {submission ? (submission.status || 'SUBMITTED') : 'PENDING'}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 800 }}>{student.fullName || student.email.split('@')[0]}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{student.email}</div>
+                                                </div>
+                                                
+                                                {submission ? (
+                                                    <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                                            <span style={{ color: 'var(--text-dim)' }}>Status:</span>
+                                                            <span style={{ fontWeight: 900, color: submission.status === 'ACCEPTED' ? '#10b981' : submission.status === 'REJECTED' ? '#ef4444' : '#fff' }}>{submission.status || 'SUBMITTED'}</span>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => {
+                                                                setActiveSubmission(submission);
+                                                                setGradingData({ marks: submission.marksObtained || 0, feedback: submission.feedback || '', status: submission.status || 'ACCEPTED' });
+                                                            }}
+                                                            className="btn-quantum" 
+                                                            style={{ padding: '8px', fontSize: '0.75rem', background: submission.status ? 'rgba(255,255,255,0.05)' : '#10b981' }}
+                                                        >
+                                                            AUDIT SUBMISSION
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ marginTop: '0.5rem', padding: '10px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', color: '#ef4444', fontSize: '0.7rem', fontWeight: 800, textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                                                        AWAITING SUBMISSION
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* --- GRADING / SUBMISSION VIEW MODAL --- */}
+            <AnimatePresence>
+                {activeSubmission && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(20px)' }}>
+                        <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '800px', padding: '3.5rem', borderRadius: '40px', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
+                                <div>
+                                    <span style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Student Audit</span>
+                                    <h2 style={{ fontSize: '2rem', fontWeight: 900, marginTop: '8px' }}>{activeSubmission.studentName}</h2>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Submitted on {new Date(activeSubmission.submittedAt).toLocaleString()}</p>
+                                </div>
+                                <button onClick={() => setActiveSubmission(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={28} /></button>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                                <div>
+                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.5rem', textTransform: 'uppercase', fontSize: '0.8rem' }}>Submission Artifacts</h5>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '2.5rem' }}>
+                                        {activeSubmission.files?.map((file: string, idx: number) => (
+                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <Paperclip size={18} color="var(--primary)" />
+                                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{file.split('/').pop() || 'submission.zip'}</span>
+                                                </div>
+                                                <button style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><Download size={18} /></button>
+                                            </div>
+                                        ))}
+                                        {(!activeSubmission.files || activeSubmission.files.length === 0) && (
+                                            <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>No binary artifacts attached.</div>
+                                        )}
+                                    </div>
+                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.2rem', textTransform: 'uppercase', fontSize: '0.8rem' }}>Student Remarks</h5>
+                                    <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.9rem', lineHeight: 1.6, minHeight: '100px' }}>
+                                        {activeSubmission.remarks || 'No remarks provided.'}
+                                    </div>
+                                </div>
+
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2.5rem', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h5 style={{ fontWeight: 900, marginBottom: '2rem', textTransform: 'uppercase', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldCheck size={18} color="#10b981" /> Audit Execution</h5>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>DECISION STATUS</label>
+                                            <select 
+                                                value={gradingData.status} 
+                                                onChange={(e) => setGradingData({...gradingData, status: e.target.value})}
+                                                style={inputStyle}
+                                            >
+                                                <option value="ACCEPTED">ACCEPT SUBMISSION</option>
+                                                <option value="REJECTED">REJECT SUBMISSION</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>INSTRUCTIONAL FEEDBACK</label>
+                                            <textarea 
+                                                value={gradingData.feedback} 
+                                                onChange={(e) => setGradingData({...gradingData, feedback: e.target.value})}
+                                                rows={5} 
+                                                style={{...inputStyle, resize: 'none'}} 
+                                                placeholder="Professional feedback for the student..."
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                             <button onClick={handleGradeSubmission} className="btn-quantum" style={{ flex: 1, padding: '15px', background: gradingData.status === 'ACCEPTED' ? '#10b981' : '#ef4444' }}>
+                                                 {gradingData.status === 'ACCEPTED' ? 'APPROVE PROTOCOL' : 'SEND FOR REVISION'}
+                                             </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* --- EDIT ASSIGNMENT MODAL --- */}
+            <AnimatePresence>
+                 {isEditAssignmentModalOpen && editingAssignment && (
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Update Protocols: {editingAssignment.title}</h2>
+                               <form onSubmit={handleUpdateAssignment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <input value={editingAssignment.title} onChange={(e) => setEditingAssignment({...editingAssignment, title: e.target.value})} placeholder="Assignment Title" style={inputStyle} required />
+                                    <textarea value={editingAssignment.description} onChange={(e) => setEditingAssignment({...editingAssignment, description: e.target.value})} placeholder="Abstract Description" rows={3} style={{...inputStyle, resize: 'none'}} required />
+                                    
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DIFFICULTY</label>
+                                            <select value={editingAssignment.difficulty} onChange={(e) => setEditingAssignment({...editingAssignment, difficulty: e.target.value})} style={inputStyle}>
+                                                <option value="EASY">Easy</option>
+                                                <option value="MEDIUM">Medium</option>
+                                                <option value="HARD">Hard</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>STATUS</label>
+                                            <select value={editingAssignment.status} onChange={(e) => setEditingAssignment({...editingAssignment, status: e.target.value})} style={inputStyle}>
+                                                <option value="ACTIVE">Active</option>
+                                                <option value="UPCOMING">Upcoming</option>
+                                                <option value="CLOSED">Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                         <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, display: 'block' }}>ATTACHMENT URL</label>
+                                         <input value={editingAssignment.attachmentUrl} onChange={(e) => setEditingAssignment({...editingAssignment, attachmentUrl: e.target.value})} style={inputStyle} />
+                                    </div>
+
+                                    <textarea value={editingAssignment.instructions} onChange={(e) => setEditingAssignment({...editingAssignment, instructions: e.target.value})} placeholder="Critical Instructions" rows={4} style={{...inputStyle, resize: 'none'}} />
+
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                         <button type="button" onClick={() => setIsEditAssignmentModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)' }}>COMMIT CHANGES</button>
+                                    </div>
+                               </form>
                           </motion.div>
                      </div>
                  )}

@@ -6,15 +6,89 @@ import { useState, useEffect } from 'react';
 import { 
     BookOpen, Video, FileText, CheckCircle, 
     Briefcase, TrendingUp, Play, Clock, 
-    Calendar, Award, Star, MessageSquare
+    Calendar, Award, Star, MessageSquare, X
 } from 'lucide-react';
 
 export default function StudentDashboard() {
-    const [selectedTab, setSelectedTab] = useState('COURSES');
+    const [selectedTab, setSelectedTab] = useState('LEARNING');
+    const [subTab, setSubTab] = useState<'COURSES' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS'>('COURSES');
+    
+    // --- ACADEMIC STATE ---
+    const [assignments, setAssignments] = useState<any[]>([]);
+    const [loggedUser, setLoggedUser] = useState<any>(null);
+    const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
+    const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+    const [submissionForm, setSubmissionForm] = useState({ url: '', remarks: '' });
+
+    useEffect(() => {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+            const user = JSON.parse(stored);
+            setLoggedUser(user);
+            fetchStudentAssignments(user.id);
+        }
+    }, []);
+
+    const fetchStudentAssignments = async (studentId: string) => {
+        try {
+            // 1. Get student's batches
+            const bRes = await fetch(`http://localhost:8080/api/academic/batches/student/${studentId}`);
+            if (!bRes.ok) return;
+            const batches = await bRes.json();
+            
+            // 2. Fetch assignments for each batch
+            const allAss: any[] = [];
+            for (const b of batches) {
+                const aRes = await fetch(`http://localhost:8080/api/academic/assignments/batch/${b.id}`);
+                if (aRes.ok) {
+                    const data = await aRes.json();
+                    allAss.push(...data);
+                }
+            }
+            setAssignments(allAss);
+        } catch (e) {
+            console.error("Failed to sync assignments:", e);
+        }
+    };
+
+    const handleSubmitAssignment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedAssignment || !loggedUser) return;
+
+        const submission = {
+            studentId: loggedUser.id,
+            studentName: loggedUser.fullName || loggedUser.name || loggedUser.email,
+            submittedAt: new Date().toISOString(),
+            files: [submissionForm.url],
+            remarks: submissionForm.remarks,
+            status: 'SUBMITTED'
+        };
+
+        const updatedAssignment = {
+            ...selectedAssignment,
+            submissions: [...(selectedAssignment.submissions || []), submission]
+        };
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/assignments/${selectedAssignment.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedAssignment)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setAssignments(assignments.map(a => a.id === saved.id ? saved : a));
+                setIsSubmissionModalOpen(false);
+                setSubmissionForm({ url: '', remarks: '' });
+                alert("Protocol Synchronized: Submission Successful.");
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const TABS = [
-        { id: 'COURSES', label: 'My Learning Center', icon: <BookOpen size={18} /> },
-        { id: 'ASSIGNMENTS', label: 'Submission Hub', icon: <FileText size={18} /> },
+        { id: 'LEARNING', label: 'My Learning Hub', icon: <BookOpen size={18} /> },
         { id: 'TESTS', label: 'Exam Node', icon: <CheckCircle size={18} /> },
         { id: 'CAREER', label: 'Career Launch', icon: <Briefcase size={18} /> },
     ];
@@ -61,21 +135,103 @@ export default function StudentDashboard() {
 
                     {/* --- TAB CONTENT --- */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        {selectedTab === 'COURSES' && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                <CourseCard title="Mastering Spring Boot Microservices" progress={85} instructor="Vamsi Krishna" next="Module 12: K8s Ingress Control" />
-                                <CourseCard title="React & Next.js Performance Optimization" progress={42} instructor="Sai Kiran" next="Chapter 4: Server Components" />
-                            </motion.div>
-                        )}
-
-                        {selectedTab === 'ASSIGNMENTS' && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
-                                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2.5rem' }}>Active Evaluation Protocols</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <TaskRow title="Authentication Cluster Implementation" deadline="MAR 25, 2026" status="SUBMITTED" color="#10b981" />
-                                    <TaskRow title="Design System (Framer Motion)" deadline="MAR 22, 2026" status="PENDING" color="#f59e0b" />
-                                    <TaskRow title="Microservices Inter-com API" deadline="MAR 20, 2026" status="OVERDUE" color="#ef4444" />
+                        {selectedTab === 'LEARNING' && (
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                                {/* --- LEARNING HUB SUB-TABS --- */}
+                                <div style={{ display: 'flex', gap: '20px', marginBottom: '2.5rem', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    {[
+                                        { id: 'COURSES', label: 'Course Tracks', icon: <BookOpen size={16} /> },
+                                        { id: 'LIVE', label: 'Live Classes', icon: <Video size={16} /> },
+                                        { id: 'RECORDINGS', label: 'Recorded Hub', icon: <Play size={16} /> },
+                                        { id: 'ASSIGNMENTS', label: 'Assignments', icon: <FileText size={16} /> },
+                                    ].map(st => (
+                                        <button 
+                                            key={st.id}
+                                            onClick={() => setSubTab(st.id as any)}
+                                            style={{ 
+                                                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                                padding: '10px', borderRadius: '10px', background: subTab === st.id ? 'var(--primary)' : 'transparent',
+                                                color: subTab === st.id ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s'
+                                            }}
+                                        >
+                                            {st.icon} {st.label}
+                                        </button>
+                                    ))}
                                 </div>
+
+                                <AnimatePresence mode="wait">
+                                    {subTab === 'COURSES' && (
+                                        <motion.div key="courses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                            <CourseCard title="Mastering Spring Boot Microservices" progress={85} instructor="Vamsi Krishna" next="Module 12: K8s Ingress Control" />
+                                            <CourseCard title="React & Next.js Performance Optimization" progress={42} instructor="Sai Kiran" next="Chapter 4: Server Components" />
+                                        </motion.div>
+                                    )}
+
+                                    {subTab === 'LIVE' && (
+                                        <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', borderLeft: '6px solid #ef4444' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                    <span style={{ color: '#ef4444', fontWeight: 900, fontSize: '0.7rem' }}>● BROADCASTING NOW</span>
+                                                </div>
+                                                <h3 style={{ fontWeight: 900 }}>Advanced K8s Deployment Patterns</h3>
+                                                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>Managed by Vamsi Krishna • Starting soon (10:00 AM)</p>
+                                                <button className="btn-quantum" style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}>JOIN STREAM</button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {subTab === 'RECORDINGS' && (
+                                        <motion.div key="recordings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ fontWeight: 900, marginBottom: '5px' }}>Docker Container Security</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Session: 14 MAR 2026 • 1h 45m</div>
+                                                <button style={{ marginTop: '1rem', background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}><Play size={14} /> WATCH AGAIN</button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {subTab === 'ASSIGNMENTS' && (
+                                        <motion.div key="assignments" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                                <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Active Evaluation Protocols</h3>
+                                                <div style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 800 }}>{assignments.length} ASSIGNMENTS TOTAL</div>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                                {assignments.map((a, idx) => {
+                                                    const submission = a.submissions?.find((s: any) => s.studentId === loggedUser?.id);
+                                                    const status = submission ? (submission.status || 'SUBMITTED') : 'PENDING';
+                                                    const color = status === 'ACCEPTED' ? '#10b981' : status === 'REJECTED' ? '#ef4444' : status === 'SUBMITTED' ? '#3b82f6' : '#f59e0b';
+                                                    
+                                                    return (
+                                                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.3s hover', cursor: 'pointer' }} onClick={() => { setSelectedAssignment(a); setIsSubmissionModalOpen(true); }}>
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                                                                    <div style={{ padding: '8px', borderRadius: '10px', background: `${color}15`, color }}>
+                                                                        <FileText size={20} />
+                                                                    </div>
+                                                                    <h4 style={{ fontWeight: 900, fontSize: '1.2rem' }}>{a.title}</h4>
+                                                                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color, background: `${color}15`, padding: '4px 10px', borderRadius: '8px', letterSpacing: '1px' }}>{status}</span>
+                                                                </div>
+                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '12px', opacity: 0.7 }}>{a.description}</p>
+                                                                <div style={{ display: 'flex', gap: '20px', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Star size={14} /> {a.difficulty} LEVEL</span>
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {a.status}</span>
+                                                                </div>
+                                                            </div>
+                                                            <button className="btn-quantum" style={{ padding: '12px 24px', borderRadius: '14px', border: submission ? `1px solid ${color}` : 'none', background: submission ? 'transparent' : 'var(--primary)', color: submission ? color : '#fff' }}>
+                                                                {submission ? 'VIEW STATUS' : 'SUBMIT WORK'}
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+
+                                                {assignments.length === 0 && (
+                                                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>No assignments distributed at this time.</div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </motion.div>
                         )}
 
@@ -94,10 +250,86 @@ export default function StudentDashboard() {
                         )}
                     </div>
                 </div>
+
+                {/* --- SUBMISSION MODAL --- */}
+                <AnimatePresence>
+                    {isSubmissionModalOpen && selectedAssignment && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                            <motion.div initial={{ scale: 0.95, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '800px', padding: '4rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
+                                    <div>
+                                        <h2 style={{ fontSize: '2.2rem', fontWeight: 900 }}>Submission Protocol</h2>
+                                        <p style={{ color: 'var(--text-dim)', fontSize: '1rem', marginTop: '8px' }}>Project Target: {selectedAssignment.title}</p>
+                                    </div>
+                                    <button onClick={() => setIsSubmissionModalOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px', borderRadius: '50%', cursor: 'pointer' }}><X size={20} /></button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                                    <div>
+                                        <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.5rem', textTransform: 'uppercase', fontSize: '0.8rem' }}>Instructions & Specs</h5>
+                                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-dim)', lineHeight: 1.6, fontSize: '0.95rem', marginBottom: '2.5rem' }}>
+                                            {selectedAssignment.instructions || "No specific instructions provided. Follow general submission guidelines."}
+                                        </div>
+
+                                        <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.2rem', textTransform: 'uppercase', fontSize: '0.8rem' }}>Academic Weight</h5>
+                                        <div style={{ display: 'flex', gap: '15px' }}>
+                                            <div style={{ flex: 1, padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '18px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>{selectedAssignment.totalMarks}</div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 800 }}>MAX POINTS</div>
+                                            </div>
+                                            <div style={{ flex: 1, padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '18px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>{new Date(selectedAssignment.dueDate).toLocaleDateString('en-US', { day: '2-digit', month: 'short' })}</div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 800 }}>DUE DATE</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ background: 'rgba(124, 58, 237, 0.05)', padding: '2.5rem', borderRadius: '32px', border: '1px solid rgba(124, 58, 237, 0.2)' }}>
+                                        {selectedAssignment.submissions?.find((s: any) => s.studentId === loggedUser?.id) ? (
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ width: '64px', height: '64px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                                    <CheckCircle size={32} color="#000" />
+                                                </div>
+                                                <h3 style={{ fontWeight: 900, marginBottom: '1rem' }}>Success Synchronized</h3>
+                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: 1.6 }}>Your work has been uploaded and is awaiting instructor audit.</p>
+                                                <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '16px', textAlign: 'left' }}>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#10b981', marginBottom: '8px' }}>LATEST FEEDBACK</div>
+                                                    <p style={{ fontSize: '0.8rem', color: '#fff' }}>{selectedAssignment.submissions?.find((s: any) => s.studentId === loggedUser?.id)?.feedback || "Awaiting grading..."}</p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <form onSubmit={handleSubmitAssignment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#fff' }}>ATTACH ARTIFACT URL</label>
+                                                <input value={submissionForm.url} onChange={(e) => setSubmissionForm({...submissionForm, url: e.target.value})} placeholder="https://github.com/your-repo" style={inputStyle} required />
+                                                
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#fff' }}>DEVELOPER NOTES</label>
+                                                <textarea value={submissionForm.remarks} onChange={(e) => setSubmissionForm({...submissionForm, remarks: e.target.value})} placeholder="Notes for the instructor..." rows={4} style={{...inputStyle, resize: 'none'}} />
+                                                
+                                                <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '100px', marginTop: '1rem' }}>UPLOAD PROTOCOL</button>
+                                            </form>
+                                        )}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </DashboardLayout>
     );
 }
+
+const inputStyle = {
+    padding: '14px 18px',
+    borderRadius: '16px',
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    color: '#fff',
+    outline: 'none',
+    width: '100%',
+    fontFamily: 'inherit',
+    fontSize: '0.95rem'
+};
 
 function ProgressStatCard({ icon, title, value, trend, sub, color }: any) {
     return (
