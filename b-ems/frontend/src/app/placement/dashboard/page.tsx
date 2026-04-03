@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
 import { 
@@ -11,11 +13,52 @@ import {
   Users, 
   TrendingUp, 
   Building2,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+interface PlacementStats {
+  totalStudents: number;
+  eligibleStudents: number;
+  placedStudents: number;
+  totalCompanies: number;
+  avgPackage: string;
+}
+
 const PlacementDashboard = () => {
+  const [stats, setStats] = useState<PlacementStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/placement/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.data.success) {
+          setStats(res.data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching placement stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) fetchStats();
+  }, [token]);
+
+  if (loading) {
+      return (
+          <DashboardLayout>
+              <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-indigo-600" size={40} /></div>
+          </DashboardLayout>
+      );
+  }
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-8">
@@ -34,10 +77,10 @@ const PlacementDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard title="Eligible Students" value="156" icon={Users} color="indigo" />
-          <StatsCard title="Hiring Partners" value="24" icon={Building2} color="purple" trend="+3 New" />
-          <StatsCard title="Placed This Month" value="18" icon={CheckCircle2} color="emerald" />
-          <StatsCard title="Avg. Package" value="8.5 LPA" icon={TrendingUp} color="cyan" />
+          <StatsCard title="Eligible Students" value={stats?.eligibleStudents || 0} icon={Users} color="indigo" />
+          <StatsCard title="Hiring Partners" value={stats?.totalCompanies || 0} icon={Building2} color="purple" trend="+3 New" />
+          <StatsCard title="Placed Students" value={stats?.placedStudents || 0} icon={CheckCircle2} color="emerald" />
+          <StatsCard title="Avg. Package" value={stats?.avgPackage || 'N/A'} icon={TrendingUp} color="cyan" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

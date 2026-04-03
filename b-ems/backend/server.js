@@ -31,7 +31,12 @@ app.get('/', (req, res) => {
 // Import Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/leads', require('./routes/leadRoutes'));
-// app.use('/api/employees', require('./routes/employeeRoutes'));
+app.use('/api/employees', require('./routes/employeeRoutes'));
+app.use('/api/campaigns', require('./routes/campaignRoutes'));
+app.use('/api/placement', require('./routes/placementRoutes'));
+
+
+
 
 // Socket.io connection
 io.on('connection', (socket) => {

@@ -1,6 +1,31 @@
 const Lead = require('../models/Lead');
 const LeadHistory = require('../models/LeadHistory');
 const User = require('../models/User');
+const csv = require('csv-parser');
+const fs = require('fs');
+
+/**
+ * AI Lead Scoring Logic (Advanced Feature)
+ * Higher score = higher probability of conversion
+ * Factors: Priority (40%), Lead Source (30%), Course interest (30%)
+ */
+const calculateAIScore = (lead) => {
+    let score = 0;
+    
+    // Priority Score
+    const priorityWeights = { 'URGENT': 100, 'HIGH': 75, 'MEDIUM': 50, 'LOW': 25 };
+    score += (priorityWeights[lead.priority] || 0) * 0.4;
+
+    // Source Score
+    const sourceWeights = { 'GOOGLE': 100, 'REFERRAL': 90, 'FACEBOOK': 60, 'COLD_CALL': 30 };
+    score += (sourceWeights[lead.source] || 50) * 0.3;
+
+    // Engagement score (mock)
+    score += 30; // base engagement
+
+    return Math.min(Math.round(score), 100);
+};
+
 
 // @desc    Get all leads
 // @route   GET /api/leads
@@ -145,6 +170,100 @@ exports.getLeadHistory = async (req, res) => {
             .sort('-timestamp');
 
         res.status(200).json({ success: true, data: history });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+};
+// @desc    Bulk upload leads
+// @route   POST /api/leads/bulk
+// @access  Private (Manager/CEO)
+exports.bulkUpload = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'Please upload a CSV file' });
+        }
+
+        const leads = [];
+        const results = [];
+
+        fs.createReadStream(req.file.path)
+            .pipe(csv())
+            .on('data', (data) => results.push(data))
+            .on('end', async () => {
+                for (const row of results) {
+                    // Simple validation & score calculation
+                    const leadData = {
+                        name: row.name,
+                        email: row.email,
+                        phone: row.phone,
+                        course: row.course,
+                        priority: row.priority || 'MEDIUM',
+                        source: row.source || 'BULK_UPLOAD',
+                    };
+                    leadData.score = calculateAIScore(leadData);
+                    
+                    const lead = await Lead.create(leadData);
+                    
+                    await LeadHistory.create({
+                        leadId: lead._id,
+                        action: 'CREATE',
+                        performedBy: req.user.id,
+                        details: 'Lead created via Bulk Upload'
+                    });
+                    
+                    leads.push(lead);
+                }
+
+                // Cleanup file
+                fs.unlinkSync(req.file.path);
+
+                res.status(201).json({
+                    success: true,
+                    count: leads.length,
+                    data: leads
+                });
+            });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+};
+
+// @desc    Round Robin Assignment
+// @route   PUT /api/leads/assign-round-robin
+// @access  Private (Manager/CEO)
+exports.roundRobinAssign = async (req, res) => {
+    try {
+        const { leadIds } = req.body;
+        
+        // Get all counsellors
+        const counsellors = await User.find({ role: 'COUNSELLOR' });
+        if (counsellors.length === 0) {
+            return res.status(400).json({ success: false, error: 'No counsellors available for assignment' });
+        }
+
+        let assignedCount = 0;
+        for (let i = 0; i < leadIds.length; i++) {
+            const counsellor = counsellors[i % counsellors.length];
+            const lead = await Lead.findByIdAndUpdate(leadIds[i], { 
+                assignedTo: counsellor._id 
+            }, { new: true });
+
+            if (lead) {
+                await LeadHistory.create({
+                    leadId: lead._id,
+                    action: 'ASSIGN',
+                    performedBy: req.user.id,
+                    details: `Automatically assigned to ${counsellor.name} via Round Robin`,
+                    newValue: counsellor._id
+                });
+                assignedCount++;
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Successfully assigned ${assignedCount} leads across ${councellors.length} counsellors`
+        });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

@@ -54,7 +54,9 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads }) => {
             <tr className="bg-slate-50 border-b border-slate-100">
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Lead Details</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Score</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Priority</th>
+
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Course</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Assigned To</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
@@ -86,6 +88,18 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${
+                        (lead.score || 0) > 80 ? 'bg-emerald-100 text-emerald-600' :
+                        (lead.score || 0) > 50 ? 'bg-indigo-100 text-indigo-600' :
+                        'bg-slate-100 text-slate-400'
+                      }`}>
+                        {lead.score || 0}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${priorityColors[lead.priority]}`}>
                       {lead.priority}
                     </span>
