@@ -119,3 +119,4 @@
 2026-04-03T12:04:15.337+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:09:15.336+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:14:15.337+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:19:15.333+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

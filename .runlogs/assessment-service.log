@@ -92,3 +92,4 @@
 2026-04-03T12:04:29.036+05:30  INFO 50283 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:09:29.035+05:30  INFO 50283 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:14:29.035+05:30  INFO 50283 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:19:29.033+05:30  INFO 50283 --- [assessment-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
