@@ -21,8 +21,10 @@ interface Lead {
   status: string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   assignedTo?: { name: string };
+  score?: number;
   createdAt: string;
 }
+
 
 interface LeadTableProps {
   leads: Lead[];
