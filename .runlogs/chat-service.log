@@ -99,3 +99,4 @@
 2026-04-03T12:09:28.924+05:30  INFO 50286 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:14:28.923+05:30  INFO 50286 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:19:28.923+05:30  INFO 50286 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:24:28.922+05:30  INFO 50286 --- [chat-service] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
