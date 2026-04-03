@@ -30,6 +30,20 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/b-ems',
+        destination: 'http://localhost:3001',
+        permanent: false,
+      },
+      {
+         source: '/b-ems/:path*',
+         destination: 'http://localhost:3001/:path*',
+         permanent: false,
+      }
+    ];
+  },
 };
 
 // reload
