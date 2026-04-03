@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import TopBanner from "@/components/TopBanner";
-import StickyMobileCTA from "@/components/StickyMobileCTA";
 import BackToTop from "@/components/BackToTop";
 import { Providers } from "@/components/Providers";
 
@@ -107,7 +106,6 @@ export default function RootLayout({
         <Providers>
           {children}
           <FloatingWhatsApp />
-          <StickyMobileCTA />
           <BackToTop />
         </Providers>
       </body>

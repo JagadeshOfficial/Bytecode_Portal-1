@@ -259,11 +259,15 @@ export default function Login() {
                     </form>
 
                     <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-dim)' }}>
-                        <p>Demo Portals (use <b>Bytecode@1354</b>):</p>
+                        <p>Access Portals (Password: <b>Bytecode@1354</b>):</p>
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>admin@hyd.bytecode.com</span>
-                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>vamsi@example.com</span>
-                            <span style={{ background: 'var(--bg-subtle)', padding: '2px 8px', borderRadius: '4px' }}>java.trainer@bytecode.com</span>
+                            <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900 }}>SUPER ADMIN</span>
+                            <span style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#a855f7', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900 }}>ADMIN</span>
+                            <span style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900 }}>TUTOR</span>
+                            <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900 }}>STUDENT</span>
+                        </div>
+                        <div style={{ marginTop: '10px', fontSize: '0.75rem', opacity: 0.6 }}>
+                            Login restricted to authorized academic roles only.
                         </div>
                     </div>
                 </motion.div>
