@@ -105,3 +105,7 @@
 2026-04-03T12:14:14.526+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:19:14.524+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:24:14.520+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:29:14.525+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:34:14.531+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:39:14.531+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:44:14.533+05:30  INFO 49492 --- [course-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

@@ -101,3 +101,6 @@
 2026-04-03T12:14:29.402+05:30  INFO 50284 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:19:29.401+05:30  INFO 50284 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T12:24:29.401+05:30  INFO 50284 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:29:29.405+05:30  INFO 50284 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:34:29.405+05:30  INFO 50284 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T12:39:29.401+05:30  INFO 50284 --- [academic-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

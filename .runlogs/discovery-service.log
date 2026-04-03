@@ -242,3 +242,21 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-04-03T12:26:00.511+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
 2026-04-03T12:27:00.514+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
 2026-04-03T12:28:00.514+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T12:29:00.197+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-04-03T12:29:00.513+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T12:30:00.518+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T12:31:00.518+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T12:32:00.520+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T12:33:00.522+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T12:34:00.521+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T12:35:00.525+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T12:36:00.526+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T12:37:00.530+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T12:38:00.531+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T12:39:00.531+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T12:40:00.534+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T12:41:00.543+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T12:42:00.540+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T12:43:00.540+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T12:44:00.203+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-04-03T12:44:00.540+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
