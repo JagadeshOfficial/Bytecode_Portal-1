@@ -19,6 +19,7 @@
     <module>exam-service</module>
     <module>academic-service</module>
     <module>finance-service</module>
+    <module>lead-service</module>
   </modules>
 </project>
 

@@ -97,3 +97,6 @@
 2026-04-03T11:24:06.037+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080: registering service...
 2026-04-03T11:24:06.045+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080 - registration status: 204
 2026-04-03T11:24:34.207+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:29:34.205+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:34:34.206+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:39:34.210+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

@@ -83,3 +83,6 @@
 2026-04-03T10:59:42.493+05:30  INFO 50285 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T11:04:42.486+05:30  INFO 50285 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T11:24:29.355+05:30  INFO 50285 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:29:29.354+05:30  INFO 50285 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:34:29.354+05:30  INFO 50285 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:39:29.357+05:30  INFO 50285 --- [exam-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
