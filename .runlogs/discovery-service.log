@@ -260,3 +260,6 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-04-03T12:43:00.540+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
 2026-04-03T12:44:00.203+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
 2026-04-03T12:44:00.540+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T12:45:00.544+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T12:46:00.544+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T12:47:00.546+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
