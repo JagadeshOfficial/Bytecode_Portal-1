@@ -80,3 +80,20 @@
 2026-04-03T10:07:18.609+05:30  INFO 50433 --- [api-gateway] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8080
 2026-04-03T10:07:18.625+05:30  INFO 50433 --- [api-gateway] [           main] c.b.gateway.ApiGatewayApplication        : Started ApiGatewayApplication in 1.49 seconds (process running for 1.661)
 2026-04-03T10:07:58.150+05:30 ERROR 50433 --- [api-gateway] [ctor-http-nio-2] i.n.r.d.DnsServerAddressStreamProviders  : Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+2026-04-03T10:12:18.335+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:17:18.330+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:22:18.325+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:27:18.361+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:35:18.315+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080 - Re-registering apps/API-GATEWAY
+2026-04-03T10:35:18.315+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080: registering service...
+2026-04-03T10:35:18.320+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080 - registration status: 204
+2026-04-03T10:39:47.341+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:44:47.333+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:49:47.330+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:54:47.337+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:59:47.348+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:04:47.341+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:24:06.036+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080 - Re-registering apps/API-GATEWAY
+2026-04-03T11:24:06.037+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080: registering service...
+2026-04-03T11:24:06.045+05:30  INFO 50433 --- [api-gateway] [beatExecutor-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/192.168.0.159:api-gateway:8080 - registration status: 204
+2026-04-03T11:24:34.207+05:30  INFO 50433 --- [api-gateway] [rap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

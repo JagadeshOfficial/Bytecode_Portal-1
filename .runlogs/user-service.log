@@ -98,3 +98,14 @@
 2026-04-03T10:07:29.644+05:30  INFO 49494 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Application version is -1: false
 2026-04-03T10:07:29.644+05:30  INFO 49494 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
 2026-04-03T10:07:29.673+05:30  INFO 49494 --- [user-service] [freshExecutor-0] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-04-03T10:11:59.476+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:16:59.472+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:21:59.471+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:26:59.500+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:39:28.489+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:44:28.477+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:49:28.472+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:54:28.469+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:59:28.487+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:04:28.482+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:24:15.345+05:30  INFO 49494 --- [user-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

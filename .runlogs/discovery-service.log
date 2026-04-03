@@ -100,3 +100,81 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-04-03T10:08:44.395+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
 2026-04-03T10:09:44.396+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
 2026-04-03T10:10:44.397+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:11:44.398+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:12:44.399+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:13:44.402+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T10:14:44.404+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:15:44.404+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:16:44.404+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:17:44.405+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:18:44.405+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:19:44.408+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:20:44.408+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:21:44.365+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-04-03T10:21:44.411+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 6ms
+2026-04-03T10:22:44.412+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:23:44.418+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 7ms
+2026-04-03T10:24:44.441+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-04-03T10:25:44.450+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:26:44.449+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:35:13.440+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 9ms
+2026-04-03T10:35:13.442+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Evicting 1 items (expired=1, evictionLimit=2)
+2026-04-03T10:35:13.443+05:30  WARN 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for API-GATEWAY/192.168.0.159:api-gateway:8080
+2026-04-03T10:35:13.452+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance API-GATEWAY/192.168.0.159:api-gateway:8080 (replication=false)
+2026-04-03T10:35:18.240+05:30  WARN 49221 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: API-GATEWAY - 192.168.0.159:api-gateway:8080
+2026-04-03T10:35:18.241+05:30  WARN 49221 --- [discovery-service] [nio-8761-exec-6] c.n.eureka.resources.InstanceResource    : Not Found (Renew): API-GATEWAY - 192.168.0.159:api-gateway:8080
+2026-04-03T10:35:18.319+05:30  INFO 49221 --- [discovery-service] [nio-8761-exec-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.0.159:api-gateway:8080 with status UP (replication=false)
+2026-04-03T10:35:18.827+05:30  INFO 49221 --- [discovery-service] [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.0.159:api-gateway:8080 with status UP (replication=true)
+2026-04-03T10:36:13.446+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:37:13.447+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:38:13.447+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:39:13.448+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:40:13.450+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 11ms
+2026-04-03T10:41:13.451+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:42:13.452+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:43:13.451+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:44:13.340+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-04-03T10:44:13.453+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:45:13.456+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:46:13.460+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T10:47:13.461+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:48:13.461+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:49:13.462+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:50:13.462+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:51:13.464+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:52:13.464+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:53:13.464+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:54:13.469+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T10:55:13.491+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T10:56:13.490+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-04-03T10:57:13.491+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T10:58:13.493+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T10:59:13.339+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-04-03T10:59:13.494+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T11:00:13.495+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T11:01:13.498+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T11:02:13.499+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T11:03:13.501+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T11:04:13.504+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T11:05:13.506+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T11:06:13.508+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T11:07:13.510+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T11:08:13.514+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T11:24:00.377+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 1ms
+2026-04-03T11:24:00.380+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Evicting 2 items (expired=6, evictionLimit=2)
+2026-04-03T11:24:00.381+05:30  WARN 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for API-GATEWAY/192.168.0.159:api-gateway:8080
+2026-04-03T11:24:00.382+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance API-GATEWAY/192.168.0.159:api-gateway:8080 (replication=false)
+2026-04-03T11:24:00.382+05:30  WARN 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: expired lease for CHAT-SERVICE/192.168.0.159:chat-service:8085
+2026-04-03T11:24:00.382+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Cancelled instance CHAT-SERVICE/192.168.0.159:chat-service:8085 (replication=false)
+2026-04-03T11:24:00.762+05:30  WARN 49221 --- [discovery-service] [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: CHAT-SERVICE - 192.168.0.159:chat-service:8085
+2026-04-03T11:24:00.762+05:30  WARN 49221 --- [discovery-service] [nio-8761-exec-4] c.n.eureka.resources.InstanceResource    : Not Found (Renew): CHAT-SERVICE - 192.168.0.159:chat-service:8085
+2026-04-03T11:24:00.793+05:30  INFO 49221 --- [discovery-service] [nio-8761-exec-2] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CHAT-SERVICE/192.168.0.159:chat-service:8085 with status UP (replication=false)
+2026-04-03T11:24:01.158+05:30  INFO 49221 --- [discovery-service] [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CHAT-SERVICE/192.168.0.159:chat-service:8085 with status UP (replication=true)
+2026-04-03T11:24:06.033+05:30  WARN 49221 --- [discovery-service] [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : DS: Registry: lease doesn't exist, registering resource: API-GATEWAY - 192.168.0.159:api-gateway:8080
+2026-04-03T11:24:06.033+05:30  WARN 49221 --- [discovery-service] [nio-8761-exec-6] c.n.eureka.resources.InstanceResource    : Not Found (Renew): API-GATEWAY - 192.168.0.159:api-gateway:8080
+2026-04-03T11:24:06.045+05:30  INFO 49221 --- [discovery-service] [io-8761-exec-11] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.0.159:api-gateway:8080 with status UP (replication=false)
+2026-04-03T11:24:06.556+05:30  INFO 49221 --- [discovery-service] [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.0.159:api-gateway:8080 with status UP (replication=true)
+2026-04-03T11:25:00.386+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T11:26:00.389+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T11:27:00.389+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms
+2026-04-03T11:28:00.390+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms

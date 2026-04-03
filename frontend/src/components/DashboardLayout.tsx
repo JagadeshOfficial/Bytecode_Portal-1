@@ -108,8 +108,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                             const data = await res.json();
                             const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
                             setUserName(actualName);
-                            // Update local storage so it stays fresh
-                            localStorage.setItem('user', JSON.stringify({ ...parsed, name: actualName, email: data.email }));
+                            // Update local storage so it stays fresh with FULL data
+                            const updatedUser = { ...parsed, ...data, name: actualName };
+                            localStorage.setItem('user', JSON.stringify(updatedUser));
                             setProfileForm({ 
                                 fullName: actualName, 
                                 email: data.email || '', 
@@ -120,7 +121,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                                 userStatus: data.userStatus || '',
                                 profileImage: data.profileImage || ''
                             });
-                            setLoggedUser({ ...parsed, ...data });
+                            setLoggedUser(updatedUser);
                         } else {
                             setUserName(parsed.name || parsed.fullName || parsed.email || 'User');
                         }
@@ -131,6 +132,17 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     setUserName(parsed.name || 'User');
                 }
             }
+        }
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfileForm({ ...profileForm, profileImage: reader.result as string });
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -227,12 +239,12 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     
                     <div className={styles.userProfile} onClick={() => setIsProfileModalOpen(true)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <span>{userName}</span>
-                        <div className={styles.avatar} style={{ 
-                            background: loggedUser?.profileImage ? `url(${loggedUser.profileImage}) center/cover` : 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                            border: '2px solid rgba(255,255,255,0.2)',
-                            boxShadow: '0 0 15px rgba(139, 92, 246, 0.4)'
-                         }}>
-                            {!loggedUser?.profileImage && userName.charAt(0).toUpperCase()}
+                        <div className={styles.avatar}>
+                            {loggedUser?.profileImage ? (
+                                <img src={loggedUser.profileImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                            ) : (
+                                <span>{userName.charAt(0).toUpperCase()}</span>
+                            )}
                         </div>
                     </div>
                 </header>
@@ -259,27 +271,36 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                             <div style={{ background: 'rgba(0,0,0,0.4)', padding: '3rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div style={{ 
                                     width: '160px', height: '160px', borderRadius: '50%', 
-                                    background: profileForm.profileImage ? `url(${profileForm.profileImage}) center/cover` : 'linear-gradient(135deg, var(--primary), var(--secondary))',
                                     border: '4px solid rgba(255,255,255,0.1)',
                                     boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.1)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: profileForm.profileImage ? '0' : '4rem', fontWeight: 900,
+                                    overflow: 'hidden',
                                     marginBottom: '2rem'
                                 }}>
-                                    {!profileForm.profileImage && userName.charAt(0).toUpperCase()}
+                                    {profileForm.profileImage ? (
+                                        <img src={profileForm.profileImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <span style={{ fontSize: '4rem', fontWeight: 900 }}>{userName.charAt(0).toUpperCase()}</span>
+                                    )}
                                 </div>
                                 
                                 <h3 style={{ fontSize: '1.4rem', fontWeight: 900, textAlign: 'center', marginBottom: '0.5rem', background: 'linear-gradient(90deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{userName}</h3>
                                 <p style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '2.5rem' }}>{roleDisplay}</p>
                                 
                                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', textAlign: 'center' }}>AVATAR URL</label>
                                     <input 
-                                        value={profileForm.profileImage} 
-                                        onChange={e => setProfileForm({...profileForm, profileImage: e.target.value})} 
-                                        placeholder="https://..."
-                                        style={{ padding: '12px', borderRadius: '12px', background: 'rgba(0,0,0,0.3)', border: '1px dashed rgba(255,255,255,0.2)', color: 'var(--text-dim)', fontSize: '0.85rem', outline: 'none', textAlign: 'center' }} 
+                                        type="file" 
+                                        id="profileImageInput" 
+                                        accept="image/*" 
+                                        onChange={handleImageUpload} 
+                                        style={{ display: 'none' }} 
                                     />
+                                    <button 
+                                        onClick={() => document.getElementById('profileImageInput')?.click()}
+                                        style={{ padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                                    >
+                                        UPLOAD PROFILE IMAGE
+                                    </button>
                                 </div>
                             </div>
 

@@ -71,3 +71,14 @@
 2026-04-03T10:07:12.684+05:30  INFO 50281 --- [finance-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8087
 2026-04-03T10:07:12.714+05:30  INFO 50281 --- [finance-service] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_FINANCE-SERVICE/192.168.0.159:finance-service:8087 - registration status: 204
 2026-04-03T10:07:12.736+05:30  INFO 50281 --- [finance-service] [           main] c.b.finance.FinanceServiceApplication    : Started FinanceServiceApplication in 3.753 seconds (process running for 4.087)
+2026-04-03T10:12:12.341+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:17:12.334+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:22:12.331+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:27:12.364+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:39:41.346+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:44:41.338+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:49:41.336+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:54:41.342+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T10:59:41.353+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:04:41.352+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:24:28.218+05:30  INFO 50281 --- [finance-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
