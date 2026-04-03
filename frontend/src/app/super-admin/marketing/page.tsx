@@ -7,7 +7,7 @@ import {
     TrendingUp, Plus, Search, Edit2, Trash2, 
     Instagram, Facebook, Linkedin, Youtube,
     BarChart3, Target, MousePointer2, Share2,
-    Calendar, Play, MessageCircle
+    Calendar, Play, MessageCircle, MoreHorizontal
 } from 'lucide-react';
 
 export default function MarketingManagement() {

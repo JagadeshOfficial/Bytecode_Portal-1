@@ -85,3 +85,4 @@
 2026-04-03T11:29:28.991+05:30  INFO 50282 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T11:34:28.991+05:30  INFO 50282 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
 2026-04-03T11:39:28.992+05:30  INFO 50282 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-04-03T11:44:28.988+05:30  INFO 50282 --- [placement-service] [trap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration

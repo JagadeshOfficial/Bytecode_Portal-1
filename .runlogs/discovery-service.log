@@ -193,3 +193,8 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-04-03T11:40:00.420+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
 2026-04-03T11:41:00.428+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
 2026-04-03T11:42:00.426+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T11:43:00.428+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 3ms
+2026-04-03T11:44:00.189+05:30  INFO 49221 --- [discovery-service] [hresholdUpdater] c.n.e.r.PeerAwareInstanceRegistryImpl    : Current renewal threshold is : 17
+2026-04-03T11:44:00.430+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 4ms
+2026-04-03T11:45:00.435+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 5ms
+2026-04-03T11:46:00.435+05:30  INFO 49221 --- [discovery-service] [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 2ms

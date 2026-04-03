@@ -87,6 +87,23 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
         phoneNumber: '', branch: '', department: '', userStatus: '', profileImage: ''
     });
 
+    // --- SIDEBAR SCROLL PERSISTENCE ---
+    useEffect(() => {
+        const sidebar = document.getElementById('sidebar-scroll-container');
+        if (sidebar) {
+            const savedScroll = sessionStorage.getItem('sidebar-scroll');
+            if (savedScroll) {
+                sidebar.scrollTop = parseInt(savedScroll, 10);
+            }
+
+            const handleScroll = () => {
+                sessionStorage.setItem('sidebar-scroll', sidebar.scrollTop.toString());
+            };
+            sidebar.addEventListener('scroll', handleScroll);
+            return () => sidebar.removeEventListener('scroll', handleScroll);
+        }
+    }, [pathname]); // Re-run on pathname change to ensure it's still there
+
     const menuItems = MENUS[role] || [];
     const roleDisplay = role.replace(/_/g, ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
@@ -197,13 +214,14 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     </button>
                 </div>
                 
-                <div className={styles.sidebarContent}>
+                <div id="sidebar-scroll-container" className={styles.sidebarContent}>
                     <ul className={styles.menu}>
                         {menuItems.map((item, index) => (
                             <li key={item.href} className={styles.menuItem}>
                                 {item.section && <div className={styles.menuSection}>{item.section}</div>}
                                 <Link
                                     href={item.href}
+                                    scroll={false}
                                     className={`${styles.menuLink} ${pathname === item.href ? styles.activeLink : ''}`}
                                     onClick={() => setIsSidebarOpen(false)}
                                 >
