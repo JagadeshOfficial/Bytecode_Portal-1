@@ -27,6 +27,9 @@ app.use(cors());
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/courses', require('./routes/courseRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/academic', require('./routes/academicRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 app.use(require('./middleware/errorMiddleware'));
 

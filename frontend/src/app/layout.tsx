@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Outfit, Inter } from "next/font/google";
 import "./globals.css";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+
 import TopBanner from "@/components/TopBanner";
 import BackToTop from "@/components/BackToTop";
 import { Providers } from "@/components/Providers";
@@ -105,7 +105,7 @@ export default function RootLayout({
         <TopBanner />
         <Providers>
           {children}
-          <FloatingWhatsApp />
+
           <BackToTop />
         </Providers>
       </body>

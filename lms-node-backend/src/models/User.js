@@ -30,7 +30,15 @@ UserSchema.pre('save', async function(next) {
 
 // Method to compare passwords
 UserSchema.methods.matchPassword = async function(enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
+    console.log(`Checking password for ${this.email}. Stored: ${this.password ? 'YES' : 'NO'}`);
+    if (this.password && !this.password.startsWith('$2')) {
+        const isMatch = enteredPassword === this.password;
+        console.log(`Plain text match: ${isMatch}`);
+        return isMatch;
+    }
+    const isBcryptMatch = await bcrypt.compare(enteredPassword, this.password);
+    console.log(`Bcrypt match: ${isBcryptMatch}`);
+    return isBcryptMatch;
 };
 
 module.exports = mongoose.model('User', UserSchema);

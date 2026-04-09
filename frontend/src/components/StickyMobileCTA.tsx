@@ -67,33 +67,6 @@ export default function StickyMobileCTA() {
                         <Phone size={20} />
                         Call Now
                     </a>
-
-                    {/* Divider */}
-                    <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-
-                    {/* WhatsApp */}
-                    <a
-                        href={WA_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '10px',
-                            padding: '1rem',
-                            background: '#25D366',
-                            color: 'white',
-                            fontWeight: 800,
-                            fontSize: '1rem',
-                            textDecoration: 'none',
-                            minHeight: '56px',
-                        }}
-                    >
-                        <MessageCircle size={20} />
-                        WhatsApp
-                    </a>
                 </motion.div>
             )}
         </AnimatePresence>

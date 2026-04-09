@@ -36,19 +36,29 @@ export default function SuperAdminHome() {
     const [metrics, setMetrics] = useState({
         totalStudents: 0,
         activeBatches: 0,
-        trainers: 0
+        trainers: 0,
+        revenue: 0,
+        placementRate: 92.4
     });
+    const [conversionData, setConversionData] = useState<any[]>([
+        { name: 'New Leads', value: 850, fill: '#8b5cf6' },
+        { name: 'Interested', value: 420, fill: '#3b82f6' },
+        { name: 'Admissions', value: 310, fill: '#10b981' },
+    ]);
 
     useEffect(() => {
         setIsMounted(true);
-        fetch('http://localhost:8080/api/users')
+        fetch('http://localhost:8080/api/admin/stats')
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data)) {
-                    const students = data.filter((u: any) => u.role === 'STUDENT').length;
-                    const trainers = data.filter((u: any) => u.role === 'TRAINER').length;
-                    setMetrics(prev => ({ ...prev, totalStudents: students, trainers }));
-                }
+                setMetrics({
+                    totalStudents: data.totalStudents,
+                    activeBatches: data.activeBatches,
+                    trainers: data.totalTrainers,
+                    revenue: data.totalRevenue,
+                    placementRate: data.placementRate
+                });
+                if (data.conversionData) setConversionData(data.conversionData);
             })
             .catch(console.error);
 
@@ -70,9 +80,9 @@ export default function SuperAdminHome() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
                     <HomeMetricCard icon={<Users />} title="Total Students" value={metrics.totalStudents} trend="Active Students" color="#8b5cf6" />
                     <HomeMetricCard icon={<Target />} title="Conversion" value="36.4%" trend="Good" color="#3b82f6" />
-                    <HomeMetricCard icon={<DollarSign />} title="Monthly Income" value="$142,500" trend="22% Growth" color="#10b981" />
+                    <HomeMetricCard icon={<DollarSign />} title="Monthly Income" value={`$${(metrics.revenue || 0).toLocaleString()}`} trend="Real-time" color="#10b981" />
                     <HomeMetricCard icon={<Layers />} title="Active Batches" value={metrics.activeBatches} sub="Current Focus" color="#f59e0b" />
-                    <HomeMetricCard icon={<Award />} title="Job Placements" value="92.4%" sub="Industry Best" color="#ec4899" />
+                    <HomeMetricCard icon={<Award />} title="Job Placements" value={`${metrics.placementRate}%`} sub="Industry Best" color="#ec4899" />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '1.5rem', flexWrap: 'wrap' }}>
@@ -110,9 +120,21 @@ export default function SuperAdminHome() {
                             <div style={{ height: 220, width: '100%' }}>
                                 {isMounted && (
                                     <ResponsiveContainer>
-                                        <BarChart data={conversionData} layout="vertical">
+                                        <BarChart 
+                                            data={conversionData} 
+                                            layout="vertical" 
+                                            margin={{ left: 30, right: 30, top: 10, bottom: 10 }}
+                                        >
                                             <XAxis type="number" hide />
-                                            <YAxis dataKey="name" type="category" stroke="var(--text-dim)" axisLine={false} tickLine={false} />
+                                            <YAxis 
+                                                dataKey="name" 
+                                                type="category" 
+                                                stroke="var(--text-dim)" 
+                                                axisLine={false} 
+                                                tickLine={false} 
+                                                width={100}
+                                                style={{ fontSize: '0.8rem', fontWeight: 600 }}
+                                            />
                                             <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#1e293b', border: 'none' }} />
                                             <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={25}>
                                                 {conversionData.map((e, i) => <Cell key={i} fill={e.fill} />)}

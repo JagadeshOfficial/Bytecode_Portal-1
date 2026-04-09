@@ -29,8 +29,24 @@ const placementStats = [
 
 export default function AdminDashboard() {
     const [isMounted, setIsMounted] = useState(false);
-    const [stats, setStats] = useState({ totalUsers: 0, activeCourses: 12, placements: 92 });
+    const [stats, setStats] = useState({ 
+        totalUsers: 0, 
+        activeCourses: 0, 
+        placements: 0,
+        revenue: 0,
+        trainers: 0,
+        jobListings: 0
+    });
     const [adminName, setAdminName] = useState('Admin');
+    const [applications, setApplications] = useState<any[]>([]);
+    const [revenueTrend, setRevenueTrend] = useState<any[]>([
+        { month: 'Jan', revenue: 45000 },
+        { month: 'Feb', revenue: 52000 },
+        { month: 'Mar', revenue: 48000 },
+        { month: 'Apr', revenue: 61000 },
+        { month: 'May', revenue: 55000 },
+        { month: 'Jun', revenue: 72000 },
+    ]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -40,17 +56,29 @@ export default function AdminDashboard() {
             setAdminName(parsed.name || 'Admin');
         }
 
-        // Fetch metrics from backend services
-        Promise.all([
-            fetch('http://localhost:8080/api/users').then(res => res.json()),
-            fetch('http://localhost:8080/api/courses').then(res => res.json()).catch(() => []),
-        ]).then(([users, courses]) => {
-            setStats({
-                totalUsers: users.length || 0,
-                activeCourses: courses.length || 12,
-                placements: 92
-            });
-        }).catch(err => console.error('Dashboard sync error:', err));
+        // Fetch metrics from backend
+        fetch('http://localhost:8080/api/admin/stats')
+            .then(res => res.json())
+            .then(data => {
+                setStats({
+                    totalUsers: data.totalStudents || 0,
+                    activeCourses: data.activeCourses || 0,
+                    placements: data.placementRate || 0,
+                    revenue: data.totalRevenue || 0,
+                    trainers: data.totalTrainers || 0,
+                    jobListings: data.jobListings || 0
+                });
+                if (data.revenueTrend) setRevenueTrend(data.revenueTrend);
+            })
+            .catch(err => console.error('Stats fetch error:', err));
+
+        // Fetch applications
+        fetch('http://localhost:8080/api/admin/applications')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setApplications(data);
+            })
+            .catch(err => console.error('Applications fetch error:', err));
     }, []);
 
     const containerVariants = {
@@ -81,10 +109,10 @@ export default function AdminDashboard() {
                     gap: '1.5rem',
                     marginBottom: '2.5rem'
                 }}>
-                    <MetricCard icon={<Users />} title="Total Enrollment" value={stats.totalUsers} trend="+12.5% vs Prev Month" color="#3b82f6" />
-                    <MetricCard icon={<DollarSign />} title="Monthly Revenue" value="$72,400" trend="On track for $80k" color="#10b981" />
-                    <MetricCard icon={<BookOpen />} title="Active Courses" value={stats.activeCourses} trend="4 New Modules added" color="#8b5cf6" />
-                    <MetricCard icon={<Award />} title="Placement Rate" value={`${stats.placements}%`} trend="Top 1% in region" color="#f59e0b" />
+                    <MetricCard icon={<Users />} title="Total Enrollment" value={stats.totalUsers} trend="Active Students" color="#3b82f6" />
+                    <MetricCard icon={<DollarSign />} title="Monthly Revenue" value={`$${(stats.revenue || 0).toLocaleString()}`} trend="Real-time Revenue" color="#10b981" />
+                    <MetricCard icon={<BookOpen />} title="Active Courses" value={stats.activeCourses} trend="Current Modules" color="#8b5cf6" />
+                    <MetricCard icon={<Award />} title="Placement Rate" value={`${stats.placements}%`} trend="Overall success" color="#f59e0b" />
                 </div>
 
                 {/* --- ANALYTICS SECTION --- */}
@@ -103,7 +131,7 @@ export default function AdminDashboard() {
                         <div style={{ height: 350, width: '100%' }}>
                             {isMounted && (
                                 <ResponsiveContainer>
-                                    <AreaChart data={revenueData}>
+                                    <AreaChart data={revenueTrend}>
                                         <defs>
                                             <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
@@ -175,9 +203,16 @@ export default function AdminDashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            <ApplicationRow name="Karthik R." course="Masters in AI" date="2 Hours Ago" status="PENDING" statusColor="#f59e0b" />
-                            <ApplicationRow name="Anjali Sharma" course="Full Stack Pro" date="5 Hours Ago" status="INTERVIEW" statusColor="#3b82f6" />
-                            <ApplicationRow name="Siddharth M." course="AWS Cloud Eng" date="Today" status="VERIFIED" statusColor="#10b981" />
+                            {applications.map((app: any) => (
+                                <ApplicationRow 
+                                    key={app.id} 
+                                    name={app.name} 
+                                    course={app.course} 
+                                    date={app.date} 
+                                    status={app.status} 
+                                    statusColor={app.statusColor} 
+                                />
+                            ))}
                         </tbody>
                     </table>
                 </div>
