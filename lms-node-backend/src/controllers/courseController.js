@@ -1,12 +1,14 @@
-const Course = require('../models/Course');
+const mongoose = require('mongoose');
 
-// @desc    Get all courses
-// @route   GET /api/courses
-// @access  Public
 exports.getCourses = async (req, res) => {
     try {
-        const courses = await Course.find();
-        res.status(200).json({ success: true, count: courses.length, data: courses });
+        const db = mongoose.connection.useDb('course-db');
+        const courses = await db.collection('courses').find().toArray();
+        const mappedCourses = courses.map(c => ({
+            ...c,
+            id: c._id.toString()
+        }));
+        res.status(200).json(mappedCourses);
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

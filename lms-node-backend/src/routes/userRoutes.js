@@ -8,7 +8,11 @@ const User = require('../models/User');
 router.get('/', async (req, res) => {
     try {
         const users = await User.find();
-        res.json(users);
+        const mappedUsers = users.map(u => ({
+            ...u.toObject(),
+            id: u._id.toString()
+        }));
+        res.json(mappedUsers);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

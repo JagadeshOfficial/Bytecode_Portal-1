@@ -6,7 +6,7 @@ const FeeRecord = require('../models/FeeRecord');
 exports.getFeeRecords = async (req, res) => {
     try {
         const records = await FeeRecord.find();
-        res.status(200).json({ success: true, count: records.length, data: records });
+        res.status(200).json(records);
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

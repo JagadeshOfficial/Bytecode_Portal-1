@@ -1127,8 +1127,8 @@ export default function AcademicHub() {
                                     <div style={{ display: 'flex', gap: '1rem' }}>
                                         <select value={newBatch.trainerId} onChange={(e) => setNewBatch({...newBatch, trainerId: e.target.value})} style={inputStyle} required>
                                             <option value="">Select Trainer / Admin</option>
-                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map(u => (
-                                                <option key={u.id} value={u.id}>{u.fullName}</option>
+                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map((u, idx) => (
+                                                <option key={u.id || idx} value={u.id}>{u.fullName}</option>
                                             ))}
                                         </select>
                                         <select value={newBatch.mode} onChange={(e) => setNewBatch({...newBatch, mode: e.target.value})} style={inputStyle}>
@@ -1171,8 +1171,8 @@ export default function AcademicHub() {
                                     <div style={{ display: 'flex', gap: '1rem' }}>
                                         <select value={editBatchData.trainerId || ''} onChange={(e) => setEditBatchData({...editBatchData, trainerId: e.target.value})} style={inputStyle} required>
                                             <option value="">Select Trainer / Admin</option>
-                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map(u => (
-                                                <option key={u.id} value={u.id}>{u.fullName}</option>
+                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map((u, idx) => (
+                                                <option key={u.id || idx} value={u.id}>{u.fullName}</option>
                                             ))}
                                         </select>
                                         <select value={editBatchData.mode || 'ONLINE'} onChange={(e) => setEditBatchData({...editBatchData, mode: e.target.value})} style={inputStyle}>
@@ -1479,8 +1479,8 @@ export default function AcademicHub() {
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SELECT TUTOR</label>
                                     <select value={newLiveSession.tutorId} onChange={e => setNewLiveSession({...newLiveSession, tutorId: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
                                         <option value="">- Select Trainer/Admin -</option>
-                                        {allUsers.filter(u => ['TRAINER', 'ADMIN', 'SUPER_ADMIN', 'TUTOR', 'EMPLOYEE'].includes(u.role)).map(u => (
-                                            <option key={u.id} value={u.id}>{u.fullName || u.name || u.email || 'Unnamed User'} ({u.role})</option>
+                                        {allUsers.filter(u => ['TRAINER', 'ADMIN', 'SUPER_ADMIN', 'TUTOR', 'EMPLOYEE'].includes(u.role)).map((u, idx) => (
+                                            <option key={u.id || idx} value={u.id}>{u.fullName || u.name || u.email || 'Unnamed User'} ({u.role})</option>
                                         ))}
                                     </select>
                                 </div>
