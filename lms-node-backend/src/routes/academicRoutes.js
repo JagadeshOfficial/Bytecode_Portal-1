@@ -1,6 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure Multer for video uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = 'src/public/recordings';
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${req.params.id}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ storage });
 
 // @desc    Get all batches
 // @route   GET /api/academic/batches
@@ -140,6 +159,43 @@ router.delete('/sessions/:id', async (req, res) => {
         await db.collection('live_sessions').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Upload recording for a session
+router.post('/sessions/:id/recording', upload.single('recording'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const db = mongoose.connection.useDb('academic-db');
+        const recordingUrl = `http://localhost:8080/uploads/recordings/${req.file.filename}`;
+        
+        // Find session and update recordingUrl
+        // Room ID might be batchCode-timestamp (from frontend) or a DB _id
+        let filter;
+        try {
+            filter = { _id: new mongoose.Types.ObjectId(req.params.id) };
+        } catch (e) {
+            // If not a valid ObjectId, try matching by meetingLink (which stores the room ID)
+            filter = { meetingLink: req.params.id };
+        }
+
+        const result = await db.collection('live_sessions').updateOne(
+            filter,
+            { $set: { recordingUrl, status: 'RECORDED', updatedAt: new Date() } }
+        );
+
+        if (result.matchedCount === 0) {
+            // If still not found, just return the URL so the frontend can handle it if it wants
+            return res.json({ message: 'File saved but session not found in DB', recordingUrl });
+        }
+
+        res.json({ success: true, recordingUrl });
+    } catch (err) {
+        console.error("Recording upload error:", err);
         res.status(500).json({ error: err.message });
     }
 });

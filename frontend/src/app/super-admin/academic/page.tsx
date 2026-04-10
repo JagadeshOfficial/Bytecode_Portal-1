@@ -1,9 +1,9 @@
 "use client";
 
 import DashboardLayout from '@/components/DashboardLayout';
-import BytecodeMeetingRoom from '@/components/BytecodeMeetingRoom';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
     Book, Plus, Search, Edit2, Trash2, 
     Layers, Users, Clock, User, BookOpen, 
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 export default function AcademicHub() {
+    const router = useRouter();
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS'>('COURSES');
     const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS'>('DRIVE');
     const [courses, setCourses] = useState<any[]>([]);
@@ -36,7 +37,7 @@ export default function AcademicHub() {
     const [isScheduleLiveModalOpen, setIsScheduleLiveModalOpen] = useState(false);
     const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
     const [editingSession, setEditingSession] = useState<any>(null);
-    const [activeMeetingRoom, setActiveMeetingRoom] = useState<any | null>(null);
+
     const [newLiveSession, setNewLiveSession] = useState({ 
         title: '', startTime: '', endDate: '', durationHours: 1, durationMinutes: 0, tutorId: '', platform: 'Bytecode Meetings', meetingLink: '' 
     });
@@ -62,7 +63,8 @@ export default function AcademicHub() {
     const [isCreateAssignmentModalOpen, setIsCreateAssignmentModalOpen] = useState(false);
     const [newAssignment, setNewAssignment] = useState({
         title: '', description: '', attachments: [] as string[], 
-        difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE'
+        difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
+        dueDate: '', totalMarks: 100
     });
     const [viewingAssignment, setViewingAssignment] = useState<any>(null);
     const [viewingSubmissionsAssignment, setViewingSubmissionsAssignment] = useState<any>(null);
@@ -570,11 +572,10 @@ export default function AcademicHub() {
         e.preventDefault();
         if (!selectedBatch) return;
 
-        // Auto-generate Jitsi link if Bytecode Meetings is selected
+        // Auto-generate internal WebRTC room ID if Bytecode Meetings is selected
         let finalLink = newLiveSession.meetingLink;
         if (newLiveSession.platform === 'Bytecode Meetings' && !finalLink) {
-            const roomName = `bytecode-${selectedBatch.batchCode}-${Date.now()}`;
-            finalLink = `https://meet.jit.si/${roomName}`;
+            finalLink = `${selectedBatch.batchCode}-${Date.now()}`;
         }
 
         const payload = {
@@ -678,9 +679,9 @@ export default function AcademicHub() {
                 setAssignments([...assignments, created]);
                 setIsCreateAssignmentModalOpen(false);
                 setNewAssignment({
-                    title: '', description: '', dueDate: '', 
-                    totalMarks: 100, difficulty: 'MEDIUM', 
-                    instructions: '', status: 'ACTIVE'
+                    title: '', description: '', attachments: [], 
+                    difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
+                    dueDate: '', totalMarks: 100
                 });
             }
         } catch (e) { console.error(e); }
@@ -981,8 +982,8 @@ export default function AcademicHub() {
                                                             <Clock size={14} /> {ls.duration} Minutes • {ls.platform}
                                                         </div>
                                                         {ls.platform === 'Bytecode Meetings' ? (
-                                                            <button onClick={() => setActiveMeetingRoom(ls)} className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', border: 'none', cursor: 'pointer' }}>
-                                                                JOIN INTERNAL ROOM
+                                                            <button onClick={() => router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`)} className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', border: 'none', cursor: 'pointer' }}>
+                                                                🎥 JOIN WEBRTC ROOM
                                                             </button>
                                                         ) : (
                                                             <a href={ls.meetingLink} target="_blank" rel="noreferrer" className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', textDecoration: 'none' }}>
@@ -1642,28 +1643,7 @@ export default function AcademicHub() {
                 )}
             </AnimatePresence>
 
-            {/* --- INTERNAL MEETING ROOM ENGINES --- */}
-            {activeMeetingRoom && (() => {
-                const tutorUser = allUsers.find((u: any) => u.id === activeMeetingRoom.mentorId);
-                const tutorName = activeMeetingRoom.mentorName || tutorUser?.fullName || tutorUser?.name || 'Trainer';
-                
-                // FALLBACK TO BATCH TRAINER IF NOT FOUND IN SESSION
-                const batchTrainer = allUsers.find((u: any) => u.id === selectedBatch?.trainerId);
-                const finalTutorName = tutorName !== 'Trainer' ? tutorName : (batchTrainer?.fullName || 'Academic Host');
-                
-                return (
-                    <BytecodeMeetingRoom
-                        session={activeMeetingRoom}
-                        roomName={activeMeetingRoom.title || 'Bytecode Live Class'}
-                        currentUserName={finalTutorName}
-                        students={students}
-                        onLeave={() => setActiveMeetingRoom(null)}
-                        onRecordingSaved={(recordingUrl: string) => {
-                            setLiveSessions(liveSessions.map((s: any) => s.id === activeMeetingRoom.id ? { ...s, recordingUrl } : s));
-                        }}
-                    />
-                );
-            })()}
+            {/* --- WebRTC Room navigation is handled via router.push --- */}
 
             {/* --- MULTI-STEP SHARE RECORDING MODAL --- */}
             <AnimatePresence>
@@ -1768,6 +1748,17 @@ export default function AcademicHub() {
                                                 <option value="MEDIUM">Medium</option>
                                                 <option value="HARD">Hard</option>
                                             </select>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>TOTAL MARKS</label>
+                                            <input type="number" value={newAssignment.totalMarks} onChange={(e) => setNewAssignment({...newAssignment, totalMarks: Number(e.target.value)})} style={inputStyle} required />
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DUE DATE</label>
+                                            <input type="date" value={newAssignment.dueDate} onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})} style={inputStyle} required />
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>STATUS</label>
