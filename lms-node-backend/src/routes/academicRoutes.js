@@ -5,19 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configure Multer for video uploads
-const upload = multer({ 
-    storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-            const dir = 'src/public/temp';
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-            cb(null, dir);
-        },
-        filename: (req, file, cb) => {
-            cb(null, `${Date.now()}-${file.originalname}`);
-        }
-    })
-});
+const upload = multer({ storage: multer.memoryStorage() });
 
 // GridFS initialization for BOTH recordings and assignments
 let gridfsAssignments; 
@@ -322,14 +310,13 @@ router.post('/upload', upload.single('file'), async (req, res) => {
             contentType: req.file.mimetype
         });
 
-        const readStream = fs.createReadStream(req.file.path);
-        
-        readStream.on('error', (err) => {
-            console.error("Read Stream Error:", err);
-            res.status(500).json({ error: 'File reading failed' });
-        });
-
-        readStream.pipe(uploadStream);
+        // Pass buffer to GridFS
+        const Readable = require('stream').Readable;
+        const s = new Readable();
+        s._read = () => {};
+        s.push(req.file.buffer);
+        s.push(null);
+        s.pipe(uploadStream);
 
         uploadStream.on('error', (err) => {
             console.error("GridFS Upload Error:", err);
@@ -337,11 +324,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         });
 
         uploadStream.on('finish', () => {
-            try {
-                fs.unlinkSync(req.file.path); // Clean up temp
-            } catch (err) {
-                console.warn("Temp file cleanup failed:", err);
-            }
             res.json({ 
                 success: true, 
                 url: `http://localhost:8080/api/academic/assignment-file/${filename}` 
@@ -349,6 +331,56 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         });
     } catch (err) {
         console.error("Upload route error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Get all assignments
+router.get('/assignments', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const assignments = await db.collection('assignments').find().toArray();
+        const mapped = assignments.map(a => ({ ...a, id: a._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Create new assignment
+router.post('/assignments', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const assignment = { ...req.body, createdAt: new Date() };
+        const result = await db.collection('assignments').insertOne(assignment);
+        res.status(201).json({ ...assignment, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Update assignment
+router.put('/assignments/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const { id, _id, ...updateData } = req.body;
+        await db.collection('assignments').updateOne(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: updateData }
+        );
+        res.json({ id: req.params.id, ...updateData });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete assignment
+router.delete('/assignments/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('assignments').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        res.json({ success: true });
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -368,6 +400,98 @@ router.get('/assignment-file/:filename', async (req, res) => {
 
         res.set('Content-Type', files[0].contentType || 'application/octet-stream');
         gridfsAssignments.openDownloadStreamByName(req.params.filename).pipe(res);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- UNIVERSAL TEST ENGINE ROUTES ---
+
+// @desc    Get all tests
+router.get('/tests', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const tests = await db.collection('tests').find().toArray();
+        const mapped = tests.map(t => ({ ...t, id: t._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Create new test
+router.post('/tests', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const test = { 
+            ...req.body, 
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            status: req.body.status || 'STAGING'
+        };
+        const result = await db.collection('tests').insertOne(test);
+        res.status(201).json({ ...test, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Update test
+router.put('/tests/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const { id, _id, ...updateData } = req.body;
+        const result = await db.collection('tests').updateOne(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: { ...updateData, updatedAt: new Date() } }
+        );
+        res.json({ id: req.params.id, ...updateData });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete test
+router.delete('/tests/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('tests').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Submit test response
+router.post('/test-submissions', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const submission = { ...req.body, submittedAt: new Date() };
+        const result = await db.collection('test_submissions').insertOne(submission);
+        res.status(201).json({ ...submission, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Log proctoring anomaly
+router.post('/proctoring/logs', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const log = { ...req.body, timestamp: new Date() };
+        await db.collection('proctoring_logs').insertOne(log);
+        res.status(201).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Get proctoring logs for a test/candidate
+router.get('/proctoring/logs/:testId', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const logs = await db.collection('proctoring_logs').find({ testId: req.params.testId }).toArray();
+        res.json(logs);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

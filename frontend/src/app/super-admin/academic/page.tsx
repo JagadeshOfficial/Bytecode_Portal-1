@@ -12,12 +12,15 @@ import {
     CheckCircle, Calendar, Play, FileText,
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle, MinusCircle,
-    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip
+    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip, 
+    Zap, Activity, Terminal, BarChart2
 } from 'lucide-react';
+import ExamManagement from '@/components/Academic/Exams/ExamManagement';
+import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
 
 export default function AcademicHub() {
     const router = useRouter();
-    const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS'>('COURSES');
+    const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS' | 'EXAMS' | 'ANALYTICS'>('COURSES');
     const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS'>('DRIVE');
     const [courses, setCourses] = useState<any[]>([]);
     const [batches, setBatches] = useState<any[]>([]);
@@ -64,14 +67,14 @@ export default function AcademicHub() {
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [sessionToDelete, setSessionToDelete] = useState<any>(null);
     const [newAssignment, setNewAssignment] = useState({
-        title: '', description: '', attachments: [] as string[], 
+        title: '', description: '', attachments: [] as { name: string, url: string }[], 
         difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
         dueDate: '', 
     });
     const [viewingAssignment, setViewingAssignment] = useState<any>(null);
     const [viewingSubmissionsAssignment, setViewingSubmissionsAssignment] = useState<any>(null);
     const [activeSubmission, setActiveSubmission] = useState<any>(null);
-    const [gradingData, setGradingData] = useState({ marks: 0, feedback: '', status: 'ACCEPTED' });
+    const [gradingData, setGradingData] = useState({ feedback: '', status: 'ACCEPTED' });
     const [isEditAssignmentModalOpen, setIsEditAssignmentModalOpen] = useState(false);
     const [editingAssignment, setEditingAssignment] = useState<any>(null);
     const [sharingTarget, setSharingTarget] = useState<any>(null);
@@ -810,8 +813,15 @@ export default function AcademicHub() {
                     difficulty: "MEDIUM", instructions: "", status: "ACTIVE",
                     dueDate: "", 
                 });
+                alert("Assignment broadcasted successfully!");
+            } else {
+                const err = await res.json();
+                alert("Failed to broadcast assignment: " + (err.error || "Unknown error"));
             }
-        } catch (e) { console.error(e); }
+        } catch (e: any) {
+            console.error(e);
+            alert("Error broadcasting assignment: " + e.message);
+        }
     };
 
     const handleAssignmentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -826,7 +836,10 @@ export default function AcademicHub() {
              });
              const data = await res.json();
              if (data.url) {
-                 setNewAssignment(prev => ({ ...prev, attachments: [...prev.attachments, data.url] }));
+                 setNewAssignment(prev => ({ 
+                    ...prev, 
+                    attachments: [...prev.attachments, { name: file.name, url: data.url }] 
+                 }));
              }
         } catch (err) { console.error(err); }
     };
@@ -908,15 +921,25 @@ export default function AcademicHub() {
                 
                 {/* --- NAVIGATION BREADCRUMBS --- */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem', fontSize: '0.9rem', fontWeight: 600 }}>
-                    <span onClick={() => setViewMode('COURSES')} style={{ cursor: 'pointer', color: viewMode === 'COURSES' ? 'var(--primary)' : 'var(--text-dim)' }}>Academic Hub</span>
-                    {viewMode !== 'COURSES' && (
+                    <span onClick={() => { setViewMode('COURSES'); setSelectedCourse(null); setSelectedBatch(null); }} style={{ cursor: 'pointer', color: viewMode === 'COURSES' ? 'var(--primary)' : 'var(--text-dim)' }}>Academic Portal</span>
+                    <ChevronRight size={14} color="var(--text-dim)" />
+                    <span onClick={() => setViewMode('ANALYTICS')} style={{ cursor: 'pointer', color: viewMode === 'ANALYTICS' ? 'var(--primary)' : 'var(--text-dim)', background: 'rgba(59, 130, 246, 0.05)', padding: '5px 12px', borderRadius: '10px' }}>
+                        <BarChart2 size={14} style={{ display: 'inline', marginRight: '5px' }} /> Academic Insights
+                    </span>
+                    <ChevronRight size={14} color="var(--text-dim)" />
+                    <span onClick={() => setViewMode('EXAMS')} style={{ cursor: 'pointer', color: viewMode === 'EXAMS' ? 'var(--primary)' : 'var(--text-dim)', background: 'rgba(139, 92, 246, 0.05)', padding: '5px 12px', borderRadius: '10px' }}>
+                        <Zap size={14} style={{ display: 'inline', marginRight: '5px' }} /> Test Engine & AI Proctoring
+                    </span>
+                    {viewMode === 'BATCHES' && (
                         <>
                             <ChevronRight size={14} color="var(--text-dim)" />
-                            <span onClick={() => setViewMode('BATCHES')} style={{ cursor: 'pointer', color: viewMode === 'BATCHES' ? 'var(--primary)' : 'var(--text-dim)' }}>{selectedCourse?.title}</span>
+                            <span style={{ color: 'var(--primary)' }}>{selectedCourse?.title}</span>
                         </>
                     )}
-                    {viewMode === 'DETAILS' && (
+                    {(viewMode === 'DETAILS') && (
                         <>
+                            <ChevronRight size={14} color="var(--text-dim)" />
+                            <span onClick={() => setViewMode('BATCHES')} style={{ cursor: 'pointer', color: 'var(--text-dim)' }}>{selectedCourse?.title}</span>
                             <ChevronRight size={14} color="var(--text-dim)" />
                             <span onClick={() => setSelectedFolder(null)} style={{ cursor: 'pointer', color: !selectedFolder ? 'var(--primary)' : 'var(--text-dim)' }}>{selectedBatch?.name || selectedBatch?.batchName}</span>
                         </>
@@ -933,10 +956,10 @@ export default function AcademicHub() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
-                            {selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Academic Drive' : viewMode === 'BATCHES' ? 'Select Cohort' : 'Shared Workspace'}
+                            {viewMode === 'ANALYTICS' ? 'Academic Insights' : viewMode === 'EXAMS' ? 'Universal Test Engine' : selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Module Drive' : viewMode === 'BATCHES' ? 'Select Batch' : 'Shared Workspace'}
                         </h1>
                         <div style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            {selectedFolder ? `Exploring learning resources inside the folder.` : viewMode === 'COURSES' ? 'Cloud-powered educational resource hub.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
+                            {viewMode === 'ANALYTICS' ? 'Global performance and engagement metrics.' : viewMode === 'EXAMS' ? 'AI-powered proctoring and assessment platform.' : selectedFolder ? `Viewing files in this folder.` : viewMode === 'COURSES' ? 'Access your courses and modules.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
                             
                             {viewMode === 'COURSES' && !selectedFolder && (
                                 <div style={{ display: 'flex', gap: '20px', marginLeft: '10px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '20px' }}>
@@ -1007,13 +1030,13 @@ export default function AcademicHub() {
                                 {/* --- BATCH TABS NAVIGATION --- */}
                                 <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     <button onClick={() => setBatchTab('DRIVE')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'DRIVE' ? 'var(--primary)' : 'transparent', color: batchTab === 'DRIVE' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Folder size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> DRIVE WORKSPACE
+                                        <Folder size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> BATCH DRIVE
                                     </button>
                                     <button onClick={() => setBatchTab('LIVE')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'LIVE' ? 'var(--primary)' : 'transparent', color: batchTab === 'LIVE' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Video size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> LIVE SESSIONS
+                                        <Video size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> LIVE CLASSES
                                     </button>
                                     <button onClick={() => setBatchTab('RECORDINGS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'RECORDINGS' ? 'var(--primary)' : 'transparent', color: batchTab === 'RECORDINGS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Play size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> RECORDINGS
+                                        <Play size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> VIDEOS
                                     </button>
                                     <button onClick={() => setBatchTab('ASSIGNMENTS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'ASSIGNMENTS' ? 'var(--primary)' : 'transparent', color: batchTab === 'ASSIGNMENTS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
                                         <FileText size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> ASSIGNMENTS
@@ -1220,7 +1243,7 @@ export default function AcademicHub() {
                                             <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} style={{ width: '95%', maxWidth: '550px', padding: '3rem', borderRadius: '45px', background: '#ffffff', boxShadow: '0 25px 80px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                                     <div>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '3px', textTransform: 'uppercase' }}>Security Engine</span>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '3px', textTransform: 'uppercase' }}>Access Control</span>
                                                         <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '8px', color: '#1a202c', letterSpacing: '-1px' }}>Manage Access</h2>
                                                         <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '5px' }}>
                                                             {accessTarget?.batchName ? "Target Batch: " : "Target Folder: "}
@@ -1265,7 +1288,7 @@ export default function AcademicHub() {
 
                                                     {/* CURRENT MEMBERS LIST */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#4a5568', letterSpacing: '1px' }}>RESIDENT MEMBERS & GUESTS</label>
+                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#4a5568', letterSpacing: '1px' }}>STUDENTS & STAFF</label>
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                                             {(() => {
                                                                 const combined = [...(accessTarget?.sharedWith || [])];
@@ -1361,7 +1384,7 @@ export default function AcademicHub() {
                                                                 </div>
                                                                 <div style={{ display: 'flex', gap: '8px' }}>
                                                                     <button onClick={() => { setEditingAssignment(a); setIsEditAssignmentModalOpen(true); }} style={{ background: 'none', border: 'none', color: '#718096', cursor: 'pointer' }}><Edit2 size={18} /></button>
-                                                                    <button onClick={() => handleDeleteAssignment(a.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                                                                    <button onClick={(e) => handleDeleteAssignment(a.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
                                                                 </div>
                                                             </div>
 
@@ -1370,18 +1393,16 @@ export default function AcademicHub() {
                                                                 <p style={{ fontSize: '0.9rem', color: '#718096', lineHeight: '1.6', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{a.description}</p>
                                                             </div>
 
-                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', background: '#f8fafc', padding: '15px', borderRadius: '20px' }}>
+                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', background: '#f8fafc', padding: '15px', borderRadius: '20px' }}>
                                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Submission Deadline</span>
+                                                                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Due Date</span>
                                                                     <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {new Date(a.dueDate).toLocaleDateString()}</span>
-                                                                </div>
-                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                 </div>
                                                             </div>
 
                                                             <div>
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 900 }}>
-                                                                    <span style={{ color: '#1a202c' }}>Submission Progress</span>
+                                                                    <span style={{ color: '#1a202c' }}>Students Submitted</span>
                                                                     <span style={{ color: '#10b981' }}>{submissionCount} / {totalStudents}</span>
                                                                 </div>
                                                                 <div style={{ height: '10px', background: '#edf2f7', borderRadius: '20px', overflow: 'hidden' }}>
@@ -1390,7 +1411,7 @@ export default function AcademicHub() {
                                                             </div>
 
                                                             <button onClick={() => setViewingSubmissionsAssignment(a)} className="btn-quantum" style={{ width: '100%', padding: '15px', background: 'rgba(139, 92, 246, 0.05)', color: 'var(--primary)', border: '1px solid rgba(139, 92, 246, 0.2)', fontWeight: 900, borderRadius: '18px', marginTop: '10px' }}>
-                                                                TRACK SUBMISSIONS & GRADE
+                                                                VIEW SUBMISSIONS
                                                             </button>
                                                         </motion.div>
                                                     );
@@ -1426,6 +1447,19 @@ export default function AcademicHub() {
                                        </div>
                                  </div>
                             </div>
+                        </motion.div>
+                    )}
+                    {/* --- EXAMS MODULE --- */}
+                    {viewMode === 'EXAMS' && (
+                        <motion.div key="exams" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <ExamManagement />
+                        </motion.div>
+                    )}
+
+                    {/* --- ACADEMIC ANALYTICS --- */}
+                    {viewMode === 'ANALYTICS' && (
+                        <motion.div key="analytics" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                            <AcademicAnalytics />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -1941,7 +1975,7 @@ export default function AcademicHub() {
 
             {/* --- WebRTC Room navigation is handled via router.push --- */}
             
-            {/* --- MULTI-STEP QUANTUM SHARE MODAL --- */}
+            {/* --- MULTI-STEP FOLDER SHARE MODAL --- */}
             <AnimatePresence>
                 {isShareModalOpen && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)' }}>
@@ -2053,8 +2087,8 @@ export default function AcademicHub() {
                         <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: "95%", maxWidth: "700px", padding: "3.5rem", borderRadius: "45px", background: "#fff", boxShadow: "0 30px 100px rgba(0,0,0,0.3)", border: "1px solid #e2e8f0", maxHeight: "90vh", overflowY: "auto" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
                                 <div>
-                                    <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#10b981", letterSpacing: "3px", textTransform: "uppercase" }}>Academic Intelligence</span>
-                                    <h2 style={{ fontSize: "2.5rem", fontWeight: 900, marginTop: "8px", color: "#1a202c", letterSpacing: "-1.5px" }}>Distribute Assignment</h2>
+                                    <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#10b981", letterSpacing: "3px", textTransform: "uppercase" }}>Assignment Details</span>
+                                    <h2 style={{ fontSize: "2.5rem", fontWeight: 900, marginTop: "8px", color: "#1a202c", letterSpacing: "-1.5px" }}>Create Assignment</h2>
                                 </div>
                                 <button onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px", borderRadius: "50%", cursor: "pointer" }}><X size={32} /></button>
                             </div>
@@ -2066,7 +2100,7 @@ export default function AcademicHub() {
                                         <input required value={newAssignment.title} onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})} placeholder="e.g. Advanced System Architecture Project" style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
                                     </div>
                                     <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>DIFFICULTY LEVEL</label>
+                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>LEVEL</label>
                                         <select value={newAssignment.difficulty} onChange={(e) => setNewAssignment({...newAssignment, difficulty: e.target.value})} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }}>
                                             <option value="BEGINNER">BEGINNER</option>
                                             <option value="MEDIUM">MEDIUM</option>
@@ -2078,30 +2112,41 @@ export default function AcademicHub() {
 
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
                                     <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>SUBMISSION DEADLINE</label>
+                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>DUE DATE</label>
                                         <input type="date" required value={newAssignment.dueDate} onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
                                     </div>
                                 </div>
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                    <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>EXECUTIVE SUMMARY / DESCRIPTION</label>
+                                    <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>DESCRIPTION</label>
                                     <textarea required value={newAssignment.description} onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})} placeholder="Explain the project scope and expected deliverables..." rows={4} style={{...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0", resize: "none" }} />
                                 </div>
 
                                 <div style={{ background: "#f0f9ff", padding: "1.5rem", borderRadius: "24px", border: "1px solid #e0f2fe" }}>
-                                    <h4 style={{ fontSize: "0.9rem", fontWeight: 900, marginBottom: "10px", color: "#0369a1" }}>Attachment Brief</h4>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "15px", color: "#0369a1" }}>
-                                        <div style={{ background: "#fff", padding: "15px", borderRadius: "15px", border: "1px dashed #7dd3fc", flex: 1, textAlign: "center", cursor: "pointer" }} onClick={() => document.getElementById("assign-file")?.click()}>
-                                            <Upload size={24} style={{ marginBottom: "5px" }} />
-                                            <p style={{ fontSize: "0.8rem", fontWeight: 700 }}>{newAssignment.attachments.length > 0 ? `${newAssignment.attachments.length} Files Attached` : "Upload Assignment Brief (PDF/DOCX)"}</p>
+                                    <h4 style={{ fontSize: "0.9rem", fontWeight: 900, marginBottom: "10px", color: "#0369a1" }}>Attachments</h4>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                        <div style={{ background: "#fff", padding: "20px", borderRadius: "15px", border: "1px dashed #7dd3fc", textAlign: "center", cursor: "pointer" }} onClick={() => document.getElementById("assign-file")?.click()}>
+                                            <Upload size={24} style={{ marginBottom: "5px", color: "#0369a1" }} />
+                                            <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0369a1" }}>{newAssignment.attachments.length > 0 ? `${newAssignment.attachments.length} Files Selected` : "Click here to upload files"}</p>
                                         </div>
+                                        {newAssignment.attachments.length > 0 && (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
+                                                {newAssignment.attachments.map((file, idx) => (
+                                                    <div key={idx} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px", background: "#fff", borderRadius: "10px", border: "1px solid #e0f2fe" }}>
+                                                        <FileText size={16} color="#0369a1" />
+                                                        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#0369a1", flex: 1 }}>{file.name}</span>
+                                                        <button type="button" onClick={(e) => { e.stopPropagation(); setNewAssignment(prev => ({ ...prev, attachments: prev.attachments.filter((_, i) => i !== idx) })) }} style={{ border: "none", background: "none", color: "#ef4444", cursor: "pointer" }}><X size={16} /></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                         <input type="file" id="assign-file" style={{ display: "none" }} onChange={handleAssignmentFileUpload} />
                                     </div>
                                 </div>
 
                                 <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem" }}>
-                                    <button type="button" onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ flex: 1, padding: "18px", borderRadius: "18px", background: "#f1f5f9", color: "#475569", border: "none", fontWeight: 900, cursor: "pointer" }}>DISCARD</button>
-                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: "18px", borderRadius: "18px", background: "#10b981", color: "#fff", fontWeight: 900 }}>BROADCAST TO BATCH</button>
+                                    <button type="button" onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ flex: 1, padding: "18px", borderRadius: "18px", background: "#f1f5f9", color: "#475569", border: "none", fontWeight: 900, cursor: "pointer" }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: "18px", borderRadius: "18px", background: "#10b981", color: "#fff", fontWeight: 900 }}>UPLOAD & SEND</button>
                                 </div>
                             </form>
                         </motion.div>
@@ -2116,7 +2161,7 @@ export default function AcademicHub() {
                         <motion.div initial={{ scale: 1.05, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: "95%", maxWidth: "900px", padding: "3.5rem", borderRadius: "45px", background: "#fff", display: "flex", flexDirection: "column", gap: "2.5rem", maxHeight: "90vh", overflowY: "auto" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                                 <div>
-                                    <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#10b981", letterSpacing: "3px", textTransform: "uppercase" }}>Submission Tracker</span>
+                                    <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#10b981", letterSpacing: "3px", textTransform: "uppercase" }}>Student Submissions</span>
                                     <h2 style={{ fontSize: "2.5rem", fontWeight: 900, marginTop: "8px", color: "#1a202c", letterSpacing: "-1.5px" }}>{viewingSubmissionsAssignment.title}</h2>
                                     <div style={{ display: "flex", gap: "15px", color: "#718096", fontSize: "0.9rem", marginTop: "10px" }}>
                                         <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Users size={16} /> {students.length} Total Students</span>
@@ -2151,7 +2196,7 @@ export default function AcademicHub() {
                                                         </div>
                                                     </td>
                                                     <td style={{ padding: "20px", color: "#718096", fontSize: "0.9rem" }}>
-                                                        {sub ? new Date(sub.submittedAt).toLocaleString() : "PENDING"}
+                                                        {sub ? new Date(sub.submittedAt).toLocaleString() : "NOT SUBMITTED"}
                                                     </td>
                                                     <td style={{ padding: "20px" }}>
                                                         {sub ? (
@@ -2164,7 +2209,7 @@ export default function AcademicHub() {
                                                     </td>
                                                     <td style={{ padding: "20px" }}>
                                                         <span style={{ padding: "6px 14px", borderRadius: "10px", fontSize: "0.7rem", fontWeight: 900, background: sub ? "rgba(16, 185, 129, 0.05)" : "#fff1f2", color: sub ? "#10b981" : "#f43f5e", border: sub ? "none" : "1px solid #fecaca" }}>
-                                                            {sub ? "TURNED IN" : "LATE / PENDING"}
+                                                            {sub ? "SUBMITTED" : "PENDING"}
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -2185,7 +2230,7 @@ export default function AcademicHub() {
                         <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '800px', padding: '3.5rem', borderRadius: '40px', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
                                 <div>
-                                    <span style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Student Audit</span>
+                                    <span style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Submission Review</span>
                                     <h2 style={{ fontSize: '2rem', fontWeight: 900, marginTop: '8px' }}>{activeSubmission.studentName}</h2>
                                     <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Submitted on {new Date(activeSubmission.submittedAt).toLocaleString()}</p>
                                 </div>
@@ -2216,21 +2261,21 @@ export default function AcademicHub() {
                                 </div>
 
                                 <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2.5rem', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <h5 style={{ fontWeight: 900, marginBottom: '2rem', textTransform: 'uppercase', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldCheck size={18} color="#10b981" /> Audit Execution</h5>
+                                    <h5 style={{ fontWeight: 900, marginBottom: '2rem', textTransform: 'uppercase', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldCheck size={18} color="#10b981" /> Action</h5>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>DECISION STATUS</label>
+                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>STATUS</label>
                                             <select 
                                                 value={gradingData.status} 
                                                 onChange={(e) => setGradingData({...gradingData, status: e.target.value})}
                                                 style={inputStyle}
                                             >
-                                                <option value="ACCEPTED">ACCEPT SUBMISSION</option>
-                                                <option value="REJECTED">REJECT SUBMISSION</option>
+                                                <option value="ACCEPTED">APPROVE SUBMISSION</option>
+                                                <option value="REJECTED">REQUEST RE-SUBMIT</option>
                                             </select>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>INSTRUCTIONAL FEEDBACK</label>
+                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>FEEDBACK</label>
                                             <textarea 
                                                 value={gradingData.feedback} 
                                                 onChange={(e) => setGradingData({...gradingData, feedback: e.target.value})}

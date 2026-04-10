@@ -1,0 +1,230 @@
+"use client";
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Search, Plus, Filter, MoreVertical, 
+    FileText, Code, Video, Layout, 
+    Clock, Users, CheckCircle, BarChart3, 
+    Copy, Trash2, Edit2, Play, 
+    Eye, Share2, Award, Zap, Shield
+} from 'lucide-react';
+
+interface TestCardProps {
+    test: any;
+    onAction: (action: string, test: any) => void;
+}
+
+const TestCard = ({ test, onAction }: TestCardProps) => {
+    const statusColors = {
+        DEPLOYED: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' },
+        STAGING: { bg: 'rgba(245, 158, 11, 0.1)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.2)' },
+        CLOSED: { bg: 'rgba(239, 68, 68, 0.1)', text: '#ef4444', border: 'rgba(239, 68, 68, 0.2)' }
+    };
+
+    const typeIcons = {
+        MCQ: <FileText size={18} />,
+        CODING: <Code size={18} />,
+        HYBRID: <Layout size={18} />,
+        VIDEO: <Video size={18} />
+    };
+
+    const status: keyof typeof statusColors = test.status || 'STAGING';
+
+    return (
+        <motion.div 
+            whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}
+            style={{ 
+                background: '#fff', 
+                border: '1px solid #e2e8f0', 
+                borderRadius: '32px', 
+                padding: '1.8rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.2rem',
+                position: 'relative',
+                overflow: 'hidden'
+            }}
+        >
+            {/* Status Ribbon */}
+            <div style={{ 
+                position: 'absolute', 
+                top: '20px', 
+                right: '20px',
+                padding: '6px 14px',
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                fontWeight: 900,
+                background: statusColors[status].bg,
+                color: statusColors[status].text,
+                border: `1px solid ${statusColors[status].border}`,
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+            }}>
+                {status}
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ 
+                    width: 50, 
+                    height: 50, 
+                    borderRadius: '16px', 
+                    background: 'rgba(99, 102, 241, 0.05)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    color: '#6366f1'
+                }}>
+                    {typeIcons[test.type as keyof typeof typeIcons] || <FileText size={24} />}
+                </div>
+                <div>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1a202c', marginBottom: '4px' }}>{test.name}</h3>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {test.tags.map((tag: string) => (
+                            <span key={tag} style={{ fontSize: '0.65rem', fontWeight: 800, color: '#718096', background: '#f8fafc', padding: '4px 8px', borderRadius: '6px' }}>#{tag}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', background: '#f8fafc', padding: '15px', borderRadius: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Structure</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {test.structure}
+                    </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Duration</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Clock size={14} /> {test.duration}m
+                    </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Questions</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c' }}>{test.questionCount} Items</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Difficulty</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: test.difficulty === 'HARD' ? '#ef4444' : (test.difficulty === 'MEDIUM' ? '#f59e0b' : '#10b981') }}>{test.difficulty}</span>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{test.attempts}</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#a0aec0' }}>ATTEMPTS</div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#10b981' }}>{test.passRate}%</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#a0aec0' }}>PASS RATE</div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#6366f1' }}>{test.aiScore}</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#a0aec0' }}>AI CONFID.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '5px' }}>
+                <button onClick={() => onAction('EDIT', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }} title="Edit"><Edit2 size={16} /></button>
+                <button onClick={() => onAction('ANALYTICS', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#6366f1', cursor: 'pointer' }} title="Analytics"><BarChart3 size={16} /></button>
+                <button onClick={() => onAction('PREVIEW', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#10b981', cursor: 'pointer' }} title="Preview"><Eye size={16} /></button>
+                <button onClick={() => onAction('MENU', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }}><MoreVertical size={16} /></button>
+            </div>
+
+            <button 
+                onClick={() => onAction('ASSIGN', test)}
+                className="btn-quantum"
+                style={{ width: '100%', padding: '14px', background: 'var(--primary)', fontWeight: 900, borderRadius: '16px', fontSize: '0.85rem' }}
+            >
+                ASSIGN TO BATCH
+            </button>
+        </motion.div>
+    );
+};
+
+export default function TestDashboard() {
+    const [tests, setTests] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTests = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/academic/tests');
+                if (res.ok) {
+                    const data = await res.json();
+                    setTests(data.length > 0 ? data : [
+                        { id: '1', name: 'Full Stack Java Assessment', status: 'DEPLOYED', type: 'Hybrid', questions: 45, duration: 90, difficulty: 'Hard', tags: ['Java', 'Spring', 'MySQL'], aiConfidence: 98 },
+                        { id: '2', name: 'Frontend React Engineering', status: 'STAGING', type: 'MCQ', questions: 30, duration: 60, difficulty: 'Medium', tags: ['React', 'Redux', 'CSS'], aiConfidence: 92 },
+                        { id: '3', name: 'Python Backend Logic', status: 'CLOSED', type: 'Coding', questions: 5, duration: 120, difficulty: 'Hard', tags: ['Python', 'DSA', 'Algorithms'], aiConfidence: 85 },
+                        { id: '4', name: 'UI/UX Fundamentals', status: 'DEPLOYED', type: 'MCQ', questions: 25, duration: 45, difficulty: 'Easy', tags: ['Design', 'Figma', 'UX'], aiConfidence: 95 }
+                    ]);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            setLoading(false);
+        };
+        fetchTests();
+    }, []);
+
+    const handleAction = (action: string, test: any) => {
+        console.log(`Action: ${action} on test:`, test);
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            {/* --- TOP BAR --- */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    <div style={{ position: 'relative', width: '350px' }}>
+                        <Search style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }} size={18} />
+                        <input 
+                            placeholder="Search tests by name or tag..." 
+                            style={{ width: '100%', padding: '14px 20px 14px 45px', borderRadius: '18px', border: '1px solid #e2e8f0', background: '#fff', fontSize: '0.9rem', outline: 'none' }} 
+                        />
+                    </div>
+                    <button style={{ padding: '14px 24px', borderRadius: '18px', border: '1px solid #e2e8f0', background: '#fff', color: '#4a5568', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                        <Filter size={18} /> FILTER
+                    </button>
+                </div>
+                <button 
+                    className="btn-quantum" 
+                    style={{ padding: '16px 32px', background: '#10b981', borderRadius: '20px', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}
+                >
+                    <Plus size={20} /> CREATE NEW TEST
+                </button>
+            </div>
+
+            {/* --- STATS ROW --- */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+                {[
+                    { label: 'Active Tests', value: '12', icon: <Play color="#10b981" />, trend: '+2 this week' },
+                    { label: 'Total Attempts', value: '45.2k', icon: <Users color="#6366f1" />, trend: 'avg 2.1k / day' },
+                    { label: 'Avg Pass Rate', value: '64.5%', icon: <CheckCircle color="#f59e0b" />, trend: 'improved 4%' },
+                    { label: 'AI Monitoring Efficiency', value: '99.2%', icon: <Shield color="#8b5cf6" />, trend: 'real-time audit active' }
+                ].map((stat, i) => (
+                    <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '28px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <div style={{ width: 60, height: 60, borderRadius: '20px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {stat.icon}
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>{stat.label}</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#1a202c', margin: '2px 0' }}>{stat.value}</div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#718096' }}>{stat.trend}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* --- GRID --- */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2.5rem' }}>
+                {tests.map(test => (
+                    <TestCard key={test.id} test={test} onAction={handleAction} />
+                ))}
+            </div>
+        </div>
+    );
+}
