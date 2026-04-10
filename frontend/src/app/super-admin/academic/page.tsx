@@ -10,7 +10,7 @@ import {
     ChevronRight, ChevronLeft, Folder, File,
     Download, Upload, Eye, MoreVertical, 
     CheckCircle, Calendar, Play, FileText,
-    ExternalLink, Share2, Lock, Globe,
+    ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle,
     ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip
 } from 'lucide-react';
@@ -61,6 +61,8 @@ export default function AcademicHub() {
     const [newFolderName, setNewFolderName] = useState('');
     const [assignments, setAssignments] = useState<any[]>([]);
     const [isCreateAssignmentModalOpen, setIsCreateAssignmentModalOpen] = useState(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [sessionToDelete, setSessionToDelete] = useState<any>(null);
     const [newAssignment, setNewAssignment] = useState({
         title: '', description: '', attachments: [] as string[], 
         difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
@@ -259,19 +261,26 @@ export default function AcademicHub() {
         }
     };
 
-    const handleDeleteRecording = async (sessionId: string, e: any) => {
+    const handleDeleteRecording = (sessionId: string, e: any) => {
         e.stopPropagation();
-        if (!confirm("Remove this recording? This will detach the recording link from the session.")) return;
+        const session = liveSessions.find((s: any) => s.id === sessionId || s._id === sessionId);
+        if (session) {
+            setSessionToDelete(session);
+            setIsDeleteConfirmOpen(true);
+        }
+    };
+
+    const confirmDeleteRecording = async () => {
+        if (!sessionToDelete) return;
         try {
-            const ls = liveSessions.find((s: any) => s.id === sessionId);
-            if (!ls) return;
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...ls, recordingUrl: null })
+            const id = sessionToDelete.id || sessionToDelete._id;
+            const res = await fetch(`http://localhost:8080/api/academic/sessions/${id}/recording`, {
+                method: 'DELETE'
             });
             if (res.ok) {
-                setLiveSessions(liveSessions.map((s: any) => s.id === sessionId ? { ...s, recordingUrl: null } : s));
+                setLiveSessions(liveSessions.map((s: any) => (s.id === id || s._id === id) ? { ...s, recordingUrl: null } : s));
+                setIsDeleteConfirmOpen(false);
+                setSessionToDelete(null);
             }
         } catch (e) {
             console.error(e);
@@ -283,10 +292,14 @@ export default function AcademicHub() {
         setIsShareModalOpen(true);
         setShareStep(1);
         try {
-            const res = await fetch(`http://localhost:8081/api/courses`);
+            const res = await fetch(`http://localhost:8080/api/courses`);
+            if (!res.ok) throw new Error(`Status: ${res.status}`);
             const data = await res.json();
             setAllCourses(data);
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("Courses fetch error:", e);
+            setAllCourses([]);
+        }
     };
 
     const handleSelectCourseForShare = async (course: any) => {
@@ -294,9 +307,13 @@ export default function AcademicHub() {
         setShareStep(2);
         try {
             const res = await fetch(`http://localhost:8080/api/academic/batches/course/${course.id}`);
+            if (!res.ok) throw new Error(`Status: ${res.status}`);
             const data = await res.json();
             setAllBatchesForCourse(data);
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("Batches for course error:", e);
+            setAllBatchesForCourse([]);
+        }
     };
 
     const handleConfirmShare = async (folderName?: string) => {
@@ -1032,7 +1049,10 @@ export default function AcademicHub() {
                                                             <button onClick={() => initiateShare(ls)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} title="Share to Batch Drive">
                                                                 <Share2 size={16} />
                                                             </button>
-                                                            <button onClick={(e) => handleDeleteRecording(ls.id, e)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }}>
+                                                            <a href={`${ls.recordingUrl}?download=true`} download={`recording-${ls.id}.webm`} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download Recording">
+                                                                <Download size={16} />
+                                                            </a>
+                                                            <button onClick={(e) => handleDeleteRecording(ls.id || ls._id, e)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }} title="Delete Recording">
                                                                 <Trash2 size={16} />
                                                             </button>
                                                         </div>
@@ -1481,11 +1501,13 @@ export default function AcademicHub() {
                                    <button onClick={() => setViewFileTarget(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={28} /></button>
                                </div>
                                <div style={{ flex: 1, background: '#000', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                                    {['mp4', 'mkv', 'webm', 'mov'].includes(viewFileTarget.type) ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-                                            <Play size={80} color="var(--primary)" style={{ opacity: 0.5 }} />
-                                            <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>Video Preview Player</p>
-                                        </div>
+                                    {['mp4', 'mkv', 'webm', 'mov', 'video'].includes(viewFileTarget.type?.toLowerCase()) || viewFileTarget.name?.toLowerCase().endsWith('.webm') ? (
+                                        <video 
+                                            src={viewFileTarget.url} 
+                                            controls 
+                                            autoPlay 
+                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                        />
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                                             <FileText size={80} color="var(--primary)" style={{ opacity: 0.5 }} />
@@ -2026,6 +2048,25 @@ export default function AcademicHub() {
                  )}
             </AnimatePresence>
 
+            {/* --- DELETE CONFIRMATION MODAL --- */}
+            <AnimatePresence>
+                {isDeleteConfirmOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '450px', padding: '3rem', borderRadius: '40px', textAlign: 'center' }}>
+                            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
+                                <AlertTriangle size={40} color="#ef4444" />
+                            </div>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem' }}>Irreversible Action</h2>
+                            <p style={{ color: 'var(--text-dim)', marginBottom: '2.5rem', lineHeight: 1.6 }}>You are about to permanently delete this session recording from MongoDB. This action cannot be undone.</p>
+                            
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setIsDeleteConfirmOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 800 }}>CANCEL</button>
+                                <button onClick={confirmDeleteRecording} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 900 }}>DELETE NOW</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </DashboardLayout>
     );
 }

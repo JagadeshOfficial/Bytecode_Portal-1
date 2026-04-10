@@ -101,6 +101,22 @@ router.delete('/batches/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// @desc    Get batches by course
+// @route   GET /api/academic/batches/course/:courseId
+router.get('/batches/course/:courseId', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const batches = await db.collection('batches').find({ courseId: req.params.courseId }).toArray();
+        const mappedBatches = batches.map(b => ({
+            ...b,
+            id: b._id.toString()
+        }));
+        res.json(mappedBatches);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 router.get('/curriculum', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
@@ -237,6 +253,44 @@ router.get('/recording/:filename', async (req, res) => {
 
         const downloadStream = bucket.openDownloadStreamByName(req.params.filename);
         downloadStream.pipe(res);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete recording and cleanup GridFS
+router.delete('/sessions/:id/recording', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
+        
+        let filter;
+        try {
+            filter = { _id: new mongoose.Types.ObjectId(req.params.id) };
+        } catch (e) {
+            filter = { meetingLink: req.params.id };
+        }
+
+        const session = await db.collection('live_sessions').findOne(filter);
+        if (session && session.recordingUrl) {
+            // Extract filename from URL
+            const parts = session.recordingUrl.split('/');
+            const filename = parts[parts.length - 1];
+            
+            // Delete from GridFS
+            const files = await bucket.find({ filename }).toArray();
+            for (const file of files) {
+                await bucket.delete(file._id);
+            }
+        }
+
+        // Detach from session
+        await db.collection('live_sessions').updateOne(
+            filter,
+            { $set: { recordingUrl: null, status: 'SCHEDULED', updatedAt: new Date() } }
+        );
+
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
