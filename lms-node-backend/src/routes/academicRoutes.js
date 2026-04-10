@@ -21,6 +21,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// GridFS initialization
+let gridfsBucket;
+mongoose.connection.on('connected', () => {
+    const db = mongoose.connection.useDb('academic-db');
+    gridfsBucket = new mongoose.mongo.GridFSBucket(db, {
+        bucketName: 'recordings'
+    });
+});
+
 // @desc    Get all batches
 // @route   GET /api/academic/batches
 router.get('/batches', async (req, res) => {
@@ -171,31 +180,64 @@ router.post('/sessions/:id/recording', upload.single('recording'), async (req, r
         }
 
         const db = mongoose.connection.useDb('academic-db');
-        const recordingUrl = `http://localhost:8080/uploads/recordings/${req.file.filename}`;
+        const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
         
-        // Find session and update recordingUrl
-        // Room ID might be batchCode-timestamp (from frontend) or a DB _id
-        let filter;
-        try {
-            filter = { _id: new mongoose.Types.ObjectId(req.params.id) };
-        } catch (e) {
-            // If not a valid ObjectId, try matching by meetingLink (which stores the room ID)
-            filter = { meetingLink: req.params.id };
-        }
+        // Upload file to GridFS
+        const uploadStream = bucket.openUploadStream(req.file.filename, {
+            contentType: req.file.mimetype,
+            metadata: { sessionId: req.params.id }
+        });
 
-        const result = await db.collection('live_sessions').updateOne(
-            filter,
-            { $set: { recordingUrl, status: 'RECORDED', updatedAt: new Date() } }
-        );
+        fs.createReadStream(req.file.path).pipe(uploadStream);
 
-        if (result.matchedCount === 0) {
-            // If still not found, just return the URL so the frontend can handle it if it wants
-            return res.json({ message: 'File saved but session not found in DB', recordingUrl });
-        }
+        uploadStream.on('error', (err) => {
+            console.error("GridFS error:", err);
+            return res.status(500).json({ error: 'Database storage failed' });
+        });
 
-        res.json({ success: true, recordingUrl });
+        uploadStream.on('finish', async () => {
+            // Clean up temporary local file
+            fs.unlinkSync(req.file.path);
+
+            const recordingUrl = `http://localhost:8080/api/academic/recording/${req.file.filename}`;
+            
+            let filter;
+            try {
+                filter = { _id: new mongoose.Types.ObjectId(req.params.id) };
+            } catch (e) {
+                filter = { meetingLink: req.params.id };
+            }
+
+            await db.collection('live_sessions').updateOne(
+                filter,
+                { $set: { recordingUrl, status: 'RECORDED', updatedAt: new Date() } }
+            );
+
+            res.json({ success: true, recordingUrl });
+        });
     } catch (err) {
         console.error("Recording upload error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Stream recording from MongoDB GridFS
+router.get('/recording/:filename', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
+        
+        const files = await bucket.find({ filename: req.params.filename }).toArray();
+        if (!files || files.length === 0) {
+            return res.status(404).json({ error: 'Recording not found' });
+        }
+
+        res.set('Content-Type', files[0].contentType || 'video/webm');
+        res.set('Accept-Ranges', 'bytes');
+
+        const downloadStream = bucket.openDownloadStreamByName(req.params.filename);
+        downloadStream.pipe(res);
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
