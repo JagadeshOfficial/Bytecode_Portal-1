@@ -29,7 +29,7 @@ router.post('/batches', async (req, res) => {
         const db = mongoose.connection.useDb('academic-db');
         const batch = { ...req.body, createdAt: new Date(), updatedAt: new Date() };
         const result = await db.collection('batches').insertOne(batch);
-        res.status(201).json({ ...batch, id: result.insertedId });
+        res.status(201).json({ ...batch, id: result.insertedId.toString() });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -40,13 +40,24 @@ router.post('/batches', async (req, res) => {
 router.put('/batches/:id', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
-        const { id, ...updateData } = req.body;
-        await db.collection('batches').updateOne(
+        const { id, _id, ...updateData } = req.body;
+        
+        // Remove any other potential ID fields from updateData
+        delete updateData.id;
+        delete updateData._id;
+
+        const result = await db.collection('batches').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
             { $set: { ...updateData, updatedAt: new Date() } }
         );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'Batch not found' });
+        }
+
         res.json({ id: req.params.id, ...updateData });
     } catch (err) {
+        console.error("Batch update error:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -101,7 +112,7 @@ router.post('/sessions', async (req, res) => {
         const db = mongoose.connection.useDb('academic-db');
         const session = { ...req.body, createdAt: new Date() };
         const result = await db.collection('live_sessions').insertOne(session);
-        res.status(201).json({ ...session, id: result.insertedId });
+        res.status(201).json({ ...session, id: result.insertedId.toString() });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -334,20 +334,55 @@ export default function AcademicHub() {
         } catch (e) { console.error(e); }
     };
 
-    const handleAssignTutor = async (trainerId: string | null) => {
-        const updatedBatch = { ...selectedBatch, trainerId };
+    const [tempTrainerIds, setTempTrainerIds] = useState<string[]>([]);
+    const [tempStudentIds, setTempStudentIds] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (isTutorModalOpen && selectedBatch) {
+            setTempTrainerIds(selectedBatch.trainerIds || (selectedBatch.trainerId ? [selectedBatch.trainerId] : []));
+        }
+    }, [isTutorModalOpen, selectedBatch]);
+
+    useEffect(() => {
+        if (isStudentModalOpen && selectedBatch) {
+             setTempStudentIds(selectedBatch.studentIds || []);
+        }
+    }, [isStudentModalOpen, selectedBatch]);
+
+    const handleSaveChanges = async (type: 'FACULTY' | 'STUDENTS') => {
+        if (!selectedBatch) return;
+        const batchId = selectedBatch.id || selectedBatch._id;
+        
+        let updatePayload = { ...selectedBatch };
+        if (type === 'FACULTY') {
+            updatePayload.trainerIds = tempTrainerIds;
+            // Backward compatibility for UI that uses trainerId
+            updatePayload.trainerId = tempTrainerIds[0] || null; 
+        } else {
+            updatePayload.studentIds = tempStudentIds;
+            updatePayload.totalStudents = tempStudentIds.length;
+        }
+
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${batchId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedBatch)
+                body: JSON.stringify(updatePayload)
             });
             if (res.ok) {
-                const savedBatch = await res.json();
-                setSelectedBatch(savedBatch);
-                setBatches(batches.map(b => b.id === savedBatch.id ? savedBatch : b));
+                await fetchData();
+                if (type === 'FACULTY') setIsTutorModalOpen(false);
+                else setIsStudentModalOpen(false);
             }
-        } catch(err) { console.error(err); }
+        } catch(err) { console.error("Save failed:", err); }
+    };
+
+    const toggleTempTrainer = (id: string) => {
+        setTempTrainerIds(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
+    };
+
+    const toggleTempStudent = (id: string) => {
+        setTempStudentIds(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
     };
 
     const handleFileUpload = async (event: any) => {
@@ -473,7 +508,10 @@ export default function AcademicHub() {
     };
 
     const handleToggleStudent = async (studentId: string) => {
-        let currentStudentIds = selectedBatch.studentIds || [];
+        if (!selectedBatch) return;
+        const batchId = selectedBatch.id || selectedBatch._id;
+
+        let currentStudentIds = [...(selectedBatch.studentIds || [])];
         if (currentStudentIds.includes(studentId)) {
             currentStudentIds = currentStudentIds.filter((id: string) => id !== studentId);
         } else {
@@ -482,17 +520,20 @@ export default function AcademicHub() {
         
         const updatedBatch = { ...selectedBatch, studentIds: currentStudentIds, totalStudents: currentStudentIds.length };
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${batchId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
                 const savedBatch = await res.json();
-                setSelectedBatch(savedBatch);
-                setBatches(batches.map(b => b.id === savedBatch.id ? savedBatch : b));
+                const normalized = { ...savedBatch, id: (savedBatch.id || savedBatch._id).toString() };
+                setSelectedBatch(normalized);
+                setBatches(batches.map(b => (b.id === normalized.id || b._id === normalized.id) ? normalized : b));
             }
-        } catch(err) { console.error(err); }
+        } catch(err) { 
+            console.error("Student sync failed:", err);
+        }
     };
 
     const handleCourseClick = (course: any) => {
@@ -703,7 +744,11 @@ export default function AcademicHub() {
         } catch (e) { console.error(e); }
     };
     const filteredBatches = batches.filter(b => b.courseId === selectedCourse?.id);
-    const tutor = allUsers.find(u => u.id === selectedBatch?.trainerId);
+    const assignedTutors = allUsers.filter(u => 
+        (selectedBatch?.trainerIds?.includes(u.id) || selectedBatch?.trainerIds?.includes(u._id)) ||
+        (selectedBatch?.trainerId === u.id || selectedBatch?.trainerId === u._id)
+    );
+    const tutor = assignedTutors[0]; // Fallback for single tutor logic elsewhere
     const batchAssignments = assignments.filter(a => a.batchId === selectedBatch?.id);
     const students = allUsers.filter(u => u.role === 'STUDENT' && (selectedBatch?.studentIds?.includes(u.id) || selectedBatch?.studentIds?.includes(u.email)));
 
@@ -1067,7 +1112,7 @@ export default function AcademicHub() {
                                  <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
                                       <h4 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Batch Context</h4>
                                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                           <InfoSnippet icon={<User size={18} />} label="Assigned Tutor" value={tutor?.fullName || tutor?.email || 'Pending'} />
+                                           <InfoSnippet icon={<User size={18} />} label="Faculty / Tutors" value={assignedTutors.length > 0 ? assignedTutors.map(t => t.fullName || t.email?.split('@')[0]).join(', ') : 'Pending'} />
                                            <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
                                            <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : 'Just Now'} />
                                        </div>
@@ -1288,44 +1333,64 @@ export default function AcademicHub() {
             {/* --- ASSIGN TUTOR MODAL --- */}
             <AnimatePresence>
                  {isTutorModalOpen && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '450px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
-                               <div style={{ background: 'var(--primary)', padding: '2rem', color: '#000' }}>
+                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(5,2,18,0.9)', backdropFilter: 'blur(20px)' }}>
+                          <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '480px', padding: 0, borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+                               <div style={{ background: 'var(--grad-main)', padding: '2.5rem', position: 'relative' }}>
                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                       <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Assign Tutor</h2>
-                                       <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}><XCircle size={24} /></button>
+                                       <div>
+                                           <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', letterSpacing: '-1px' }}>Assign Faculty</h2>
+                                           <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Select personnel for {selectedBatch?.batchName}</p>
+                                       </div>
+                                       <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
                                    </div>
-                                    <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                         <Search size={18} />
+                                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                         <Search size={18} color="#fff" />
                                          <input 
                                             value={tutorSearchTerm}
                                             onChange={(e) => setTutorSearchTerm(e.target.value)}
-                                            placeholder="Search name, email, number..." 
-                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }} 
+                                            placeholder="Search by name or email..." 
+                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 600, fontSize: '0.95rem', color: '#fff' }} 
                                          />
                                     </div>
                                </div>
-                               <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto' }}>
-                                   {allUsers.filter(u => u.role === 'TRAINER' && (
+                               <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                                   {allUsers.filter(u => (u.role === 'TRAINER' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') && (
                                        (u.fullName || '').toLowerCase().includes(tutorSearchTerm.toLowerCase()) ||
-                                       (u.email || '').toLowerCase().includes(tutorSearchTerm.toLowerCase()) ||
-                                       (u.phone || '').toLowerCase().includes(tutorSearchTerm.toLowerCase())
+                                       (u.email || '').toLowerCase().includes(tutorSearchTerm.toLowerCase())
                                    )).map((trainer: any, idx: number) => {
-                                       const isAssigned = selectedBatch?.trainerId === trainer.id;
+                                       const isAssigned = tempTrainerIds.includes(trainer.id || trainer._id);
                                        return (
-                                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: isAssigned ? '1px solid var(--primary)' : '1px solid transparent' }}>
-                                           <div>
-                                               <div style={{ fontWeight: 800 }}>{trainer.fullName || trainer.email.split('@')[0]}</div>
-                                               <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{trainer.email} • {trainer.phone || 'No phone'}</div>
+                                       <motion.div key={idx} whileHover={{ x: 5 }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: isAssigned ? 'rgba(124, 58, 237, 0.05)' : 'rgba(255,255,255,0.02)', borderRadius: '20px', border: isAssigned ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)' }}>
+                                           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                               <div style={{ width: '45px', height: '45px', borderRadius: '14px', background: 'var(--grad-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.1rem', color: '#fff' }}>
+                                                   {(trainer.fullName || 'U').charAt(0)}
+                                               </div>
+                                               <div>
+                                                   <div style={{ fontWeight: 800, fontSize: '1rem' }}>{trainer.fullName || 'Academic Staff'}</div>
+                                                   <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 600 }}>{trainer.email}</div>
+                                               </div>
                                            </div>
-                                           <button onClick={() => handleAssignTutor(isAssigned ? null : trainer.id)} style={{ background: isAssigned ? 'rgba(239, 68, 68, 0.1)' : 'var(--primary)', color: isAssigned ? '#ef4444' : '#000', border: isAssigned ? '1px solid #ef4444' : 'none', padding: '6px 15px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}>
-                                               {isAssigned ? 'UNASSIGN' : 'ASSIGN'}
+                                           <button 
+                                              onClick={() => toggleTempTrainer(trainer.id || trainer._id)} 
+                                              style={{ 
+                                                background: isAssigned ? '#ef444420' : 'rgba(255,255,255,0.05)', 
+                                                color: isAssigned ? '#ef4444' : 'var(--text-bright)', 
+                                                border: isAssigned ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', 
+                                                padding: '8px 18px', 
+                                                borderRadius: '12px', 
+                                                fontSize: '0.75rem', 
+                                                fontWeight: 800, 
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease'
+                                              }}
+                                           >
+                                               {isAssigned ? 'UNSELECT' : 'SELECT'}
                                            </button>
-                                       </div>
+                                       </motion.div>
                                    )})}
                                </div>
-                               <div style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>
-                                    <button onClick={() => setIsTutorModalOpen(false)} className="btn-quantum" style={{ padding: '10px 20px' }}>DONE</button>
+                               <div style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button onClick={() => handleSaveChanges('FACULTY')} className="btn-quantum" style={{ padding: '12px 30px', borderRadius: '14px' }}>SAVE CHANGES</button>
                                </div>
                           </motion.div>
                      </div>
@@ -1359,7 +1424,7 @@ export default function AcademicHub() {
                                        (u.email || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
                                        (u.phone || '').toLowerCase().includes(studentSearchTerm.toLowerCase())
                                    )).map((student: any, idx: number) => {
-                                       const hasAccess = selectedBatch?.studentIds?.includes(student.id);
+                                       const hasAccess = tempStudentIds.includes(student.id || student._id);
                                        return (
                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: hasAccess ? '1px solid var(--secondary)' : '1px solid transparent' }}>
                                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -1369,15 +1434,15 @@ export default function AcademicHub() {
                                                          <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email} • {student.phone || 'No phone'}</div>
                                                     </div>
                                                </div>
-                                               <button onClick={() => handleToggleStudent(student.id)} style={{ background: hasAccess ? 'rgba(239, 68, 68, 0.1)' : 'var(--secondary)', color: hasAccess ? '#ef4444' : '#000', border: hasAccess ? '1px solid #ef4444' : 'none', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
-                                                   {hasAccess ? 'UNASSIGN' : 'ASSIGN'}
+                                               <button onClick={() => toggleTempStudent(student.id || student._id)} style={{ background: hasAccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', color: hasAccess ? '#10b981' : '#fff', border: hasAccess ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', padding: '8px 18px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
+                                                   {hasAccess ? 'UNSELECT' : 'SELECT'}
                                                </button>
                                            </div>
                                        )
                                    })}
                                </div>
-                               <div style={{ padding: '1.5rem 2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>
-                                    <button onClick={() => setIsStudentModalOpen(false)} className="btn-quantum" style={{ padding: '10px 20px' }}>DONE</button>
+                               <div style={{ padding: '1.5rem 2.5rem', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button onClick={() => handleSaveChanges('STUDENTS')} className="btn-quantum" style={{ padding: '12px 30px', borderRadius: '14px', background: 'var(--secondary)' }}>SAVE CHANGES</button>
                                </div>
                           </motion.div>
                      </div>
