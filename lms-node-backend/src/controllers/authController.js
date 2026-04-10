@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -19,6 +20,11 @@ exports.register = async (req, res) => {
 // @access  Public
 exports.login = async (req, res) => {
     try {
+        // Check if MongoDB is actually connected before querying
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, error: 'Database not connected. Please ensure MongoDB is running and try again.' });
+        }
+
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ success: false, error: 'Please provide email and password' });
 
