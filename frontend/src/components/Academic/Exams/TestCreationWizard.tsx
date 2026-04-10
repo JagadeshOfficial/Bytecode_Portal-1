@@ -6,7 +6,7 @@ import {
     X, Check, ChevronRight, ChevronLeft,
     Plus, Trash2, Code, FileText,
     Zap, Shield, Clock, Award,
-    Globe, Smartphone, Monitor, Info
+    Globe, Smartphone, Monitor, Info, Video, Layers
 } from 'lucide-react';
 
 export default function TestCreationWizard({ onClose }: { onClose: () => void }) {

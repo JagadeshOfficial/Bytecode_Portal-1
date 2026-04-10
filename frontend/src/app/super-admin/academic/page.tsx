@@ -4,30 +4,31 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-    Book, Plus, Search, Edit2, Trash2, 
-    Layers, Users, Clock, User, BookOpen, 
+import {
+    Book, Plus, Search, Edit2, Trash2,
+    Layers, Users, Clock, User, BookOpen,
     ChevronRight, ChevronLeft, Folder, File,
-    Download, Upload, Eye, MoreVertical, 
+    Download, Upload, Eye, MoreVertical,
     CheckCircle, Calendar, Play, FileText,
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle, MinusCircle,
-    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip, 
+    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip,
     Zap, Activity, Terminal, BarChart2
 } from 'lucide-react';
 import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
+import MockInterviewEngine from '@/components/Academic/MockInterviews/MockInterviewEngine';
 
 export default function AcademicHub() {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS' | 'EXAMS' | 'ANALYTICS'>('COURSES');
-    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS'>('DRIVE');
+    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'INTERVIEWS' | 'TESTS'>('DRIVE');
     const [courses, setCourses] = useState<any[]>([]);
     const [batches, setBatches] = useState<any[]>([]);
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [liveSessions, setLiveSessions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Selection state
     const [selectedCourse, setSelectedCourse] = useState<any>(null);
     const [selectedBatch, setSelectedBatch] = useState<any>(null);
@@ -41,8 +42,8 @@ export default function AcademicHub() {
     const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
     const [editingSession, setEditingSession] = useState<any>(null);
 
-    const [newLiveSession, setNewLiveSession] = useState({ 
-        title: '', startTime: '', endDate: '', durationHours: 1, durationMinutes: 0, tutorId: '', platform: 'Bytecode Meetings', meetingLink: '' 
+    const [newLiveSession, setNewLiveSession] = useState({
+        title: '', startTime: '', endDate: '', durationHours: 1, durationMinutes: 0, tutorId: '', platform: 'Bytecode Meetings', meetingLink: ''
     });
     const [isEditBatchOpen, setIsEditBatchOpen] = useState(false);
     const [editBatchData, setEditBatchData] = useState<any>(null);
@@ -58,7 +59,7 @@ export default function AcademicHub() {
     const [shareNewFolderName, setShareNewFolderName] = useState('');
     const [isCreatingNewFolderInShare, setIsCreatingNewFolderInShare] = useState(false);
     const [newBatch, setNewBatch] = useState({
-        batchCode: '', batchName: '', trainerId: '', startDate: '', endDate: '', status: 'UPCOMING', 
+        batchCode: '', batchName: '', trainerId: '', startDate: '', endDate: '', status: 'UPCOMING',
         schedule: '', mode: 'ONLINE', branch: '', maxCapacity: 50, description: ''
     });
     const [newFolderName, setNewFolderName] = useState('');
@@ -67,14 +68,14 @@ export default function AcademicHub() {
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [sessionToDelete, setSessionToDelete] = useState<any>(null);
     const [newAssignment, setNewAssignment] = useState({
-        title: '', description: '', attachments: [] as { name: string, url: string }[], 
+        title: '', description: '', attachments: [] as { name: string, url: string }[],
         difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
-        dueDate: '', 
+        dueDate: '',
     });
     const [viewingAssignment, setViewingAssignment] = useState<any>(null);
     const [viewingSubmissionsAssignment, setViewingSubmissionsAssignment] = useState<any>(null);
     const [activeSubmission, setActiveSubmission] = useState<any>(null);
-    const [gradingData, setGradingData] = useState({ feedback: '', status: 'ACCEPTED' });
+    const [gradingData, setGradingData] = useState({ marks: 0, feedback: '', status: 'ACCEPTED' });
     const [isEditAssignmentModalOpen, setIsEditAssignmentModalOpen] = useState(false);
     const [editingAssignment, setEditingAssignment] = useState<any>(null);
     const [sharingTarget, setSharingTarget] = useState<any>(null);
@@ -105,7 +106,7 @@ export default function AcademicHub() {
                 try {
                     const res = await fetch(url);
                     if (res.ok) return await res.json();
-                } catch(e) {}
+                } catch (e) { }
                 return null;
             };
 
@@ -139,11 +140,11 @@ export default function AcademicHub() {
         const updatedBatch = { ...selectedBatch };
         const newFolder = {
             name: newFolderName,
-            createdBy: "Super Admin", 
-            sharedWith: [], 
+            createdBy: "Super Admin",
+            sharedWith: [],
             files: []
         };
-        
+
         updatedBatch.folders = [...(updatedBatch.folders || []), newFolder];
 
         try {
@@ -168,19 +169,19 @@ export default function AcademicHub() {
         if (!sharingTarget) return;
 
         const updatedFolders = selectedBatch.folders.map((f: any) => {
-             if (f.name === sharingTarget.name) {
-                  const alreadyShared = f.sharedWith?.find((s: any) => s.userId === user.id);
-                  if (alreadyShared) {
-                       return { ...f, sharedWith: f.sharedWith.map((s: any) => s.userId === user.id ? { ...s, role } : s) };
-                  } else {
-                       return { ...f, sharedWith: [...(f.sharedWith || []), { userId: user.id, fullName: user.fullName, role }] };
-                  }
-             }
-             return f;
+            if (f.name === sharingTarget.name) {
+                const alreadyShared = f.sharedWith?.find((s: any) => s.userId === user.id);
+                if (alreadyShared) {
+                    return { ...f, sharedWith: f.sharedWith.map((s: any) => s.userId === user.id ? { ...s, role } : s) };
+                } else {
+                    return { ...f, sharedWith: [...(f.sharedWith || []), { userId: user.id, fullName: user.fullName, role }] };
+                }
+            }
+            return f;
         });
 
         const updatedBatch = { ...selectedBatch, folders: updatedFolders };
-        
+
         try {
             const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
@@ -227,7 +228,7 @@ export default function AcademicHub() {
                 setBatches([...batches, saved]);
                 setIsCreateBatchOpen(false);
                 setNewBatch({
-                    batchCode: '', batchName: '', trainerId: '', startDate: '', endDate: '', status: 'UPCOMING', 
+                    batchCode: '', batchName: '', trainerId: '', startDate: '', endDate: '', status: 'UPCOMING',
                     schedule: '', mode: 'ONLINE', branch: '', maxCapacity: 50, description: ''
                 });
             }
@@ -304,7 +305,7 @@ export default function AcademicHub() {
     const initiateShare = async (ls: any) => {
         setShareTarget(ls);
         setIsShareModalOpen(true);
-        
+
         try {
             // Priority 1: Get all courses for general sharing
             const res = await fetch(`http://localhost:8080/api/courses`);
@@ -319,7 +320,7 @@ export default function AcademicHub() {
                     const bRes = await fetch(`http://localhost:8080/api/academic/batches/course/${course.id || course._id}`);
                     const batches = await bRes.json();
                     setAllBatchesForCourse(batches);
-                    
+
                     const batch = batches.find((b: any) => b.id === ls.batchId || b._id === ls.batchId);
                     if (batch) {
                         setShareSelectedBatch(batch);
@@ -333,7 +334,7 @@ export default function AcademicHub() {
             } else {
                 setShareStep(1);
             }
-        } catch (e) { 
+        } catch (e) {
             console.error("Initiate Share Error:", e);
             setShareStep(1);
         }
@@ -347,7 +348,7 @@ export default function AcademicHub() {
             if (!res.ok) throw new Error(`Status: ${res.status}`);
             const data = await res.json();
             setAllBatchesForCourse(data);
-        } catch (e) { 
+        } catch (e) {
             console.error("Batches for course error:", e);
             setAllBatchesForCourse([]);
         }
@@ -355,7 +356,7 @@ export default function AcademicHub() {
 
     const handleConfirmShare = async (folderName?: string) => {
         if (!shareSelectedBatch || !shareTarget) return;
-        
+
         const newFile = {
             name: `${shareTarget.batchName}_${shareTarget.title}.webm`,
             type: 'VIDEO',
@@ -366,10 +367,10 @@ export default function AcademicHub() {
 
         const updatedBatch = { ...shareSelectedBatch, updatedAt: new Date() };
         const targetFolderName = folderName || 'Shared Recordings';
-        
+
         if (!updatedBatch.folders) updatedBatch.folders = [];
         let folder = updatedBatch.folders.find((f: any) => f.name === targetFolderName);
-        
+
         if (!folder) {
             folder = { name: targetFolderName, files: [], createdBy: 'Stream Capture', createdAt: new Date() };
             updatedBatch.folders.push(folder);
@@ -384,8 +385,8 @@ export default function AcademicHub() {
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
-               alert(`Recording shared successfully to ${targetFolderName}!`);
-               setIsShareModalOpen(false);
+                alert(`Recording shared successfully to ${targetFolderName}!`);
+                setIsShareModalOpen(false);
             }
         } catch (e) { console.error(e); }
     };
@@ -401,19 +402,19 @@ export default function AcademicHub() {
 
     useEffect(() => {
         if (isStudentModalOpen && selectedBatch) {
-             setTempStudentIds(selectedBatch.studentIds || []);
+            setTempStudentIds(selectedBatch.studentIds || []);
         }
     }, [isStudentModalOpen, selectedBatch]);
 
     const handleSaveChanges = async (type: 'FACULTY' | 'STUDENTS') => {
         if (!selectedBatch) return;
         const batchId = selectedBatch.id || selectedBatch._id;
-        
+
         let updatePayload = { ...selectedBatch };
         if (type === 'FACULTY') {
             updatePayload.trainerIds = tempTrainerIds;
             // Backward compatibility for UI that uses trainerId
-            updatePayload.trainerId = tempTrainerIds[0] || null; 
+            updatePayload.trainerId = tempTrainerIds[0] || null;
         } else {
             updatePayload.studentIds = tempStudentIds;
             updatePayload.totalStudents = tempStudentIds.length;
@@ -430,7 +431,7 @@ export default function AcademicHub() {
                 if (type === 'FACULTY') setIsTutorModalOpen(false);
                 else setIsStudentModalOpen(false);
             }
-        } catch(err) { console.error("Save failed:", err); }
+        } catch (err) { console.error("Save failed:", err); }
     };
 
     const toggleTempTrainer = (id: string) => {
@@ -501,15 +502,15 @@ export default function AcademicHub() {
                 const savedBatch = await res.json();
                 setSelectedBatch(savedBatch);
                 setBatches(batches.map((b: any) => b.id === savedBatch.id ? savedBatch : b));
-                
+
                 if (newSelectedFolderName) {
                     const freshFolder = savedBatch.folders?.find((f: any) => f.name === newSelectedFolderName);
                     setSelectedFolder(freshFolder);
                 } else if (newSelectedFolderName === null && selectedFolder) {
-                   setSelectedFolder(null);
+                    setSelectedFolder(null);
                 } else if (selectedFolder) {
-                   const freshFolder = savedBatch.folders?.find((f: any) => f.name === selectedFolder.name);
-                   setSelectedFolder(freshFolder);
+                    const freshFolder = savedBatch.folders?.find((f: any) => f.name === selectedFolder.name);
+                    setSelectedFolder(freshFolder);
                 }
             }
         } catch (err) { console.error(err); }
@@ -528,7 +529,7 @@ export default function AcademicHub() {
         if (!renameTarget || !renameValue.trim()) return;
 
         const updatedBatch = { ...selectedBatch };
-        
+
         if (renameTarget.type === 'folder') {
             updatedBatch.folders = updatedBatch.folders.map((f: any) => {
                 if (f.name === renameTarget.oldName) return { ...f, name: renameValue.trim() };
@@ -573,7 +574,7 @@ export default function AcademicHub() {
         } else {
             currentStudentIds = [...currentStudentIds, studentId];
         }
-        
+
         const updatedBatch = { ...selectedBatch, studentIds: currentStudentIds, totalStudents: currentStudentIds.length };
         try {
             const res = await fetch(`http://localhost:8080/api/academic/batches/${batchId}`, {
@@ -587,7 +588,7 @@ export default function AcademicHub() {
                 setSelectedBatch(normalized);
                 setBatches(batches.map(b => (b.id === normalized.id || b._id === normalized.id) ? normalized : b));
             }
-        } catch(err) { 
+        } catch (err) {
             console.error("Student sync failed:", err);
         }
     };
@@ -601,7 +602,7 @@ export default function AcademicHub() {
         setSelectedBatch(batch);
         setSelectedFolder(null); // Reset folder view
         setViewMode('DETAILS');
-        
+
         // Fetch Live Sessions for this batch
         if (batch.id) {
             try {
@@ -624,7 +625,7 @@ export default function AcademicHub() {
     const handleUpdateAccess = async (user: any, role: string) => {
         if (!selectedBatch) return;
         const updatedBatch = { ...selectedBatch };
-        
+
         // CHECK: Is this a global batch access or a folder access?
         if (accessTarget.batchName || accessTarget.batchCode) {
             // Global Batch Access
@@ -734,10 +735,10 @@ export default function AcademicHub() {
                 const created = await res.json();
                 setLiveSessions([...liveSessions, created]);
                 setIsScheduleLiveModalOpen(false);
-                setNewLiveSession({ 
-                    title: '', startTime: '', endDate: '', 
-                    durationHours: 1, durationMinutes: 0, 
-                    tutorId: '', platform: 'Bytecode Meetings', meetingLink: '' 
+                setNewLiveSession({
+                    title: '', startTime: '', endDate: '',
+                    durationHours: 1, durationMinutes: 0,
+                    tutorId: '', platform: 'Bytecode Meetings', meetingLink: ''
                 });
             }
         } catch (e) {
@@ -784,7 +785,7 @@ export default function AcademicHub() {
 
     const handleCreateAssignment = async (e: React.FormEvent) => {
         e.preventDefault();
-        if(!selectedBatch) return;
+        if (!selectedBatch) return;
 
         const payload = {
             ...newAssignment,
@@ -809,9 +810,9 @@ export default function AcademicHub() {
                 setAssignments([...assignments, created]);
                 setIsCreateAssignmentModalOpen(false);
                 setNewAssignment({
-                    title: "", description: "", attachments: [], 
+                    title: "", description: "", attachments: [],
                     difficulty: "MEDIUM", instructions: "", status: "ACTIVE",
-                    dueDate: "", 
+                    dueDate: "",
                 });
                 alert("Assignment broadcasted successfully!");
             } else {
@@ -830,17 +831,17 @@ export default function AcademicHub() {
         const formData = new FormData();
         formData.append("file", file);
         try {
-             const res = await fetch("http://localhost:8080/api/academic/upload", {
-                 method: "POST",
-                 body: formData
-             });
-             const data = await res.json();
-             if (data.url) {
-                 setNewAssignment(prev => ({ 
-                    ...prev, 
-                    attachments: [...prev.attachments, { name: file.name, url: data.url }] 
-                 }));
-             }
+            const res = await fetch("http://localhost:8080/api/academic/upload", {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+            if (data.url) {
+                setNewAssignment(prev => ({
+                    ...prev,
+                    attachments: [...prev.attachments, { name: file.name, url: data.url }]
+                }));
+            }
         } catch (err) { console.error(err); }
     };
 
@@ -902,7 +903,7 @@ export default function AcademicHub() {
         } catch (e) { console.error(e); }
     };
     const filteredBatches = batches.filter(b => b.courseId === selectedCourse?.id);
-    const assignedTutors = allUsers.filter(u => 
+    const assignedTutors = allUsers.filter(u =>
         (selectedBatch?.trainerIds?.includes(u.id) || selectedBatch?.trainerIds?.includes(u._id)) ||
         (selectedBatch?.trainerId === u.id || selectedBatch?.trainerId === u._id)
     );
@@ -910,21 +911,21 @@ export default function AcademicHub() {
     const batchAssignments = assignments.filter(a => a.batchId === selectedBatch?.id);
     const students = allUsers.filter(u => u.role === 'STUDENT' && (selectedBatch?.studentIds?.includes(u.id) || selectedBatch?.studentIds?.includes(u.email)));
 
-    const usersToShareWith = allUsers.filter(u => 
-        (u.fullName || '').toLowerCase().includes(userSearchTerm.toLowerCase()) || 
+    const usersToShareWith = allUsers.filter(u =>
+        (u.fullName || '').toLowerCase().includes(userSearchTerm.toLowerCase()) ||
         (u.email || '').toLowerCase().includes(userSearchTerm.toLowerCase())
     ).slice(0, 5);
 
     return (
         <DashboardLayout role="super_admin">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ paddingBottom: '5rem' }}>
-                
+
                 {/* --- NAVIGATION BREADCRUMBS --- */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem', fontSize: '0.9rem', fontWeight: 600 }}>
                     <span onClick={() => { setViewMode('COURSES'); setSelectedCourse(null); setSelectedBatch(null); }} style={{ cursor: 'pointer', color: viewMode === 'COURSES' ? 'var(--primary)' : 'var(--text-dim)' }}>Academic Portal</span>
                     <ChevronRight size={14} color="var(--text-dim)" />
                     <span onClick={() => setViewMode('ANALYTICS')} style={{ cursor: 'pointer', color: viewMode === 'ANALYTICS' ? 'var(--primary)' : 'var(--text-dim)', background: 'rgba(59, 130, 246, 0.05)', padding: '5px 12px', borderRadius: '10px' }}>
-                        <BarChart2 size={14} style={{ display: 'inline', marginRight: '5px' }} /> Academic Insights
+                        <Users size={14} style={{ display: 'inline', marginRight: '5px' }} /> Mock Interviews
                     </span>
                     <ChevronRight size={14} color="var(--text-dim)" />
                     <span onClick={() => setViewMode('EXAMS')} style={{ cursor: 'pointer', color: viewMode === 'EXAMS' ? 'var(--primary)' : 'var(--text-dim)', background: 'rgba(139, 92, 246, 0.05)', padding: '5px 12px', borderRadius: '10px' }}>
@@ -956,18 +957,18 @@ export default function AcademicHub() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
-                            {viewMode === 'ANALYTICS' ? 'Academic Insights' : viewMode === 'EXAMS' ? 'Universal Test Engine' : selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Module Drive' : viewMode === 'BATCHES' ? 'Select Batch' : 'Shared Workspace'}
+                            {viewMode === 'ANALYTICS' ? 'Mock Interviews' : viewMode === 'EXAMS' ? 'Universal Test Engine' : selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Module Drive' : viewMode === 'BATCHES' ? 'Select Batch' : 'Shared Workspace'}
                         </h1>
                         <div style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            {viewMode === 'ANALYTICS' ? 'Global performance and engagement metrics.' : viewMode === 'EXAMS' ? 'AI-powered proctoring and assessment platform.' : selectedFolder ? `Viewing files in this folder.` : viewMode === 'COURSES' ? 'Access your courses and modules.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
-                            
+                            {viewMode === 'ANALYTICS' ? 'Practice and master real-world interview scenarios.' : viewMode === 'EXAMS' ? 'AI-powered proctoring and assessment platform.' : selectedFolder ? `Viewing files in this folder.` : viewMode === 'COURSES' ? 'Access your courses and modules.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
+
                             {viewMode === 'COURSES' && !selectedFolder && (
                                 <div style={{ display: 'flex', gap: '20px', marginLeft: '10px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '20px' }}>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary)' }}>{allUsers.filter(u => u.role === 'STUDENT').length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>STUDENTS</span></span>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--secondary)' }}>{allUsers.filter(u => u.role === 'TRAINER').length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>TRAINERS</span></span>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>{courses.length} <span style={{ color: 'var(--text-dim)', opacity: 0.6 }}>COURSES</span></span>
                                 </div>
-                            ) }
+                            )}
                         </div>
                     </div>
                     {viewMode !== 'COURSES' && (
@@ -1025,7 +1026,7 @@ export default function AcademicHub() {
                     {/* --- DRIVE WORKSPACE --- */}
                     {viewMode === 'DETAILS' && (
                         <motion.div key="details" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2.5rem' }}>
-                            
+
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                 {/* --- BATCH TABS NAVIGATION --- */}
                                 <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -1041,70 +1042,76 @@ export default function AcademicHub() {
                                     <button onClick={() => setBatchTab('ASSIGNMENTS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'ASSIGNMENTS' ? 'var(--primary)' : 'transparent', color: batchTab === 'ASSIGNMENTS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
                                         <FileText size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> ASSIGNMENTS
                                     </button>
+                                    <button onClick={() => setBatchTab('INTERVIEWS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'INTERVIEWS' ? 'var(--primary)' : 'transparent', color: batchTab === 'INTERVIEWS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
+                                        <Users size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> MOCK INTERVIEWS
+                                    </button>
+                                    <button onClick={() => setBatchTab('TESTS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'TESTS' ? 'var(--primary)' : 'transparent', color: batchTab === 'TESTS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
+                                        <Zap size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> TEST ENGINE
+                                    </button>
                                 </div>
 
                                 {/* --- DRIVE CONTENT --- */}
                                 {batchTab === 'DRIVE' && (
                                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                 {selectedFolder ? <Folder color="var(--primary)" /> : <HardDrive color="var(--primary)" />} 
-                                                 {selectedFolder ? selectedFolder.name : "My Drive"}
-                                             </h3>
-                                             <div style={{ display: 'flex', gap: '10px' }}>
-                                                  {!selectedFolder && (
-                                                      <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-                                                           <Plus size={16} /> NEW FOLDER
-                                                      </button>
-                                                  )}
-                                                  <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                                  <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'var(--secondary)' }}>
-                                                       <Upload size={16} /> UPLOAD FILE
-                                                  </button>
-                                              </div>
-                                         </div>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                {selectedFolder ? <Folder color="var(--primary)" /> : <HardDrive color="var(--primary)" />}
+                                                {selectedFolder ? selectedFolder.name : "My Drive"}
+                                            </h3>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                {!selectedFolder && (
+                                                    <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
+                                                        <Plus size={16} /> NEW FOLDER
+                                                    </button>
+                                                )}
+                                                <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                                <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'var(--secondary)' }}>
+                                                    <Upload size={16} /> UPLOAD FILE
+                                                </button>
+                                            </div>
+                                        </div>
 
                                         {!selectedFolder ? (
-                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}>
-                                                  {selectedBatch?.folders?.map((folder: any, fIdx: number) => (
-                                                      <DriveFolder 
-                                                         key={fIdx} 
-                                                         folder={folder} 
-                                                         onClick={() => setSelectedFolder(folder)} 
-                                                         onShare={(e: any) => { e.stopPropagation(); handleOpenAccess(folder); }} 
-                                                         onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
-                                                         onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
-                                                      />
-                                                  ))}
-                                                  {(!selectedBatch?.folders || selectedBatch.folders.length === 0) && (
-                                                       <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
-                                                           <Folder size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.1 }} />
-                                                           <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>This batch has no resources yet.</p>
-                                                       </div>
-                                                  )}
-                                             </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}>
+                                                {selectedBatch?.folders?.map((folder: any, fIdx: number) => (
+                                                    <DriveFolder
+                                                        key={fIdx}
+                                                        folder={folder}
+                                                        onClick={() => setSelectedFolder(folder)}
+                                                        onShare={(e: any) => { e.stopPropagation(); handleOpenAccess(folder); }}
+                                                        onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
+                                                        onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
+                                                    />
+                                                ))}
+                                                {(!selectedBatch?.folders || selectedBatch.folders.length === 0) && (
+                                                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
+                                                        <Folder size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.1 }} />
+                                                        <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>This batch has no resources yet.</p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         ) : (
-                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                  {selectedFolder.files?.length > 0 ? selectedFolder.files.map((file: any, fIdx: number) => (
-                                                      <FileItem 
-                                                         key={fIdx} 
-                                                         name={file.name} 
-                                                         type={file.type} 
-                                                         size={file.size} 
-                                                         date={new Date(file.uploadDate).toLocaleDateString()} 
-                                                         onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
-                                                         onDelete={() => handleDeleteFile(file.name)}
-                                                         onView={() => setViewFileTarget(file)}
-                                                         onShare={() => handleOpenAccess(file)}
-                                                      />
-                                                  )) : (
-                                                      <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
-                                                          <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                                                          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>No files found in this folder.</p>
-                                                          <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
-                                                      </div>
-                                                  )}
-                                             </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                {selectedFolder.files?.length > 0 ? selectedFolder.files.map((file: any, fIdx: number) => (
+                                                    <FileItem
+                                                        key={fIdx}
+                                                        name={file.name}
+                                                        type={file.type}
+                                                        size={file.size}
+                                                        date={new Date(file.uploadDate).toLocaleDateString()}
+                                                        onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
+                                                        onDelete={() => handleDeleteFile(file.name)}
+                                                        onView={() => setViewFileTarget(file)}
+                                                        onShare={() => handleOpenAccess(file)}
+                                                    />
+                                                )) : (
+                                                    <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
+                                                        <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
+                                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>No files found in this folder.</p>
+                                                        <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
                                     </motion.div>
                                 )}
@@ -1113,12 +1120,12 @@ export default function AcademicHub() {
                                 {batchTab === 'LIVE' && (
                                     <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                 <Video color="var(--primary)" /> Live Sessions Hub
-                                             </h3>
-                                             <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-                                                 <Plus size={16} /> SCHEDULE SESSION
-                                             </button>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <Video color="var(--primary)" /> Live Sessions Hub
+                                            </h3>
+                                            <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
+                                                <Plus size={16} /> SCHEDULE SESSION
+                                            </button>
                                         </div>
 
                                         {liveSessions.length === 0 ? (
@@ -1129,36 +1136,36 @@ export default function AcademicHub() {
                                                 <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ marginTop: '2rem', padding: '12px 24px', fontSize: '0.9rem' }}>SCHEDULE LIVE CLASS</button>
                                             </div>
                                         ) : (
-                                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "2rem" }}>
-                                                 {liveSessions.map((ls, idx) => (
-                                                     <motion.div 
-                                                         key={idx} 
-                                                         whileHover={{ y: -5, boxShadow: "0 15px 40px rgba(0,0,0,0.12)" }}
-                                                         style={{ 
-                                                             background: "#ffffff", 
-                                                             border: "1px solid #e2e8f0",
-                                                             borderRadius: "35px",
-                                                             padding: "2.5rem",
-                                                             display: "flex", 
-                                                             flexDirection: "column", 
-                                                             gap: "1.5rem", 
-                                                             position: "relative", 
-                                                             overflow: "hidden",
-                                                             boxShadow: "0 10px 25px rgba(0,0,0,0.05)"
-                                                         }}
-                                                     >
-                                                         <div style={{ position: "absolute", top: 0, left: 0, width: "6px", height: "100%", background: ls.status === "LIVE" ? "#10b981" : "var(--primary)" }} />
-                                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                                                             <div>
-                                                                 <h4 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
-                                                                 <span style={{ fontSize: "0.75rem", fontWeight: 900, color: "var(--primary)", letterSpacing: "2px", textTransform: "uppercase" }}>Live Transmission</span>
-                                                             </div>
-                                                             <div style={{ display: "flex", gap: "8px" }}>
-                                                                 <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
-                                                                 <button onClick={(e) => handleDeleteSession(ls.id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
-                                                             </div>
-                                                         </div>
-                                                         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "2rem" }}>
+                                                {liveSessions.map((ls, idx) => (
+                                                    <motion.div
+                                                        key={idx}
+                                                        whileHover={{ y: -5, boxShadow: "0 15px 40px rgba(0,0,0,0.12)" }}
+                                                        style={{
+                                                            background: "#ffffff",
+                                                            border: "1px solid #e2e8f0",
+                                                            borderRadius: "35px",
+                                                            padding: "2.5rem",
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            gap: "1.5rem",
+                                                            position: "relative",
+                                                            overflow: "hidden",
+                                                            boxShadow: "0 10px 25px rgba(0,0,0,0.05)"
+                                                        }}
+                                                    >
+                                                        <div style={{ position: "absolute", top: 0, left: 0, width: "6px", height: "100%", background: ls.status === "LIVE" ? "#10b981" : "var(--primary)" }} />
+                                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                                                            <div>
+                                                                <h4 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
+                                                                <span style={{ fontSize: "0.75rem", fontWeight: 900, color: "var(--primary)", letterSpacing: "2px", textTransform: "uppercase" }}>Live Transmission</span>
+                                                            </div>
+                                                            <div style={{ display: "flex", gap: "8px" }}>
+                                                                <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
+                                                                <button onClick={(e) => handleDeleteSession(ls.id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                                                             <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#2d3748" }}>
                                                                 <User size={18} color="var(--primary)" />
                                                                 <span style={{ fontSize: "1rem", fontWeight: 700 }}>Trainer: <b style={{ color: "var(--primary)" }}>{ls.mentorName || "Unassigned"}</b></span>
@@ -1171,13 +1178,13 @@ export default function AcademicHub() {
                                                                 <Clock size={16} />
                                                                 <span style={{ fontSize: "0.85rem" }}>{ls.duration} Minutes • {ls.platform}</span>
                                                             </div>
-                                                         </div>
-                                                         <button onClick={() => router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`)} className="btn-quantum" style={{ marginTop: "1rem", padding: "16px", fontSize: "1rem", fontWeight: 900, background: ls.status === "LIVE" ? "#10b981" : "var(--primary)", borderRadius: "20px", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", boxShadow: "0 10px 20px rgba(139, 92, 246, 0.3)" }}>
-                                                             🎥 JOIN WEBRTC ROOM
-                                                         </button>
-                                                     </motion.div>
-                                                 ))}
-                                             </div>
+                                                        </div>
+                                                        <button onClick={() => router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`)} className="btn-quantum" style={{ marginTop: "1rem", padding: "16px", fontSize: "1rem", fontWeight: 900, background: ls.status === "LIVE" ? "#10b981" : "var(--primary)", borderRadius: "20px", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", boxShadow: "0 10px 20px rgba(139, 92, 246, 0.3)" }}>
+                                                            🎥 JOIN WEBRTC ROOM
+                                                        </button>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
                                         )}
                                     </motion.div>
                                 )}
@@ -1186,9 +1193,9 @@ export default function AcademicHub() {
                                 {batchTab === 'RECORDINGS' && (
                                     <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                 <Play color="var(--primary)" /> Class Recordings
-                                             </h3>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <Play color="var(--primary)" /> Class Recordings
+                                            </h3>
                                         </div>
 
                                         {liveSessions.filter(ls => ls.recordingUrl).length === 0 ? (
@@ -1292,7 +1299,7 @@ export default function AcademicHub() {
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                                             {(() => {
                                                                 const combined = [...(accessTarget?.sharedWith || [])];
-                                                                
+
                                                                 // Add Core Tutors
                                                                 selectedBatch?.trainerIds?.forEach((id: string) => {
                                                                     const user = allUsers.find(u => u.id === id || u._id === id);
@@ -1346,13 +1353,13 @@ export default function AcademicHub() {
                                 {batchTab === 'ASSIGNMENTS' && (
                                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                             <div>
-                                                 <h3 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px', color: '#1a202c' }}>
-                                                     <FileText color="#10b981" /> Academic Assignments
-                                                 </h3>
-                                                 <p style={{ color: '#718096', fontSize: '0.9rem' }}>Project tracking, submissions, and performance auditing.</p>
-                                             </div>
-                                             <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '16px 32px', background: '#10b981', borderRadius: '18px', fontSize: '1rem', fontWeight: 900 }}>+ NEW ASSIGNMENT</button>
+                                            <div>
+                                                <h3 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px', color: '#1a202c' }}>
+                                                    <FileText color="#10b981" /> Academic Assignments
+                                                </h3>
+                                                <p style={{ color: '#718096', fontSize: '0.9rem' }}>Project tracking, submissions, and performance auditing.</p>
+                                            </div>
+                                            <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '16px 32px', background: '#10b981', borderRadius: '18px', fontSize: '1rem', fontWeight: 900 }}>+ NEW ASSIGNMENT</button>
                                         </div>
 
                                         {batchAssignments.length === 0 ? (
@@ -1370,10 +1377,10 @@ export default function AcademicHub() {
                                                     const submissionCount = a.submissions?.length || 0;
                                                     const totalStudents = students.length || 1;
                                                     const completionRate = Math.round((submissionCount / totalStudents) * 100);
-                                                    
+
                                                     return (
-                                                        <motion.div 
-                                                            key={idx} 
+                                                        <motion.div
+                                                            key={idx}
                                                             whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}
                                                             style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '35px', padding: '2.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', position: 'relative' }}
                                                         >
@@ -1420,32 +1427,45 @@ export default function AcademicHub() {
                                         )}
                                     </motion.div>
                                 )}
+                                {/* --- MOCK INTERVIEWS CONTENT --- */}
+                                {batchTab === 'INTERVIEWS' && (
+                                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
+                                        <MockInterviewEngine />
+                                    </motion.div>
+                                )}
+
+                                {/* --- TEST ENGINE CONTENT --- */}
+                                {batchTab === 'TESTS' && (
+                                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
+                                        <ExamManagement />
+                                    </motion.div>
+                                )}
                             </div>
 
                             {/* --- RIGHT INFO PANEL --- */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                 <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
-                                      <h4 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Batch Context</h4>
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                           <InfoSnippet icon={<User size={18} />} label="Faculty / Tutors" value={assignedTutors.length > 0 ? assignedTutors.map(t => t.fullName || t.email?.split('@')[0]).join(', ') : 'Pending'} />
-                                           <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
-                                           <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : 'Just Now'} />
-                                       </div>
-                                       <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                            <button onClick={() => {
-                                                setEditBatchData({
-                                                    ...selectedBatch,
-                                                    startDate: selectedBatch.startDate ? selectedBatch.startDate.split('T')[0] : '',
-                                                    endDate: selectedBatch.endDate ? selectedBatch.endDate.split('T')[0] : ''
-                                                });
-                                                setIsEditBatchOpen(true);
-                                            }} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%', background: 'var(--primary)' }}>EDIT BATCH</button>
-                                           <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
-                                            <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "var(--secondary)", width: "100%" }}>MANAGE BATCH STUDENTS</button>
-                                            <button onClick={() => handleOpenAccess(selectedBatch)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--primary)", color: "var(--primary)" }}>MANAGE BATCH ACCESS</button>
-                                            <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "#ef4444", width: "100%", border: "none" }}>DELETE BATCH</button>
-                                       </div>
-                                 </div>
+                                <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
+                                    <h4 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Batch Context</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <InfoSnippet icon={<User size={18} />} label="Faculty / Tutors" value={assignedTutors.length > 0 ? assignedTutors.map(t => t.fullName || t.email?.split('@')[0]).join(', ') : 'Pending'} />
+                                        <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
+                                        <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : 'Just Now'} />
+                                    </div>
+                                    <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <button onClick={() => {
+                                            setEditBatchData({
+                                                ...selectedBatch,
+                                                startDate: selectedBatch.startDate ? selectedBatch.startDate.split('T')[0] : '',
+                                                endDate: selectedBatch.endDate ? selectedBatch.endDate.split('T')[0] : ''
+                                            });
+                                            setIsEditBatchOpen(true);
+                                        }} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%', background: 'var(--primary)' }}>EDIT BATCH</button>
+                                        <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
+                                        <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "var(--secondary)", width: "100%" }}>MANAGE BATCH STUDENTS</button>
+                                        <button onClick={() => handleOpenAccess(selectedBatch)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--primary)", color: "var(--primary)" }}>MANAGE BATCH ACCESS</button>
+                                        <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "#ef4444", width: "100%", border: "none" }}>DELETE BATCH</button>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     )}
@@ -1456,10 +1476,10 @@ export default function AcademicHub() {
                         </motion.div>
                     )}
 
-                    {/* --- ACADEMIC ANALYTICS --- */}
+                    {/* --- MOCK INTERVIEW ENGINE --- */}
                     {viewMode === 'ANALYTICS' && (
-                        <motion.div key="analytics" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <AcademicAnalytics />
+                        <motion.div key="mock-interviews" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                            <MockInterviewEngine />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -1467,365 +1487,366 @@ export default function AcademicHub() {
 
             {/* --- CREATE FOLDER MODAL --- */}
             <AnimatePresence>
-                 {isCreateFolderOpen && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '3rem', borderRadius: '40px' }}>
-                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>New Folder</h2>
-                               <form onSubmit={handleCreateFolder}>
-                                    <input value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} autoFocus placeholder="Folder Name" style={inputStyle} />
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                         <button type="button" onClick={() => setIsCreateFolderOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
-                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>CREATE</button>
-                                    </div>
-                               </form>
-                          </motion.div>
-                     </div>
-                 )}
+                {isCreateFolderOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '3rem', borderRadius: '40px' }}>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>New Folder</h2>
+                            <form onSubmit={handleCreateFolder}>
+                                <input value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} autoFocus placeholder="Folder Name" style={inputStyle} />
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                                    <button type="button" onClick={() => setIsCreateFolderOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>CREATE</button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- CREATE BATCH MODAL --- */}
             <AnimatePresence>
-                 {isCreateBatchOpen && selectedCourse && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
-                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>New Batch for {selectedCourse.title}</h2>
-                               <form onSubmit={handleCreateBatch} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <input value={newBatch.batchCode} onChange={(e) => setNewBatch({...newBatch, batchCode: e.target.value})} placeholder="Batch Code (e.g. J1_APRIL)" style={inputStyle} required />
-                                        <input value={newBatch.batchName} onChange={(e) => setNewBatch({...newBatch, batchName: e.target.value})} placeholder="Batch Name" style={inputStyle} required />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <input type="date" value={newBatch.startDate} onChange={(e) => setNewBatch({...newBatch, startDate: e.target.value})} style={inputStyle} required />
-                                        <input type="date" value={newBatch.endDate} onChange={(e) => setNewBatch({...newBatch, endDate: e.target.value})} style={inputStyle} required />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <select value={newBatch.trainerId} onChange={(e) => setNewBatch({...newBatch, trainerId: e.target.value})} style={inputStyle} required>
-                                            <option value="">Select Trainer / Admin</option>
-                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map((u, idx) => (
-                                                <option key={u.id || idx} value={u.id}>{u.fullName}</option>
-                                            ))}
-                                        </select>
-                                        <select value={newBatch.mode} onChange={(e) => setNewBatch({...newBatch, mode: e.target.value})} style={inputStyle}>
-                                            <option value="ONLINE">Online</option>
-                                            <option value="OFFLINE">Offline</option>
-                                            <option value="HYBRID">Hybrid</option>
-                                        </select>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <input value={newBatch.schedule} onChange={(e) => setNewBatch({...newBatch, schedule: e.target.value})} placeholder="Schedule (e.g. Mon-Fri 10AM-1PM)" style={inputStyle} />
-                                        <input type="number" value={newBatch.maxCapacity} onChange={(e) => setNewBatch({...newBatch, maxCapacity: parseInt(e.target.value)})} placeholder="Max Capacity" style={inputStyle} />
-                                    </div>
-                                    <textarea value={newBatch.description} onChange={(e) => setNewBatch({...newBatch, description: e.target.value})} placeholder="Description" rows={3} style={{...inputStyle, resize: 'none'}} />
-                                    
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                         <button type="button" onClick={() => setIsCreateBatchOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
-                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>CREATE BATCH</button>
-                                    </div>
-                               </form>
-                          </motion.div>
-                     </div>
-                 )}
+                {isCreateBatchOpen && selectedCourse && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>New Batch for {selectedCourse.title}</h2>
+                            <form onSubmit={handleCreateBatch} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <input value={newBatch.batchCode} onChange={(e) => setNewBatch({ ...newBatch, batchCode: e.target.value })} placeholder="Batch Code (e.g. J1_APRIL)" style={inputStyle} required />
+                                    <input value={newBatch.batchName} onChange={(e) => setNewBatch({ ...newBatch, batchName: e.target.value })} placeholder="Batch Name" style={inputStyle} required />
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <input type="date" value={newBatch.startDate} onChange={(e) => setNewBatch({ ...newBatch, startDate: e.target.value })} style={inputStyle} required />
+                                    <input type="date" value={newBatch.endDate} onChange={(e) => setNewBatch({ ...newBatch, endDate: e.target.value })} style={inputStyle} required />
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <select value={newBatch.trainerId} onChange={(e) => setNewBatch({ ...newBatch, trainerId: e.target.value })} style={inputStyle} required>
+                                        <option value="">Select Trainer / Admin</option>
+                                        {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map((u, idx) => (
+                                            <option key={u.id || idx} value={u.id}>{u.fullName}</option>
+                                        ))}
+                                    </select>
+                                    <select value={newBatch.mode} onChange={(e) => setNewBatch({ ...newBatch, mode: e.target.value })} style={inputStyle}>
+                                        <option value="ONLINE">Online</option>
+                                        <option value="OFFLINE">Offline</option>
+                                        <option value="HYBRID">Hybrid</option>
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <input value={newBatch.schedule} onChange={(e) => setNewBatch({ ...newBatch, schedule: e.target.value })} placeholder="Schedule (e.g. Mon-Fri 10AM-1PM)" style={inputStyle} />
+                                    <input type="number" value={newBatch.maxCapacity} onChange={(e) => setNewBatch({ ...newBatch, maxCapacity: parseInt(e.target.value) })} placeholder="Max Capacity" style={inputStyle} />
+                                </div>
+                                <textarea value={newBatch.description} onChange={(e) => setNewBatch({ ...newBatch, description: e.target.value })} placeholder="Description" rows={3} style={{ ...inputStyle, resize: 'none' }} />
+
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="button" onClick={() => setIsCreateBatchOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>CREATE BATCH</button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- EDIT BATCH MODAL --- */}
             <AnimatePresence>
-                 {isEditBatchOpen && editBatchData && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
-                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Edit Batch {editBatchData.batchName}</h2>
-                               <form onSubmit={handleUpdateBatchSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <input value={editBatchData.batchCode} onChange={(e) => setEditBatchData({...editBatchData, batchCode: e.target.value})} placeholder="Batch Code" style={inputStyle} required />
-                                        <input value={editBatchData.batchName} onChange={(e) => setEditBatchData({...editBatchData, batchName: e.target.value})} placeholder="Batch Name" style={inputStyle} required />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <input type="date" value={editBatchData.startDate} onChange={(e) => setEditBatchData({...editBatchData, startDate: e.target.value})} style={inputStyle} required />
-                                        <input type="date" value={editBatchData.endDate} onChange={(e) => setEditBatchData({...editBatchData, endDate: e.target.value})} style={inputStyle} required />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <select value={editBatchData.trainerId || ''} onChange={(e) => setEditBatchData({...editBatchData, trainerId: e.target.value})} style={inputStyle} required>
-                                            <option value="">Select Trainer / Admin</option>
-                                            {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map((u, idx) => (
-                                                <option key={u.id || idx} value={u.id}>{u.fullName}</option>
-                                            ))}
-                                        </select>
-                                        <select value={editBatchData.mode || 'ONLINE'} onChange={(e) => setEditBatchData({...editBatchData, mode: e.target.value})} style={inputStyle}>
-                                            <option value="ONLINE">Online</option>
-                                            <option value="OFFLINE">Offline</option>
-                                            <option value="HYBRID">Hybrid</option>
-                                        </select>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <input value={editBatchData.schedule || ''} onChange={(e) => setEditBatchData({...editBatchData, schedule: e.target.value})} placeholder="Schedule (e.g. Mon-Fri 10AM-1PM)" style={inputStyle} />
-                                        <input type="number" value={editBatchData.maxCapacity || 50} onChange={(e) => setEditBatchData({...editBatchData, maxCapacity: parseInt(e.target.value)})} placeholder="Max Capacity" style={inputStyle} />
-                                    </div>
-                                    <textarea value={editBatchData.description || ''} onChange={(e) => setEditBatchData({...editBatchData, description: e.target.value})} placeholder="Description" rows={3} style={{...inputStyle, resize: 'none'}} />
-                                    
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                         <button type="button" onClick={() => setIsEditBatchOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
-                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)' }}>SAVE CHANGES</button>
-                                    </div>
-                               </form>
-                          </motion.div>
-                     </div>
-                 )}
+                {isEditBatchOpen && editBatchData && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Edit Batch {editBatchData.batchName}</h2>
+                            <form onSubmit={handleUpdateBatchSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <input value={editBatchData.batchCode} onChange={(e) => setEditBatchData({ ...editBatchData, batchCode: e.target.value })} placeholder="Batch Code" style={inputStyle} required />
+                                    <input value={editBatchData.batchName} onChange={(e) => setEditBatchData({ ...editBatchData, batchName: e.target.value })} placeholder="Batch Name" style={inputStyle} required />
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <input type="date" value={editBatchData.startDate} onChange={(e) => setEditBatchData({ ...editBatchData, startDate: e.target.value })} style={inputStyle} required />
+                                    <input type="date" value={editBatchData.endDate} onChange={(e) => setEditBatchData({ ...editBatchData, endDate: e.target.value })} style={inputStyle} required />
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <select value={editBatchData.trainerId || ''} onChange={(e) => setEditBatchData({ ...editBatchData, trainerId: e.target.value })} style={inputStyle} required>
+                                        <option value="">Select Trainer / Admin</option>
+                                        {allUsers.filter(u => u.role === 'TRAINER' || u.role === 'SUPER_ADMIN').map((u, idx) => (
+                                            <option key={u.id || idx} value={u.id}>{u.fullName}</option>
+                                        ))}
+                                    </select>
+                                    <select value={editBatchData.mode || 'ONLINE'} onChange={(e) => setEditBatchData({ ...editBatchData, mode: e.target.value })} style={inputStyle}>
+                                        <option value="ONLINE">Online</option>
+                                        <option value="OFFLINE">Offline</option>
+                                        <option value="HYBRID">Hybrid</option>
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <input value={editBatchData.schedule || ''} onChange={(e) => setEditBatchData({ ...editBatchData, schedule: e.target.value })} placeholder="Schedule (e.g. Mon-Fri 10AM-1PM)" style={inputStyle} />
+                                    <input type="number" value={editBatchData.maxCapacity || 50} onChange={(e) => setEditBatchData({ ...editBatchData, maxCapacity: parseInt(e.target.value) })} placeholder="Max Capacity" style={inputStyle} />
+                                </div>
+                                <textarea value={editBatchData.description || ''} onChange={(e) => setEditBatchData({ ...editBatchData, description: e.target.value })} placeholder="Description" rows={3} style={{ ...inputStyle, resize: 'none' }} />
+
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="button" onClick={() => setIsEditBatchOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)' }}>SAVE CHANGES</button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- SHARE ACCESS MODAL (Fully Functional) --- */}
             <AnimatePresence>
-                 {isShareModalOpen && sharingTarget && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
-                               <div style={{ background: 'var(--primary)', padding: '2.5rem', color: '#000' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Share2 size={24} /> Share Access</h2>
-                                         <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><XCircle size={28} /></button>
+                {isShareModalOpen && sharingTarget && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
+                            <div style={{ background: 'var(--primary)', padding: '2.5rem', color: '#000' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Share2 size={24} /> Share Access</h2>
+                                    <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><XCircle size={28} /></button>
+                                </div>
+                                <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <Search size={18} />
+                                    <input
+                                        value={userSearchTerm}
+                                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                                        placeholder="Search students, staff or tutors..."
+                                        style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '2.5rem' }}>
+                                {/* --- SEARCH RESULTS --- */}
+                                {userSearchTerm && (
+                                    <div style={{ marginBottom: '2rem' }}>
+                                        <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Search Results</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            {usersToShareWith.map((u: any, idx: number) => (
+                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+                                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
+                                                        <div>
+                                                            <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'var(--primary)', color: '#000', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                         <Search size={18} />
-                                         <input 
-                                            value={userSearchTerm}
-                                            onChange={(e) => setUserSearchTerm(e.target.value)}
-                                            placeholder="Search students, staff or tutors..." 
-                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }} 
-                                         />
+                                )}
+
+                                {/* --- SUGGESTED USERS (All Students of Batch) --- */}
+                                {!userSearchTerm && (
+                                    <div style={{ marginBottom: '2rem' }}>
+                                        <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Suggested Users (Batch {selectedBatch.batchName})</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {students.filter(s => !sharingTarget.sharedWith?.find((sw: any) => sw.userId === s.id)).map((u: any, idx: number) => (
+                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+                                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
+                                                        <div>
+                                                            <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
+                                                </div>
+                                            ))}
+                                            {students.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', padding: '10px' }}>No students found in this batch.</div>}
+                                        </div>
                                     </div>
-                               </div>
+                                )}
 
-                               <div style={{ padding: '2.5rem' }}>
-                                    {/* --- SEARCH RESULTS --- */}
-                                     {userSearchTerm && (
-                                          <div style={{ marginBottom: '2rem' }}>
-                                               <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Search Results</h4>
-                                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                    {usersToShareWith.map((u: any, idx: number) => (
-                                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
-                                                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                                   <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
-                                                                   <div>
-                                                                        <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
-                                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
-                                                                   </div>
-                                                              </div>
-                                                              <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'var(--primary)', color: '#000', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
-                                                         </div>
-                                                    ))}
-                                               </div>
-                                          </div>
-                                     )}
+                                {/* --- CURRENT ACCESS LIST --- */}
+                                <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>People with access</h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+                                    <SharedMemberItem name="Super Admin (You)" role="OWNER" />
+                                    {sharingTarget.sharedWith?.map((access: any, idx: number) => (
+                                        <SharedMemberItem
+                                            key={idx}
+                                            name={access.fullName}
+                                            role={access.role}
+                                            onRoleChange={(r: string) => handleUpdateSharing({ id: access.userId, fullName: access.fullName }, r)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
 
-                                     {/* --- SUGGESTED USERS (All Students of Batch) --- */}
-                                     {!userSearchTerm && (
-                                          <div style={{ marginBottom: '2rem' }}>
-                                               <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Suggested Users (Batch {selectedBatch.batchName})</h4>
-                                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
-                                                    {students.filter(s => !sharingTarget.sharedWith?.find((sw: any) => sw.userId === s.id)).map((u: any, idx: number) => (
-                                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
-                                                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                                   <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{u.fullName?.charAt(0)}</div>
-                                                                   <div>
-                                                                        <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{u.fullName}</div>
-                                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.role.replace('_', ' ')}</div>
-                                                                   </div>
-                                                              </div>
-                                                              <button onClick={() => handleUpdateSharing(u, 'EDITOR')} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', padding: '6px 15px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', border: 'none' }}>GIVE ACCESS</button>
-                                                         </div>
-                                                    ))}
-                                                    {students.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', padding: '10px' }}>No students found in this batch.</div>}
-                                               </div>
-                                          </div>
-                                     )}
-
-                                    {/* --- CURRENT ACCESS LIST --- */}
-                                    <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>People with access</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '300px', overflowY: 'auto' }}>
-                                         <SharedMemberItem name="Super Admin (You)" role="OWNER" />
-                                         {sharingTarget.sharedWith?.map((access: any, idx: number) => (
-                                              <SharedMemberItem 
-                                                 key={idx} 
-                                                 name={access.fullName} 
-                                                 role={access.role} 
-                                                 onRoleChange={(r: string) => handleUpdateSharing({ id: access.userId, fullName: access.fullName }, r)} 
-                                              />
-                                         ))}
-                                    </div>
-                               </div>
-
-                               <div style={{ padding: '2rem 2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontWeight: 800, cursor: 'pointer' }}>CLOSE</button>
-                               </div>
-                          </motion.div>
-                     </div>
-                 )}
+                            <div style={{ padding: '2rem 2.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontWeight: 800, cursor: 'pointer' }}>CLOSE</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- ASSIGN TUTOR MODAL --- */}
             <AnimatePresence>
-                 {isTutorModalOpen && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(5,2,18,0.9)', backdropFilter: 'blur(20px)' }}>
-                          <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '480px', padding: 0, borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
-                               <div style={{ background: 'var(--grad-main)', padding: '2.5rem', position: 'relative' }}>
-                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                       <div>
-                                           <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', letterSpacing: '-1px' }}>Assign Faculty</h2>
-                                           <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Select personnel for {selectedBatch?.batchName}</p>
-                                       </div>
-                                       <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
-                                   </div>
-                                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                         <Search size={18} color="#fff" />
-                                         <input 
-                                            value={tutorSearchTerm}
-                                            onChange={(e) => setTutorSearchTerm(e.target.value)}
-                                            placeholder="Search by name or email..." 
-                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 600, fontSize: '0.95rem', color: '#fff' }} 
-                                         />
+                {isTutorModalOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(5,2,18,0.9)', backdropFilter: 'blur(20px)' }}>
+                        <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '480px', padding: 0, borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+                            <div style={{ background: 'var(--grad-main)', padding: '2.5rem', position: 'relative' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', letterSpacing: '-1px' }}>Assign Faculty</h2>
+                                        <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Select personnel for {selectedBatch?.batchName}</p>
                                     </div>
-                               </div>
-                               <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
-                                   {allUsers.filter(u => (u.role === 'TRAINER' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') && (
-                                       (u.fullName || '').toLowerCase().includes(tutorSearchTerm.toLowerCase()) ||
-                                       (u.email || '').toLowerCase().includes(tutorSearchTerm.toLowerCase())
-                                   )).map((trainer: any, idx: number) => {
-                                       const isAssigned = tempTrainerIds.includes(trainer.id || trainer._id);
-                                       return (
-                                       <motion.div key={idx} whileHover={{ x: 5 }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: isAssigned ? 'rgba(124, 58, 237, 0.05)' : 'rgba(255,255,255,0.02)', borderRadius: '20px', border: isAssigned ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)' }}>
-                                           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                               <div style={{ width: '45px', height: '45px', borderRadius: '14px', background: 'var(--grad-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.1rem', color: '#fff' }}>
-                                                   {(trainer.fullName || 'U').charAt(0)}
-                                               </div>
-                                               <div>
-                                                   <div style={{ fontWeight: 800, fontSize: '1rem' }}>{trainer.fullName || 'Academic Staff'}</div>
-                                                   <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 600 }}>{trainer.email}</div>
-                                               </div>
-                                           </div>
-                                           <button 
-                                              onClick={() => toggleTempTrainer(trainer.id || trainer._id)} 
-                                              style={{ 
-                                                background: isAssigned ? '#ef444420' : 'rgba(255,255,255,0.05)', 
-                                                color: isAssigned ? '#ef4444' : 'var(--text-bright)', 
-                                                border: isAssigned ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', 
-                                                padding: '8px 18px', 
-                                                borderRadius: '12px', 
-                                                fontSize: '0.75rem', 
-                                                fontWeight: 800, 
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s ease'
-                                              }}
-                                           >
-                                               {isAssigned ? 'UNSELECT' : 'SELECT'}
-                                           </button>
-                                       </motion.div>
-                                   )})}
-                               </div>
-                               <div style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button onClick={() => handleSaveChanges('FACULTY')} className="btn-quantum" style={{ padding: '12px 30px', borderRadius: '14px' }}>SAVE CHANGES</button>
-                               </div>
-                          </motion.div>
-                     </div>
-                 )}
+                                    <button onClick={() => setIsTutorModalOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <Search size={18} color="#fff" />
+                                    <input
+                                        value={tutorSearchTerm}
+                                        onChange={(e) => setTutorSearchTerm(e.target.value)}
+                                        placeholder="Search by name or email..."
+                                        style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 600, fontSize: '0.95rem', color: '#fff' }}
+                                    />
+                                </div>
+                            </div>
+                            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                                {allUsers.filter(u => (u.role === 'TRAINER' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') && (
+                                    (u.fullName || '').toLowerCase().includes(tutorSearchTerm.toLowerCase()) ||
+                                    (u.email || '').toLowerCase().includes(tutorSearchTerm.toLowerCase())
+                                )).map((trainer: any, idx: number) => {
+                                    const isAssigned = tempTrainerIds.includes(trainer.id || trainer._id);
+                                    return (
+                                        <motion.div key={idx} whileHover={{ x: 5 }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: isAssigned ? 'rgba(124, 58, 237, 0.05)' : 'rgba(255,255,255,0.02)', borderRadius: '20px', border: isAssigned ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                <div style={{ width: '45px', height: '45px', borderRadius: '14px', background: 'var(--grad-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.1rem', color: '#fff' }}>
+                                                    {(trainer.fullName || 'U').charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 800, fontSize: '1rem' }}>{trainer.fullName || 'Academic Staff'}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 600 }}>{trainer.email}</div>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => toggleTempTrainer(trainer.id || trainer._id)}
+                                                style={{
+                                                    background: isAssigned ? '#ef444420' : 'rgba(255,255,255,0.05)',
+                                                    color: isAssigned ? '#ef4444' : 'var(--text-bright)',
+                                                    border: isAssigned ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                                                    padding: '8px 18px',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 800,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                {isAssigned ? 'UNSELECT' : 'SELECT'}
+                                            </button>
+                                        </motion.div>
+                                    )
+                                })}
+                            </div>
+                            <div style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button onClick={() => handleSaveChanges('FACULTY')} className="btn-quantum" style={{ padding: '12px 30px', borderRadius: '14px' }}>SAVE CHANGES</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- MANAGE STUDENTS MODAL --- */}
             <AnimatePresence>
-                 {isStudentModalOpen && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
-                               <div style={{ background: 'var(--secondary)', padding: '2.5rem', color: '#000' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={24} /> Edit Batch Students</h2>
-                                         <button onClick={() => setIsStudentModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}><XCircle size={28} /></button>
-                                    </div>
-                                    <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                         <Search size={18} />
-                                         <input 
-                                            value={studentSearchTerm}
-                                            onChange={(e) => setStudentSearchTerm(e.target.value)}
-                                            placeholder="Search name, email, number..." 
-                                            style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }} 
-                                         />
-                                    </div>
-                               </div>
+                {isStudentModalOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: 0, borderRadius: '40px', overflow: 'hidden' }}>
+                            <div style={{ background: 'var(--secondary)', padding: '2.5rem', color: '#000' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={24} /> Edit Batch Students</h2>
+                                    <button onClick={() => setIsStudentModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}><XCircle size={28} /></button>
+                                </div>
+                                <div style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <Search size={18} />
+                                    <input
+                                        value={studentSearchTerm}
+                                        onChange={(e) => setStudentSearchTerm(e.target.value)}
+                                        placeholder="Search name, email, number..."
+                                        style={{ background: 'none', border: 'none', width: '100%', outline: 'none', fontWeight: 700, fontSize: '0.95rem', color: '#000' }}
+                                    />
+                                </div>
+                            </div>
 
-                               <div style={{ padding: '2rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
-                                   {allUsers.filter(u => u.role === 'STUDENT' && (
-                                       (u.fullName || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
-                                       (u.email || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
-                                       (u.phone || '').toLowerCase().includes(studentSearchTerm.toLowerCase())
-                                   )).map((student: any, idx: number) => {
-                                       const hasAccess = tempStudentIds.includes(student.id || student._id);
-                                       return (
-                                           <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: hasAccess ? '1px solid var(--secondary)' : '1px solid transparent' }}>
-                                               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--secondary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{student.email?.charAt(0).toUpperCase()}</div>
-                                                    <div>
-                                                         <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{student.fullName || student.email.split('@')[0]}</div>
-                                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email} • {student.phone || 'No phone'}</div>
-                                                    </div>
-                                               </div>
-                                               <button onClick={() => toggleTempStudent(student.id || student._id)} style={{ background: hasAccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', color: hasAccess ? '#10b981' : '#fff', border: hasAccess ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', padding: '8px 18px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
-                                                   {hasAccess ? 'UNSELECT' : 'SELECT'}
-                                               </button>
-                                           </div>
-                                       )
-                                   })}
-                               </div>
-                               <div style={{ padding: '1.5rem 2.5rem', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button onClick={() => handleSaveChanges('STUDENTS')} className="btn-quantum" style={{ padding: '12px 30px', borderRadius: '14px', background: 'var(--secondary)' }}>SAVE CHANGES</button>
-                               </div>
-                          </motion.div>
-                     </div>
-                 )}
+                            <div style={{ padding: '2rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
+                                {allUsers.filter(u => u.role === 'STUDENT' && (
+                                    (u.fullName || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
+                                    (u.email || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
+                                    (u.phone || '').toLowerCase().includes(studentSearchTerm.toLowerCase())
+                                )).map((student: any, idx: number) => {
+                                    const hasAccess = tempStudentIds.includes(student.id || student._id);
+                                    return (
+                                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: hasAccess ? '1px solid var(--secondary)' : '1px solid transparent' }}>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--secondary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{student.email?.charAt(0).toUpperCase()}</div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{student.fullName || student.email.split('@')[0]}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email} • {student.phone || 'No phone'}</div>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => toggleTempStudent(student.id || student._id)} style={{ background: hasAccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', color: hasAccess ? '#10b981' : '#fff', border: hasAccess ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', padding: '8px 18px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
+                                                {hasAccess ? 'UNSELECT' : 'SELECT'}
+                                            </button>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div style={{ padding: '1.5rem 2.5rem', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button onClick={() => handleSaveChanges('STUDENTS')} className="btn-quantum" style={{ padding: '12px 30px', borderRadius: '14px', background: 'var(--secondary)' }}>SAVE CHANGES</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- RENAME MODAL --- */}
             <AnimatePresence>
-                 {renameTarget && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '3rem', borderRadius: '40px' }}>
-                               <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem' }}>Rename {renameTarget.type === 'folder' ? 'Folder' : 'File'}</h2>
-                               <form onSubmit={handleRenameSubmit}>
-                                    <input value={renameValue} onChange={(e) => setRenameValue(e.target.value)} autoFocus placeholder="New Name" style={inputStyle} />
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                         <button type="button" onClick={() => setRenameTarget(null)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
-                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>SAVE</button>
-                                    </div>
-                               </form>
-                          </motion.div>
-                     </div>
-                 )}
+                {renameTarget && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '3rem', borderRadius: '40px' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem' }}>Rename {renameTarget.type === 'folder' ? 'Folder' : 'File'}</h2>
+                            <form onSubmit={handleRenameSubmit}>
+                                <input value={renameValue} onChange={(e) => setRenameValue(e.target.value)} autoFocus placeholder="New Name" style={inputStyle} />
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                                    <button type="button" onClick={() => setRenameTarget(null)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px' }}>SAVE</button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- VIEW FILE MODAL --- */}
             <AnimatePresence>
-                 {viewFileTarget && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(15px)' }}>
-                          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: '95%', maxWidth: '1000px', height: '80vh', display: 'flex', flexDirection: 'column' }}>
-                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '24px 24px 0 0' }}>
-                                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                       {viewFileTarget.type === 'pdf' || viewFileTarget.type === 'doc' || viewFileTarget.type === 'txt' ? <FileText color="var(--primary)" /> : <Play color="var(--primary)" />}
-                                       <h2 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{viewFileTarget.name}</h2>
-                                   </div>
-                                   <button onClick={() => setViewFileTarget(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={28} /></button>
-                               </div>
-                               <div style={{ flex: 1, background: '#000', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                                    {['mp4', 'mkv', 'webm', 'mov', 'video'].includes(viewFileTarget.type?.toLowerCase()) || viewFileTarget.name?.toLowerCase().endsWith('.webm') ? (
-                                        <video 
-                                            src={viewFileTarget.url} 
-                                            controls 
-                                            autoPlay 
-                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                        />
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-                                            <FileText size={80} color="var(--primary)" style={{ opacity: 0.5 }} />
-                                            <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>Document Preview Viewer</p>
-                                        </div>
-                                    )}
-                               </div>
-                  </motion.div>
-                     </div>
-                 )}
+                {viewFileTarget && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(15px)' }}>
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: '95%', maxWidth: '1000px', height: '80vh', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '24px 24px 0 0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                    {viewFileTarget.type === 'pdf' || viewFileTarget.type === 'doc' || viewFileTarget.type === 'txt' ? <FileText color="var(--primary)" /> : <Play color="var(--primary)" />}
+                                    <h2 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{viewFileTarget.name}</h2>
+                                </div>
+                                <button onClick={() => setViewFileTarget(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={28} /></button>
+                            </div>
+                            <div style={{ flex: 1, background: '#000', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                                {['mp4', 'mkv', 'webm', 'mov', 'video'].includes(viewFileTarget.type?.toLowerCase()) || viewFileTarget.name?.toLowerCase().endsWith('.webm') ? (
+                                    <video
+                                        src={viewFileTarget.url}
+                                        controls
+                                        autoPlay
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    />
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+                                        <FileText size={80} color="var(--primary)" style={{ opacity: 0.5 }} />
+                                        <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>Document Preview Viewer</p>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- SCHEDULE LIVE SESSION MODAL --- */}
@@ -1842,17 +1863,17 @@ export default function AcademicHub() {
                         <form onSubmit={handleScheduleLiveClass} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SESSION TITLE</label>
-                                <input value={newLiveSession.title} onChange={e => setNewLiveSession({...newLiveSession, title: e.target.value})} placeholder="e.g. FullStack Development Introduction" required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                <input value={newLiveSession.title} onChange={e => setNewLiveSession({ ...newLiveSession, title: e.target.value })} placeholder="e.g. FullStack Development Introduction" required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>START DATE & TIME</label>
-                                    <input type="datetime-local" value={newLiveSession.startTime} onChange={e => setNewLiveSession({...newLiveSession, startTime: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    <input type="datetime-local" value={newLiveSession.startTime} onChange={e => setNewLiveSession({ ...newLiveSession, startTime: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>END DATE & TIME (OPTIONAL)</label>
-                                    <input type="datetime-local" value={newLiveSession.endDate} onChange={e => setNewLiveSession({...newLiveSession, endDate: e.target.value})} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    <input type="datetime-local" value={newLiveSession.endDate} onChange={e => setNewLiveSession({ ...newLiveSession, endDate: e.target.value })} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                 </div>
                             </div>
 
@@ -1860,11 +1881,11 @@ export default function AcademicHub() {
                                 <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>DURATION</label>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div style={{ position: 'relative' }}>
-                                        <input type="number" min="0" value={newLiveSession.durationHours} onChange={e => setNewLiveSession({...newLiveSession, durationHours: parseInt(e.target.value) || 0})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', width: '100%' }} />
+                                        <input type="number" min="0" value={newLiveSession.durationHours} onChange={e => setNewLiveSession({ ...newLiveSession, durationHours: parseInt(e.target.value) || 0 })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', width: '100%' }} />
                                         <span style={{ position: 'absolute', right: '12px', top: '12px', fontSize: '0.7rem', color: 'var(--secondary)', fontWeight: 900 }}>HOURS</span>
                                     </div>
                                     <div style={{ position: 'relative' }}>
-                                        <input type="number" min="0" max="59" value={newLiveSession.durationMinutes} onChange={e => setNewLiveSession({...newLiveSession, durationMinutes: parseInt(e.target.value) || 0})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', width: '100%' }} />
+                                        <input type="number" min="0" max="59" value={newLiveSession.durationMinutes} onChange={e => setNewLiveSession({ ...newLiveSession, durationMinutes: parseInt(e.target.value) || 0 })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', width: '100%' }} />
                                         <span style={{ position: 'absolute', right: '12px', top: '12px', fontSize: '0.7rem', color: 'var(--secondary)', fontWeight: 900 }}>MINS</span>
                                     </div>
                                 </div>
@@ -1873,7 +1894,7 @@ export default function AcademicHub() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SELECT TUTOR</label>
-                                    <select value={newLiveSession.tutorId} onChange={e => setNewLiveSession({...newLiveSession, tutorId: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                    <select value={newLiveSession.tutorId} onChange={e => setNewLiveSession({ ...newLiveSession, tutorId: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
                                         <option value="">- Select Trainer/Admin -</option>
                                         {allUsers.filter(u => ['TRAINER', 'ADMIN', 'SUPER_ADMIN', 'TUTOR', 'EMPLOYEE'].includes(u.role)).map((u, idx) => (
                                             <option key={u.id || idx} value={u.id}>{u.fullName || u.name || u.email || 'Unnamed User'} ({u.role})</option>
@@ -1882,7 +1903,7 @@ export default function AcademicHub() {
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>PLATFORM</label>
-                                    <select value={newLiveSession.platform} onChange={e => setNewLiveSession({...newLiveSession, platform: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                    <select value={newLiveSession.platform} onChange={e => setNewLiveSession({ ...newLiveSession, platform: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.9)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
                                         <option value="Bytecode Meetings">Bytecode Meetings</option>
                                         <option value="ZOOM">Zoom Cloud Meeting</option>
                                         <option value="GOOGLE_MEET">Google Meet</option>
@@ -1894,7 +1915,7 @@ export default function AcademicHub() {
                             {newLiveSession.platform !== 'Bytecode Meetings' && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>MEETING LINK URL</label>
-                                    <input value={newLiveSession.meetingLink} onChange={e => setNewLiveSession({...newLiveSession, meetingLink: e.target.value})} placeholder={`https://${newLiveSession.platform.toLowerCase()}...`} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    <input value={newLiveSession.meetingLink} onChange={e => setNewLiveSession({ ...newLiveSession, meetingLink: e.target.value })} placeholder={`https://${newLiveSession.platform.toLowerCase()}...`} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                 </div>
                             )}
 
@@ -1925,24 +1946,24 @@ export default function AcademicHub() {
                             <form onSubmit={handleUpdateSession} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>SESSION TITLE</label>
-                                    <input value={editingSession.title} onChange={e => setEditingSession({...editingSession, title: e.target.value})} placeholder="e.g. React Hooks Deep Dive" required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    <input value={editingSession.title} onChange={e => setEditingSession({ ...editingSession, title: e.target.value })} placeholder="e.g. React Hooks Deep Dive" required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>START DATE & TIME</label>
-                                        <input type="datetime-local" value={editingSession.startTime?.slice(0, 16)} onChange={e => setEditingSession({...editingSession, startTime: e.target.value})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                        <input type="datetime-local" value={editingSession.startTime?.slice(0, 16)} onChange={e => setEditingSession({ ...editingSession, startTime: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>DURATION (MINUTES)</label>
-                                        <input type="number" min="1" value={editingSession.duration} onChange={e => setEditingSession({...editingSession, duration: parseInt(e.target.value) || 60})} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                        <input type="number" min="1" value={editingSession.duration} onChange={e => setEditingSession({ ...editingSession, duration: parseInt(e.target.value) || 60 })} required style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                     </div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>PLATFORM</label>
-                                        <select value={editingSession.platform} onChange={e => setEditingSession({...editingSession, platform: e.target.value})} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                        <select value={editingSession.platform} onChange={e => setEditingSession({ ...editingSession, platform: e.target.value })} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
                                             <option value="Bytecode Meetings">Bytecode Meetings</option>
                                             <option value="ZOOM">Zoom</option>
                                             <option value="GOOGLE_MEET">Google Meet</option>
@@ -1951,7 +1972,7 @@ export default function AcademicHub() {
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>STATUS</label>
-                                        <select value={editingSession.status} onChange={e => setEditingSession({...editingSession, status: e.target.value})} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
+                                        <select value={editingSession.status} onChange={e => setEditingSession({ ...editingSession, status: e.target.value })} style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }}>
                                             <option value="UPCOMING">Upcoming</option>
                                             <option value="LIVE">Live Now</option>
                                             <option value="COMPLETED">Completed</option>
@@ -1961,7 +1982,7 @@ export default function AcademicHub() {
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>MEETING LINK URL</label>
-                                    <input value={editingSession.meetingLink} onChange={e => setEditingSession({...editingSession, meetingLink: e.target.value})} placeholder="https://..." style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    <input value={editingSession.meetingLink} onChange={e => setEditingSession({ ...editingSession, meetingLink: e.target.value })} placeholder="https://..." style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                 </div>
 
                                 <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '12px', fontWeight: 900, marginTop: '1rem' }}>
@@ -1974,7 +1995,7 @@ export default function AcademicHub() {
             </AnimatePresence>
 
             {/* --- WebRTC Room navigation is handled via router.push --- */}
-            
+
             {/* --- MULTI-STEP FOLDER SHARE MODAL --- */}
             <AnimatePresence>
                 {isShareModalOpen && (
@@ -2046,7 +2067,7 @@ export default function AcademicHub() {
                                     <button onClick={() => setShareStep(2)} style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <ChevronLeft size={16} /> BACK TO BATCHES
                                     </button>
-                                    
+
                                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.06)' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
                                             {shareSelectedBatch.folders?.map((f: any) => (
@@ -2097,11 +2118,11 @@ export default function AcademicHub() {
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
                                     <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "8px" }}>
                                         <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>ASSIGNMENT TITLE</label>
-                                        <input required value={newAssignment.title} onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})} placeholder="e.g. Advanced System Architecture Project" style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
+                                        <input required value={newAssignment.title} onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })} placeholder="e.g. Advanced System Architecture Project" style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
                                     </div>
                                     <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: "8px" }}>
                                         <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>LEVEL</label>
-                                        <select value={newAssignment.difficulty} onChange={(e) => setNewAssignment({...newAssignment, difficulty: e.target.value})} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }}>
+                                        <select value={newAssignment.difficulty} onChange={(e) => setNewAssignment({ ...newAssignment, difficulty: e.target.value })} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }}>
                                             <option value="BEGINNER">BEGINNER</option>
                                             <option value="MEDIUM">MEDIUM</option>
                                             <option value="ADVANCED">ADVANCED</option>
@@ -2113,13 +2134,13 @@ export default function AcademicHub() {
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
                                     <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: "8px" }}>
                                         <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>DUE DATE</label>
-                                        <input type="date" required value={newAssignment.dueDate} onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
+                                        <input type="date" required value={newAssignment.dueDate} onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
                                     </div>
                                 </div>
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                     <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>DESCRIPTION</label>
-                                    <textarea required value={newAssignment.description} onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})} placeholder="Explain the project scope and expected deliverables..." rows={4} style={{...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0", resize: "none" }} />
+                                    <textarea required value={newAssignment.description} onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })} placeholder="Explain the project scope and expected deliverables..." rows={4} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0", resize: "none" }} />
                                 </div>
 
                                 <div style={{ background: "#f0f9ff", padding: "1.5rem", borderRadius: "24px", border: "1px solid #e0f2fe" }}>
@@ -2265,9 +2286,9 @@ export default function AcademicHub() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>STATUS</label>
-                                            <select 
-                                                value={gradingData.status} 
-                                                onChange={(e) => setGradingData({...gradingData, status: e.target.value})}
+                                            <select
+                                                value={gradingData.status}
+                                                onChange={(e) => setGradingData({ ...gradingData, status: e.target.value })}
                                                 style={inputStyle}
                                             >
                                                 <option value="ACCEPTED">APPROVE SUBMISSION</option>
@@ -2276,18 +2297,18 @@ export default function AcademicHub() {
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)' }}>FEEDBACK</label>
-                                            <textarea 
-                                                value={gradingData.feedback} 
-                                                onChange={(e) => setGradingData({...gradingData, feedback: e.target.value})}
-                                                rows={5} 
-                                                style={{...inputStyle, resize: 'none'}} 
+                                            <textarea
+                                                value={gradingData.feedback}
+                                                onChange={(e) => setGradingData({ ...gradingData, feedback: e.target.value })}
+                                                rows={5}
+                                                style={{ ...inputStyle, resize: 'none' }}
                                                 placeholder="Professional feedback for the student..."
                                             />
                                         </div>
                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                             <button onClick={handleGradeSubmission} className="btn-quantum" style={{ flex: 1, padding: '15px', background: gradingData.status === 'ACCEPTED' ? '#10b981' : '#ef4444' }}>
-                                                 {gradingData.status === 'ACCEPTED' ? 'APPROVE PROTOCOL' : 'SEND FOR REVISION'}
-                                             </button>
+                                            <button onClick={handleGradeSubmission} className="btn-quantum" style={{ flex: 1, padding: '15px', background: gradingData.status === 'ACCEPTED' ? '#10b981' : '#ef4444' }}>
+                                                {gradingData.status === 'ACCEPTED' ? 'APPROVE PROTOCOL' : 'SEND FOR REVISION'}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -2299,48 +2320,48 @@ export default function AcademicHub() {
 
             {/* --- EDIT ASSIGNMENT MODAL --- */}
             <AnimatePresence>
-                 {isEditAssignmentModalOpen && editingAssignment && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
-                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Update Protocols: {editingAssignment.title}</h2>
-                               <form onSubmit={handleUpdateAssignment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <input value={editingAssignment.title} onChange={(e) => setEditingAssignment({...editingAssignment, title: e.target.value})} placeholder="Assignment Title" style={inputStyle} required />
-                                    <textarea value={editingAssignment.description} onChange={(e) => setEditingAssignment({...editingAssignment, description: e.target.value})} placeholder="Abstract Description" rows={3} style={{...inputStyle, resize: 'none'}} required />
-                                    
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DIFFICULTY</label>
-                                            <select value={editingAssignment.difficulty} onChange={(e) => setEditingAssignment({...editingAssignment, difficulty: e.target.value})} style={inputStyle}>
-                                                <option value="EASY">Easy</option>
-                                                <option value="MEDIUM">Medium</option>
-                                                <option value="HARD">Hard</option>
-                                            </select>
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>STATUS</label>
-                                            <select value={editingAssignment.status} onChange={(e) => setEditingAssignment({...editingAssignment, status: e.target.value})} style={inputStyle}>
-                                                <option value="ACTIVE">Active</option>
-                                                <option value="UPCOMING">Upcoming</option>
-                                                <option value="CLOSED">Closed</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                {isEditAssignmentModalOpen && editingAssignment && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Update Protocols: {editingAssignment.title}</h2>
+                            <form onSubmit={handleUpdateAssignment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <input value={editingAssignment.title} onChange={(e) => setEditingAssignment({ ...editingAssignment, title: e.target.value })} placeholder="Assignment Title" style={inputStyle} required />
+                                <textarea value={editingAssignment.description} onChange={(e) => setEditingAssignment({ ...editingAssignment, description: e.target.value })} placeholder="Abstract Description" rows={3} style={{ ...inputStyle, resize: 'none' }} required />
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                         <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, display: 'block' }}>ATTACHMENT URL</label>
-                                         <input value={editingAssignment.attachmentUrl} onChange={(e) => setEditingAssignment({...editingAssignment, attachmentUrl: e.target.value})} style={inputStyle} />
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DIFFICULTY</label>
+                                        <select value={editingAssignment.difficulty} onChange={(e) => setEditingAssignment({ ...editingAssignment, difficulty: e.target.value })} style={inputStyle}>
+                                            <option value="EASY">Easy</option>
+                                            <option value="MEDIUM">Medium</option>
+                                            <option value="HARD">Hard</option>
+                                        </select>
                                     </div>
-
-                                    <textarea value={editingAssignment.instructions} onChange={(e) => setEditingAssignment({...editingAssignment, instructions: e.target.value})} placeholder="Critical Instructions" rows={4} style={{...inputStyle, resize: 'none'}} />
-
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                         <button type="button" onClick={() => setIsEditAssignmentModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
-                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)' }}>COMMIT CHANGES</button>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>STATUS</label>
+                                        <select value={editingAssignment.status} onChange={(e) => setEditingAssignment({ ...editingAssignment, status: e.target.value })} style={inputStyle}>
+                                            <option value="ACTIVE">Active</option>
+                                            <option value="UPCOMING">Upcoming</option>
+                                            <option value="CLOSED">Closed</option>
+                                        </select>
                                     </div>
-                               </form>
-                          </motion.div>
-                     </div>
-                 )}
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, display: 'block' }}>ATTACHMENT URL</label>
+                                    <input value={editingAssignment.attachmentUrl} onChange={(e) => setEditingAssignment({ ...editingAssignment, attachmentUrl: e.target.value })} style={inputStyle} />
+                                </div>
+
+                                <textarea value={editingAssignment.instructions} onChange={(e) => setEditingAssignment({ ...editingAssignment, instructions: e.target.value })} placeholder="Critical Instructions" rows={4} style={{ ...inputStyle, resize: 'none' }} />
+
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="button" onClick={() => setIsEditAssignmentModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)' }}>COMMIT CHANGES</button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             {/* --- DELETE CONFIRMATION MODAL --- */}
@@ -2353,7 +2374,7 @@ export default function AcademicHub() {
                             </div>
                             <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem' }}>Irreversible Action</h2>
                             <p style={{ color: 'var(--text-dim)', marginBottom: '2.5rem', lineHeight: 1.6 }}>You are about to permanently delete this session recording from MongoDB. This action cannot be undone.</p>
-                            
+
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button onClick={() => setIsDeleteConfirmOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 800 }}>CANCEL</button>
                                 <button onClick={confirmDeleteRecording} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 900 }}>DELETE NOW</button>
@@ -2368,7 +2389,7 @@ export default function AcademicHub() {
 
 function DriveFolder({ folder, onClick, onShare, onRename, onDelete }: any) {
     return (
-        <motion.div 
+        <motion.div
             whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.03)' }}
             className="drive-card"
             style={{ padding: '1.5rem', borderRadius: '24px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', cursor: 'pointer', position: 'relative' }}
@@ -2381,8 +2402,8 @@ function DriveFolder({ folder, onClick, onShare, onRename, onDelete }: any) {
             <div onClick={onClick}>
                 <Folder size={64} fill="rgba(124, 58, 237, 0.2)" color="var(--primary)" />
                 <div style={{ marginTop: '10px' }}>
-                     <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{folder.name}</div>
-                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{folder.files?.length || 0} Files</div>
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{folder.name}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{folder.files?.length || 0} Files</div>
                 </div>
             </div>
         </motion.div>
@@ -2414,23 +2435,23 @@ function FileItem({ name, type, size, date, onRename, onDelete, onView }: any) {
 function SharedMemberItem({ name, role, onRoleChange }: any) {
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{name.charAt(0)}</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>{name}</div>
-             </div>
-             {onRoleChange ? (
-                  <select 
-                    value={role} 
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{name.charAt(0)}</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>{name}</div>
+            </div>
+            {onRoleChange ? (
+                <select
+                    value={role}
                     onChange={(e) => onRoleChange(e.target.value)}
                     style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', outline: 'none', cursor: 'pointer' }}
-                  >
-                       <option value="VIEWER">VIEWER</option>
-                       <option value="EDITOR">EDITOR</option>
-                       <option value="OWNER">OWNER</option>
-                  </select>
-             ) : (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase' }}>{role}</span>
-             )}
+                >
+                    <option value="VIEWER">VIEWER</option>
+                    <option value="EDITOR">EDITOR</option>
+                    <option value="OWNER">OWNER</option>
+                </select>
+            ) : (
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase' }}>{role}</span>
+            )}
         </div>
     );
 }
@@ -2440,8 +2461,8 @@ function InfoSnippet({ icon, label, value }: any) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
             <div>
-                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase' }}>{label}</div>
-                 <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>{value}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase' }}>{label}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>{value}</div>
             </div>
         </div>
     );
@@ -2449,7 +2470,7 @@ function InfoSnippet({ icon, label, value }: any) {
 
 function CourseCard({ course, onClick, delay }: any) {
     return (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }} onClick={onClick} className="glass-panel" 
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }} onClick={onClick} className="glass-panel"
             style={{ padding: '2.5rem', borderRadius: '32px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}
             whileHover={{ y: -5, background: 'rgba(255,255,255,0.06)' }}
         >
@@ -2466,7 +2487,7 @@ function CourseCard({ course, onClick, delay }: any) {
 
 function BatchCard({ batch, onClick, delay }: any) {
     return (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay }} onClick={onClick} className="glass-panel" 
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay }} onClick={onClick} className="glass-panel"
             style={{ padding: '2.5rem', borderRadius: '32px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)' }}
             whileHover={{ y: -5 }}
         >
