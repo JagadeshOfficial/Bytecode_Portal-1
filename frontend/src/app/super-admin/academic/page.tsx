@@ -11,7 +11,7 @@ import {
     Download, Upload, Eye, MoreVertical, 
     CheckCircle, Calendar, Play, FileText,
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
-    Settings, HardDrive, Filter, XCircle,
+    Settings, HardDrive, Filter, XCircle, MinusCircle,
     ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip
 } from 'lucide-react';
 
@@ -66,7 +66,7 @@ export default function AcademicHub() {
     const [newAssignment, setNewAssignment] = useState({
         title: '', description: '', attachments: [] as string[], 
         difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
-        dueDate: '', totalMarks: 100
+        dueDate: '', 
     });
     const [viewingAssignment, setViewingAssignment] = useState<any>(null);
     const [viewingSubmissionsAssignment, setViewingSubmissionsAssignment] = useState<any>(null);
@@ -84,6 +84,15 @@ export default function AcademicHub() {
     const [renameValue, setRenameValue] = useState('');
     const [viewFileTarget, setViewFileTarget] = useState<any>(null);
 
+    const [recSearchTerm, setRecSearchTerm] = useState('');
+    const [recCourseFilter, setRecCourseFilter] = useState('ALL');
+    const [recBatchFilter, setRecBatchFilter] = useState('ALL');
+
+    const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
+    const [accessTarget, setAccessTarget] = useState<any>(null);
+    const [accessSearchTerm, setAccessSearchTerm] = useState('');
+    const [accessRole, setAccessRole] = useState('VIEWER');
+
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
@@ -97,17 +106,19 @@ export default function AcademicHub() {
                 return null;
             };
 
-            const [cData, bData, uData, aData] = await Promise.all([
+            const [cData, bData, uData, aData, sData] = await Promise.all([
                 safeFetch('http://localhost:8080/api/courses'),
                 safeFetch('http://localhost:8080/api/academic/batches'),
                 safeFetch('http://localhost:8080/api/users'),
-                safeFetch('http://localhost:8080/api/academic/assignments')
+                safeFetch('http://localhost:8080/api/academic/assignments'),
+                safeFetch('http://localhost:8080/api/academic/sessions')
             ]);
 
             if (Array.isArray(cData)) setCourses(cData);
             if (Array.isArray(bData)) setBatches(bData);
             if (Array.isArray(uData)) setAllUsers(uData);
             if (Array.isArray(aData)) setAssignments(aData);
+            if (Array.isArray(sData)) setLiveSessions(sData);
         } catch (err) {
             console.error(err);
         }
@@ -290,15 +301,38 @@ export default function AcademicHub() {
     const initiateShare = async (ls: any) => {
         setShareTarget(ls);
         setIsShareModalOpen(true);
-        setShareStep(1);
+        
         try {
+            // Priority 1: Get all courses for general sharing
             const res = await fetch(`http://localhost:8080/api/courses`);
-            if (!res.ok) throw new Error(`Status: ${res.status}`);
-            const data = await res.json();
-            setAllCourses(data);
+            const courses = await res.json();
+            setAllCourses(courses);
+
+            // Priority 2: If session has metadata, jump to appropriate step
+            if (ls.courseId || ls.batchId) {
+                const course = courses.find((c: any) => c.id === ls.courseId || c._id === ls.courseId);
+                if (course) {
+                    setShareSelectedCourse(course);
+                    const bRes = await fetch(`http://localhost:8080/api/academic/batches/course/${course.id || course._id}`);
+                    const batches = await bRes.json();
+                    setAllBatchesForCourse(batches);
+                    
+                    const batch = batches.find((b: any) => b.id === ls.batchId || b._id === ls.batchId);
+                    if (batch) {
+                        setShareSelectedBatch(batch);
+                        setShareStep(3); // Jump straight to folder selection
+                    } else {
+                        setShareStep(2); // Jump to batch selection
+                    }
+                } else {
+                    setShareStep(1);
+                }
+            } else {
+                setShareStep(1);
+            }
         } catch (e) { 
-            console.error("Courses fetch error:", e);
-            setAllCourses([]);
+            console.error("Initiate Share Error:", e);
+            setShareStep(1);
         }
     };
 
@@ -579,6 +613,82 @@ export default function AcademicHub() {
         }
     };
 
+    const handleOpenAccess = (target: any) => {
+        setAccessTarget(target);
+        setIsAccessModalOpen(true);
+    };
+
+    const handleUpdateAccess = async (user: any, role: string) => {
+        if (!selectedBatch) return;
+        const updatedBatch = { ...selectedBatch };
+        
+        // CHECK: Is this a global batch access or a folder access?
+        if (accessTarget.batchName || accessTarget.batchCode) {
+            // Global Batch Access
+            updatedBatch.sharedWith = updatedBatch.sharedWith || [];
+            const existing = updatedBatch.sharedWith.find((s: any) => s.email === user.email);
+            if (existing) existing.role = role;
+            else updatedBatch.sharedWith.push({ email: user.email, name: user.fullName, role });
+        } else {
+            // Specific Folder Access
+            const targetFolder = updatedBatch.folders?.find((f: any) => f.name === accessTarget.name);
+            if (targetFolder) {
+                targetFolder.sharedWith = targetFolder.sharedWith || [];
+                const existing = targetFolder.sharedWith.find((s: any) => s.email === user.email);
+                if (existing) existing.role = role;
+                else targetFolder.sharedWith.push({ email: user.email, name: user.fullName, role });
+            }
+        }
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setSelectedBatch(saved);
+                setBatches(batches.map(b => (b.id === saved.id || b._id === saved.id) ? saved : b));
+                setAccessTarget(accessTarget.batchName ? saved : accessTarget);
+            }
+        } catch (e) {
+            console.error("Access Update Error:", e);
+        }
+    };
+
+    const handleRemoveAccess = async (email: string) => {
+        if (!selectedBatch) return;
+        const updatedBatch = { ...selectedBatch };
+
+        if (accessTarget.batchName || accessTarget.batchCode) {
+            // Global Batch
+            updatedBatch.sharedWith = updatedBatch.sharedWith?.filter((s: any) => s.email !== email);
+        } else {
+            // Folder
+            const targetFolder = updatedBatch.folders?.find((f: any) => f.name === accessTarget.name);
+            if (targetFolder) {
+                targetFolder.sharedWith = targetFolder.sharedWith?.filter((s: any) => s.email !== email);
+            }
+        }
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setSelectedBatch(saved);
+                setBatches(batches.map(b => (b.id === saved.id || b._id === saved.id) ? saved : b));
+                setAccessTarget(accessTarget.batchName ? saved : accessTarget);
+            }
+        } catch (e) {
+            console.error("Access Revoke Error:", e);
+        }
+    };
+
     const goBack = () => {
         if (selectedFolder) setSelectedFolder(null);
         else if (viewMode === 'DETAILS') setViewMode('BATCHES');
@@ -680,15 +790,15 @@ export default function AcademicHub() {
             courseId: selectedCourse.id,
             courseName: selectedCourse.title,
             trainerId: selectedBatch.trainerId,
-            trainerName: tutor?.fullName || 'Unassigned',
+            trainerName: tutor?.fullName || "Unassigned",
             assignedDate: new Date(),
             submissions: []
         };
 
         try {
-            const res = await fetch('http://localhost:8080/api/academic/assignments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const res = await fetch("http://localhost:8080/api/academic/assignments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
@@ -696,12 +806,29 @@ export default function AcademicHub() {
                 setAssignments([...assignments, created]);
                 setIsCreateAssignmentModalOpen(false);
                 setNewAssignment({
-                    title: '', description: '', attachments: [], 
-                    difficulty: 'MEDIUM', instructions: '', status: 'ACTIVE',
-                    dueDate: '', totalMarks: 100
+                    title: "", description: "", attachments: [], 
+                    difficulty: "MEDIUM", instructions: "", status: "ACTIVE",
+                    dueDate: "", 
                 });
             }
         } catch (e) { console.error(e); }
+    };
+
+    const handleAssignmentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+             const res = await fetch("http://localhost:8080/api/academic/upload", {
+                 method: "POST",
+                 body: formData
+             });
+             const data = await res.json();
+             if (data.url) {
+                 setNewAssignment(prev => ({ ...prev, attachments: [...prev.attachments, data.url] }));
+             }
+        } catch (err) { console.error(err); }
     };
 
     const handleDeleteAssignment = async (id: string, e: any) => {
@@ -921,7 +1048,7 @@ export default function AcademicHub() {
                                                          key={fIdx} 
                                                          folder={folder} 
                                                          onClick={() => setSelectedFolder(folder)} 
-                                                         onShare={(e: any) => { e.stopPropagation(); setSharingTarget(folder); setIsShareModalOpen(true); }} 
+                                                         onShare={(e: any) => { e.stopPropagation(); handleOpenAccess(folder); }} 
                                                          onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
                                                          onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
                                                       />
@@ -945,6 +1072,7 @@ export default function AcademicHub() {
                                                          onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
                                                          onDelete={() => handleDeleteFile(file.name)}
                                                          onView={() => setViewFileTarget(file)}
+                                                         onShare={() => handleOpenAccess(file)}
                                                       />
                                                   )) : (
                                                       <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
@@ -978,38 +1106,55 @@ export default function AcademicHub() {
                                                 <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ marginTop: '2rem', padding: '12px 24px', fontSize: '0.9rem' }}>SCHEDULE LIVE CLASS</button>
                                             </div>
                                         ) : (
-                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "2rem" }}>
                                                  {liveSessions.map((ls, idx) => (
-                                                     <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', overflow: 'hidden' }}>
-                                                         <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)' }} />
-                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                             <h4 style={{ fontSize: '1.1rem', fontWeight: 900, maxWidth: '80%' }}>{ls.title}</h4>
-                                                             <div style={{ display: 'flex', gap: '8px' }}>
-                                                                 <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '4px' }}><Edit2 size={16} /></button>
-                                                                 <button onClick={(e) => handleDeleteSession(ls.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}><Trash2 size={16} /></button>
+                                                     <motion.div 
+                                                         key={idx} 
+                                                         whileHover={{ y: -5, boxShadow: "0 15px 40px rgba(0,0,0,0.12)" }}
+                                                         style={{ 
+                                                             background: "#ffffff", 
+                                                             border: "1px solid #e2e8f0",
+                                                             borderRadius: "35px",
+                                                             padding: "2.5rem",
+                                                             display: "flex", 
+                                                             flexDirection: "column", 
+                                                             gap: "1.5rem", 
+                                                             position: "relative", 
+                                                             overflow: "hidden",
+                                                             boxShadow: "0 10px 25px rgba(0,0,0,0.05)"
+                                                         }}
+                                                     >
+                                                         <div style={{ position: "absolute", top: 0, left: 0, width: "6px", height: "100%", background: ls.status === "LIVE" ? "#10b981" : "var(--primary)" }} />
+                                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                                                             <div>
+                                                                 <h4 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
+                                                                 <span style={{ fontSize: "0.75rem", fontWeight: 900, color: "var(--primary)", letterSpacing: "2px", textTransform: "uppercase" }}>Live Transmission</span>
+                                                             </div>
+                                                             <div style={{ display: "flex", gap: "8px" }}>
+                                                                 <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
+                                                                 <button onClick={(e) => handleDeleteSession(ls.id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
                                                              </div>
                                                          </div>
-                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800 }}>
-                                                             <Users size={14} /> Trainer: {ls.mentorName || 'Unassigned'}
+                                                         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                                                            <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#2d3748" }}>
+                                                                <User size={18} color="var(--primary)" />
+                                                                <span style={{ fontSize: "1rem", fontWeight: 700 }}>Trainer: <b style={{ color: "var(--primary)" }}>{ls.mentorName || "Unassigned"}</b></span>
+                                                            </div>
+                                                            <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#718096" }}>
+                                                                <Calendar size={18} />
+                                                                <span style={{ fontSize: "0.9rem" }}>{new Date(ls.startTime).toLocaleString()}</span>
+                                                            </div>
+                                                            <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#a0aec0" }}>
+                                                                <Clock size={16} />
+                                                                <span style={{ fontSize: "0.85rem" }}>{ls.duration} Minutes • {ls.platform}</span>
+                                                            </div>
                                                          </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
-                                                            <Calendar size={14} /> {new Date(ls.startTime).toLocaleString()}
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
-                                                            <Clock size={14} /> {ls.duration} Minutes • {ls.platform}
-                                                        </div>
-                                                        {ls.platform === 'Bytecode Meetings' ? (
-                                                            <button onClick={() => router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`)} className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', border: 'none', cursor: 'pointer' }}>
-                                                                🎥 JOIN WEBRTC ROOM
-                                                            </button>
-                                                        ) : (
-                                                            <a href={ls.meetingLink} target="_blank" rel="noreferrer" className="btn-quantum" style={{ marginTop: '1rem', textAlign: 'center', padding: '10px', fontSize: '0.8rem', background: ls.status === 'LIVE' ? '#10b981' : 'var(--primary)', textDecoration: 'none' }}>
-                                                                LAUNCH {ls.platform}
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
+                                                         <button onClick={() => router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`)} className="btn-quantum" style={{ marginTop: "1rem", padding: "16px", fontSize: "1rem", fontWeight: 900, background: ls.status === "LIVE" ? "#10b981" : "var(--primary)", borderRadius: "20px", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", boxShadow: "0 10px 20px rgba(139, 92, 246, 0.3)" }}>
+                                                             🎥 JOIN WEBRTC ROOM
+                                                         </button>
+                                                     </motion.div>
+                                                 ))}
+                                             </div>
                                         )}
                                     </motion.div>
                                 )}
@@ -1031,97 +1176,225 @@ export default function AcademicHub() {
                                             </div>
                                         ) : (
                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
-                                                {liveSessions.filter(ls => ls.recordingUrl).map((ls, idx) => (
-                                                    <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                                        <div style={{ aspectRatio: '16/9', borderRadius: '12px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-                                                            <Play size={32} color="var(--primary)" />
+                                                {liveSessions
+                                                    .filter(ls => ls.recordingUrl)
+                                                    .filter(ls => recCourseFilter === 'ALL' || ls.courseName === recCourseFilter)
+                                                    .filter(ls => recBatchFilter === 'ALL' || ls.batchName === recBatchFilter)
+                                                    .filter(ls => !recSearchTerm || ls.title.toLowerCase().includes(recSearchTerm.toLowerCase()) || ls.batchName.toLowerCase().includes(recSearchTerm.toLowerCase()))
+                                                    .map((ls, idx) => (
+                                                        <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                                            <div style={{ aspectRatio: '16/9', borderRadius: '12px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                                                                <Play size={32} color="var(--primary)" />
+                                                            </div>
+                                                            <h4 style={{ fontSize: '1.1rem', fontWeight: 900 }}>{ls.courseName}</h4>
+                                                            <p style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>{ls.batchName} - {ls.title}</p>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+                                                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} /> {new Date(ls.startTime).toLocaleDateString()}</span>
+                                                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {ls.duration} Mins</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '8px', marginTop: '0.5rem' }}>
+                                                                <button onClick={() => setViewFileTarget({ name: ls.title, url: ls.recordingUrl, type: 'video' })} className="btn-quantum" style={{ flex: 2, padding: '10px', textAlign: 'center', fontSize: '0.8rem', border: 'none', cursor: 'pointer' }}>
+                                                                    WATCH
+                                                                </button>
+                                                                <button onClick={() => initiateShare(ls)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} title="Share to Batch Drive">
+                                                                    <Share2 size={16} />
+                                                                </button>
+                                                                <a href={`${ls.recordingUrl}?download=true`} download={`recording-${ls.id}.webm`} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download Recording">
+                                                                    <Download size={16} />
+                                                                </a>
+                                                                <button onClick={(e) => handleDeleteRecording(ls.id || ls._id, e)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }} title="Delete Recording">
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        <h4 style={{ fontSize: '1.1rem', fontWeight: 900 }}>{ls.courseName}</h4>
-                                                        <p style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>{ls.batchName} - {ls.title}</p>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} /> {new Date(ls.startTime).toLocaleDateString()}</span>
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {ls.duration} Mins</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', gap: '8px', marginTop: '0.5rem' }}>
-                                                            <a href={ls.recordingUrl} target="_blank" className="btn-quantum" style={{ flex: 2, padding: '10px', textAlign: 'center', fontSize: '0.8rem', textDecoration: 'none' }}>
-                                                                WATCH
-                                                            </a>
-                                                            <button onClick={() => initiateShare(ls)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} title="Share to Batch Drive">
-                                                                <Share2 size={16} />
-                                                            </button>
-                                                            <a href={`${ls.recordingUrl}?download=true`} download={`recording-${ls.id}.webm`} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download Recording">
-                                                                <Download size={16} />
-                                                            </a>
-                                                            <button onClick={(e) => handleDeleteRecording(ls.id || ls._id, e)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }} title="Delete Recording">
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    ))}
                                             </div>
                                         )}
                                     </motion.div>
                                 )}
 
+                                {/* --- ACCESS MANAGEMENT MODAL --- */}
+                                <AnimatePresence>
+                                    {isAccessModalOpen && (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 110000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(20px)' }}>
+                                            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} style={{ width: '95%', maxWidth: '550px', padding: '3rem', borderRadius: '45px', background: '#ffffff', boxShadow: '0 25px 80px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                                    <div>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '3px', textTransform: 'uppercase' }}>Security Engine</span>
+                                                        <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '8px', color: '#1a202c', letterSpacing: '-1px' }}>Manage Access</h2>
+                                                        <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '5px' }}>
+                                                            {accessTarget?.batchName ? "Target Batch: " : "Target Folder: "}
+                                                            <span style={{ color: 'var(--primary)', fontWeight: 800 }}>{accessTarget?.batchName || accessTarget?.name}</span>
+                                                        </p>
+                                                    </div>
+                                                    <button onClick={() => setIsAccessModalOpen(false)} style={{ background: '#f7fafc', border: '1px solid #e2e8f0', color: '#1a202c', padding: '10px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={28} /></button>
+                                                </div>
+
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                                    {/* ADD USER SECTION */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#4a5568', letterSpacing: '1px' }}>ADD STUDENT OR FACULTY</label>
+                                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                                            <div style={{ position: 'relative', flex: 1 }}>
+                                                                <Search size={18} style={{ position: 'absolute', left: '15px', top: '15px', color: 'var(--primary)' }} />
+                                                                <input value={accessSearchTerm} onChange={(e) => setAccessSearchTerm(e.target.value)} placeholder="Search by Email or Name..." style={{ ...inputStyle, paddingLeft: '45px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#1a202c' }} />
+                                                            </div>
+                                                            <select value={accessRole} onChange={(e) => setAccessRole(e.target.value)} style={{ ...inputStyle, width: '130px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1a202c', fontWeight: 700 }}>
+                                                                <option value="VIEWER">VIEWER</option>
+                                                                <option value="EDITOR">EDITOR</option>
+                                                                <option value="OWNER">OWNER</option>
+                                                            </select>
+                                                        </div>
+
+                                                        {accessSearchTerm && (
+                                                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid #e2e8f0', maxHeight: '180px', overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                                                                {allUsers.filter(u => u.email?.toLowerCase().includes(accessSearchTerm.toLowerCase()) || u.fullName?.toLowerCase().includes(accessSearchTerm.toLowerCase())).map((u: any) => (
+                                                                    <button key={u.id} onClick={() => { handleUpdateAccess(u, accessRole); setAccessSearchTerm(''); }} style={{ width: '100%', padding: '15px 20px', border: 'none', background: 'none', color: '#1a202c', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}>
+                                                                        <div>
+                                                                            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{u.fullName}</div>
+                                                                            <div style={{ color: '#718096', fontSize: '0.75rem' }}>{u.email}</div>
+                                                                        </div>
+                                                                        <div style={{ padding: '8px', background: 'rgba(124, 58, 237, 0.05)', borderRadius: '10px' }}>
+                                                                            <Plus size={16} color="var(--primary)" />
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </motion.div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* CURRENT MEMBERS LIST */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#4a5568', letterSpacing: '1px' }}>RESIDENT MEMBERS & GUESTS</label>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                            {(() => {
+                                                                const combined = [...(accessTarget?.sharedWith || [])];
+                                                                
+                                                                // Add Core Tutors
+                                                                selectedBatch?.trainerIds?.forEach((id: string) => {
+                                                                    const user = allUsers.find(u => u.id === id || u._id === id);
+                                                                    if (user && !combined.find(s => s.email === user.email)) {
+                                                                        combined.push({ email: user.email, name: user.fullName, role: 'BATCH TUTOR', isCore: true });
+                                                                    }
+                                                                });
+
+                                                                // Add Core Students
+                                                                selectedBatch?.studentIds?.forEach((id: string) => {
+                                                                    const user = allUsers.find(u => u.id === id || u._id === id || u.email === id);
+                                                                    if (user && !combined.find(s => s.email === user.email)) {
+                                                                        combined.push({ email: user.email, name: user.fullName, role: 'STUDENT', isCore: true });
+                                                                    }
+                                                                });
+
+                                                                return combined.length > 0 ? combined.map((member: any) => (
+                                                                    <div key={member.email} style={{ background: '#f8fafc', padding: '15px 20px', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                                            <div style={{ width: 45, height: 45, borderRadius: '14px', background: member.isCore ? '#e2e8f0' : 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: member.isCore ? '#4a5568' : '#fff' }}>{member.name?.[0] || 'U'}</div>
+                                                                            <div>
+                                                                                <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1a202c' }}>{member.name}</div>
+                                                                                <div style={{ fontSize: '0.8rem', color: '#718096' }}>{member.email}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: member.role.includes('OWNER') ? '#d97706' : (member.role.includes('EDITOR') ? 'var(--primary)' : '#4a5568'), background: '#fff', padding: '6px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>{member.role}</span>
+                                                                            {!member.isCore ? (
+                                                                                <button onClick={() => handleRemoveAccess(member.email)} style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', padding: '8px', borderRadius: '10px' }}><Trash2 size={18} /></button>
+                                                                            ) : (
+                                                                                <button onClick={() => { setAccessSearchTerm(member.email); setAccessRole('EDITOR'); }} style={{ background: '#f0f9ff', border: '1px solid #e0f2fe', color: 'var(--primary)', cursor: 'pointer', padding: '8px', borderRadius: '10px' }} title="Promote to Editor"><Plus size={18} /></button>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )) : (
+                                                                    <div style={{ textAlign: 'center', padding: '3rem 2rem', border: '2px dashed #e2e8f0', borderRadius: '35px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                                                                        <Users size={40} style={{ color: '#cbd5e1' }} />
+                                                                        <p style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.9rem' }}>No individual access members added yet.</p>
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 {/* --- ASSIGNMENTS CONTENT --- */}
                                 {batchTab === 'ASSIGNMENTS' && (
                                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                 <FileText color="#10b981" /> Academic Assignments
-                                             </h3>
-                                             <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', background: '#10b981' }}>NEW ASSIGNMENT</button>
+                                             <div>
+                                                 <h3 style={{ fontSize: '1.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px', color: '#1a202c' }}>
+                                                     <FileText color="#10b981" /> Academic Assignments
+                                                 </h3>
+                                                 <p style={{ color: '#718096', fontSize: '0.9rem' }}>Project tracking, submissions, and performance auditing.</p>
+                                             </div>
+                                             <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '16px 32px', background: '#10b981', borderRadius: '18px', fontSize: '1rem', fontWeight: 900 }}>+ NEW ASSIGNMENT</button>
                                         </div>
 
                                         {batchAssignments.length === 0 ? (
-                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '40px', padding: '4rem' }}>
-                                                <FileText size={64} color="#10b981" style={{ marginBottom: '1.5rem', opacity: 0.3 }} />
-                                                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dim)' }}>Queue Empty</h2>
-                                                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', textAlign: 'center', maxWidth: '300px' }}>No assignments have been distributed to this batch yet.</p>
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRadius: '45px', padding: '4rem', border: '1px solid #e2e8f0' }}>
+                                                <div style={{ width: 100, height: 100, borderRadius: '35px', background: 'rgba(16, 185, 129, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                                                    <FileText size={48} color="#10b981" />
+                                                </div>
+                                                <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#1a202c' }}>Assignment Queue Empty</h2>
+                                                <p style={{ color: '#718096', fontSize: '1rem', textAlign: 'center', maxWidth: '350px', marginTop: '10px' }}>Distribute projects or exams to this batch to start tracking performance and submissions.</p>
+                                                <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ marginTop: '2.5rem', padding: '12px 24px', background: '#10b981' }}>CREATE FIRST ASSIGNMENT</button>
                                             </div>
                                         ) : (
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-                                                {batchAssignments.map((a, idx) => (
-                                                    <motion.div 
-                                                        key={idx} 
-                                                        className="glass-panel" 
-                                                        whileHover={{ y: -5 }}
-                                                        style={{ padding: '1.8rem', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem', cursor: 'pointer' }}
-                                                        onClick={() => setViewingAssignment(a)}
-                                                    >
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                            <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900 }}>
-                                                                {a.difficulty}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
+                                                {batchAssignments.map((a, idx) => {
+                                                    const submissionCount = a.submissions?.length || 0;
+                                                    const totalStudents = students.length || 1;
+                                                    const completionRate = Math.round((submissionCount / totalStudents) * 100);
+                                                    
+                                                    return (
+                                                        <motion.div 
+                                                            key={idx} 
+                                                            whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}
+                                                            style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '35px', padding: '2.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', position: 'relative' }}
+                                                        >
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                                    <span style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.05)', color: '#10b981', fontSize: '0.75rem', fontWeight: 900 }}>{a.difficulty}</span>
+                                                                    <span style={{ padding: '6px 14px', borderRadius: '10px', background: '#f7fafc', color: '#1a202c', fontSize: '0.75rem', fontWeight: 900 }}>ASSIGNMENT</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                                    <button onClick={() => { setEditingAssignment(a); setIsEditAssignmentModalOpen(true); }} style={{ background: 'none', border: 'none', color: '#718096', cursor: 'pointer' }}><Edit2 size={18} /></button>
+                                                                    <button onClick={() => handleDeleteAssignment(a.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                                                                </div>
                                                             </div>
-                                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                                <button onClick={(e) => { e.stopPropagation(); setEditingAssignment(a); setIsEditAssignmentModalOpen(true); }} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={18} /></button>
-                                                                <button onClick={(e) => handleDeleteAssignment(a.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
-                                                            </div>
-                                                        </div>
-                                                        <h4 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{a.title}</h4>
-                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{a.description}</p>
-                                                        
-                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.5rem 0' }} />
-                                                        
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 800 }}>Due Date</span>
-                                                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}><Calendar size={12} /> {new Date(a.dueDate).toLocaleDateString()}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 800 }}>Submissions</span>
-                                                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>{a.submissions?.length || 0} Turned In</span>
-                                                            </div>
-                                                        </div>
 
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '0.5rem' }}>
-                                                            <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                                                <div style={{ width: `${((a.submissions?.length || 0) / 50) * 100}%`, height: '100%', background: '#10b981' }} />
+                                                            <div>
+                                                                <h4 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#1a202c', marginBottom: '8px' }}>{a.title}</h4>
+                                                                <p style={{ fontSize: '0.9rem', color: '#718096', lineHeight: '1.6', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{a.description}</p>
                                                             </div>
-                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>{Math.round(((a.submissions?.length || 0) / 50) * 100)}%</span>
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
+
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', background: '#f8fafc', padding: '15px', borderRadius: '20px' }}>
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Submission Deadline</span>
+                                                                    <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {new Date(a.dueDate).toLocaleDateString()}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 900 }}>
+                                                                    <span style={{ color: '#1a202c' }}>Submission Progress</span>
+                                                                    <span style={{ color: '#10b981' }}>{submissionCount} / {totalStudents}</span>
+                                                                </div>
+                                                                <div style={{ height: '10px', background: '#edf2f7', borderRadius: '20px', overflow: 'hidden' }}>
+                                                                    <motion.div initial={{ width: 0 }} animate={{ width: `${completionRate}%` }} style={{ height: '100%', background: '#10b981' }} />
+                                                                </div>
+                                                            </div>
+
+                                                            <button onClick={() => setViewingSubmissionsAssignment(a)} className="btn-quantum" style={{ width: '100%', padding: '15px', background: 'rgba(139, 92, 246, 0.05)', color: 'var(--primary)', border: '1px solid rgba(139, 92, 246, 0.2)', fontWeight: 900, borderRadius: '18px', marginTop: '10px' }}>
+                                                                TRACK SUBMISSIONS & GRADE
+                                                            </button>
+                                                        </motion.div>
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </motion.div>
@@ -1147,8 +1420,9 @@ export default function AcademicHub() {
                                                 setIsEditBatchOpen(true);
                                             }} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%', background: 'var(--primary)' }}>EDIT BATCH</button>
                                            <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
-                                           <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', background: 'var(--secondary)', width: '100%' }}>MANAGE BATCH STUDENTS</button>
-                                           <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', background: '#ef4444', width: '100%', border: 'none' }}>DELETE BATCH</button>
+                                            <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "var(--secondary)", width: "100%" }}>MANAGE BATCH STUDENTS</button>
+                                            <button onClick={() => handleOpenAccess(selectedBatch)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--primary)", color: "var(--primary)" }}>MANAGE BATCH ACCESS</button>
+                                            <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "#ef4444", width: "100%", border: "none" }}>DELETE BATCH</button>
                                        </div>
                                  </div>
                             </div>
@@ -1666,81 +1940,100 @@ export default function AcademicHub() {
             </AnimatePresence>
 
             {/* --- WebRTC Room navigation is handled via router.push --- */}
-
-            {/* --- MULTI-STEP SHARE RECORDING MODAL --- */}
+            
+            {/* --- MULTI-STEP QUANTUM SHARE MODAL --- */}
             <AnimatePresence>
                 {isShareModalOpen && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ backdropFilter: 'blur(15px)' }}>
-                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="glass-panel" style={{ width: '90%', maxWidth: '550px', padding: '2.5rem', borderRadius: '40px', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)' }}>
+                        <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} className="glass-panel" style={{ width: '95%', maxWidth: '650px', padding: '3rem', borderRadius: '45px', border: '1px solid rgba(139, 92, 246, 0.4)', position: 'relative', boxShadow: '0 50px 100px rgba(0,0,0,0.8)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
                                 <div>
-                                    <span style={{ color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Share Workflow • Step {shareStep} of 3</span>
-                                    <h2 style={{ fontSize: '1.6rem', fontWeight: 900, marginTop: '5px' }}>
-                                        {shareStep === 1 && "Target Course"}
-                                        {shareStep === 2 && "Target Batch"}
-                                        {shareStep === 3 && "Drive Destination"}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} />
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px' }}>DISTRIBUTION ENGINE • STEP {shareStep}</span>
+                                    </div>
+                                    <h2 style={{ fontSize: '2rem', fontWeight: 900 }}>
+                                        {shareStep === 1 && "Pick a Course"}
+                                        {shareStep === 2 && "Select Batch"}
+                                        {shareStep === 3 && "Choose Folder"}
                                     </h2>
                                 </div>
-                                <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={24} /></button>
+                                <button onClick={() => setIsShareModalOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', padding: '12px', borderRadius: '50%' }}><XCircle size={28} /></button>
                             </div>
 
-                            {/* Step 1: Courses */}
-                            {shareStep === 1 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
-                                    {allCourses.map((c: any) => (
-                                        <button key={c.id} onClick={() => handleSelectCourseForShare(c)} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', transition: 'all 0.3s' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <div style={{ padding: '10px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px' }}><BookOpen size={20} color="var(--primary)" /></div>
-                                                <span style={{ fontWeight: 700 }}>{c.title}</span>
-                                            </div>
-                                            <ChevronRight size={18} color="var(--text-dim)" />
-                                        </button>
-                                    ))}
+                            {/* PATH SUMMARY BREADCRUMB */}
+                            {(shareSelectedCourse || shareSelectedBatch) && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '12px 20px', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: '2rem', fontSize: '0.85rem' }}>
+                                    <Globe size={16} color="var(--primary)" />
+                                    {shareSelectedCourse && <span style={{ fontWeight: 800 }}>{shareSelectedCourse.title}</span>}
+                                    {shareSelectedBatch && <>
+                                        <ChevronRight size={14} color="rgba(255,255,255,0.2)" />
+                                        <span style={{ fontWeight: 800, color: '#10b981' }}>{shareSelectedBatch.batchName}</span>
+                                    </>}
                                 </div>
                             )}
 
-                            {/* Step 2: Batches */}
+                            {/* STEP 1: COURSES */}
+                            {shareStep === 1 && (
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxHeight: '420px', overflowY: 'auto', padding: '5px' }}>
+                                    {allCourses.length > 0 ? allCourses.map((c: any) => (
+                                        <motion.button key={c.id} whileHover={{ y: -5, background: 'rgba(139, 92, 246, 0.1)' }} onClick={() => handleSelectCourseForShare(c)} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', display: 'flex', gap: '15px', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s' }}>
+                                            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '14px' }}><BookOpen size={22} color="var(--primary)" /></div>
+                                            <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>{c.title}</span>
+                                        </motion.button>
+                                    )) : <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', opacity: 0.5 }}>Syncing courses from engine...</div>}
+                                </div>
+                            )}
+
+                            {/* STEP 2: BATCHES */}
                             {shareStep === 2 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
-                                    <button onClick={() => setShareStep(1)} style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 800, marginBottom: '10px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>← BACK TO COURSES</button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '420px', overflowY: 'auto' }}>
+                                    <button onClick={() => setShareStep(1)} style={{ marginBottom: '10px', fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <ChevronLeft size={16} /> CHANGE COURSE
+                                    </button>
                                     {allBatchesForCourse.length > 0 ? allBatchesForCourse.map((b: any) => (
-                                        <button key={b.id} onClick={() => { setShareSelectedBatch(b); setShareStep(3); }} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <div style={{ padding: '10px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px' }}><Layers size={20} color="#10b981" /></div>
+                                        <motion.button key={b.id} whileHover={{ x: 5, background: 'rgba(16, 185, 129, 0.1)' }} onClick={() => { setShareSelectedBatch(b); setShareStep(3); }} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', cursor: 'pointer' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                                                <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '15px' }}><Layers size={22} color="#10b981" /></div>
                                                 <div>
-                                                    <div style={{ fontWeight: 800 }}>{b.batchName}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{b.batchCode} • {b.mode}</div>
+                                                    <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{b.batchName}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>{b.batchCode} • {b.mode}</div>
                                                 </div>
                                             </div>
-                                            <ChevronRight size={18} color="var(--text-dim)" />
-                                        </button>
-                                    )) : <p style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>No active batches for this course.</p>}
+                                            <ChevronRight size={20} color="rgba(255,255,255,0.2)" />
+                                        </motion.button>
+                                    )) : <p style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No active batches found for this course.</p>}
                                 </div>
                             )}
 
-                            {/* Step 3: Destination (Folders) */}
+                            {/* STEP 3: FOLDERS */}
                             {shareStep === 3 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <button onClick={() => setShareStep(2)} style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>← BACK TO BATCHES</button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <button onClick={() => setShareStep(2)} style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <ChevronLeft size={16} /> BACK TO BATCHES
+                                    </button>
                                     
-                                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', display: 'block', marginBottom: '10px' }}>Target Folder</label>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
+                                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
                                             {shareSelectedBatch.folders?.map((f: any) => (
-                                                <button key={f.name} onClick={() => handleConfirmShare(f.name)} style={{ padding: '12px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
-                                                    📁 {f.name}
+                                                <button key={f.name} onClick={() => handleConfirmShare(f.name)} style={{ padding: '14px', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: '#fff', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                    <Folder size={16} color="#f59e0b" /> {f.name}
                                                 </button>
                                             ))}
-                                            <button onClick={() => handleConfirmShare('Shared Recordings')} style={{ padding: '12px', borderRadius: '14px', border: '1px solid var(--primary)', background: 'rgba(139, 92, 246, 0.1)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>
-                                                ✨ Recordings Folder
+                                            <button onClick={() => handleConfirmShare('Shared Recordings')} style={{ padding: '14px', borderRadius: '18px', border: '1px solid var(--primary)', background: 'rgba(139, 92, 246, 0.1)', color: '#fff', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                <Play size={16} color="var(--primary)" /> Shared Recordings
                                             </button>
                                         </div>
 
-                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginTop: '1rem' }}>
-                                            <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', display: 'block', marginBottom: '10px' }}>OR CREATE NEW FOLDER</label>
-                                            <div style={{ display: 'flex', gap: '10px' }}>
-                                                <input value={shareNewFolderName} onChange={(e) => setShareNewFolderName(e.target.value)} placeholder="Folder Name..." style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '10px', color: '#fff' }} />
-                                                <button onClick={() => handleConfirmShare(shareNewFolderName)} disabled={!shareNewFolderName} className="btn-quantum" style={{ padding: '10px 15px', fontSize: '0.8rem' }}><FolderPlus size={16} /></button>
+                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', marginBottom: '1.5rem' }} />
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>Create & Share to New Folder</label>
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <input value={shareNewFolderName} onChange={(e) => setShareNewFolderName(e.target.value)} placeholder="New Folder Name..." style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '14px', color: '#fff', fontSize: '0.9rem' }} />
+                                                <button onClick={() => handleConfirmShare(shareNewFolderName)} disabled={!shareNewFolderName} className="btn-quantum" style={{ padding: '0 25px', borderRadius: '16px' }}>
+                                                    <FolderPlus size={22} />
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -1752,176 +2045,133 @@ export default function AcademicHub() {
                 )}
             </AnimatePresence>
 
+
             {/* --- CREATE ASSIGNMENT MODAL --- */}
             <AnimatePresence>
-                 {isCreateAssignmentModalOpen && (
-                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
-                               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Distribute Assignment</h2>
-                               <form onSubmit={handleCreateAssignment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <input value={newAssignment.title} onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})} placeholder="Assignment Title (e.g. Build a Netflix Clone)" style={inputStyle} required />
-                                    <textarea value={newAssignment.description} onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})} placeholder="Abstract Description" rows={3} style={{...inputStyle, resize: 'none'}} required />
-                                    
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DIFFICULTY</label>
-                                            <select value={newAssignment.difficulty} onChange={(e) => setNewAssignment({...newAssignment, difficulty: e.target.value})} style={inputStyle}>
-                                                <option value="EASY">Easy</option>
-                                                <option value="MEDIUM">Medium</option>
-                                                <option value="HARD">Hard</option>
-                                            </select>
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>TOTAL MARKS</label>
-                                            <input type="number" value={newAssignment.totalMarks} onChange={(e) => setNewAssignment({...newAssignment, totalMarks: Number(e.target.value)})} style={inputStyle} required />
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>DUE DATE</label>
-                                            <input type="date" value={newAssignment.dueDate} onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})} style={inputStyle} required />
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '8px', display: 'block' }}>STATUS</label>
-                                            <select value={newAssignment.status} onChange={(e) => setNewAssignment({...newAssignment, status: e.target.value})} style={inputStyle}>
-                                                <option value="ACTIVE">Active</option>
-                                                <option value="UPCOMING">Upcoming</option>
-                                                <option value="CLOSED">Closed</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                         <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800, display: 'block' }}>ATTACHMENTS (RESOURCES/DOCS)</label>
-                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                              <input value={newAssignment.attachments[0] || ''} onChange={(e) => setNewAssignment({...newAssignment, attachments: [e.target.value]})} placeholder="Paste Resource URL..." style={inputStyle} />
-                                              <button type="button" onClick={() => alert('Industrial Browser Service: Mock Upload Triggered')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0 20px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer' }}>UPLOAD</button>
-                                         </div>
-                                    </div>
-
-                                    <textarea value={newAssignment.instructions} onChange={(e) => setNewAssignment({...newAssignment, instructions: e.target.value})} placeholder="Specific Instructions / Requirements" rows={4} style={{...inputStyle, resize: 'none'}} />
-
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                         <button type="button" onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer' }}>CANCEL</button>
-                                         <button type="submit" className="btn-quantum" style={{ flex: 2, padding: '12px', borderRadius: '12px', background: '#10b981' }}>LAUNCH ASSIGNMENT</button>
-                                    </div>
-                               </form>
-                          </motion.div>
-                     </div>
-                 )}
-            </AnimatePresence>
-
-            {/* --- ASSIGNMENT DETAIL VIEW MODAL --- */}
-            <AnimatePresence>
-                {viewingAssignment && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', height: '80vh', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden' }}>
-                            <div style={{ padding: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {isCreateAssignmentModalOpen && (
+                    <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(15px)" }}>
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: "95%", maxWidth: "700px", padding: "3.5rem", borderRadius: "45px", background: "#fff", boxShadow: "0 30px 100px rgba(0,0,0,0.3)", border: "1px solid #e2e8f0", maxHeight: "90vh", overflowY: "auto" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
                                 <div>
-                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900 }}>{viewingAssignment.title}</h2>
-                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Created by {viewingAssignment.trainerName} • Due {new Date(viewingAssignment.dueDate).toLocaleDateString()}</p>
+                                    <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#10b981", letterSpacing: "3px", textTransform: "uppercase" }}>Academic Intelligence</span>
+                                    <h2 style={{ fontSize: "2.5rem", fontWeight: 900, marginTop: "8px", color: "#1a202c", letterSpacing: "-1.5px" }}>Distribute Assignment</h2>
                                 </div>
-                                <button onClick={() => setViewingAssignment(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={32} /></button>
+                                <button onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px", borderRadius: "50%", cursor: "pointer" }}><X size={32} /></button>
                             </div>
-                            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 350px', overflow: 'hidden' }}>
-                                <div style={{ padding: '3rem', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.5rem', textTransform: 'uppercase' }}>Description & Scope</h5>
-                                    <p style={{ color: '#fff', lineHeight: 1.8, marginBottom: '2.5rem' }}>{viewingAssignment.description}</p>
-                                    
-                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, marginBottom: '1.5rem', textTransform: 'uppercase' }}>Instructions</h5>
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <p style={{ whiteSpace: 'pre-wrap', color: 'var(--text-dim)', lineHeight: 1.6 }}>{viewingAssignment.instructions || 'No specific instructions provided.'}</p>
+
+                            <form onSubmit={handleCreateAssignment} style={{ display: "flex", flexDirection: "column", gap: "1.8rem" }}>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
+                                    <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>ASSIGNMENT TITLE</label>
+                                        <input required value={newAssignment.title} onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})} placeholder="e.g. Advanced System Architecture Project" style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
+                                    </div>
+                                    <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>DIFFICULTY LEVEL</label>
+                                        <select value={newAssignment.difficulty} onChange={(e) => setNewAssignment({...newAssignment, difficulty: e.target.value})} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }}>
+                                            <option value="BEGINNER">BEGINNER</option>
+                                            <option value="MEDIUM">MEDIUM</option>
+                                            <option value="ADVANCED">ADVANCED</option>
+                                            <option value="CHALLENGE">CHALLENGE</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                    <h5 style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase' }}>Grading Analytics</h5>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
-                                            <h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{viewingAssignment.submissions?.length || 0}</h3>
-                                            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>SUBMISSIONS</p>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '3rem' }}>
-                                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)' }}>{viewingAssignment.attachments?.length || 0}</h3>
-                                                <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>ATTACHMENTS</p>
-                                            </div>
-                                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)', flex: 1 }}>
-                                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900 }}>{viewingAssignment.attachments?.[0]?.split('/').pop() || 'Standard Protocol'}</h3>
-                                                <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 800 }}>PRIMARY RESOURCE</p>
-                                            </div>
-                                        </div>
+
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
+                                    <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                                        <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>SUBMISSION DEADLINE</label>
+                                        <input type="date" required value={newAssignment.dueDate} onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})} style={{ ...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0" }} />
                                     </div>
-                                    <button onClick={() => {
-                                        setViewingSubmissionsAssignment(viewingAssignment);
-                                        setViewingAssignment(null);
-                                    }} className="btn-quantum" style={{ width: '100%', padding: '15px', background: '#10b981' }}>VIEW ALL SUBMISSIONS</button>
-                                    <button className="btn-quantum" style={{ width: '100%', padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>MARK AS COMPLETED</button>
                                 </div>
-                            </div>
+
+                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                    <label style={{ fontSize: "0.75rem", fontWeight: 900, color: "#718096", marginLeft: "10px" }}>EXECUTIVE SUMMARY / DESCRIPTION</label>
+                                    <textarea required value={newAssignment.description} onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})} placeholder="Explain the project scope and expected deliverables..." rows={4} style={{...inputStyle, background: "#f8fafc", color: "#1a202c", border: "1px solid #e2e8f0", resize: "none" }} />
+                                </div>
+
+                                <div style={{ background: "#f0f9ff", padding: "1.5rem", borderRadius: "24px", border: "1px solid #e0f2fe" }}>
+                                    <h4 style={{ fontSize: "0.9rem", fontWeight: 900, marginBottom: "10px", color: "#0369a1" }}>Attachment Brief</h4>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "15px", color: "#0369a1" }}>
+                                        <div style={{ background: "#fff", padding: "15px", borderRadius: "15px", border: "1px dashed #7dd3fc", flex: 1, textAlign: "center", cursor: "pointer" }} onClick={() => document.getElementById("assign-file")?.click()}>
+                                            <Upload size={24} style={{ marginBottom: "5px" }} />
+                                            <p style={{ fontSize: "0.8rem", fontWeight: 700 }}>{newAssignment.attachments.length > 0 ? `${newAssignment.attachments.length} Files Attached` : "Upload Assignment Brief (PDF/DOCX)"}</p>
+                                        </div>
+                                        <input type="file" id="assign-file" style={{ display: "none" }} onChange={handleAssignmentFileUpload} />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem" }}>
+                                    <button type="button" onClick={() => setIsCreateAssignmentModalOpen(false)} style={{ flex: 1, padding: "18px", borderRadius: "18px", background: "#f1f5f9", color: "#475569", border: "none", fontWeight: 900, cursor: "pointer" }}>DISCARD</button>
+                                    <button type="submit" className="btn-quantum" style={{ flex: 2, padding: "18px", borderRadius: "18px", background: "#10b981", color: "#fff", fontWeight: 900 }}>BROADCAST TO BATCH</button>
+                                </div>
+                            </form>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
-            {/* --- VIEW ALL SUBMISSIONS MODAL --- */}
+            {/* --- SUBMISSIONS TRACKING MODAL --- */}
             <AnimatePresence>
                 {viewingSubmissionsAssignment && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
-                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '1000px', height: '85vh', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden' }}>
-                            <div style={{ padding: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.05)' }}>
+                    <div style={{ position: "fixed", inset: 0, zIndex: 110000, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(20px)" }}>
+                        <motion.div initial={{ scale: 1.05, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: "95%", maxWidth: "900px", padding: "3.5rem", borderRadius: "45px", background: "#fff", display: "flex", flexDirection: "column", gap: "2.5rem", maxHeight: "90vh", overflowY: "auto" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                                 <div>
-                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Submissions Explorer</h2>
-                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Assignment: {viewingSubmissionsAssignment.title} • {students.length} Total Students</p>
+                                    <span style={{ fontSize: "0.8rem", fontWeight: 900, color: "#10b981", letterSpacing: "3px", textTransform: "uppercase" }}>Submission Tracker</span>
+                                    <h2 style={{ fontSize: "2.5rem", fontWeight: 900, marginTop: "8px", color: "#1a202c", letterSpacing: "-1.5px" }}>{viewingSubmissionsAssignment.title}</h2>
+                                    <div style={{ display: "flex", gap: "15px", color: "#718096", fontSize: "0.9rem", marginTop: "10px" }}>
+                                        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Users size={16} /> {students.length} Total Students</span>
+                                        <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#10b981" }}><CheckCircle size={16} /> {viewingSubmissionsAssignment.submissions?.length || 0} Turned In</span>
+                                    </div>
                                 </div>
-                                <button onClick={() => setViewingSubmissionsAssignment(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><XCircle size={32} /></button>
+                                <button onClick={() => setViewingSubmissionsAssignment(null)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#1a202c", padding: "12px", borderRadius: "50%", cursor: "pointer" }}><X size={32} /></button>
                             </div>
-                            
-                            <div style={{ flex: 1, padding: '3rem', overflowY: 'auto' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                    {students.map((student: any, idx: number) => {
-                                        const submission = viewingSubmissionsAssignment.submissions?.find((s: any) => s.studentId === student.id);
-                                        return (
-                                            <div key={idx} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', border: submission ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: submission ? '#10b981' : 'rgba(255,255,255,0.05)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 900 }}>
-                                                        {student.fullName?.charAt(0) || 'S'}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: submission ? '#10b981' : 'var(--text-dim)', padding: '4px 8px', background: submission ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
-                                                        {submission ? (submission.status || 'SUBMITTED') : 'PENDING'}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontWeight: 800 }}>{student.fullName || student.email.split('@')[0]}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{student.email}</div>
-                                                </div>
-                                                
-                                                {submission ? (
-                                                    <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                                            <span style={{ color: 'var(--text-dim)' }}>Status:</span>
-                                                            <span style={{ fontWeight: 900, color: submission.status === 'ACCEPTED' ? '#10b981' : submission.status === 'REJECTED' ? '#ef4444' : '#fff' }}>{submission.status || 'SUBMITTED'}</span>
+
+                            <div style={{ border: "1px solid #e2e8f0", borderRadius: "30px", overflow: "hidden" }}>
+                                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                    <thead>
+                                        <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                                            <th style={{ padding: "20px", textAlign: "left", fontSize: "0.8rem", fontWeight: 900, color: "#4a5568" }}>STUDENT NAME</th>
+                                            <th style={{ padding: "20px", textAlign: "left", fontSize: "0.8rem", fontWeight: 900, color: "#4a5568" }}>SUBMISSION DATE</th>
+                                            <th style={{ padding: "20px", textAlign: "left", fontSize: "0.8rem", fontWeight: 900, color: "#4a5568" }}>HISTORY / FILE</th>
+                                            <th style={{ padding: "20px", textAlign: "left", fontSize: "0.8rem", fontWeight: 900, color: "#4a5568" }}>STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {students.map((student: any) => {
+                                            const sub = (viewingSubmissionsAssignment.submissions || []).find((s: any) => s.studentId === student.id || s.email === student.email);
+                                            return (
+                                                <tr key={student.email} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                                                    <td style={{ padding: "20px" }}>
+                                                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                                            <div style={{ width: 35, height: 35, borderRadius: "10px", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", fontWeight: 900, color: "#64748b" }}>{student.fullName?.[0]}</div>
+                                                            <div>
+                                                                <div style={{ fontWeight: 800, color: "#1a202c" }}>{student.fullName}</div>
+                                                                <div style={{ fontSize: "0.7rem", color: "#a0aec0" }}>{student.email}</div>
+                                                            </div>
                                                         </div>
-                                                        <button 
-                                                            onClick={() => {
-                                                                setActiveSubmission(submission);
-                                                                setGradingData({ marks: submission.marksObtained || 0, feedback: submission.feedback || '', status: submission.status || 'ACCEPTED' });
-                                                            }}
-                                                            className="btn-quantum" 
-                                                            style={{ padding: '8px', fontSize: '0.75rem', background: submission.status ? 'rgba(255,255,255,0.05)' : '#10b981' }}
-                                                        >
-                                                            AUDIT SUBMISSION
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ marginTop: '0.5rem', padding: '10px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', color: '#ef4444', fontSize: '0.7rem', fontWeight: 800, textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
-                                                        AWAITING SUBMISSION
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                                    </td>
+                                                    <td style={{ padding: "20px", color: "#718096", fontSize: "0.9rem" }}>
+                                                        {sub ? new Date(sub.submittedAt).toLocaleString() : "PENDING"}
+                                                    </td>
+                                                    <td style={{ padding: "20px" }}>
+                                                        {sub ? (
+                                                            <a href={sub.fileUrl} target="_blank" rel="noreferrer" style={{ color: "var(--primary)", textDecoration: "none", fontWeight: 800, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "5px" }}>
+                                                                <Paperclip size={14} /> VIEW SUBMISSION
+                                                            </a>
+                                                        ) : (
+                                                            <span style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>NO RECORD</span>
+                                                        )}
+                                                    </td>
+                                                    <td style={{ padding: "20px" }}>
+                                                        <span style={{ padding: "6px 14px", borderRadius: "10px", fontSize: "0.7rem", fontWeight: 900, background: sub ? "rgba(16, 185, 129, 0.05)" : "#fff1f2", color: sub ? "#10b981" : "#f43f5e", border: sub ? "none" : "1px solid #fecaca" }}>
+                                                            {sub ? "TURNED IN" : "LATE / PENDING"}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
                             </div>
                         </motion.div>
                     </div>
@@ -2075,18 +2325,20 @@ function DriveFolder({ folder, onClick, onShare, onRename, onDelete }: any) {
     return (
         <motion.div 
             whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.03)' }}
-            onClick={onClick}
+            className="drive-card"
             style={{ padding: '1.5rem', borderRadius: '24px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', cursor: 'pointer', position: 'relative' }}
         >
             <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '5px' }}>
-                <button onClick={onShare} title="Share" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Share2 size={16} /></button>
-                <button onClick={onRename} title="Rename" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Edit2 size={16} /></button>
-                <button onClick={onDelete} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', opacity: 0.9, cursor: 'pointer' }}><Trash2 size={16} /></button>
+                <button onClick={(e) => { e.stopPropagation(); onShare(folder); }} title="Share" style={{ background: 'none', border: 'none', color: 'var(--primary)', opacity: 0.9, cursor: 'pointer' }}><Share2 size={16} /></button>
+                <button onClick={(e) => { e.stopPropagation(); onRename(); }} title="Rename" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Edit2 size={16} /></button>
+                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', opacity: 0.9, cursor: 'pointer' }}><Trash2 size={16} /></button>
             </div>
-            <Folder size={64} fill="rgba(124, 58, 237, 0.2)" color="var(--primary)" />
-            <div>
-                 <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{folder.name}</div>
-                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{folder.files?.length || 0} Files</div>
+            <div onClick={onClick}>
+                <Folder size={64} fill="rgba(124, 58, 237, 0.2)" color="var(--primary)" />
+                <div style={{ marginTop: '10px' }}>
+                     <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{folder.name}</div>
+                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{folder.files?.length || 0} Files</div>
+                </div>
             </div>
         </motion.div>
     );

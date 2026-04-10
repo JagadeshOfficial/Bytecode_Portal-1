@@ -6,22 +6,29 @@ const path = require('path');
 const fs = require('fs');
 
 // Configure Multer for video uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'src/public/recordings';
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir, { recursive: true });
+const upload = multer({ 
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            const dir = 'src/public/temp';
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            cb(null, dir);
+        },
+        filename: (req, file, cb) => {
+            cb(null, `${Date.now()}-${file.originalname}`);
         }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${req.params.id}-${Date.now()}${path.extname(file.originalname)}`);
-    }
+    })
 });
 
-const upload = multer({ storage });
+// GridFS initialization for BOTH recordings and assignments
+let gridfsAssignments; 
+mongoose.connection.on('connected', () => {
+    const db = mongoose.connection.useDb('academic-db');
+    gridfsAssignments = new mongoose.mongo.GridFSBucket(db, {
+        bucketName: 'assignment_files'
+    });
+});
 
-// GridFS initialization
+// GridFS initialization for recordings
 let gridfsBucket;
 mongoose.connection.on('connected', () => {
     const db = mongoose.connection.useDb('academic-db');
@@ -291,6 +298,76 @@ router.delete('/sessions/:id/recording', async (req, res) => {
         );
 
         res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Upload general academic files (Assignments, Project brief) to GridFS
+// @route   POST /api/academic/upload
+router.post('/upload', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+        // Lazy initialization check
+        if (!gridfsAssignments) {
+            const db = mongoose.connection.useDb('academic-db');
+            gridfsAssignments = new mongoose.mongo.GridFSBucket(db, {
+                bucketName: 'assignment_files'
+            });
+        }
+
+        const filename = `${Date.now()}-${req.file.originalname}`;
+        const uploadStream = gridfsAssignments.openUploadStream(filename, {
+            contentType: req.file.mimetype
+        });
+
+        const readStream = fs.createReadStream(req.file.path);
+        
+        readStream.on('error', (err) => {
+            console.error("Read Stream Error:", err);
+            res.status(500).json({ error: 'File reading failed' });
+        });
+
+        readStream.pipe(uploadStream);
+
+        uploadStream.on('error', (err) => {
+            console.error("GridFS Upload Error:", err);
+            res.status(500).json({ error: 'Database storage failed' });
+        });
+
+        uploadStream.on('finish', () => {
+            try {
+                fs.unlinkSync(req.file.path); // Clean up temp
+            } catch (err) {
+                console.warn("Temp file cleanup failed:", err);
+            }
+            res.json({ 
+                success: true, 
+                url: `http://localhost:8080/api/academic/assignment-file/${filename}` 
+            });
+        });
+    } catch (err) {
+        console.error("Upload route error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Serve academic files from GridFS
+router.get('/assignment-file/:filename', async (req, res) => {
+    try {
+        if (!gridfsAssignments) {
+            const db = mongoose.connection.useDb('academic-db');
+            gridfsAssignments = new mongoose.mongo.GridFSBucket(db, {
+                bucketName: 'assignment_files'
+            });
+        }
+
+        const files = await gridfsAssignments.find({ filename: req.params.filename }).toArray();
+        if (!files || files.length === 0) return res.status(404).json({ error: 'File not found' });
+
+        res.set('Content-Type', files[0].contentType || 'application/octet-stream');
+        gridfsAssignments.openDownloadStreamByName(req.params.filename).pipe(res);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
