@@ -13,8 +13,8 @@ connectDB();
 const app = express();
 
 // Body parser
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '1024mb' }));
+app.use(express.urlencoded({ limit: '1024mb', extended: true }));
 
 // Static folder
 app.use('/uploads', express.static('src/public'));

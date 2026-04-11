@@ -32,13 +32,18 @@ const ChatSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['OFFICIAL', 'CHANNELS', 'TEAM', 'SYSTEM'],
+        enum: ['OFFICIAL', 'CHANNELS', 'TEAM', 'SYSTEM', 'DIRECT', 'PERSONAL'],
         default: 'CHANNELS'
     },
     description: String,
     createdBy: {
         type: mongoose.Schema.ObjectId,
         ref: 'User'
+    },
+    image: String,
+    isArchived: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

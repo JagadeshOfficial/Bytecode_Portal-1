@@ -17,7 +17,7 @@ const MessageSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['TEXT', 'FILE', 'AI', 'SYSTEM'],
+        enum: ['TEXT', 'FILE', 'AI', 'SYSTEM', 'IMAGE', 'VIDEO', 'AUDIO'],
         default: 'TEXT'
     },
     status: {
@@ -34,6 +34,14 @@ const MessageSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: 'User'
         }
+    }],
+    parentMessage: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Message'
+    },
+    isDeletedFor: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
     }],
     isPinned: {
         type: Boolean,
