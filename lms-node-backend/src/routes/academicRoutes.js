@@ -497,4 +497,73 @@ router.get('/proctoring/logs/:testId', async (req, res) => {
     }
 });
 
+// --- MOCK INTERVIEW ROUTES ---
+
+// @desc    Get all mock interviews
+router.get('/mock-interviews', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const interviews = await db.collection('mock_interviews').find().toArray();
+        const mapped = interviews.map(i => ({ ...i, id: i._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Create new mock interview
+router.post('/mock-interviews', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const interview = { 
+            ...req.body, 
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            status: req.body.status || 'SCHEDULED'
+        };
+        const result = await db.collection('mock_interviews').insertOne(interview);
+        res.status(201).json({ ...interview, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Update mock interview
+router.put('/mock-interviews/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const { id, _id, ...updateData } = req.body;
+        const result = await db.collection('mock_interviews').updateOne(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: { ...updateData, updatedAt: new Date() } }
+        );
+        res.json({ id: req.params.id, ...updateData });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete mock interview
+router.delete('/mock-interviews/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('mock_interviews').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Submit interview feedback
+router.post('/interview-feedback', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const feedback = { ...req.body, submittedAt: new Date() };
+        const result = await db.collection('interview_feedback').insertOne(feedback);
+        res.status(201).json({ ...feedback, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

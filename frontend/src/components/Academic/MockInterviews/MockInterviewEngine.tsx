@@ -9,7 +9,7 @@ import {
     Shield, Activity, Bot, Mic, 
     Monitor, Brain, Clipboard, UserPlus,
     X, ChevronRight, ChevronLeft, Flag,
-    Edit2, Trash2, Copy, Play
+    Edit2, Trash2, Copy, Play, Check
 } from 'lucide-react';
 
 // --- STYLES & ACCENTS ---
@@ -21,12 +21,6 @@ const glassStyle = {
     boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
 };
 
-const gradText = {
-    background: 'linear-gradient(to right, #818cf8, #c084fc)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-};
-
 // --- MOCK DATA ---
 const INITIAL_STATS = [
     { label: 'Total Interviews', value: 128, change: '+12%', icon: <Video size={20} /> },
@@ -35,50 +29,112 @@ const INITIAL_STATS = [
     { label: 'Success Rate', value: '68%', change: '+8%', icon: <Target size={20} /> },
 ];
 
-const INITIAL_INTERVIEWS = [
-    {
-        id: '1',
-        title: 'Senior Java Developer Technical',
-        type: 'TECHNICAL',
-        mode: 'AI',
-        duration: '45 Mins',
-        difficulty: 'HARD',
-        candidates: 24,
-        confidence: 94,
-        status: 'LIVE',
-        interviewer: 'AI Engine v2.4'
-    },
-    {
-        id: '2',
-        title: 'Graduate HR Screening',
-        type: 'HR',
-        mode: 'HYBRID',
-        duration: '20 Mins',
-        difficulty: 'EASY',
-        candidates: 156,
-        confidence: 88,
-        status: 'SCHEDULED',
-        interviewer: 'Sarah Jen (Lead HR)'
-    },
-    {
-        id: '3',
-        title: 'System Design Architecture',
-        type: 'SYSTEM_DESIGN',
-        mode: 'HUMAN',
-        duration: '60 Mins',
-        difficulty: 'EXPERT',
-        candidates: 8,
-        confidence: 91,
-        status: 'COMPLETED',
-        interviewer: 'Alex Rivera (Staff Engineer)'
-    }
-];
-
 export default function MockInterviewEngine() {
     const [subView, setSubView] = useState<'DASHBOARD' | 'LIVE_MONITOR' | 'ANALYTICS' | 'AI_ROOM'>('DASHBOARD');
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardStep, setWizardStep] = useState(1);
-    const [interviews, setInterviews] = useState(INITIAL_INTERVIEWS);
+    
+    // Data states
+    const [interviews, setInterviews] = useState<any[]>([]);
+    const [courses, setCourses] = useState<any[]>([]);
+    const [batches, setBatches] = useState<any[]>([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [selectedInterviewId, setSelectedInterviewId] = useState<string | null>(null);
+
+    // Form state
+    const [newInterview, setNewInterview] = useState({
+        title: '',
+        description: '',
+        type: 'TECHNICAL',
+        difficulty: 'MEDIUM',
+        courseId: '',
+        courseName: '',
+        batchId: '',
+        batchName: '',
+        candidateType: 'ALL', // 'ALL' or 'SPECIFIC'
+        candidateIds: [] as string[],
+        interviewerId: '',
+        interviewerName: '',
+        interviewerRole: '',
+        mode: 'AI', // 'AI', 'HUMAN', 'HYBRID'
+        date: '',
+        startTime: '',
+        duration: 30,
+        settings: {
+            faceDetection: true,
+            eyeTracking: true,
+            tabBlocker: true,
+            noiseAnalysis: true
+        }
+    });
+
+    const fetchAllData = async () => {
+        setLoading(true);
+        try {
+            const [intRes, courRes, batchRes, userRes] = await Promise.all([
+                fetch('http://localhost:8080/api/academic/mock-interviews'),
+                fetch('http://localhost:8080/api/courses'),
+                fetch('http://localhost:8080/api/academic/batches'),
+                fetch('http://localhost:8080/api/users')
+            ]);
+            
+            if (intRes.ok) setInterviews(await intRes.json());
+            if (courRes.ok) setCourses(await courRes.json());
+            if (batchRes.ok) setBatches(await batchRes.json());
+            if (userRes.ok) setAllUsers(await userRes.json());
+        } catch (err) {
+            console.error("Failed to fetch interview data:", err);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchAllData();
+    }, []);
+
+    const handleCreateInterview = async () => {
+        try {
+            const method = isEditing ? 'PUT' : 'POST';
+            const url = isEditing 
+                ? `http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}` 
+                : 'http://localhost:8080/api/academic/mock-interviews';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newInterview)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                if (isEditing) {
+                    setInterviews(interviews.map(i => (i.id === selectedInterviewId || i._id === selectedInterviewId) ? saved : i));
+                } else {
+                    setInterviews([saved, ...interviews]);
+                }
+                setIsWizardOpen(false);
+                setIsEditing(false);
+                setWizardStep(1);
+                alert(isEditing ? "Interview Updated!" : "Mock Interview Scheduled Successfully!");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteInterview = async (id: string) => {
+        if (!confirm("Are you sure?")) return;
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setInterviews(interviews.filter(i => i.id !== id && i._id !== id));
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
         <div style={{ padding: '0 0.5rem' }}>
@@ -97,7 +153,7 @@ export default function MockInterviewEngine() {
                     <BarChart2 size={16} /> ANALYTICS
                 </button>
                 <div style={{ flex: 1 }} />
-                <button onClick={() => setIsWizardOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button onClick={() => { setIsEditing(false); setNewInterview({ ...newInterview, title: '', description: '', date: '', startTime: '' }); setIsWizardOpen(true); }} className="btn-quantum" style={{ padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Plus size={18} /> CREATE INTERVIEW
                 </button>
             </div>
@@ -121,11 +177,35 @@ export default function MockInterviewEngine() {
                         </div>
 
                         {/* Interview Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-                            {interviews.map((item) => (
-                                <InterviewCard key={item.id} data={item} />
-                            ))}
-                        </div>
+                        {loading ? (
+                            <div style={{ textAlign: 'center', padding: '5rem' }}>Loading Interview Feed...</div>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2rem' }}>
+                                {interviews.length === 0 ? (
+                                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(0,0,0,0.02)', borderRadius: '32px' }}>
+                                        <Video size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                                        <p style={{ fontWeight: 800, color: '#666' }}>No mock interviews scheduled yet.</p>
+                                    </div>
+                                ) : (
+                                    interviews.map((item) => (
+                                        <InterviewCard 
+                                            key={item.id || item._id} 
+                                            data={item} 
+                                            onDelete={() => handleDeleteInterview(item.id || item._id)} 
+                                            onEdit={() => {
+                                                setNewInterview(item);
+                                                setSelectedInterviewId(item.id || item._id);
+                                                setIsEditing(true);
+                                                setIsWizardOpen(true);
+                                                setWizardStep(1);
+                                            }}
+                                            onJoin={() => { setSelectedInterviewId(item.id || item._id); setSubView('AI_ROOM'); }}
+                                            onReports={() => { setSelectedInterviewId(item.id || item._id); setSubView('ANALYTICS'); }}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </motion.div>
                 )}
 
@@ -157,39 +237,39 @@ export default function MockInterviewEngine() {
                 {isWizardOpen && (
                     <div style={modalOverlayStyle}>
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={modalContentStyle}>
-                            <div style={{ padding: '2.5rem', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ padding: '2rem', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
                                 <div>
-                                    <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#111' }}>Mock Interview Builder</h2>
+                                    <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#111' }}>Mock Interview Scheduler</h2>
                                     <p style={{ fontSize: '0.8rem', color: '#666' }}>Step {wizardStep} of 8: {getStepTitle(wizardStep)}</p>
                                 </div>
                                 <button onClick={() => setIsWizardOpen(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><X size={24} /></button>
                             </div>
 
-                            <div style={{ padding: '3rem', flex: 1, overflowY: 'auto' }}>
-                                {wizardStep === 1 && <WizardStep1 />}
-                                {wizardStep === 2 && <WizardStep2 />}
-                                {wizardStep === 3 && <WizardStep3 />}
-                                {wizardStep === 4 && <WizardStep4 />}
-                                {wizardStep === 5 && <WizardStep5 />}
-                                {wizardStep === 6 && <WizardStep6 />}
-                                {wizardStep === 7 && <WizardStep7 />}
-                                {wizardStep === 8 && <WizardStep8 />}
+                            <div style={{ padding: '2.5rem', flex: 1, overflowY: 'auto', background: '#fefefe' }}>
+                                {wizardStep === 1 && <BasicInfoStep data={newInterview} setData={setNewInterview} />}
+                                {wizardStep === 2 && <CourseSelector data={newInterview} setData={setNewInterview} courses={courses} />}
+                                {wizardStep === 3 && <BatchSelector data={newInterview} setData={setNewInterview} batches={batches} />}
+                                {wizardStep === 4 && <CandidateSelector data={newInterview} setData={setNewInterview} allUsers={allUsers} selectedBatch={batches.find(b => b.id === newInterview.batchId || b._id === newInterview.batchId)} />}
+                                {wizardStep === 5 && <InterviewerSelector data={newInterview} setData={setNewInterview} allUsers={allUsers} />}
+                                {wizardStep === 6 && <ModeSelector data={newInterview} setData={setNewInterview} />}
+                                {wizardStep === 7 && <ScheduleStep data={newInterview} setData={setNewInterview} />}
+                                {wizardStep === 8 && <ReviewStep data={newInterview} />}
                             </div>
 
-                            <div style={{ padding: '2rem', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ padding: '1.5rem 2rem', background: '#fff', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between' }}>
                                 <button 
                                     onClick={() => setWizardStep(prev => Math.max(1, prev - 1))} 
-                                    style={{ ...inactiveBtnStyle, padding: '12px 30px' }}
+                                    style={{ ...secondaryBtnStyle, padding: '12px 30px' }}
                                     disabled={wizardStep === 1}
                                 >
-                                    PREVIOUS
+                                    BACK
                                 </button>
                                 <button 
-                                    onClick={() => wizardStep === 8 ? setIsWizardOpen(false) : setWizardStep(prev => prev + 1)} 
+                                    onClick={() => wizardStep === 8 ? handleCreateInterview() : setWizardStep(prev => prev + 1)} 
                                     className="btn-quantum" 
-                                    style={{ padding: '12px 40px', borderRadius: '12px' }}
+                                    style={{ padding: '12px 40px', borderRadius: '14px', background: 'var(--primary)', color: '#fff', fontWeight: 900 }}
                                 >
-                                    {wizardStep === 8 ? 'FINALIZE & PUBLISH' : 'CONTINUE'}
+                                    {wizardStep === 8 ? (isEditing ? 'UPDATE INTERVIEW' : 'SCHEDULE INTERVIEW') : 'NEXT STEP'}
                                 </button>
                             </div>
                         </motion.div>
@@ -200,56 +280,340 @@ export default function MockInterviewEngine() {
     );
 }
 
-// --- SUB-COMPONENTS ---
+// --- WIZARD STEPS COMPONENTS ---
 
-function InterviewCard({ data }: { data: any }) {
+function BasicInfoStep({ data, setData }: any) {
     return (
-        <motion.div whileHover={{ y: -5 }} style={{ ...glassStyle, padding: '0', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={inputGroupStyle}>
+                <label style={labelStyleWizard}>INTERVIEW TITLE</label>
+                <input 
+                    value={data.title} 
+                    onChange={e => setData({...data, title: e.target.value})}
+                    placeholder="e.g. Java Backend Developer Mock" 
+                    style={wizardInputStyle} 
+                />
+            </div>
+            <div style={inputGroupStyle}>
+                <label style={labelStyleWizard}>DESCRIPTION</label>
+                <textarea 
+                    value={data.description}
+                    onChange={e => setData({...data, description: e.target.value})}
+                    rows={3} 
+                    placeholder="Focus areas, expectations..." 
+                    style={{ ...wizardInputStyle, resize: 'none' }} 
+                />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div style={inputGroupStyle}>
+                    <label style={labelStyleWizard}>TYPE</label>
+                    <select value={data.type} onChange={e => setData({...data, type: e.target.value})} style={wizardInputStyle}>
+                        <option value="TECHNICAL">Technical Interview</option>
+                        <option value="HR">HR / Behavioral</option>
+                        <option value="CODING">Coding Assessment</option>
+                        <option value="SYSTEM_DESIGN">System Design</option>
+                    </select>
+                </div>
+                <div style={inputGroupStyle}>
+                    <label style={labelStyleWizard}>DIFFICULTY</label>
+                    <select value={data.difficulty} onChange={e => setData({...data, difficulty: e.target.value})} style={wizardInputStyle}>
+                        <option value="EASY">Easy</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HARD">Hard</option>
+                        <option value="EXPERT">Expert</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function CourseSelector({ data, setData, courses }: any) {
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            {courses.map((c: any) => (
+                <div 
+                    key={c.id || c._id} 
+                    onClick={() => setData({...data, courseId: c.id || c._id, courseName: c.title})}
+                    style={{ 
+                        ...glassStyle, 
+                        padding: '1.5rem', 
+                        cursor: 'pointer', 
+                        border: data.courseId === (c.id || c._id) ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)',
+                        background: data.courseId === (c.id || c._id) ? 'rgba(124, 58, 237, 0.05)' : '#fff'
+                    }}
+                >
+                    <div style={{ width: 40, height: 40, borderRadius: '10px', background: 'rgba(124, 58, 237, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                        <Monitor size={20} color="var(--primary)" />
+                    </div>
+                    <h4 style={{ fontWeight: 800 }}>{c.title}</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '5px' }}>{c.duration}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function BatchSelector({ data, setData, batches }: any) {
+    const filteredBatches = batches.filter((b: any) => b.courseId === data.courseId);
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            {filteredBatches.length > 0 ? filteredBatches.map((b: any) => (
+                <div 
+                    key={b.id || b._id} 
+                    onClick={() => setData({...data, batchId: b.id || b._id, batchName: b.batchName || b.name})}
+                    style={{ 
+                        ...glassStyle, 
+                        padding: '1.5rem', 
+                        cursor: 'pointer', 
+                        border: data.batchId === (b.id || b._id) ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)',
+                        background: data.batchId === (b.id || b._id) ? 'rgba(124, 58, 237, 0.05)' : '#fff'
+                    }}
+                >
+                    <h4 style={{ fontWeight: 800 }}>{b.batchName || b.name}</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '5px' }}>{b.batchCode}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '10px', color: 'var(--primary)', fontWeight: 800, fontSize: '0.7rem' }}>
+                        <Users size={12} /> {b.studentIds?.length || 0} Students
+                    </div>
+                </div>
+            )) : (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>Select a course first or no batches found.</div>
+            )}
+        </div>
+    );
+}
+
+function CandidateSelector({ data, setData, allUsers, selectedBatch }: any) {
+    const batchStudents = allUsers.filter((u: any) => selectedBatch?.studentIds?.includes(u.email) || selectedBatch?.studentIds?.includes(u.id) || selectedBatch?.studentIds?.includes(u._id));
+    
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', gap: '1.5rem' }}>
+                <button 
+                    onClick={() => setData({...data, candidateType: 'ALL', candidateIds: []})}
+                    style={{ ...inactiveBtnStyle, flex: 1, border: data.candidateType === 'ALL' ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)', background: data.candidateType === 'ALL' ? 'rgba(124, 58, 237, 0.05)' : '#fff' }}
+                >
+                    <Users size={16} /> ALL STUDENTS ({batchStudents.length})
+                </button>
+                <button 
+                    onClick={() => setData({...data, candidateType: 'SPECIFIC'})}
+                    style={{ ...inactiveBtnStyle, flex: 1, border: data.candidateType === 'SPECIFIC' ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)', background: data.candidateType === 'SPECIFIC' ? 'rgba(124, 58, 237, 0.05)' : '#fff' }}
+                >
+                    <UserPlus size={16} /> SELECT INDIVIDUALS
+                </button>
+            </div>
+
+            {data.candidateType === 'SPECIFIC' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', maxHeight: '300px', overflowY: 'auto', padding: '10px' }}>
+                    {batchStudents.map((s: any) => {
+                        const isSelected = data.candidateIds.includes(s.id || s._id);
+                        return (
+                            <div 
+                                key={s.id || s._id} 
+                                onClick={() => {
+                                    const ids = [...data.candidateIds];
+                                    if (isSelected) setData({...data, candidateIds: ids.filter(id => id !== (s.id || s._id))});
+                                    else setData({...data, candidateIds: [...ids, (s.id || s._id)]});
+                                }}
+                                style={{ ...glassStyle, padding: '1rem', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', border: isSelected ? '1px solid var(--primary)' : '1px solid rgba(0,0,0,0.05)' }}
+                            >
+                                <div style={{ width: 16, height: 16, border: '1px solid #ddd', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isSelected ? 'var(--primary)' : 'transparent' }}>
+                                    {isSelected && <Check size={12} color="white" />}
+                                </div>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{s.fullName}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function InterviewerSelector({ data, setData, allUsers }: any) {
+    const interviewers = allUsers.filter((u: any) => u.role === 'SUPER_ADMIN' || u.role === 'ADMIN' || u.role === 'EMPLOYEE');
+    
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {interviewers.map((u: any) => (
+                <div 
+                    key={u.id || u._id}
+                    onClick={() => setData({...data, interviewerId: u.id || u._id, interviewerName: u.fullName, interviewerRole: u.role})}
+                    style={{ 
+                        ...glassStyle, 
+                        padding: '1.5rem', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '1.2rem', 
+                        cursor: 'pointer',
+                        border: data.interviewerId === (u.id || u._id) ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)',
+                        background: data.interviewerId === (u.id || u._id) ? 'rgba(124, 58, 237, 0.05)' : '#fff'
+                    }}
+                >
+                    <div style={{ width: 45, height: 45, borderRadius: '12px', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                        {u.fullName.charAt(0)}
+                    </div>
+                    <div>
+                        <h4 style={{ fontWeight: 800 }}>{u.fullName}</h4>
+                        <p style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase' }}>{u.role.replace('_', ' ')}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function ModeSelector({ data, setData }: any) {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div 
+                onClick={() => setData({...data, mode: 'AI'})}
+                style={{ ...glassStyle, padding: '1.5rem', display: 'flex', gap: '1.5rem', cursor: 'pointer', border: data.mode === 'AI' ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)' }}
+            >
+                <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '14px' }}><Bot color="#3b82f6" /></div>
+                <div>
+                    <h4 style={{ fontWeight: 800 }}>AI Interview Engine</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#666' }}>Autonomous evaluation with real-time scoring.</p>
+                </div>
+            </div>
+            <div 
+                onClick={() => setData({...data, mode: 'HUMAN'})}
+                style={{ ...glassStyle, padding: '1.5rem', display: 'flex', gap: '1.5rem', cursor: 'pointer', border: data.mode === 'HUMAN' ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)' }}
+            >
+                <div style={{ padding: '1rem', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '14px' }}><UserPlus color="var(--primary)" /></div>
+                <div>
+                    <h4 style={{ fontWeight: 800 }}>Human Interviewer</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#666' }}>Manual evaluation by assigned faculty member.</p>
+                </div>
+            </div>
+            <div 
+                onClick={() => setData({...data, mode: 'HYBRID'})}
+                style={{ ...glassStyle, padding: '1.5rem', display: 'flex', gap: '1.5rem', cursor: 'pointer', border: data.mode === 'HYBRID' ? '2px solid var(--primary)' : '1px solid rgba(0,0,0,0.1)' }}
+            >
+                <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '14px' }}><Target color="#10b981" /></div>
+                <div>
+                    <h4 style={{ fontWeight: 800 }}>Hybrid Protocol</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#666' }}>AI screens the candidate, Human finalizes the feedback.</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ScheduleStep({ data, setData }: any) {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div style={inputGroupStyle}>
+                    <label style={labelStyleWizard}>DATE</label>
+                    <input 
+                        type="date" 
+                        value={data.date} 
+                        onChange={e => setData({...data, date: e.target.value})}
+                        style={wizardInputStyle} 
+                    />
+                </div>
+                <div style={inputGroupStyle}>
+                    <label style={labelStyleWizard}>START TIME</label>
+                    <input 
+                        type="time" 
+                        value={data.startTime} 
+                        onChange={e => setData({...data, startTime: e.target.value})}
+                        style={wizardInputStyle} 
+                    />
+                </div>
+            </div>
+            <div style={inputGroupStyle}>
+                <label style={labelStyleWizard}>DURATION (MINUTES)</label>
+                <input 
+                    type="number" 
+                    value={isNaN(data.duration) ? '' : data.duration} 
+                    onChange={e => setData({...data, duration: parseInt(e.target.value) || 0})}
+                    style={wizardInputStyle} 
+                />
+            </div>
+        </div>
+    );
+}
+
+function ReviewStep({ data }: any) {
+    return (
+        <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 70, height: 70, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#10b981' }}>
+                <CheckCircle size={35} />
+            </div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Validation Complete</h3>
+            <p style={{ color: '#666', marginBottom: '2rem' }}>All interview slots are configured correctly.</p>
+            
+            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '20px', textAlign: 'left', display: 'inline-block', minWidth: '350px', border: '1px solid #e2e8f0' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                    <p style={labelStyle}>TITLE</p>
+                    <p style={{ fontWeight: 800 }}>{data.title}</p>
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                    <p style={labelStyle}>TARGET</p>
+                    <p style={{ fontWeight: 800 }}>{data.batchName} ({data.courseName})</p>
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                    <p style={labelStyle}>INTERVIEWER</p>
+                    <p style={{ fontWeight: 800 }}>{data.interviewerName} ({data.interviewerRole})</p>
+                </div>
+                <div>
+                    <p style={labelStyle}>SCHEDULE</p>
+                    <p style={{ fontWeight: 800 }}>{data.date} at {data.startTime} ({data.duration} mins)</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// --- SUB-COMPONENTS CORE ---
+
+function InterviewCard({ data, onDelete, onEdit, onJoin, onReports }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any }) {
+    return (
+        <motion.div whileHover={{ y: -5 }} style={{ ...glassStyle, padding: '0', overflow: 'hidden', background: '#fff' }}>
             <div style={{ padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                     <div style={{ background: data.status === 'LIVE' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: data.status === 'LIVE' ? '#ef4444' : '#10b981', boxShadow: data.status === 'LIVE' ? '0 0 10px #ef4444' : 'none' }} />
-                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: data.status === 'LIVE' ? '#ef4444' : '#10b981' }}>{data.status}</span>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: data.status === 'LIVE' ? '#ef4444' : '#10b981' }}>{data.status || 'SCHEDULED'}</span>
                     </div>
-                    <button style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}><MoreVertical size={16} /></button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={onEdit} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                        <button onClick={onDelete} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                    </div>
                 </div>
 
                 <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.5rem', minHeight: '3.5rem', color: '#111' }}>{data.title}</h4>
                 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '2rem' }}>
                     <Badge icon={<Zap size={10} />} label={data.type} color="var(--primary)" />
-                    <Badge icon={<Mic size={10} />} label={data.mode} color="var(--secondary)" />
-                    <Badge icon={<Clock size={10} />} label={data.duration} color="#f59e0b" />
+                    <Badge icon={<Bot size={10} />} label={data.mode} color="var(--secondary)" />
+                    <Badge icon={<Clock size={10} />} label={`${data.duration} MINS`} color="#f59e0b" />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1.5rem', background: 'rgba(0,0,0,0.02)', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.05)', marginBottom: '2rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0', marginBottom: '2rem' }}>
                     <div>
                         <p style={labelStyle}>INTERVIEWER</p>
-                        <p style={valueStyle}>{data.interviewer}</p>
+                        <p style={valueStyle}>{data.interviewerName}</p>
                     </div>
                     <div>
-                        <p style={labelStyle}>DIFFICULTY</p>
-                        <p style={{ ...valueStyle, color: '#ef4444' }}>{data.difficulty}</p>
+                        <p style={labelStyle}>BATCH</p>
+                        <p style={valueStyle}>{data.batchName}</p>
                     </div>
                     <div>
-                        <p style={labelStyle}>CANDIDATES</p>
-                        <p style={valueStyle}>{data.candidates}</p>
+                        <p style={labelStyle}>DATE</p>
+                        <p style={valueStyle}>{data.date}</p>
                     </div>
                     <div>
-                        <p style={labelStyle}>AI CONFIDENCE</p>
-                        <p style={{ ...valueStyle, color: '#10b981' }}>{data.confidence}%</p>
+                        <p style={labelStyle}>TIME</p>
+                        <p style={valueStyle}>{data.startTime}</p>
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(0,0,0,0.03)', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>VIEW REPORTS</button>
-                    {data.status === 'LIVE' ? (
-                        <button style={{ flex: 1.2, padding: '11px', borderRadius: '12px', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                            <Play size={14} fill="white" /> JOIN LIVE
-                        </button>
-                    ) : (
-                        <button style={{ flex: 1.2, padding: '11px', borderRadius: '12px', background: 'var(--primary)', color: '#000', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>SCHEDULE NOW</button>
-                    )}
+                    <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>VIEW REPORTS</button>
+                    <button onClick={onJoin} style={{ flex: 1.2, padding: '11px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>JOIN HUB</button>
                 </div>
             </div>
         </motion.div>
@@ -257,259 +621,21 @@ function InterviewCard({ data }: { data: any }) {
 }
 
 function LiveMonitoringView() {
-    const liveItems = [
-        { name: 'John Doe', status: 'CODING', risk: 'LOW', time: '12:45 remaining', location: 'India/Mumbai' },
-        { name: 'Alice Smith', status: 'HR ROUND', risk: 'HIGH', time: '05:20 remaining', location: 'UK/London' },
-        { name: 'Bob Wilson', status: 'SYSTEM DESIGN', risk: 'LOW', time: '40:10 remaining', location: 'USA/California' }
-    ];
-
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ ...glassStyle, padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#111' }}>Global Live Feed</h2>
-                        <p style={{ color: '#666', fontSize: '0.8rem' }}>Monitoring 12 active interview sessions across all regions.</p>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <div style={tagStyle}><div style={dotStyle('#ef4444')} /> 2 CRITICAL</div>
-                        <div style={tagStyle}><div style={dotStyle('#f59e0b')} /> 5 WARNING</div>
-                    </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    {liveItems.slice(0, 2).map((item, i) => (
-                        <div key={i} style={{ ...glassStyle, padding: '0', overflow: 'hidden' }}>
-                            <div style={{ height: '220px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                                <Monitor size={48} style={{ opacity: 0.1 }} />
-                                <div style={{ position: 'absolute', top: '15px', right: '15px', background: 'rgba(239, 68, 68, 0.8)', padding: '4px 10px', borderRadius: '10px', fontSize: '0.6rem', fontWeight: 900 }}>REC LIVE</div>
-                                <div style={{ position: 'absolute', bottom: '15px', left: '15px', display: 'flex', gap: '10px' }}>
-                                    <div style={{ padding: '5px 10px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 800 }}>{item.name}</div>
-                                </div>
-                            </div>
-                            <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <p style={{ fontSize: '0.8rem', fontWeight: 900 }}>{item.status}</p>
-                                    <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{item.time}</p>
-                                </div>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                     <button style={{ padding: '8px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '10px', color: '#111' }}><Shield size={14} /></button>
-                                     <button style={{ padding: '8px 15px', background: 'var(--primary)', border: 'none', borderRadius: '10px', color: '#fff', fontWeight: 900, fontSize: '0.65rem' }}>JOIN ROOM</button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div style={{ ...glassStyle, padding: '2rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '2rem' }}>Activity Inspector</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {liveItems.map((item, i) => (
-                        <div key={i} style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>{item.name}</span>
-                                <span style={{ color: item.risk === 'HIGH' ? '#ef4444' : '#10b981', fontWeight: 900, fontSize: '0.65rem' }}>{item.risk} RISK</span>
-                            </div>
-                            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>Suspicious tab switch detected 2 mins ago.</p>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <button style={{ flex: 1, padding: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef444440', color: '#ef4444', borderRadius: '8px', fontSize: '0.6rem', fontWeight: 800 }}>SEND WARNING</button>
-                                <button style={{ flex: 1, padding: '8px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', color: '#111', borderRadius: '8px', fontSize: '0.6rem', fontWeight: 800 }}>VIEW LOGS</button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+        <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
+            <Activity size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+            <h2 style={{ color: '#111' }}>Live Interview Monitor</h2>
+            <p style={{ color: '#666' }}>Active sessions will appear here as candidates join the rooms.</p>
         </div>
     );
 }
 
-// --- WIZARD STEPS ---
-
-function WizardStep1() {
+function AIRoomView() {
     return (
-        <div style={{ gap: '2rem', display: 'flex', flexDirection: 'column' }}>
-            <div style={inputGroupStyle}>
-                <label style={labelStyleWizard}>Interview Title</label>
-                <input placeholder="e.g. Senior Frontend Engineer Mock Interview" style={wizardInputStyle} />
-            </div>
-            <div style={inputGroupStyle}>
-                <label style={labelStyleWizard}>Description</label>
-                <textarea rows={4} placeholder="What should candidates expect from this interview?" style={{ ...wizardInputStyle, resize: 'none' }} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                 <div style={inputGroupStyle}>
-                    <label style={labelStyleWizard}>Hiring Role</label>
-                    <select style={wizardInputStyle}>
-                        <option>FullStack Developer</option>
-                        <option>Data Scientist</option>
-                        <option>Product Manager</option>
-                        <option>DevOps Engineer</option>
-                    </select>
-                </div>
-                <div style={inputGroupStyle}>
-                    <label style={labelStyleWizard}>Tags (Comma separated)</label>
-                    <input placeholder="React, Node.js, System Design" style={wizardInputStyle} />
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function WizardStep2() {
-    const types = [
-        { id: 'hr', title: 'HR / Behavioral', desc: 'Communication and cultural fit evaluation.', icon: <Users /> },
-        { id: 'tech', title: 'Technical Interview', desc: 'Core concept evaluation and logic checks.', icon: <Zap /> },
-        { id: 'coding', title: 'Coding Interview', desc: 'Whiteboard and live coding assessment.', icon: <Play /> },
-        { id: 'system', title: 'System Design', desc: 'High-level architecture and scalability.', icon: <Monitor /> },
-    ];
-    return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-            {types.map(t => (
-                <div key={t.id} style={{ ...glassStyle, padding: '2rem', border: '1px solid var(--primary)', cursor: 'pointer', background: 'rgba(129, 140, 248, 0.05)' }}>
-                    <div style={{ color: 'var(--primary)', marginBottom: '1.5rem' }}>{t.icon}</div>
-                    <h4 style={{ fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.5rem' }}>{t.title}</h4>
-                    <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{t.desc}</p>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function WizardStep3() {
-    const modes = [
-        { id: 'ai', title: 'AI-Powered Interview', desc: 'Our AI engine asks questions and evaluates automatically.', icon: <Bot />, accent: 'var(--secondary)' },
-        { id: 'human', title: 'Human Interviewer', desc: 'Assign a professional interviewer for the session.', icon: <UserPlus />, accent: 'var(--primary)' },
-        { id: 'hybrid', title: 'Hybrid Intelligence', desc: 'AI screens first, then human takes over for final round.', icon: <Target />, accent: '#10b981' },
-    ];
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {modes.map(m => (
-                <div key={m.id} style={{ ...glassStyle, padding: '2rem', display: 'flex', alignItems: 'center', gap: '2rem', cursor: 'pointer' }}>
-                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '20px', color: m.accent }}>{m.icon}</div>
-                    <div>
-                        <h4 style={{ fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.5rem' }}>{m.title}</h4>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>{m.desc}</p>
-                    </div>
-                    <div style={{ flex: 1 }} />
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.1)' }} />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function WizardStep4() {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ ...glassStyle, padding: '2.5rem', border: '1px dashed var(--primary)', background: '#fff' }}>
-                <h4 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>AI Question Generator</h4>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>Our AI can extract questions from the job description or resume.</p>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                     <button style={{ flex: 1, padding: '12px', background: 'var(--grad-main)', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 900, fontSize: '0.75rem' }}>UPLOAD J.D. (PDF)</button>
-                     <button style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.03)', color: '#111', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', fontWeight: 900, fontSize: '0.75rem' }}>SELECT FROM LIBRARY</button>
-                </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 <h4 style={{ fontWeight: 900, fontSize: '1rem' }}>Manual Question Builder</h4>
-                 {[1, 2].map(i => (
-                    <div key={i} style={{ ...glassStyle, padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                            <div style={{ padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px' }}><Clipboard size={16} color="var(--primary)" /></div>
-                            <div>
-                                <p style={{ fontWeight: 800, fontSize: '0.9rem' }}>{i === 1 ? 'Explain Closures in Javascript' : 'Explain System Scalability'}</p>
-                                <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Technical Round • Medium</p>
-                            </div>
-                        </div>
-                        <Trash2 size={16} color="#ef4444" style={{ cursor: 'pointer' }} />
-                    </div>
-                 ))}
-                 <button style={{ width: 'fit-content', color: 'var(--primary)', background: 'none', border: 'none', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 10px' }}>
-                    <Plus size={16} /> ADD CUSTOM QUESTION
-                 </button>
-            </div>
-        </div>
-    );
-}
-
-function WizardStep5() {
-    const criteria = ['Communication', 'Technical Skills', 'Problem Solving', 'Confidence', 'Behavioral Fit', 'Leadership'];
-    return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-            {criteria.map((c, i) => (
-                <div key={i} style={{ ...glassStyle, padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 800 }}>{c}</span>
-                    <input type="checkbox" defaultChecked style={{ width: 20, height: 20 }} />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function WizardStep6() {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div style={inputGroupStyle}>
-                    <label style={labelStyleWizard}>Interview Date</label>
-                    <input type="date" style={wizardInputStyle} />
-                </div>
-                <div style={inputGroupStyle}>
-                    <label style={labelStyleWizard}>Start Time</label>
-                    <input type="time" style={wizardInputStyle} />
-                </div>
-            </div>
-            <div style={inputGroupStyle}>
-                <label style={labelStyleWizard}>Time Slots (Auto-scheduling)</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    {['30 MINS', '1 HOUR', '1.5 HOURS'].map(t => (
-                        <button key={t} style={{ border: '1px solid var(--primary)', background: 'rgba(129, 140, 248, 0.1)', color: '#fff', padding: '10px 20px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 900 }}>{t}</button>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function WizardStep7() {
-    const settings = [
-        { label: 'Face AI Detection', desc: 'Alert if multi-face detected.' },
-        { label: 'Eye Tracking Monitor', desc: 'Warn if candidate looks away.' },
-        { label: 'Tab Switch Blocker', desc: 'Auto-end if candidate switches tabs.' },
-        { label: 'Noise Analysis', desc: 'Detect background whispering.' }
-    ];
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {settings.map((s, i) => (
-                <div key={i} style={{ ...glassStyle, padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h4 style={{ fontWeight: 900, fontSize: '1rem', marginBottom: '0.2rem' }}>{s.label}</h4>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{s.desc}</p>
-                    </div>
-                    <div style={{ width: 50, height: 26, background: 'var(--primary)', borderRadius: '20px', position: 'relative' }}>
-                        <div style={{ width: 18, height: 18, background: '#000', borderRadius: '50%', position: 'absolute', right: 4, top: 4 }} />
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function WizardStep8() {
-    return (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#10b981' }}>
-                <CheckCircle size={40} />
-            </div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Ready to Launch?</h2>
-            <p style={{ color: 'var(--text-dim)', maxWidth: '400px', margin: '0 auto 3rem' }}>All protocols have been validated. Your mock interview engine is ready to broadcast to candidates.</p>
-            <div style={{ ...glassStyle, padding: '2rem', display: 'inline-block', textAlign: 'left' }}>
-                <p style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '1rem' }}>SUMMARY</p>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>• Role: Sr. Frontend Developer</p>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>• Mode: AI Interview Engine</p>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>• Features: Face AI, Tab Blocking Enabled</p>
-            </div>
+        <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
+            <Bot size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+            <h2 style={{ color: '#111' }}>AI Calibration Room</h2>
+            <p style={{ color: '#666' }}>Adjusting NLP engine for behavioral analysis...</p>
         </div>
     );
 }
@@ -527,103 +653,17 @@ function Badge({ icon, label, color }: { icon: any, label: string, color: string
 
 const getStepTitle = (step: number) => {
     switch (step) {
-        case 1: return 'Basic Information';
-        case 2: return 'Interview Type';
-        case 3: return 'Execution Mode';
-        case 4: return 'Question Builder';
-        case 5: return 'Evaluation Criteria';
-        case 6: return 'Scheduling Slot';
-        case 7: return 'Proctoring Guard';
-        case 8: return 'Final Review';
+        case 1: return 'Position Specifics';
+        case 2: return 'Curriculum Context';
+        case 3: return 'Target Batch';
+        case 4: return 'Candidate Selection';
+        case 5: return 'Interviewers';
+        case 6: return 'Execution Protocol';
+        case 7: return 'Timing & Slotting';
+        case 8: return 'Deployment Preview';
         default: return '';
     }
 };
-
-function AIRoomView() {
-    return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem', height: '70vh' }}>
-            <div style={{ ...glassStyle, padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ flex: 1, background: '#f8fafc', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <div style={{ width: 200, height: 200, borderRadius: '50%', background: 'var(--primary)', filter: 'blur(80px)', opacity: 0.15, position: 'absolute' }} />
-                    <motion.div 
-                        animate={{ scale: [1, 1.1, 1] }} 
-                        transition={{ repeat: Infinity, duration: 2 }} 
-                        style={{ width: 120, height: 120, borderRadius: '50%', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}
-                    >
-                        <Bot size={50} color="var(--primary)" />
-                    </motion.div>
-                    
-                    <div style={{ marginTop: '3rem', textAlign: 'center', zIndex: 1 }}>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>AI Interviewer v2.4</h3>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>"Tell me about a time you handled a production outage..."</p>
-                    </div>
-
-                    <div style={{ position: 'absolute', bottom: '40px', display: 'flex', gap: '4px', alignItems: 'flex-end', height: '40px' }}>
-                        {[0.4, 0.7, 1, 0.8, 0.5, 0.9, 0.6, 1, 0.7, 0.4].map((h, i) => (
-                            <motion.div 
-                                key={i} 
-                                animate={{ height: [h * 40, (1-h) * 40, h * 40] }} 
-                                transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
-                                style={{ width: 4, borderRadius: '2px', background: 'var(--primary)' }} 
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                <div style={{ padding: '2rem', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', gap: '2rem' }}>
-                    <div style={{ flex: 1 }}>
-                        <p style={labelStyle}>LIVE TRANSCRIPTION</p>
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginTop: '8px' }}>Candidate: "So at my previous firm, we had an AWS S3 bucket leak that triggered our pager duty alerts..."</p>
-                    </div>
-                    <div style={{ width: '200px', display: 'flex', gap: '10px' }}>
-                        <button style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef444440', borderRadius: '12px', fontWeight: 900, fontSize: '0.7rem' }}>END SESSION</button>
-                    </div>
-                </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ ...glassStyle, padding: '2rem' }}>
-                    <h4 style={{ fontWeight: 900, fontSize: '0.9rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Target size={16} /> LIVE SCORE</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                        <LiveMetric label="Technical Accuracy" value={82} color="var(--primary)" />
-                        <LiveMetric label="Communication" value={91} color="var(--secondary)" />
-                        <LiveMetric label="Confidence" value={78} color="#f59e0b" />
-                    </div>
-                </div>
-
-                <div style={{ ...glassStyle, padding: '2rem', flex: 1 }}>
-                    <h4 style={{ fontWeight: 900, fontSize: '0.9rem', marginBottom: '1.5rem' }}>AI INSIGHTS</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid #10b98120' }}>
-                             <p style={{ fontSize: '0.75rem', fontWeight: 800, color: '#10b981' }}>STRENGTH</p>
-                             <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Strong understanding of incident response lifecycle.</p>
-                        </div>
-                        <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '12px', border: '1px solid #ef444420' }}>
-                             <p style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ef4444' }}>IMPROVEMENT</p>
-                             <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Use more specific architectural terms when describing S3.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function LiveMetric({ label, value, color }: { label: string, value: number, color: string }) {
-    return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-dim)' }}>{label}</span>
-                <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>{value}%</span>
-            </div>
-            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px' }}>
-                <motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }} transition={{ duration: 1 }} style={{ height: '100%', background: color, borderRadius: '2px' }} />
-            </div>
-        </div>
-    );
-}
-
-// --- STYLES OBJECTS ---
 
 const activeBtnStyle: React.CSSProperties = {
     padding: '12px 24px',
@@ -653,34 +693,44 @@ const inactiveBtnStyle: React.CSSProperties = {
     cursor: 'pointer'
 };
 
+const secondaryBtnStyle: React.CSSProperties = {
+    padding: '12px 24px',
+    borderRadius: '14px',
+    background: '#f8fafc',
+    color: '#666',
+    border: '1px solid #e2e8f0',
+    fontWeight: 800,
+    fontSize: '0.8rem',
+    cursor: 'pointer'
+};
+
 const labelStyle: React.CSSProperties = { fontSize: '0.6rem', fontWeight: 900, color: '#999', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '1px' };
 const valueStyle: React.CSSProperties = { fontSize: '0.85rem', fontWeight: 800, color: '#111' };
 
 const modalOverlayStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(30px)',
+    background: 'rgba(0, 0, 0, 0.4)',
+    backdropFilter: 'blur(10px)',
     zIndex: 10000,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '6rem 0'
+    padding: '4rem 0'
 };
 
 const modalContentStyle: React.CSSProperties = {
     width: '95%',
-    maxWidth: '1000px',
-    height: '100%',
+    maxWidth: '900px',
+    height: '90%',
     ...glassStyle,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    background: '#fff',
+    boxShadow: '0 40px 100px rgba(0,0,0,0.2)'
 };
 
 const inputGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '10px' };
-const labelStyleWizard: React.CSSProperties = { fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', marginLeft: '10px' };
-const wizardInputStyle: React.CSSProperties = { padding: '1.2rem 1.5rem', borderRadius: '18px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)', color: '#111', fontSize: '0.9rem', outline: 'none', fontWeight: 600 };
-
-const tagStyle: React.CSSProperties = { padding: '6px 15px', borderRadius: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', fontSize: '0.65rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', color: '#111' };
-const dotStyle = (color: string) => ({ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` });
+const labelStyleWizard: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 900, color: '#666', marginLeft: '5px', letterSpacing: '1px' };
+const wizardInputStyle: React.CSSProperties = { padding: '1rem', borderRadius: '15px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#111', fontSize: '0.9rem', outline: 'none', fontWeight: 600 };
