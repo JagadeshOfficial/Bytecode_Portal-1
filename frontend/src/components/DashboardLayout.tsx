@@ -7,7 +7,8 @@ import {
     Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar, 
     Video, FileText, CheckCircle, Target, Search, Phone, DollarSign, 
     BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap, 
-    HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool, Edit2, XCircle
+    HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool, Edit2, XCircle,
+    MessageSquare, ClipboardCheck, Microscope, UserPlus, Fingerprint, Terminal
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
@@ -23,6 +24,7 @@ interface MenuItem {
 interface DashboardLayoutProps {
     children: React.ReactNode;
     role: Role;
+    noPadding?: boolean;
 }
 
 const MENUS: Record<string, MenuItem[]> = {
@@ -30,9 +32,12 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Overview', label: 'Dashboard Home', href: '/super-admin', icon: <LayoutDashboard size={18} /> },
         { section: 'User Management', label: 'Users List', href: '/super-admin/users', icon: <Users size={18} /> },
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
-        { section: 'Reports & Settings', label: 'Marketing Planner', href: '/super-admin/marketing', icon: <TrendingUp size={18} /> },
-        { label: 'System Reports', href: '/super-admin/reports', icon: <BarChart3 size={18} /> },
-        { label: 'Settings', href: '/super-admin/settings', icon: <Settings size={18} /> },
+        { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
+        { section: 'Pinpoint Tracking', label: 'Students & Trainer Attendance', href: '/super-admin/attendance', icon: <ClipboardCheck size={18} /> },
+        { label: 'Tutor Full Tracking', href: '/super-admin/tutor-tracking', icon: <Activity size={18} /> },
+        { label: 'Admin Full Tracking', href: '/super-admin/admin-tracking', icon: <Fingerprint size={18} /> },
+        { label: 'Students Pinpoint Tracking', href: '/super-admin/academic?tab=TRACKING', icon: <Microscope size={18} /> },
+        { label: 'Universal System Audit', href: '/super-admin/global-tracking', icon: <Terminal size={18} /> },
     ],
     admin: [
         { section: 'Main', label: 'Admin Home', href: '/admin', icon: <LayoutDashboard size={18} /> },
@@ -68,7 +73,7 @@ const MENUS: Record<string, MenuItem[]> = {
     ]
 };
 
-export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, role, noPadding }: DashboardLayoutProps) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [userName, setUserName] = useState('User');
@@ -259,7 +264,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                     </div>
                 </header>
                 
-                <div className={styles.content}>
+                <div className={styles.content} style={noPadding ? { padding: 0, height: 'calc(100vh - 80px)', overflow: 'hidden' } : {}}>
                     {children}
                 </div>
             </main>

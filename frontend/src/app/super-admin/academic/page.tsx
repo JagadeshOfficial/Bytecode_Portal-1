@@ -3,7 +3,7 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Book, Plus, Search, Edit2, Trash2,
     Layers, Users, Clock, User, BookOpen,
@@ -13,7 +13,7 @@ import {
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle, MinusCircle,
     ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip,
-    Zap, Activity, Terminal, BarChart2
+    Zap, Activity, Terminal, BarChart2, Monitor, Bot
 } from 'lucide-react';
 import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
@@ -22,9 +22,10 @@ import MockInterviewEngine from '@/components/Academic/MockInterviews/MockInterv
 export default function AcademicHub() {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS' | 'EXAMS' | 'ANALYTICS'>('COURSES');
-    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'INTERVIEWS' | 'TESTS'>('DRIVE');
+    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'INTERVIEWS' | 'LIVE_MONITOR' | 'AI_ROOM' | 'ANALYTICS' | 'TESTS' | 'TRACKING'>('DRIVE');
     const [courses, setCourses] = useState<any[]>([]);
     const [batches, setBatches] = useState<any[]>([]);
+    const [studentTracking, setStudentTracking] = useState<any[]>([]);
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [liveSessions, setLiveSessions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -129,9 +130,32 @@ export default function AcademicHub() {
         setLoading(false);
     };
 
+    const searchParams = useSearchParams();
+    const activeTabParam = searchParams.get('tab');
+
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (activeTabParam === 'TRACKING') {
+            setBatchTab('TRACKING');
+        }
+    }, [activeTabParam]);
+
+    useEffect(() => {
+        const fetchTracking = async () => {
+            if (batchTab === 'TRACKING' && selectedBatch) {
+                try {
+                    const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id || selectedBatch._id}/student-tracking`);
+                    if (res.ok) setStudentTracking(await res.json());
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        };
+        fetchTracking();
+    }, [batchTab, selectedBatch]);
 
     const handleCreateFolder = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -1029,25 +1053,61 @@ export default function AcademicHub() {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                 {/* --- BATCH TABS NAVIGATION --- */}
-                                <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <button onClick={() => setBatchTab('DRIVE')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'DRIVE' ? 'var(--primary)' : 'transparent', color: batchTab === 'DRIVE' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Folder size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> BATCH DRIVE
-                                    </button>
-                                    <button onClick={() => setBatchTab('LIVE')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'LIVE' ? 'var(--primary)' : 'transparent', color: batchTab === 'LIVE' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Video size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> LIVE CLASSES
-                                    </button>
-                                    <button onClick={() => setBatchTab('RECORDINGS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'RECORDINGS' ? 'var(--primary)' : 'transparent', color: batchTab === 'RECORDINGS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Play size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> VIDEOS
-                                    </button>
-                                    <button onClick={() => setBatchTab('ASSIGNMENTS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'ASSIGNMENTS' ? 'var(--primary)' : 'transparent', color: batchTab === 'ASSIGNMENTS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <FileText size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> ASSIGNMENTS
-                                    </button>
-                                    <button onClick={() => setBatchTab('INTERVIEWS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'INTERVIEWS' ? 'var(--primary)' : 'transparent', color: batchTab === 'INTERVIEWS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Users size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> MOCK INTERVIEWS
-                                    </button>
-                                    <button onClick={() => setBatchTab('TESTS')} style={{ flex: 1, padding: '12px', borderRadius: '16px', background: batchTab === 'TESTS' ? 'var(--primary)' : 'transparent', color: batchTab === 'TESTS' ? '#fff' : 'var(--text-dim)', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}>
-                                        <Zap size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} /> TEST ENGINE
-                                    </button>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    gap: '10px', 
+                                    background: 'rgba(255,255,255,0.02)', 
+                                    padding: '8px', 
+                                    borderRadius: '24px', 
+                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    position: 'relative'
+                                }}>
+                                    {[
+                                        { id: 'DRIVE', label: 'BATCH DRIVE', icon: <Folder size={16} /> },
+                                        { id: 'LIVE', label: 'LIVE CLASSES', icon: <Video size={16} /> },
+                                        { id: 'RECORDINGS', label: 'VIDEOS', icon: <Play size={16} /> },
+                                        { id: 'ASSIGNMENTS', label: 'ASSIGNMENTS', icon: <FileText size={16} /> },
+                                        { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> }
+                                    ].map((tab) => (
+                                        <button 
+                                            key={tab.id}
+                                            onClick={() => setBatchTab(tab.id as any)} 
+                                            style={{ 
+                                                flex: 1, 
+                                                padding: '14px', 
+                                                borderRadius: '16px', 
+                                                background: 'transparent',
+                                                color: batchTab === tab.id ? '#fff' : 'var(--text-dim)', 
+                                                border: 'none', 
+                                                fontWeight: 800, 
+                                                cursor: 'pointer', 
+                                                transition: 'color 0.3s',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '10px',
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            {batchTab === tab.id && (
+                                                <motion.div
+                                                    layoutId="batchActiveTab"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        background: 'var(--primary)',
+                                                        borderRadius: '16px',
+                                                        zIndex: 0,
+                                                        boxShadow: '0 10px 20px rgba(124, 58, 237, 0.3)'
+                                                    }}
+                                                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                                />
+                                            )}
+                                            <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {tab.icon} {tab.label}
+                                            </span>
+                                        </button>
+                                    ))}
                                 </div>
 
                                 {/* --- DRIVE CONTENT --- */}
@@ -1428,16 +1488,69 @@ export default function AcademicHub() {
                                     </motion.div>
                                 )}
                                 {/* --- MOCK INTERVIEWS CONTENT --- */}
-                                {batchTab === 'INTERVIEWS' && (
+                                {['INTERVIEWS', 'LIVE_MONITOR', 'AI_ROOM', 'ANALYTICS'].includes(batchTab) && (
                                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
-                                        <MockInterviewEngine />
+                                        <MockInterviewEngine activeView={batchTab === 'INTERVIEWS' ? 'DASHBOARD' : batchTab} />
                                     </motion.div>
                                 )}
 
-                                {/* --- TEST ENGINE CONTENT --- */}
                                 {batchTab === 'TESTS' && (
                                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
                                         <ExamManagement />
+                                    </motion.div>
+                                )}
+
+                                {batchTab === 'TRACKING' && (
+                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', flex: 1 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <Users color="var(--primary)" /> STUDENT PERFORMANCE TRACKING
+                                            </h3>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                                            {studentTracking.length === 0 ? (
+                                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(0,0,0,0.02)', borderRadius: '32px' }}>
+                                                    <Users size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                                                    <p style={{ fontWeight: 800, color: '#666' }}>No student tracking data available yet for this batch.</p>
+                                                </div>
+                                            ) : (
+                                                studentTracking.map((student) => (
+                                                    <motion.div key={student.id} whileHover={{ y: -5 }} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '32px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                            <div style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(124, 58, 237, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <User size={30} color="var(--primary)" />
+                                                            </div>
+                                                            <div>
+                                                                <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1a202c' }}>{student.name}</h4>
+                                                                <p style={{ fontSize: '0.8rem', color: '#718096', fontWeight: 700 }}>{student.email}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', background: '#f8fafc', padding: '1.5rem', borderRadius: '24px' }}>
+                                                            <div>
+                                                                <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Interviews</p>
+                                                                <p style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{student.interviewsAttended} <span style={{ fontSize: '0.7rem', color: '#10b981' }}>({student.avgInterviewScore}%)</span></p>
+                                                            </div>
+                                                            <div>
+                                                                <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Tests Taken</p>
+                                                                <p style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{student.testsTaken} <span style={{ fontSize: '0.7rem', color: '#6366f1' }}>({student.avgTestScore}%)</span></p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 900 }}>
+                                                                <span>Overall Mastery</span>
+                                                                <span style={{ color: 'var(--primary)' }}>{student.overallProgress}%</span>
+                                                            </div>
+                                                            <div style={{ height: '10px', background: '#edf2f7', borderRadius: '20px', overflow: 'hidden' }}>
+                                                                <motion.div initial={{ width: 0 }} animate={{ width: `${student.overallProgress}%` }} style={{ height: '100%', background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)' }} />
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))
+                                            )}
+                                        </div>
                                     </motion.div>
                                 )}
                             </div>

@@ -15,6 +15,13 @@ interface TestCardProps {
     onAction: (action: string, test: any) => void;
 }
 
+const STATS_ICON_MAP: Record<string, any> = {
+    Play: <Play color="#10b981" />,
+    Users: <Users color="#6366f1" />,
+    CheckCircle: <CheckCircle color="#f59e0b" />,
+    Shield: <Shield color="#8b5cf6" />
+};
+
 const TestCard = ({ test, onAction }: TestCardProps) => {
     const statusColors = {
         DEPLOYED: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' },
@@ -147,27 +154,33 @@ const TestCard = ({ test, onAction }: TestCardProps) => {
 
 export default function TestDashboard() {
     const [tests, setTests] = useState<any[]>([]);
+    const [stats, setStats] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchTests = async () => {
+        const fetchData = async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/academic/tests');
-                if (res.ok) {
-                    const data = await res.json();
+                const [testsRes, statsRes] = await Promise.all([
+                    fetch('http://localhost:8080/api/academic/tests'),
+                    fetch('http://localhost:8080/api/academic/tests/stats')
+                ]);
+
+                if (testsRes.ok) {
+                    const data = await testsRes.json();
                     setTests(data.length > 0 ? data : [
-                        { id: '1', name: 'Full Stack Java Assessment', status: 'DEPLOYED', type: 'Hybrid', questions: 45, duration: 90, difficulty: 'Hard', tags: ['Java', 'Spring', 'MySQL'], aiConfidence: 98 },
-                        { id: '2', name: 'Frontend React Engineering', status: 'STAGING', type: 'MCQ', questions: 30, duration: 60, difficulty: 'Medium', tags: ['React', 'Redux', 'CSS'], aiConfidence: 92 },
-                        { id: '3', name: 'Python Backend Logic', status: 'CLOSED', type: 'Coding', questions: 5, duration: 120, difficulty: 'Hard', tags: ['Python', 'DSA', 'Algorithms'], aiConfidence: 85 },
-                        { id: '4', name: 'UI/UX Fundamentals', status: 'DEPLOYED', type: 'MCQ', questions: 25, duration: 45, difficulty: 'Easy', tags: ['Design', 'Figma', 'UX'], aiConfidence: 95 }
+                        { id: '1', name: 'Full Stack Java Assessment', status: 'DEPLOYED', type: 'Hybrid', questionCount: 45, duration: 90, difficulty: 'HARD', tags: ['Java', 'Spring', 'MySQL'], aiScore: 98, attempts: 124, passRate: 85, structure: 'MCQ + Coding' },
+                        { id: '2', name: 'Frontend React Engineering', status: 'STAGING', type: 'MCQ', questionCount: 30, duration: 60, difficulty: 'MEDIUM', tags: ['React', 'Redux', 'CSS'], aiScore: 92, attempts: 85, passRate: 78, structure: 'MCQ Only' }
                     ]);
+                }
+                if (statsRes.ok) {
+                    setStats(await statsRes.json());
                 }
             } catch (err) {
                 console.error(err);
             }
             setLoading(false);
         };
-        fetchTests();
+        fetchData();
     }, []);
 
     const handleAction = (action: string, test: any) => {
@@ -200,20 +213,20 @@ export default function TestDashboard() {
 
             {/* --- STATS ROW --- */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
-                {[
-                    { label: 'Active Tests', value: '12', icon: <Play color="#10b981" />, trend: '+2 this week' },
-                    { label: 'Total Attempts', value: '45.2k', icon: <Users color="#6366f1" />, trend: 'avg 2.1k / day' },
-                    { label: 'Avg Pass Rate', value: '64.5%', icon: <CheckCircle color="#f59e0b" />, trend: 'improved 4%' },
-                    { label: 'AI Monitoring Efficiency', value: '99.2%', icon: <Shield color="#8b5cf6" />, trend: 'real-time audit active' }
-                ].map((stat, i) => (
+                {(stats.length > 0 ? stats : [
+                    { label: 'Active Tests', value: '12', iconType: 'Play', change: '+2 this week' },
+                    { label: 'Total Attempts', value: '45.2k', iconType: 'Users', change: 'avg 2.1k / day' },
+                    { label: 'Avg Pass Rate', value: '64.5%', iconType: 'CheckCircle', change: 'improved 4%' },
+                    { label: 'AI Monitoring Efficiency', value: '99.2%', iconType: 'Shield', change: 'real-time audit active' }
+                ]).map((stat, i) => (
                     <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '28px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <div style={{ width: 60, height: 60, borderRadius: '20px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {stat.icon}
+                            {STATS_ICON_MAP[stat.iconType] || <Play color="var(--primary)" />}
                         </div>
                         <div>
                             <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>{stat.label}</div>
                             <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#1a202c', margin: '2px 0' }}>{stat.value}</div>
-                            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#718096' }}>{stat.trend}</div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#718096' }}>{stat.change}</div>
                         </div>
                     </div>
                 ))}

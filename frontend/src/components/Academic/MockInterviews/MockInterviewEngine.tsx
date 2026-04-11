@@ -21,21 +21,31 @@ const glassStyle = {
     boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
 };
 
-// --- MOCK DATA ---
-const INITIAL_STATS = [
-    { label: 'Total Interviews', value: 128, change: '+12%', icon: <Video size={20} /> },
-    { label: 'Avg AI Score', value: '84%', change: '+5%', icon: <Brain size={20} /> },
-    { label: 'Suspicious Activities', value: 3, change: '-20%', icon: <Shield size={20} /> },
-    { label: 'Success Rate', value: '68%', change: '+8%', icon: <Target size={20} /> },
-];
+// --- ICON MAPPING ---
+const ICON_MAP: Record<string, any> = {
+    Video: <Video size={20} />,
+    Brain: <Brain size={20} />,
+    Shield: <Shield size={20} />,
+    Target: <Target size={20} />,
+    Play: <Play size={20} />,
+    Users: <Users size={20} />,
+    CheckCircle: <CheckCircle size={20} />
+};
 
-export default function MockInterviewEngine() {
+export default function MockInterviewEngine({ activeView }: { activeView?: string }) {
     const [subView, setSubView] = useState<'DASHBOARD' | 'LIVE_MONITOR' | 'ANALYTICS' | 'AI_ROOM'>('DASHBOARD');
+
+    useEffect(() => {
+        if (activeView) {
+            setSubView(activeView as any);
+        }
+    }, [activeView]);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardStep, setWizardStep] = useState(1);
     
     // Data states
     const [interviews, setInterviews] = useState<any[]>([]);
+    const [stats, setStats] = useState<any[]>([]);
     const [courses, setCourses] = useState<any[]>([]);
     const [batches, setBatches] = useState<any[]>([]);
     const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -67,24 +77,34 @@ export default function MockInterviewEngine() {
             faceDetection: true,
             eyeTracking: true,
             tabBlocker: true,
-            noiseAnalysis: true
+            noiseAnalysis: true,
+            multiLanguage: true,
+            codingSandbox: true
         }
     });
 
     const fetchAllData = async () => {
         setLoading(true);
         try {
-            const [intRes, courRes, batchRes, userRes] = await Promise.all([
+            const [intRes, courRes, batchRes, userRes, statsRes] = await Promise.all([
                 fetch('http://localhost:8080/api/academic/mock-interviews'),
                 fetch('http://localhost:8080/api/courses'),
                 fetch('http://localhost:8080/api/academic/batches'),
-                fetch('http://localhost:8080/api/users')
+                fetch('http://localhost:8080/api/users'),
+                fetch('http://localhost:8080/api/academic/mock-interviews/stats')
             ]);
             
             if (intRes.ok) setInterviews(await intRes.json());
             if (courRes.ok) setCourses(await courRes.json());
             if (batchRes.ok) setBatches(await batchRes.json());
             if (userRes.ok) setAllUsers(await userRes.json());
+            if (statsRes.ok) {
+                const statsData = await statsRes.json();
+                setStats(statsData.map((s: any) => ({
+                    ...s,
+                    icon: ICON_MAP[s.iconType] || <Activity size={20} />
+                })));
+            }
         } catch (err) {
             console.error("Failed to fetch interview data:", err);
         }
@@ -164,7 +184,7 @@ export default function MockInterviewEngine() {
                     <motion.div key="dash" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
                         {/* Stats Cards */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                            {INITIAL_STATS.map((stat, i) => (
+                            {stats.map((stat, i) => (
                                 <div key={i} style={{ ...glassStyle, padding: '2rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                                         <div style={{ padding: 0, color: 'var(--primary)' }}>{stat.icon}</div>
@@ -193,7 +213,15 @@ export default function MockInterviewEngine() {
                                             data={item} 
                                             onDelete={() => handleDeleteInterview(item.id || item._id)} 
                                             onEdit={() => {
-                                                setNewInterview(item);
+                                                const merged = {
+                                                    ...item,
+                                                    settings: {
+                                                        faceDetection: true, eyeTracking: true, tabBlocker: true, noiseAnalysis: true, 
+                                                        multiLanguage: true, codingSandbox: true,
+                                                        ...(item.settings || {})
+                                                    }
+                                                };
+                                                setNewInterview(merged);
                                                 setSelectedInterviewId(item.id || item._id);
                                                 setIsEditing(true);
                                                 setIsWizardOpen(true);
@@ -201,6 +229,20 @@ export default function MockInterviewEngine() {
                                             }}
                                             onJoin={() => { setSelectedInterviewId(item.id || item._id); setSubView('AI_ROOM'); }}
                                             onReports={() => { setSelectedInterviewId(item.id || item._id); setSubView('ANALYTICS'); }}
+                                            onStart={async () => {
+                                                try {
+                                                    const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
+                                                        method: 'PUT',
+                                                        headers: {'Content-Type': 'application/json'},
+                                                        body: JSON.stringify({...item, status: 'LIVE'})
+                                                    });
+                                                    if(res.ok) {
+                                                        const updated = await res.json();
+                                                        setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
+                                                        setSubView('LIVE_MONITOR');
+                                                    }
+                                                } catch(err) { console.error(err); }
+                                            }}
                                         />
                                     ))
                                 )}
@@ -211,13 +253,13 @@ export default function MockInterviewEngine() {
 
                 {subView === 'LIVE_MONITOR' && (
                     <motion.div key="live" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <LiveMonitoringView />
+                        <LiveMonitoringView interviews={interviews} onJoin={(s: any) => { setSelectedInterviewId(s.id || s._id); setSubView('AI_ROOM'); }} />
                     </motion.div>
                 )}
 
                 {subView === 'AI_ROOM' && (
                     <motion.div key="ai" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <AIRoomView />
+                        <AIRoomView session={interviews.find(i => i.id === selectedInterviewId || i._id === selectedInterviewId)} />
                     </motion.div>
                 )}
 
@@ -322,6 +364,20 @@ function BasicInfoStep({ data, setData }: any) {
                         <option value="HARD">Hard</option>
                         <option value="EXPERT">Expert</option>
                     </select>
+                </div>
+            </div>
+
+            <div style={{ ...glassStyle, padding: '1.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '1rem', color: '#3b82f6' }}>ADVANCED CAPABILITIES</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={!!data.settings?.multiLanguage} onChange={e => setData({...data, settings: {...(data.settings || {}), multiLanguage: e.target.checked}})} />
+                        Multi-Language Support (Hindi/Telugu/English)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={!!data.settings?.codingSandbox} onChange={e => setData({...data, settings: {...(data.settings || {}), codingSandbox: e.target.checked}})} />
+                        Interactive Coding Sandbox
+                    </label>
                 </div>
             </div>
         </div>
@@ -569,7 +625,7 @@ function ReviewStep({ data }: any) {
 
 // --- SUB-COMPONENTS CORE ---
 
-function InterviewCard({ data, onDelete, onEdit, onJoin, onReports }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any }) {
+function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any, onStart: any }) {
     return (
         <motion.div whileHover={{ y: -5 }} style={{ ...glassStyle, padding: '0', overflow: 'hidden', background: '#fff' }}>
             <div style={{ padding: '2rem' }}>
@@ -612,30 +668,160 @@ function InterviewCard({ data, onDelete, onEdit, onJoin, onReports }: { data: an
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
+                    {data.status === 'LIVE' ? (
+                        <button onClick={onJoin} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>MONITOR LIVE</button>
+                    ) : (
+                        <button onClick={onStart} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#10b981', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>START SESSION</button>
+                    )}
                     <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>VIEW REPORTS</button>
-                    <button onClick={onJoin} style={{ flex: 1.2, padding: '11px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>JOIN HUB</button>
                 </div>
             </div>
         </motion.div>
     );
 }
 
-function LiveMonitoringView() {
+function LiveMonitoringView({ interviews, onJoin }: { interviews: any[], onJoin: any }) {
+    const liveSessions = interviews.filter(i => i.status === 'LIVE');
+    
     return (
-        <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
-            <Activity size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-            <h2 style={{ color: '#111' }}>Live Interview Monitor</h2>
-            <p style={{ color: '#666' }}>Active sessions will appear here as candidates join the rooms.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontWeight: 900 }}>Active Interviews ({liveSessions.length})</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444', animation: 'pulse 1.5s infinite' }} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ef4444' }}>LIVE STREAMING</span>
+                </div>
+            </div>
+
+            {liveSessions.length === 0 ? (
+                <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
+                    <Activity size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                    <h2 style={{ color: '#111' }}>No Live Sessions</h2>
+                    <p style={{ color: '#666' }}>Active sessions will appear here once you start an interview from the Dashboard.</p>
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
+                    {liveSessions.map(session => (
+                        <div key={session.id || session._id} style={{ ...glassStyle, padding: '1.5rem', background: '#fff', borderLeft: '4px solid #ef4444' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <h4 style={{ fontWeight: 900 }}>{session.title}</h4>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#ef4444' }}>00:45:12</span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                                <div><p style={labelStyle}>CANDIDATE</p><p style={valueStyle}>Multiple ({session.candidateIds?.length || session.candidateType})</p></div>
+                                <div><p style={labelStyle}>INTERVIEWER</p><p style={valueStyle}>{session.interviewerName}</p></div>
+                            </div>
+                            <button onClick={() => onJoin(session)} className="btn-quantum" style={{ width: '100%', padding: '12px' }}>ENTER LIVE ROOM</button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <style>{`
+                @keyframes pulse {
+                    0% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.5; transform: scale(1.1); }
+                    100% { opacity: 1; transform: scale(1); }
+                }
+            `}</style>
         </div>
     );
 }
 
-function AIRoomView() {
+function AIRoomView({ session }: { session: any }) {
+    if (!session) {
+        return (
+            <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
+                <Bot size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                <h2 style={{ color: '#111' }}>AI Calibration Room</h2>
+                <p style={{ color: '#666' }}>Select a session to begin AI-assisted monitoring.</p>
+            </div>
+        );
+    }
+
     return (
-        <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
-            <Bot size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-            <h2 style={{ color: '#111' }}>AI Calibration Room</h2>
-            <p style={{ color: '#666' }}>Adjusting NLP engine for behavioral analysis...</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2.5rem' }}>
+            <div style={{ ...glassStyle, background: '#111', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: '2rem', left: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
+                    <span style={{ fontWeight: 900 }}>LIVE FEED: {session.interviewerName} vs CANDIDATE</span>
+                </div>
+                <Bot size={120} style={{ opacity: 0.2, animation: 'float 3s infinite ease-in-out' }} />
+                <div style={{ position: 'absolute', bottom: '2rem', left: '2rem', right: '2rem', display: 'flex', gap: '15px' }}>
+                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
+                        <div style={{ width: '45%', height: '100%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} />
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
+                    <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>EMOTION RADAR</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#666' }}>Confidence</span>
+                            <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '85%', height: '100%', background: '#10b981', borderRadius: '3px' }}/></div>
+                            <span style={{ fontWeight: 800 }}>85%</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#666' }}>Anxiety</span>
+                            <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '15%', height: '100%', background: '#ef4444', borderRadius: '3px' }}/></div>
+                            <span style={{ fontWeight: 800 }}>15%</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#666' }}>Engagement</span>
+                            <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '92%', height: '100%', background: 'var(--primary)', borderRadius: '3px' }}/></div>
+                            <span style={{ fontWeight: 800 }}>92%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
+                    <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>AI ANALYSIS</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#666' }}>Confidence Score</span>
+                            <span style={{ fontWeight: 800 }}>88%</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#666' }}>Sentiment Index</span>
+                            <span style={{ fontWeight: 800 }}>Positive</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#666' }}>Speech Clarity</span>
+                            <span style={{ fontWeight: 800 }}>Excellent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>LIVE TRANSCRIPT (HYBRID)</h4>
+                    <div style={{ fontSize: '0.75rem', color: '#444', height: '200px', overflowY: 'auto', marginBottom: '1rem' }}>
+                        <p style={{ marginBottom: '10px' }}><strong>Candidate:</strong> మల్టీ-థ్రెడింగ్ అనేది జావాలో ఒక ప్రధాన అంశం...</p>
+                        <p style={{ color: 'var(--primary)', marginBottom: '10px' }}><strong>AI (Translated):</strong> Multi-threading is a key concept in Java...</p>
+                        <p style={{ marginBottom: '10px' }}><strong>Interviewer:</strong> Correct. How do you handle synchronization?</p>
+                    </div>
+                    {session.settings?.codingSandbox && (
+                        <div style={{ marginTop: 'auto', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                            <p style={labelStyle}>CODING SANDBOX</p>
+                            <div style={{ background: '#1e1e1e', padding: '10px', borderRadius: '8px', color: '#4ade80', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                                public class Solution {'{'} <br/>
+                                &nbsp;&nbsp;public static void main(String[] args) {'{'} <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;System.out.println("Hello World"); <br/>
+                                &nbsp;&nbsp;{'}'} <br/>
+                                {'}'}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `}</style>
         </div>
     );
 }

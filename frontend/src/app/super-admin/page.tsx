@@ -8,17 +8,13 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { 
     Users, DollarSign, BookOpen, Layers, 
     Award, TrendingUp, AlertCircle, ChevronRight,
     Search, UserCheck, Activity, Target
 } from 'lucide-react';
 
-const conversionData = [
-    { name: 'New Leads', value: 850, fill: '#8b5cf6' },
-    { name: 'Interested', value: 420, fill: '#3b82f6' },
-    { name: 'Admissions', value: 310, fill: '#10b981' },
-];
 
 const revenueTrend = [
     { day: 'Mon', revenue: 4200, enrollments: 12 },
@@ -80,33 +76,46 @@ export default function SuperAdminHome() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
                     <HomeMetricCard icon={<Users />} title="Total Students" value={metrics.totalStudents} trend="Active Students" color="#8b5cf6" />
                     <HomeMetricCard icon={<Target />} title="Conversion" value="36.4%" trend="Good" color="#3b82f6" />
-                    <HomeMetricCard icon={<DollarSign />} title="Monthly Income" value={`$${(metrics.revenue || 0).toLocaleString()}`} trend="Real-time" color="#10b981" />
+                    <HomeMetricCard icon={<DollarSign />} title="Monthly Income" value={`$${(metrics.revenue || 0).toLocaleString()}`} trend="+12.5% AI Predict" color="#10b981" />
                     <HomeMetricCard icon={<Layers />} title="Active Batches" value={metrics.activeBatches} sub="Current Focus" color="#f59e0b" />
                     <HomeMetricCard icon={<Award />} title="Job Placements" value={`${metrics.placementRate}%`} sub="Industry Best" color="#ec4899" />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '1.5rem', flexWrap: 'wrap' }}>
                     {/* Main Growth Graph */}
-                    <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
+                    <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Income & Enrollment Growth</h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Daily tracking of new students and revenue</p>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Income & Enrollment Growth</h3>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginTop: '4px' }}>Predictive tracking of revenue and scale.</p>
                             </div>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <Badge label="Live Update" color="#10b981" />
+                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 14px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, color: '#10b981' }}>
+                                    <Activity size={12} /> REAL-TIME AUDIT
+                                </div>
+                                <Badge label="AI SECURE" color="#8b5cf6" />
                             </div>
                         </div>
                         <div style={{ height: 350, width: '100%', marginLeft: '-20px' }}>
                             {isMounted && (
                                 <ResponsiveContainer>
                                     <ComposedChart data={revenueTrend}>
-                                        <XAxis dataKey="day" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} />
-                                        <YAxis yAxisId="left" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} />
-                                        <YAxis yAxisId="right" orientation="right" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '16px' }} />
-                                        <Area yAxisId="left" type="monotone" dataKey="revenue" fill="rgba(139, 92, 246, 0.1)" stroke="#8b5cf6" strokeWidth={3} />
-                                        <Line yAxisId="right" type="step" dataKey="enrollments" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981' }} />
+                                        <defs>
+                                            <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                                        <XAxis dataKey="day" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} style={{ fontSize: '0.8rem', fontWeight: 700 }} />
+                                        <YAxis yAxisId="left" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} style={{ fontSize: '0.8rem', fontWeight: 700 }} />
+                                        <YAxis yAxisId="right" orientation="right" stroke="rgba(255,255,255,0.2)" axisLine={false} tickLine={false} style={{ fontSize: '0.8rem', fontWeight: 700 }} />
+                                        <Tooltip 
+                                            contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '15px' }} 
+                                            itemStyle={{ fontWeight: 800 }}
+                                        />
+                                        <Area yAxisId="left" type="monotone" dataKey="revenue" fill="url(#colorRev)" stroke="#8b5cf6" strokeWidth={4} />
+                                        <Line yAxisId="right" type="monotone" dataKey="enrollments" stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 4, stroke: '#0f172a' }} />
                                     </ComposedChart>
                                 </ResponsiveContainer>
                             )}
@@ -115,15 +124,18 @@ export default function SuperAdminHome() {
 
                     {/* Conversion Funnel & Alerts */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px' }}>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '2rem' }}>Leads Tracking</h3>
+                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900 }}>Leads Tracking</h3>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)' }}>CONVERSION FUNNEL</span>
+                             </div>
                             <div style={{ height: 220, width: '100%' }}>
                                 {isMounted && (
                                     <ResponsiveContainer>
                                         <BarChart 
                                             data={conversionData} 
                                             layout="vertical" 
-                                            margin={{ left: 30, right: 30, top: 10, bottom: 10 }}
+                                            margin={{ left: 10, right: 30, top: 10, bottom: 10 }}
                                         >
                                             <XAxis type="number" hide />
                                             <YAxis 
@@ -132,11 +144,11 @@ export default function SuperAdminHome() {
                                                 stroke="var(--text-dim)" 
                                                 axisLine={false} 
                                                 tickLine={false} 
-                                                width={100}
-                                                style={{ fontSize: '0.8rem', fontWeight: 600 }}
+                                                width={90}
+                                                style={{ fontSize: '0.75rem', fontWeight: 800 }}
                                             />
-                                            <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#1e293b', border: 'none' }} />
-                                            <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={25}>
+                                            <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '15px' }} />
+                                            <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={28}>
                                                 {conversionData.map((e, i) => <Cell key={i} fill={e.fill} />)}
                                             </Bar>
                                         </BarChart>
@@ -145,26 +157,34 @@ export default function SuperAdminHome() {
                             </div>
                         </div>
 
-                        {/* Alerts Panel */}
-                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', borderLeft: '4px solid #ef4444' }}>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <AlertCircle size={18} color="#ef4444" /> Pending Tasks
-                            </h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <AlertRow type="FOLLOW-UP" label="24 Pending Counsellor calls" time="30m ago" />
-                                <AlertRow type="ATTENDANCE" label="Batch J1 attendance low" time="2h ago" />
-                                <AlertRow type="PAYMENTS" label="4 Payments overdue ($3.2k)" time="Today" />
+                        {/* Recent Alerts (Critical System Status) */}
+                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px', borderLeft: '4px solid #ef4444', background: 'rgba(239, 68, 68, 0.02)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <AlertCircle size={20} color="#ef4444" /> Safety Alerts
+                                </h3>
+                                <Badge label="High Priority" color="#ef4444" />
                             </div>
-                            <button style={{ width: '100%', marginTop: '1.5rem', padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer' }}>VIEW ALL NOTIFICATIONS →</button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <AlertRow type="FOLLOW-UP" label="24 Pending Admissions Tracker" time="30m ago" />
+                                <AlertRow type="SECURITY" label="Strange IP login from Moscow" time="1h ago" />
+                                <AlertRow type="PAYMENTS" label="Overdue Tutor Payouts (8 Staff)" time="Today" />
+                            </div>
+                            <button className="btn-quantum" style={{ width: '100%', marginTop: '1.5rem', padding: '14px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '15px' }}>RESOLVE INCIDENTS →</button>
                         </div>
                     </div>
                 </div>
 
-                {/* --- RECENT ACTIVITY TABLE --- */}
-                <div style={{ marginTop: '3rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Recent Activity</h3>
-                        <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem' }}>VIEW ALL ACTIVITY</div>
+                {/* --- LIVE SYSTEM ACTIVITY --- */}
+                <div style={{ marginTop: '4rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '2rem' }}>
+                        <div>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Live Command Feed</h3>
+                            <p style={{ color: '#666', fontWeight: 700 }}>Real-time audit of every action in the Bytecode ecosystem.</p>
+                        </div>
+                        <Link href="/super-admin/global-tracking" style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            OPEN GLOBAL CONTROL CENTER <ChevronRight size={18} />
+                        </Link>
                     </div>
                     <div className="glass-panel" style={{ borderRadius: '24px', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
