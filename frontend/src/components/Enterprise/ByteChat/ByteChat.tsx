@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Search, Plus, Hash, User, MessageSquare, 
@@ -41,43 +42,206 @@ interface ChatItem {
 }
 
 export default function ByteChat() {
+    const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
-    const [activeChat, setActiveChat] = useState('2');
+    const [chats, setChats] = useState<ChatItem[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [activeChat, setActiveChat] = useState<string | null>(null);
+    const [messageInput, setMessageInput] = useState('');
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+    const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+    const [newChatName, setNewChatName] = useState('');
+    const [newChatType, setNewChatType] = useState('GROUP');
+    const [newChatCategory, setNewChatCategory] = useState('CHANNELS');
+    const [activeDetailTab, setActiveDetailTab] = useState<'OVERVIEW' | 'MEMBERS'>('OVERVIEW');
+    const [participants, setParticipants] = useState<any[]>([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+    const [isAddMemberVisible, setIsAddMemberVisible] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    const API_BASE = 'http://localhost:8080/api/chat';
+
+    const fetchChats = async () => {
+        try {
+            const res = await fetch(API_BASE);
+            const data = await res.json();
+            const formatted = data.map((c: any) => ({
+                id: c._id,
+                name: c.name,
+                type: c.type,
+                lastMessage: c.lastMessage?.text || 'No messages yet',
+                time: new Date(c.lastMessage?.timestamp || c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                category: c.category || 'CHANNELS',
+                status: 'ONLINE'
+            }));
+            setChats(formatted);
+            if (!activeChat && formatted.length > 0) setActiveChat(formatted[0].id);
+        } catch (err) {
+            console.error('Chat fetch error:', err);
+        }
+    };
+
+    const fetchMessages = async (chatId: string) => {
+        try {
+            const res = await fetch(`${API_BASE}/${chatId}/messages`);
+            const data = await res.json();
+            const mapped = data.map((msg: any) => {
+                const sId = (msg.sender?._id || msg.sender)?.toString();
+                const curId = (currentUser?.id || currentUser?._id)?.toString();
+                const isMe = sId === curId;
+                const foundUser = allUsers.find(u => (u.id?.toString() === sId || u._id?.toString() === sId));
+                
+                return {
+                    id: msg._id,
+                    senderId: sId,
+                    senderName: isMe ? (currentUser.fullName || currentUser.name || "You") : (msg.sender?.fullName || foundUser?.fullName || 'Member'),
+                    senderImage: isMe ? currentUser.profileImage : (msg.sender?.profileImage || foundUser?.profileImage),
+                    text: msg.text,
+                    timestamp: new Date(msg.createdAt),
+                    type: msg.type,
+                    status: msg.status
+                };
+            });
+            setMessages(mapped);
+        } catch (err) {
+            console.error('Fetch messages error:', err);
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!messageInput.trim() || !activeChat || !currentUser) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/${activeChat}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender: currentUser.id || currentUser._id, 
+                    text: messageInput,
+                    type: 'TEXT'
+                })
+            });
+            
+            if (res.ok) {
+                setMessageInput('');
+                fetchMessages(activeChat);
+                fetchChats();
+            }
+        } catch (err) {
+            console.error('Send error:', err);
+        }
+    };
+
+    const fetchAllUsers = async () => {
+        try {
+            const res = await fetch('http://localhost:8080/api/users');
+            const data = await res.json();
+            setAllUsers(data);
+        } catch (err) {
+            console.error('User fetch error:', err);
+        }
+    };
 
     useEffect(() => {
         setIsMounted(true);
+        fetchChats();
+        fetchAllUsers();
+
+        const syncUser = () => {
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                setCurrentUser(parsed);
+            }
+        };
+
+        syncUser();
+        // Also listen for potential storage changes
+        window.addEventListener('storage', syncUser);
+        return () => window.removeEventListener('storage', syncUser);
     }, []);
 
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        if (activeChat && isMounted) fetchMessages(activeChat);
+    }, [activeChat, isMounted, allUsers, currentUser]); // Re-run when users load
+
+    useEffect(() => {
+        if (activeChat) fetchMessages(activeChat);
+    }, [activeChat]);
+
+
+
+    const handleCreateChat = async () => {
+        if (!newChatName.trim()) return;
+        try {
+            const res = await fetch(API_BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newChatName,
+                    type: newChatType,
+                    category: newChatCategory,
+                    participants: [...selectedMembers, '65f1a58e8e3f9a1234567890'] // Include selected + mock admin
+                })
+            });
+            if (res.ok) {
+                setNewChatName('');
+                setSelectedMembers([]);
+                setIsCreateModalVisible(false);
+                fetchChats();
+            }
+        } catch (err) {
+            console.error('Create chat error:', err);
         }
-    }, [activeChat, isMounted]);
+    };
 
-    const chatList: ChatItem[] = [
-        { id: '1', name: 'General Announcements', type: 'CHANNEL', lastMessage: 'The mock interview schedule is live.', time: '10:45 AM', unread: 2, category: 'OFFICIAL' },
-        { id: '2', name: 'Batch PDA-86', type: 'GROUP', lastMessage: 'Check the new Python curriculum.', time: '11:20 AM', category: 'CHANNELS' },
-        { id: '3', name: 'Trainer Rahul', type: 'DIRECT', lastMessage: 'Can we sync at 4 PM?', time: 'Yesterday', status: 'ONLINE', category: 'TEAM' },
-        { id: '4', name: 'Koushik Krishna', type: 'DIRECT', lastMessage: 'Syllabus updated.', time: '2:15 PM', status: 'AWAY', category: 'TEAM' },
-        { id: '5', name: 'Technical Support', type: 'CHANNEL', lastMessage: 'LMS access restored.', time: '3 days ago', category: 'SYSTEM' },
-    ];
+    const fetchParticipants = async (chatId: string) => {
+        try {
+            const res = await fetch(`${API_BASE}/${chatId}`);
+            const data = await res.json();
+            setParticipants(data.participants || []);
+        } catch (err) {
+            console.error('Participant fetch error:', err);
+        }
+    };
 
-    const messages: Message[] = [
-        { id: 'm1', senderId: 'bot', senderName: 'ByteAI', text: "Analyzing engagement for PDA-86... High activity detected in Module 4. Students are requesting more examples of asynchronous logic.", timestamp: new Date(Date.now() - 3600000), type: 'AI', status: 'SEEN' },
-        { id: 'm2', senderId: 'u1', senderName: 'Koushik Krishna', text: "I've uploaded the Advanced Python PDF. Please ensure all trainers review the memory management section.", timestamp: new Date(Date.now() - 1800000), type: 'TEXT', status: 'SEEN', isPinned: true, reactions: [{ emoji: '👍', count: 5 }, { emoji: '🔥', count: 2 }] },
-        { id: 'm3', senderId: 'u1', senderName: 'Koushik Krishna', text: "advanced_curriculum.pdf", timestamp: new Date(Date.now() - 1700000), type: 'FILE', fileName: 'advanced_curriculum.pdf', fileSize: '4.2 MB', status: 'SEEN' },
-        { id: 'm4', senderId: 'me', senderName: 'Super Admin', text: "Great work. I will notify the respective coordinators immediately.", timestamp: new Date(Date.now() - 600000), type: 'TEXT', status: 'DELIVERED' },
-    ];
+    const handleKickMember = async (userId: string) => {
+        if (!activeChat) return;
+        try {
+            const res = await fetch(`${API_BASE}/${activeChat}/members/${userId}`, { method: 'DELETE' });
+            if (res.ok) fetchParticipants(activeChat);
+        } catch (err) {
+            console.error('Kick error:', err);
+        }
+    };
 
-    if (!isMounted) return <div style={{ background: '#fcfaff', height: '100vh' }} />;
+    const handlePromoteAdmin = async (userId: string) => {
+        if (!activeChat) return;
+        try {
+            const res = await fetch(`${API_BASE}/${activeChat}/admins`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+            if (res.ok) fetchParticipants(activeChat);
+        } catch (err) {
+            console.error('Admin promotion error:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (isDetailsVisible && activeChat) fetchParticipants(activeChat);
+    }, [isDetailsVisible, activeChat]);
 
     const glassStyle = {
         background: 'rgba(255, 255, 255, 0.7)',
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(109, 40, 217, 0.08)'
     };
+
+    if (!isMounted) return <div style={{ background: '#fcfaff', height: '100vh' }} />;
 
     return (
         <div style={{ 
@@ -111,19 +275,27 @@ export default function ByteChat() {
                 }}>
                     <Zap size={22} color="#fff" />
                 </div>
-                {[Home, MessageSquare, BarChart3, Users, Settings].map((Icon, i) => (
+                {[
+                    { icon: Home, route: '/super-admin' },
+                    { icon: MessageSquare, route: '/super-admin/chat' },
+                    { icon: BarChart3, route: '/super-admin/global-tracking' },
+                    { icon: Users, route: '/super-admin/academic' },
+                    { icon: Settings, route: '/super-admin/settings' }
+                ].map((item, i) => (
                     <motion.div 
                         key={i} 
-                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(109, 40, 217, 0.05)' }}
+                        onClick={() => router.push(item.route)}
+                        whileHover={{ scale: 1.15, backgroundColor: 'rgba(109, 40, 217, 0.1)' }}
+                        whileTap={{ scale: 0.9 }}
                         style={{
-                            width: '44px', height: '44px', borderRadius: '14px',
+                            width: '48px', height: '48px', borderRadius: '16px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: i === 1 ? '#6d28d9' : '#94a3b8',
-                            background: i === 1 ? 'rgba(109, 40, 217, 0.08)' : 'transparent',
-                            cursor: 'pointer', transition: 'all 0.2s'
+                            color: item.route === '/super-admin/chat' ? '#6d28d9' : '#94a3b8',
+                            background: item.route === '/super-admin/chat' ? 'rgba(109, 40, 217, 0.1)' : 'transparent',
+                            cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
-                        <Icon size={20} />
+                        <item.icon size={22} />
                     </motion.div>
                 ))}
             </div>
@@ -140,7 +312,14 @@ export default function ByteChat() {
                 <div style={{ padding: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <h2 style={{ fontSize: '1.2rem', fontWeight: 800 }}>ByteChat</h2>
-                        <div style={{ background: '#f5f3ff', color: '#6d28d9', padding: '6px', borderRadius: '10px', cursor: 'pointer' }}><Plus size={16} /></div>
+                        <motion.div 
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setIsCreateModalVisible(true)}
+                            style={{ background: '#f5f3ff', color: '#6d28d9', padding: '6px', borderRadius: '10px', cursor: 'pointer' }}
+                        >
+                            <Plus size={16} />
+                        </motion.div>
                     </div>
                     <div style={{ background: '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '14px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                         <Search size={16} color="#94a3b8" />
@@ -153,7 +332,7 @@ export default function ByteChat() {
                         <div key={cat} style={{ marginBottom: '28px' }}>
                             <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1.5px', padding: '0 12px', marginBottom: '12px' }}>{cat}</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {chatList.filter(c => c.category === cat).map(chat => (
+                                {chats.filter(c => c.category === cat).map(chat => (
                                     <motion.div 
                                         key={chat.id} 
                                         onClick={() => setActiveChat(chat.id)}
@@ -195,7 +374,7 @@ export default function ByteChat() {
                              <Hash size={24} color="#6d28d9" />
                         </div>
                         <div>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>{chatList.find(c => c.id === activeChat)?.name}</h3>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>{chats.find(c => c.id === activeChat)?.name || 'Select a Chat'}</h3>
                             <p style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
                                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} /> 12 Active Members
                             </p>
@@ -224,29 +403,37 @@ export default function ByteChat() {
                                 display: 'flex', 
                                 gap: '18px', 
                                 maxWidth: '80%', 
-                                alignSelf: msg.senderId === 'me' ? 'flex-end' : 'flex-start', 
-                                flexDirection: msg.senderId === 'me' ? 'row-reverse' : 'row' 
+                                alignSelf: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'flex-end' : 'flex-start', 
+                                flexDirection: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'row-reverse' : 'row' 
                             }}
                         >
-                            <div style={{ width: 42, height: 42, borderRadius: '14px', background: msg.type === 'AI' ? '#f5f3ff' : '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'flex-start', boxShadow: '0 4px 10px rgba(0,0,0,0.03)' }}>
-                                {msg.type === 'AI' ? <BrainCircuit size={22} color="#6d28d9" /> : <User size={20} color="#94a3b8" />}
+                            <div style={{ width: 42, height: 42, borderRadius: '14px', background: msg.type === 'AI' ? '#f5f3ff' : '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'flex-start', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+                                {msg.type === 'AI' ? <BrainCircuit size={22} color="#6d28d9" /> : (
+                                    msg.senderImage ? (
+                                        <img src={msg.senderImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                                    ) : (
+                                        <div style={{ width: '100%', height: '100%', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem' }}>
+                                            {msg.senderName?.[0] || 'U'}
+                                        </div>
+                                    )
+                                )}
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.senderId === 'me' ? 'flex-end' : 'flex-start' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'flex-end' : 'flex-start' }}>
                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'baseline', marginBottom: '6px', padding: '0 4px' }}>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e1b4b' }}>{msg.senderName}</span>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e1b4b' }}>{(msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'You' : msg.senderName}</span>
                                     <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                                 <div 
                                     className="message-bubble-silk"
                                     style={{ 
                                         padding: '16px 22px', borderRadius: '24px',
-                                        background: msg.senderId === 'me' ? 'linear-gradient(135deg, #6d28d9, #4f46e5)' : '#fff',
-                                        color: msg.senderId === 'me' ? '#fff' : '#334155',
+                                        background: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'linear-gradient(135deg, #6d28d9, #4f46e5)' : '#fff',
+                                        color: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '#fff' : '#334155',
                                         border: '1px solid rgba(109, 40, 217, 0.08)',
                                         fontSize: '0.95rem', fontWeight: 500, lineHeight: '1.6',
-                                        boxShadow: msg.senderId === 'me' ? '0 10px 25px rgba(109, 40, 217, 0.2)' : '0 4px 15px rgba(0,0,0,0.03)',
-                                        borderTopLeftRadius: msg.senderId === 'me' ? '24px' : '4px',
-                                        borderTopRightRadius: msg.senderId === 'me' ? '4px' : '24px'
+                                        boxShadow: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '0 10px 25px rgba(109, 40, 217, 0.2)' : '0 4px 15px rgba(0,0,0,0.03)',
+                                        borderTopLeftRadius: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '24px' : '4px',
+                                        borderTopRightRadius: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '4px' : '24px'
                                     }}
                                 >
                                     {msg.type === 'FILE' ? (
@@ -281,12 +468,14 @@ export default function ByteChat() {
                         <textarea 
                             value={messageInput}
                             onChange={(e) => setMessageInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
                             placeholder="Type something clever..."
                             style={{ flex: 1, background: 'none', border: 'none', color: '#1e1b4b', outline: 'none', fontSize: '1rem', fontWeight: 500, padding: '10px 0', resize: 'none', minHeight: '44px' }}
                         />
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                             <div className="input-tool ai-glow"><Sparkles size={20} /></div>
                             <motion.button 
+                                onClick={handleSendMessage}
                                 whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(109, 40, 217, 0.3)' }}
                                 whileTap={{ scale: 0.98 }}
                                 style={{ 
@@ -303,61 +492,220 @@ export default function ByteChat() {
                 </div>
             </div>
 
-            {/* PANEL 4: THE DRAWER (Details) */}
+            {/* PANEL 4: THE POPUP MODAL (Details) */}
             <AnimatePresence>
                 {isDetailsVisible && (
-                    <motion.div 
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: '320px', opacity: 1 }}
-                        exit={{ width: 0, opacity: 0 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        style={{ 
-                            width: '320px', 
-                            flexShrink: 0, 
-                            background: '#fcfaff', 
-                            borderLeft: '1px solid rgba(109, 40, 217, 0.08)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            padding: '40px',
-                            overflowY: 'auto'
-                        }}
-                    >
-                        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                            <div style={{ width: 110, height: 110, borderRadius: '40px', background: 'linear-gradient(135deg, #6d28d9, #c026d3)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 20px 40px rgba(109, 40, 217, 0.25)' }}>
-                                <Hash size={45} color="#fff" />
-                            </div>
-                            <h4 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e1b4b' }}>{chatList.find(c => c.id === activeChat)?.name}</h4>
-                            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px', fontWeight: 600 }}>Batch PDA-86 Official Channel</p>
-                        </div>
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsDetailsVisible(false)}
+                            style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(8px)' }}
+                        />
+                        
+                        {/* Modal Card */}
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            style={{ 
+                                width: '100%', 
+                                maxWidth: '420px', 
+                                background: '#fff', 
+                                borderRadius: '40px', 
+                                padding: '40px', 
+                                position: 'relative', 
+                                boxShadow: '0 30px 60px -12px rgba(30, 27, 75, 0.25)',
+                                border: '1px solid rgba(109, 40, 217, 0.1)',
+                                zIndex: 1001,
+                                overflow: 'hidden'
+                            }}
+                        >
+                            <button 
+                                onClick={() => setIsDetailsVisible(false)}
+                                style={{ position: 'absolute', top: '24px', right: '24px', padding: '8px', borderRadius: '50%', background: '#f5f3ff', border: 'none', cursor: 'pointer', color: '#6d28d9', zIndex: 10 }}
+                            >
+                                <X size={20} />
+                            </button>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                            <div style={{ padding: '20px', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '24px', background: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.02)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px' }}>HUB PERFORMANCE</span>
-                                    <Zap size={14} color="#6d28d9" />
+                            <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', borderBottom: '1px solid #f1f5f9' }}>
+                                {['OVERVIEW', 'MEMBERS'].map(tab => (
+                                    <button 
+                                        key={tab}
+                                        onClick={() => setActiveDetailTab(tab as any)}
+                                        style={{ 
+                                            background: 'none', border: 'none', padding: '12px 4px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer',
+                                            color: activeDetailTab === tab ? '#6d28d9' : '#94a3b8',
+                                            borderBottom: activeDetailTab === tab ? '2px solid #6d28d9' : '2px solid transparent'
+                                        }}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {activeDetailTab === 'OVERVIEW' ? (
+                                <>
+                                    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                                        <div style={{ width: 100, height: 100, borderRadius: '35px', background: 'linear-gradient(135deg, #6d28d9, #c026d3)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 20px 40px rgba(109, 40, 217, 0.25)' }}>
+                                            <Hash size={45} color="#fff" />
+                                        </div>
+                                        <h4 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1e1b4b' }}>{chats.find(c => c.id === activeChat)?.name}</h4>
+                                        <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '6px', fontWeight: 600 }}>Operational Unit PDA-86</p>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ padding: '20px', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '24px', background: '#fcfaff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px' }}>ACTIVE ENGAGEMENT</p>
+                                                <p style={{ fontSize: '1.2rem', fontWeight: 900 }}>98.2%</p>
+                                            </div>
+                                            <Zap size={24} color="#6d28d9" />
+                                        </div>
+
+                                        <div style={{ padding: '20px', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '24px', background: '#fff' }}>
+                                            <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px', marginBottom: '15px' }}>RECENT ASSETS</p>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                                                {[1, 2, 3, 4].map(i => (
+                                                    <div key={i} style={{ aspectRatio: '1', borderRadius: '12px', background: '#f8fafc', border: '1px solid #f1f5f9' }} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div style={{ height: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {participants.map(p => (
+                                        <div key={p._id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '16px', background: '#fcfaff' }}>
+                                            <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem' }}>
+                                                {p.fullName?.[0] || 'U'}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ fontSize: '0.85rem', fontWeight: 800 }}>{p.fullName}</p>
+                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{p.role}</p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button onClick={() => handlePromoteAdmin(p._id)} style={{ padding: '6px', borderRadius: '8px', background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer' }}><Shield size={14} color="#6d28d9" /></button>
+                                                <button onClick={() => handleKickMember(p._id)} style={{ padding: '6px', borderRadius: '8px', background: '#fff', border: '1px solid #fee2e2', cursor: 'pointer' }}><LogOut size={14} color="#ef4444" /></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button style={{ width: '100%', padding: '14px', borderRadius: '16px', background: '#6d28d9', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', marginTop: '10px' }}>
+                                        ADD MEMBER
+                                    </button>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '1.2rem', fontWeight: 900 }}>98.2%</span>
-                                    <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800 }}>+4.1% TREND</span>
+                            )}
+
+                            <button style={{ 
+                                width: '100%', marginTop: '30px', padding: '16px', borderRadius: '20px', 
+                                background: '#fff', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', 
+                                fontWeight: 800, cursor: 'pointer', fontSize: '0.9rem'
+                            }}>
+                                LEAVE CHANNEL
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* NEW CHAT MODAL */}
+            <AnimatePresence>
+                {isCreateModalVisible && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsCreateModalVisible(false)}
+                            style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(8px)' }}
+                        />
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            style={{ width: '100%', maxWidth: '400px', background: '#fff', borderRadius: '32px', padding: '32px', position: 'relative', zIndex: 1 }}
+                        >
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '24px' }}>Create New Hub</h3>
+                            
+                            <div style={{ marginBottom: '20px' }}>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '10px' }}>SELECT TYPE</p>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    {['CHANNEL', 'GROUP', 'COMMUNITY'].map(t => (
+                                        <button 
+                                            key={t}
+                                            onClick={() => setNewChatType(t)}
+                                            style={{ 
+                                                flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700,
+                                                background: newChatType === t ? '#6d28d9' : '#f8fafc',
+                                                color: newChatType === t ? '#fff' : '#475569',
+                                                border: 'none', cursor: 'pointer', transition: '0.2s'
+                                            }}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div>
-                                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px', marginBottom: '15px', paddingLeft: '8px' }}>MEDIA ASSETS (128)</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                                    {[1, 2, 3, 4, 5, 6].map(i => (
-                                        <div key={i} style={{ aspectRatio: '1', borderRadius: '14px', background: '#fff', border: '1px solid rgba(109, 40, 217, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                                            <ImageIcon size={20} color="#e2e8f0" />
+                            <div style={{ marginBottom: '24px' }}>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '10px' }}>ORGANIZATIONAL CATEGORY</p>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    {['OFFICIAL', 'CHANNELS', 'TEAM'].map(c => (
+                                        <button 
+                                            key={c}
+                                            onClick={() => setNewChatCategory(c)}
+                                            style={{ 
+                                                flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700,
+                                                background: newChatCategory === c ? 'rgba(109, 40, 217, 0.1)' : '#f8fafc',
+                                                color: newChatCategory === c ? '#6d28d9' : '#475569',
+                                                border: 'none', cursor: 'pointer', transition: '0.2s'
+                                            }}
+                                        >
+                                            {c}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <input 
+                                value={newChatName}
+                                onChange={(e) => setNewChatName(e.target.value)}
+                                placeholder="Name your hub..."
+                                style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', marginBottom: '24px', fontSize: '1rem', fontWeight: 600 }}
+                            />
+
+                            <div style={{ marginBottom: '24px' }}>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '10px' }}>INVITE PARTICIPANTS</p>
+                                <div style={{ height: '150px', overflowY: 'auto', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '8px' }}>
+                                    {allUsers.map(user => (
+                                        <div 
+                                            key={user.id} 
+                                            onClick={() => setSelectedMembers(prev => prev.includes(user.id) ? prev.filter(id => id !== user.id) : [...prev, user.id])}
+                                            style={{ 
+                                                display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', borderRadius: '12px', cursor: 'pointer',
+                                                background: selectedMembers.includes(user.id) ? 'rgba(109, 40, 217, 0.05)' : 'transparent'
+                                            }}
+                                        >
+                                            <div style={{ width: 30, height: 30, borderRadius: '8px', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.7rem' }}>
+                                                {user.fullName?.[0]}
+                                            </div>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 600, flex: 1 }}>{user.fullName}</span>
+                                            <div style={{ width: 18, height: 18, borderRadius: '4px', border: '2px solid #6d28d9', display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedMembers.includes(user.id) ? '#6d28d9' : 'transparent' }}>
+                                                {selectedMembers.includes(user.id) && <CheckCircle2 size={12} color="#fff" />}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        </div>
 
-                        <div style={{ marginTop: 'auto' }}>
-                            <button style={{ width: '100%', padding: '16px', borderRadius: '20px', background: '#fff', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', transition: '0.3s' }}>LEAVE CHANNEL</button>
-                        </div>
-                    </motion.div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button onClick={() => setIsCreateModalVisible(false)} style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#f8fafc', border: 'none', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
+                                <button onClick={handleCreateChat} style={{ flex: 1, padding: '16px', borderRadius: '20px', background: 'linear-gradient(135deg, #6d28d9, #4f46e5)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer' }}>Create Hub</button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
