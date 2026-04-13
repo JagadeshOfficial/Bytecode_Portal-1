@@ -3,17 +3,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Search, Plus, Hash, User, MessageSquare, 
-    Video, Phone, MoreVertical, Send, Paperclip, 
-    Smile, Star, Pin, Reply, Globe, Bot, 
+import {
+    Search, Plus, Hash, User, MessageSquare,
+    Video, Phone, MoreVertical, Send, Paperclip,
+    Smile, Star, Pin, Reply, Globe, Bot,
     BarChart3, Users, Volume2, Mic, Settings,
     CheckCircle2, Clock, Shield, Image as ImageIcon,
-    FileText, Download, X, Maximize2, Home, 
-    Layers, Zap, Bell, ChevronDown, AtSign, 
-    Command, Sparkles, SendHorizontal, Edit3,
-    Activity, Cpu, BrainCircuit, CornerDownRight,
-    Briefcase, LogOut, Info, Trash2, Share2
+    FileText, Download, X, Maximize2, Home,
+    Layers, Zap, Bell, ChevronDown, AtSign,
+    Command, SendHorizontal, Edit3,
+    Activity, CornerDownRight, Camera, Circle, StopCircle, BrainCircuit,
+    Briefcase, LogOut, Info, Trash2, Share2, Mail, MicOff, VideoOff, Monitor, ScreenShare, ScreenShareOff, StopCircle as StopIcon
 } from 'lucide-react';
 
 interface Message {
@@ -71,22 +71,47 @@ export default function ByteChat() {
     const [isAddMemberVisible, setIsAddMemberVisible] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [isEmojiPickerVisible, setIsEmojiPickerVisible] = useState(false);
-    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [isDeletingMessage, setIsDeletingMessage] = useState<Message | null>(null);
     const [isForwardingMessage, setIsForwardingMessage] = useState<Message | null>(null);
     const [forwardSearch, setForwardSearch] = useState('');
     const [mediaPickerTab, setMediaPickerTab] = useState<'EMOJI' | 'GIF' | 'STICKER'>('EMOJI');
-    const [isAIMenuVisible, setIsAIMenuVisible] = useState(false);
-    const [aiPromptModal, setAIPromptModal] = useState<{ visible: boolean, action: 'PROFESSIONAL' | 'GRAMMAR' | 'FUNNY' | 'IMAGE' | null }>({ visible: false, action: null });
-    const [aiPromptText, setAIPromptText] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const activeChatRef = useRef<string | null>(null);
+    const [isCalling, setIsCalling] = useState(false);
+    const [callStatus, setCallStatus] = useState<'WAITING' | 'CONNECTED' | 'DISCONNECTED'>('DISCONNECTED');
+    const [callType, setCallType] = useState<'AUDIO' | 'VIDEO'>('AUDIO');
+    const [isScreenSharing, setIsScreenSharing] = useState(false);
+    const [isMicMuted, setIsMicMuted] = useState(false);
+    const [isLocalCameraOff, setIsLocalCameraOff] = useState(false);
+    const [callTimer, setCallTimer] = useState(0);
+    const [activeCallId, setActiveCallId] = useState<string | null>(null);
+    const [incomingCall, setIncomingCall] = useState<any>(null);
+    const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
+    const [permissionError, setPermissionError] = useState<string | null>(null);
+    const [emailData, setEmailData] = useState({ 
+        recipients: [] as any[], // { id, name, email, selected: boolean }
+        subject: 'ByteChat: Organizational Correspondence', 
+        body: '' 
+    });
+    const [isSendingEmail, setIsSendingEmail] = useState(false);
     const [isEditingDetails, setIsEditingDetails] = useState(false);
     const [editedChatName, setEditedChatName] = useState('');
     const [editedChatImage, setEditedChatImage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isCameraActive, setIsCameraActive] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isAudioRecording, setIsAudioRecording] = useState(false);
+    const [audioTimer, setAudioTimer] = useState(0);
+    const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+    const [videoTimer, setVideoTimer] = useState(0);
+    const videoPreviewRef = useRef<HTMLVideoElement>(null);
+    const callVideoRef = useRef<HTMLVideoElement>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const screenStreamRef = useRef<MediaStream | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     const API_BASE = 'http://localhost:8080/api/chat';
 
@@ -118,7 +143,7 @@ export default function ByteChat() {
             });
             setChats(formatted);
             if (!activeChat && formatted.length > 0) setActiveChat(formatted[0].id);
-            
+
             // Sync activeChatRef
             if (activeChat) activeChatRef.current = activeChat;
 
@@ -136,14 +161,18 @@ export default function ByteChat() {
         if (!chatId) return;
         try {
             const res = await fetch(`${API_BASE}/${chatId}/messages`);
-            if (!res.ok) throw new Error('Failed to fetch messages');
+            if (!res.ok) {
+                console.error(`Correspondence Fetch Error [Status: ${res.status}] for Hub: ${chatId}`);
+                throw new Error('Failed to fetch messages');
+            }
             const data = await res.json();
+            console.log(`Resolved ${data.length} messages for Hub: ${chatId}`);
             const mapped: Message[] = data.map((msg: any) => {
                 const sId = (msg.sender?._id || msg.sender)?.toString();
                 const curId = (currentUser?.id || currentUser?._id)?.toString();
                 const isMe = sId === curId;
                 const foundUser = allUsers.find(u => (u.id?.toString() === sId || u._id?.toString() === sId));
-                
+
                 return {
                     id: msg._id || msg.id,
                     _id: msg._id || msg.id,
@@ -185,7 +214,7 @@ export default function ByteChat() {
                     ...(fileData && { fileName: fileData.name, fileSize: fileData.size })
                 })
             });
-            
+
             if (res.ok) {
                 setMessageInput('');
                 setReplyingTo(null);
@@ -223,7 +252,7 @@ export default function ByteChat() {
         if (!file) return;
 
         // 1GB Limit (Enterprise Scaling)
-        const MAX_SIZE = 1024 * 1024 * 1024; 
+        const MAX_SIZE = 1024 * 1024 * 1024;
         if (file.size > MAX_SIZE) {
             alert(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Please upload files smaller than 1GB for optimal performance.`);
             return;
@@ -233,7 +262,7 @@ export default function ByteChat() {
         reader.onload = async (event) => {
             const base64 = event.target?.result as string;
             let type: 'IMAGE' | 'VIDEO' | 'FILE' | 'AUDIO' = 'FILE';
-            
+
             if (file.type.startsWith('image/')) type = 'IMAGE';
             else if (file.type.startsWith('video/')) type = 'VIDEO';
             else if (file.type.startsWith('audio/')) type = 'AUDIO';
@@ -243,38 +272,6 @@ export default function ByteChat() {
         reader.readAsDataURL(file);
     };
 
-    const handleAIWrite = (action: 'PROFESSIONAL' | 'GRAMMAR' | 'FUNNY' | 'IMAGE', customPrompt?: string) => {
-        const inputToUse = customPrompt || messageInput;
-        if (!inputToUse.trim()) {
-            setAIPromptModal({ visible: true, action });
-            setAIPromptText(messageInput);
-            return;
-        }
-        setIsGeneratingAI(true);
-        setIsAIMenuVisible(false);
-        setAIPromptModal({ visible: false, action: null });
-
-        setTimeout(() => {
-            let result = '';
-            if (action === 'PROFESSIONAL') {
-                result = `[Professional]: ${inputToUse}. We request your immediate review and feedback on this matter. Regards.`;
-                setMessageInput(result);
-            } else if (action === 'GRAMMAR') {
-                result = `[Corrected]: ${inputToUse.charAt(0).toUpperCase() + inputToUse.slice(1).replace(/([?!.,])\s*/g, '$1 ')}`;
-                setMessageInput(result);
-            } else if (action === 'FUNNY') {
-                result = `[Funny]: Guys, listen up! 🚀 ${inputToUse} - Let's get it done! Cheers! 🎉`;
-                setMessageInput(result);
-            } else if (action === 'IMAGE') {
-                const keywords = inputToUse.split(' ').slice(0, 3).join(',');
-                const mockImageUrl = `https://images.unsplash.com/photo-1512446816042-4412c7c12500?auto=format&fit=crop&q=80&w=800&keywords=${keywords}`;
-                handleSendMessage(mockImageUrl, 'IMAGE', { name: 'AI_Generated.png', size: 'AI Visual' });
-                setMessageInput('');
-            }
-            setIsGeneratingAI(false);
-            setAIPromptText('');
-        }, 1500);
-    };
 
     const handleDownload = (base64: string, fileName: string) => {
         const link = document.createElement('a');
@@ -318,6 +315,241 @@ export default function ByteChat() {
         }
     };
 
+    // Incoming Call Signaling Pipeline
+    useEffect(() => {
+        if (!currentUser || isCalling || incomingCall) return;
+        
+        const checkCalls = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/calls/active/${currentUser.id || currentUser._id}`);
+                const call = await res.json();
+                if (call) setIncomingCall(call);
+            } catch (err) { /* Silent polling */ }
+        };
+
+        const interval = setInterval(checkCalls, 4000);
+        return () => clearInterval(interval);
+    }, [currentUser, isCalling, incomingCall]);
+
+    const initiateCall = async (type: 'AUDIO' | 'VIDEO') => {
+        console.log(`Initiating ${type} call... Context:`, { activeChat, hasUser: !!currentUser });
+        
+        if (!activeChat || !currentUser) {
+            alert('Please select a chat first to initiate a call.');
+            return;
+        }
+
+        // 1. Instantly update UI for high-performance feel
+        setCallType(type);
+        setIsCalling(true);
+        setCallStatus('WAITING');
+        setCallTimer(0);
+        
+        try {
+            const chatObj = chats.find(c => c.id === activeChat);
+            if (!chatObj) throw new Error('Active chat not found in registry');
+
+            const receiver = chatObj.participants?.find((p: any) => {
+                const pid = typeof p === 'object' ? (p._id || p.id) : p;
+                return pid !== (currentUser.id || currentUser._id);
+            });
+
+            if (!receiver) {
+                console.warn('No receiver found for call. Defaulting to system signal.');
+            }
+            
+            const res = await fetch(`${API_BASE}/calls`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chatId: activeChat,
+                    initiatorId: currentUser.id || currentUser._id,
+                    receiverId: typeof receiver === 'object' ? (receiver._id || receiver.id) : (receiver || currentUser.id || currentUser._id),
+                    type
+                })
+            });
+            const data = await res.json();
+            if (data._id) setActiveCallId(data._id);
+        } catch (err) {
+            console.error('Call Initiation Error:', err);
+        }
+    };
+
+    // Bilateral Signaling Monitor (Detect Acceptance)
+    useEffect(() => {
+        if (!isCalling || !activeCallId || callStatus === 'CONNECTED') return;
+
+        const monitorSignal = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/calls/active/${currentUser.id || currentUser._id}`); // We reuse this or create a direct check
+                // For simplicity, let's fetch the specific call status
+                const callRes = await fetch(`${API_BASE}/calls/${activeCallId}`);
+                const call = await callRes.json();
+                
+                if (call.status === 'ACTIVE') {
+                    setCallStatus('CONNECTED');
+                    console.log('Remote Participant Joined. Stream live.');
+                } else if (call.status === 'REJECTED' || call.status === 'ENDED') {
+                    setIsCalling(false);
+                    setCallStatus('DISCONNECTED');
+                    setActiveCallId(null);
+                }
+            } catch (err) { /* Silent monitor */ }
+        };
+
+        const interval = setInterval(monitorSignal, 3000);
+        return () => clearInterval(interval);
+    }, [isCalling, activeCallId, callStatus]);
+
+    const handleCallAction = async (status: 'ACTIVE' | 'ENDED' | 'REJECTED') => {
+        const id = activeCallId || incomingCall?._id;
+        if (!id) return;
+        
+        try {
+            await fetch(`${API_BASE}/calls/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+
+            if (status === 'ACTIVE') {
+                setIsCalling(true);
+                setCallStatus('CONNECTED');
+                setCallType(incomingCall.type);
+                setActiveCallId(incomingCall._id);
+                setIncomingCall(null);
+            } else {
+                // Industrial Resource Cleanup
+                stopCamera();
+                stopScreenShare();
+                
+                setIsCalling(false);
+                setCallStatus('DISCONNECTED');
+                setIncomingCall(null);
+                setActiveCallId(null);
+            }
+        } catch (err) {
+            console.error('Call Action Error:', err);
+        }
+    };
+
+    const toggleScreenShare = async () => {
+        setPermissionError(null);
+        if (!isScreenSharing) {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                screenStreamRef.current = screenStream;
+                if (callVideoRef.current) callVideoRef.current.srcObject = screenStream;
+                setIsScreenSharing(true);
+                
+                screenStream.getVideoTracks()[0].onended = () => {
+                    stopScreenShare();
+                };
+            } catch (err: any) {
+                if (err.name === 'NotAllowedError') {
+                    setPermissionError('Screen capture access was denied. Please enable it in your browser to share your display.');
+                }
+                console.error('Screen Share Failed:', err);
+            }
+        } else {
+            stopScreenShare();
+        }
+    };
+
+    const toggleMic = () => {
+        if (streamRef.current) {
+            const audioTrack = streamRef.current.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                setIsMicMuted(!audioTrack.enabled);
+            }
+        }
+    };
+
+    const toggleLocalCamera = () => {
+        if (streamRef.current) {
+            const videoTrack = streamRef.current.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                setIsLocalCameraOff(!videoTrack.enabled);
+            }
+        }
+    };
+
+    const stopScreenShare = () => {
+        if (screenStreamRef.current) {
+            screenStreamRef.current.getTracks().forEach(track => track.stop());
+            screenStreamRef.current = null;
+        }
+        setIsScreenSharing(false);
+        // Switch back to camera stream if in video call
+        if (isCalling && callType === 'VIDEO' && streamRef.current && callVideoRef.current) {
+            callVideoRef.current.srcObject = streamRef.current;
+        }
+    };
+
+    const handleSendEmail = async () => {
+        const activeRecipients = emailData.recipients.filter(r => r.selected).map(r => r.email);
+        if (activeRecipients.length === 0) return alert('Please select at least one recipient.');
+        
+        setIsSendingEmail(true);
+        try {
+            const res = await fetch(`${API_BASE}/email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    to: activeRecipients,
+                    subject: emailData.subject, 
+                    body: emailData.body 
+                })
+            });
+            if (res.ok) {
+                alert(`Organizational Email Dispatched to ${activeRecipients.length} members!`);
+                setIsEmailModalVisible(false);
+            }
+        } catch (err) {
+            console.error('Email Error:', err);
+        } finally {
+            setIsSendingEmail(false);
+        }
+    };
+
+    const openEmailHub = () => {
+        const chatObj = chats.find(c => c.id === activeChat);
+        if (!chatObj) return;
+
+        const participantList = (chatObj.participants || []).filter((p: any) => {
+            const pid = typeof p === 'object' ? (p._id || p.id) : p;
+            return pid !== (currentUser.id || currentUser._id);
+        }).map((p: any) => ({
+            id: typeof p === 'object' ? (p._id || p.id) : p,
+            name: typeof p === 'object' ? p.fullName : 'Member',
+            email: typeof p === 'object' ? p.email : 'contact@bytecode.corp',
+            selected: true
+        }));
+        
+        setEmailData({
+            recipients: participantList,
+            subject: `ByteChat: Following up on hub "${chatObj.name}"`,
+            body: `Hi there,\n\nI'm reaching out regarding our discussion in the ${chatObj.name} hub on ByteChat.\n\nRegards,\n${currentUser.fullName}`
+        });
+        setIsEmailModalVisible(true);
+    };
+
+    const toggleRecipient = (id: string) => {
+        setEmailData(prev => ({
+            ...prev,
+            recipients: prev.recipients.map(r => r.id === id ? { ...r, selected: !r.selected } : r)
+        }));
+    };
+
+    const toggleAllRecipients = (select: boolean) => {
+        setEmailData(prev => ({
+            ...prev,
+            recipients: prev.recipients.map(r => ({ ...r, selected: select }))
+        }));
+    };
+
     useEffect(() => {
         setIsMounted(true);
         fetchChats();
@@ -334,8 +566,211 @@ export default function ByteChat() {
         syncUser();
         // Also listen for potential storage changes
         window.addEventListener('storage', syncUser);
-        return () => window.removeEventListener('storage', syncUser);
+        return () => {
+            window.removeEventListener('storage', syncUser);
+        };
     }, []);
+
+    // Outside Click Handler for Emoji Picker
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+                setIsEmojiPickerVisible(false);
+            }
+        };
+
+        if (isEmojiPickerVisible) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isEmojiPickerVisible]);
+
+    // Dedicated Call Timer Hook
+    useEffect(() => {
+        let timer: any;
+        if (isCalling && callStatus === 'CONNECTED') {
+            timer = setInterval(() => {
+                setCallTimer(prev => prev + 1);
+            }, 1000);
+        } else {
+            setCallTimer(0);
+        }
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [isCalling, callStatus]);
+
+    // Video Recording Timer Hook
+    useEffect(() => {
+        let interval: any;
+        if (isRecording) {
+            interval = setInterval(() => setVideoTimer(prev => prev + 1), 1000);
+        } else {
+            setVideoTimer(0);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isRecording]);
+
+    const startCamera = async () => {
+        setPermissionError(null);
+        setIsCameraActive(true);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            streamRef.current = stream;
+            if (videoPreviewRef.current) videoPreviewRef.current.srcObject = stream;
+        } catch (err: any) {
+            if (err.name === 'NotAllowedError') {
+                setPermissionError('Camera/Microphone access was denied. Please enable permissions in your browser bar.');
+            }
+            console.error('Camera access denied:', err);
+        }
+    };
+
+    // Sync Stream with Video Element
+    useEffect(() => {
+        if (isCameraActive && streamRef.current && videoPreviewRef.current) {
+            videoPreviewRef.current.srcObject = streamRef.current;
+        }
+    }, [isCameraActive]);
+
+    // Call Stream Lifecycle Manager
+    useEffect(() => {
+        if (isCalling && callType === 'VIDEO') {
+            const startCallStream = async () => {
+                try {
+                    setPermissionError(null);
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    streamRef.current = stream;
+                    if (callVideoRef.current) callVideoRef.current.srcObject = stream;
+                } catch (err: any) {
+                    if (err.name === 'NotAllowedError') {
+                        setPermissionError('Camera/Microphone access was denied. Please click the "Camera" icon in your browser address bar and select "Always allow" to go live.');
+                    }
+                    console.error('Call Stream Failed:', err);
+                }
+            };
+            startCallStream();
+        } else if (!isCalling && !isCameraActive) {
+            stopCamera();
+        }
+    }, [isCalling, callType]);
+
+    // Internal sync for call video element
+    useEffect(() => {
+        if (isCalling && callType === 'VIDEO' && streamRef.current && callVideoRef.current) {
+            callVideoRef.current.srcObject = streamRef.current;
+        }
+    }, [isCalling, callType]);
+
+    const stopCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        setIsCameraActive(false);
+        setIsRecording(false);
+    };
+
+    const startRecording = () => {
+        if (!streamRef.current) return;
+        const mediaRecorder = new MediaRecorder(streamRef.current);
+        mediaRecorderRef.current = mediaRecorder;
+        const chunks: Blob[] = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result as string;
+                handleSendMessage(base64, 'VIDEO', { name: `Record_${Date.now()}.webm`, size: (blob.size / 1024).toFixed(1) + ' KB' });
+            };
+            reader.readAsDataURL(blob);
+            stopCamera();
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    const takePhoto = () => {
+        if (!videoPreviewRef.current) return;
+        const video = videoPreviewRef.current;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64 = canvas.toDataURL('image/jpeg');
+            handleSendMessage(base64, 'IMAGE', { name: `Photo_${Date.now()}.jpg`, size: 'Captured' });
+            stopCamera();
+        }
+    };
+
+    // Audio Recording Logic
+    const startAudioRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            const chunks: Blob[] = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64 = reader.result as string;
+                    handleSendMessage(base64, 'AUDIO', { name: `VoiceNote_${Date.now()}.webm`, size: (blob.size / 1024).toFixed(1) + ' KB' });
+                };
+                reader.readAsDataURL(blob);
+                if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+            };
+
+            mediaRecorder.start();
+            setIsAudioRecording(true);
+            setAudioTimer(0);
+        } catch (err) {
+            console.error('Audio Access Failed:', err);
+            alert('Unable to access microphone.');
+        }
+    };
+
+    const stopAudioRecording = () => {
+        if (mediaRecorderRef.current && isAudioRecording) {
+            mediaRecorderRef.current.stop();
+            setIsAudioRecording(false);
+        }
+    };
+
+    useEffect(() => {
+        let interval: any;
+        if (isAudioRecording) {
+            interval = setInterval(() => setAudioTimer(prev => prev + 1), 1000);
+        } else {
+            setAudioTimer(0);
+        }
+        return () => clearInterval(interval);
+    }, [isAudioRecording]);
 
     // Sync ref when state changes
     useEffect(() => {
@@ -526,21 +961,21 @@ export default function ByteChat() {
     if (!isMounted) return <div style={{ background: '#fcfaff', height: '100vh' }} />;
 
     return (
-        <div style={{ 
-            height: '100%', 
-            width: '100%', 
-            display: 'flex', 
-            background: '#fcfaff', 
+        <div style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            background: '#fcfaff',
             overflow: 'hidden',
             fontFamily: 'Inter, system-ui, sans-serif',
             color: '#1e1b4b'
         }}>
-            
+
             {/* PANEL 1: ICON STRIP */}
-            <div style={{ 
-                width: '72px', 
-                flexShrink: 0, 
-                background: '#ffffff', 
+            <div style={{
+                width: '72px',
+                flexShrink: 0,
+                background: '#ffffff',
                 borderRight: '1px solid rgba(109, 40, 217, 0.08)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -548,8 +983,8 @@ export default function ByteChat() {
                 padding: '24px 0',
                 gap: '16px'
             }}>
-                <div style={{ 
-                    width: '44px', height: '44px', borderRadius: '16px', 
+                <div style={{
+                    width: '44px', height: '44px', borderRadius: '16px',
                     background: 'linear-gradient(135deg, #6d28d9, #c026d3)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 8px 16px rgba(109, 40, 217, 0.2)',
@@ -564,8 +999,8 @@ export default function ByteChat() {
                     { icon: Users, route: '/super-admin/academic' },
                     { icon: Settings, route: '/super-admin/settings' }
                 ].map((item, i) => (
-                    <motion.div 
-                        key={i} 
+                    <motion.div
+                        key={i}
                         onClick={() => router.push(item.route)}
                         whileHover={{ scale: 1.15, backgroundColor: 'rgba(109, 40, 217, 0.1)' }}
                         whileTap={{ scale: 0.9 }}
@@ -583,10 +1018,10 @@ export default function ByteChat() {
             </div>
 
             {/* PANEL 2: NAVIGATION NEXUS */}
-            <div style={{ 
-                width: '300px', 
-                flexShrink: 0, 
-                background: 'rgba(255, 255, 255, 0.4)', 
+            <div style={{
+                width: '300px',
+                flexShrink: 0,
+                background: 'rgba(255, 255, 255, 0.4)',
                 borderRight: '1px solid rgba(109, 40, 217, 0.08)',
                 display: 'flex',
                 flexDirection: 'column'
@@ -594,7 +1029,7 @@ export default function ByteChat() {
                 <div style={{ padding: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <h2 style={{ fontSize: '1.2rem', fontWeight: 800 }}>ByteChat</h2>
-                        <motion.div 
+                        <motion.div
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => setIsCreateModalVisible(true)}
@@ -615,8 +1050,8 @@ export default function ByteChat() {
                             <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1.5px', padding: '0 12px', marginBottom: '12px' }}>{cat === 'DIRECT' ? 'PERSONAL' : cat}</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 {chats.filter(c => c.category === cat && !c.isArchived).map(chat => (
-                                    <motion.div 
-                                        key={chat.id} 
+                                    <motion.div
+                                        key={chat.id}
                                         onClick={() => setActiveChat(chat.id)}
                                         whileHover={{ backgroundColor: 'rgba(109, 40, 217, 0.03)' }}
                                         style={{
@@ -632,8 +1067,8 @@ export default function ByteChat() {
                                                 <img src={chat.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             ) : (
                                                 chat.type === 'DIRECT' ? <AtSign size={18} /> :
-                                                chat.type === 'CHANNEL' ? <Volume2 size={18} /> : 
-                                                chat.type === 'GROUP' ? <Users size={18} /> : <Hash size={18} />
+                                                    chat.type === 'CHANNEL' ? <Volume2 size={18} /> :
+                                                        chat.type === 'GROUP' ? <Users size={18} /> : <Hash size={18} />
                                             )}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -654,8 +1089,8 @@ export default function ByteChat() {
                             <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1.5px', padding: '0 12px', marginBottom: '12px' }}>ARCHIVED</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 {chats.filter(c => c.isArchived).map(chat => (
-                                    <div 
-                                        key={chat.id} 
+                                    <div
+                                        key={chat.id}
                                         onClick={() => setActiveChat(chat.id)}
                                         style={{ padding: '12px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6 }}
                                     >
@@ -677,11 +1112,11 @@ export default function ByteChat() {
                 <div style={{ padding: '14px 32px', borderBottom: '1px solid rgba(109, 40, 217, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{ width: 40, height: 40, borderRadius: '14px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(109, 40, 217, 0.1)', overflow: 'hidden' }}>
-                             {chats.find(c => c.id === activeChat)?.image ? (
-                                 <img src={chats.find(c => c.id === activeChat)?.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                             ) : (
-                                 chats.find(c => c.id === activeChat)?.type === 'DIRECT' ? <AtSign size={20} color="#6d28d9" /> : <Hash size={20} color="#6d28d9" />
-                             )}
+                            {chats.find(c => c.id === activeChat)?.image ? (
+                                <img src={chats.find(c => c.id === activeChat)?.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                chats.find(c => c.id === activeChat)?.type === 'DIRECT' ? <AtSign size={20} color="#6d28d9" /> : <Hash size={20} color="#6d28d9" />
+                            )}
                         </div>
                         <div>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{chats.find(c => c.id === activeChat)?.name || 'Select a Chat'}</h3>
@@ -691,9 +1126,10 @@ export default function ByteChat() {
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                        <div className="action-circle-soft" style={{ width: 36, height: 36 }}><Phone size={16} /></div>
-                        <div className="action-circle-soft" style={{ width: 36, height: 36 }}><Video size={16} /></div>
-                        <div 
+                        <div className="action-circle-soft" onClick={() => initiateCall('AUDIO')} style={{ width: 36, height: 36 }}><Phone size={16} /></div>
+                        <div className="action-circle-soft" onClick={() => initiateCall('VIDEO')} style={{ width: 36, height: 36 }}><Video size={16} /></div>
+                        <div className="action-circle-soft" onClick={openEmailHub} style={{ width: 36, height: 36 }}><Mail size={16} /></div>
+                        <div
                             className={`action-circle-soft ${isDetailsVisible ? 'active' : ''}`}
                             onClick={() => setIsDetailsVisible(!isDetailsVisible)}
                             style={{ width: 36, height: 36 }}
@@ -706,16 +1142,16 @@ export default function ByteChat() {
                 {/* Feed */}
                 <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px', background: 'radial-gradient(circle at 50% 50%, #fff, #fcfaff)' }}>
                     {messages.map((msg, i) => (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            key={msg.id} 
-                            style={{ 
-                                display: 'flex', 
-                                gap: '14px', 
-                                maxWidth: '85%', 
-                                alignSelf: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'flex-end' : 'flex-start', 
-                                flexDirection: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'row-reverse' : 'row' 
+                            key={msg.id}
+                            style={{
+                                display: 'flex',
+                                gap: '14px',
+                                maxWidth: '85%',
+                                alignSelf: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'flex-end' : 'flex-start',
+                                flexDirection: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'row-reverse' : 'row'
                             }}
                         >
                             <div style={{ width: 36, height: 36, borderRadius: '12px', background: msg.type === 'AI' ? '#f5f3ff' : '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'flex-start', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
@@ -738,19 +1174,19 @@ export default function ByteChat() {
                                 {msg.parentMessage && (
                                     <div style={{ fontSize: '0.7rem', color: '#6d28d9', background: 'rgba(109, 40, 217, 0.05)', padding: '6px 12px', borderRadius: '10px', marginBottom: '4px', borderLeft: '3px solid #6d28d9', maxWidth: '200px', cursor: 'pointer' }}>
                                         <p style={{ fontWeight: 800, marginBottom: '2px' }}>{msg.parentMessage.sender?.fullName || 'User'}</p>
-                                        <p style={{ opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {msg.parentMessage.type === 'TEXT' ? msg.parentMessage.text : 
-                                             msg.parentMessage.type === 'IMAGE' ? '[Image]' : 
-                                             msg.parentMessage.type === 'VIDEO' ? '[Video]' : 
-                                             msg.parentMessage.type === 'AUDIO' ? '[Audio]' : 
-                                             `[File: ${msg.parentMessage.fileName}]`}
+                                        <p style={{ opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+                                            {msg.parentMessage.type === 'TEXT' ? msg.parentMessage.text :
+                                                msg.parentMessage.type === 'IMAGE' ? '[Image]' :
+                                                    msg.parentMessage.type === 'VIDEO' ? '[Video]' :
+                                                        msg.parentMessage.type === 'AUDIO' ? '[Audio]' :
+                                                            `[File: ${msg.parentMessage.fileName}]`}
                                         </p>
                                     </div>
                                 )}
 
-                                <div 
+                                <div
                                     className="message-bubble-silk group"
-                                    style={{ 
+                                    style={{
                                         position: 'relative',
                                         padding: '12px 18px',
                                         background: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'linear-gradient(135deg, #6d28d9, #4f46e5)' : '#fff',
@@ -758,8 +1194,8 @@ export default function ByteChat() {
                                         border: '1px solid rgba(109, 40, 217, 0.08)',
                                         fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.5',
                                         boxShadow: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '0 10px 25px rgba(109, 40, 217, 0.2)' : '0 4px 15px rgba(0,0,0,0.03)',
-                                        borderRadius: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) 
-                                            ? '20px 4px 20px 20px' 
+                                        borderRadius: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id)
+                                            ? '20px 4px 20px 20px'
                                             : '4px 20px 20px 20px'
                                     }}
                                 >
@@ -771,10 +1207,10 @@ export default function ByteChat() {
                                     </div>
                                     {msg.type === 'IMAGE' ? (
                                         <div style={{ position: 'relative' }}>
-                                            <motion.img 
+                                            <motion.img
                                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                                src={msg.text} 
-                                                style={{ maxWidth: '280px', borderRadius: '12px', display: 'block', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} 
+                                                src={msg.text}
+                                                style={{ maxWidth: '280px', borderRadius: '12px', display: 'block', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
                                                 alt="Shared image"
                                             />
                                             <div onClick={() => handleDownload(msg.text, msg.fileName || 'image.png')} style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(255,255,255,0.8)', padding: '6px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}><Download size={14} color="#6d28d9" /></div>
@@ -800,9 +1236,9 @@ export default function ByteChat() {
                                                 <p style={{ fontSize: '0.8rem', fontWeight: 800 }}>{msg.fileName}</p>
                                                 <p style={{ fontSize: '0.6rem', opacity: 0.7 }}>{msg.fileSize} • ATTACHMENT</p>
                                             </div>
-                                            <Download 
-                                                size={16} 
-                                                style={{ cursor: 'pointer' }} 
+                                            <Download
+                                                size={16}
+                                                style={{ cursor: 'pointer' }}
                                                 onClick={() => handleDownload(msg.text, msg.fileName || 'download')}
                                             />
                                         </div>
@@ -820,22 +1256,22 @@ export default function ByteChat() {
                             <div style={{ fontSize: '0.75rem' }}>
                                 <span style={{ fontWeight: 800, color: '#6d28d9' }}>Replying to {replyingTo.senderName}</span>
                                 <p style={{ opacity: 0.7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
-                                    {replyingTo.type === 'TEXT' ? replyingTo.text : 
-                                     replyingTo.type === 'IMAGE' ? '🖼️ [Image]' : 
-                                     replyingTo.type === 'VIDEO' ? '🎥 [Video]' : 
-                                     replyingTo.type === 'AUDIO' ? '🎵 [Audio]' : 
-                                     `📁 [File: ${replyingTo.fileName}]`}
+                                    {replyingTo.type === 'TEXT' ? replyingTo.text :
+                                        replyingTo.type === 'IMAGE' ? '🖼️ [Image]' :
+                                            replyingTo.type === 'VIDEO' ? '🎥 [Video]' :
+                                                replyingTo.type === 'AUDIO' ? '🎵 [Audio]' :
+                                                    `📁 [File: ${replyingTo.fileName}]`}
                                 </p>
                             </div>
                             <button onClick={() => setReplyingTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><LogOut size={14} /></button>
                         </div>
                     )}
-                    
+
                     {isEmojiPickerVisible && (
-                        <div style={{ position: 'absolute', bottom: '80px', left: '25px', background: '#fff', padding: '20px', borderRadius: '24px', boxShadow: '0 20px 50px rgba(30,27,75,0.2)', width: '340px', zIndex: 110, border: '1px solid rgba(109, 40, 217, 0.1)' }}>
+                        <div ref={emojiPickerRef} style={{ position: 'absolute', bottom: '80px', left: '25px', background: '#fff', padding: '20px', borderRadius: '24px', boxShadow: '0 20px 50px rgba(30,27,75,0.2)', width: '340px', zIndex: 110, border: '1px solid rgba(109, 40, 217, 0.1)' }}>
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
                                 {['EMOJI', 'GIF', 'STICKER'].map((tab: any) => (
-                                    <button 
+                                    <button
                                         key={tab}
                                         onClick={() => setMediaPickerTab(tab)}
                                         style={{ flex: 1, padding: '8px', borderRadius: '12px', background: mediaPickerTab === tab ? '#f5f3ff' : 'none', border: 'none', fontSize: '0.7rem', fontWeight: 900, color: mediaPickerTab === tab ? '#6d28d9' : '#94a3b8', cursor: 'pointer' }}
@@ -849,9 +1285,9 @@ export default function ByteChat() {
                                         "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾",
                                         "👋", "🤚", "🖐", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "👐", "🤲", "🤝", "🙏"
                                     ].map((emoji, idx) => (
-                                        <button 
-                                            key={idx} 
-                                            onClick={() => { setMessageInput(prev => prev + emoji); setIsEmojiPickerVisible(false); }} 
+                                        <button
+                                            key={idx}
+                                            onClick={() => setMessageInput(prev => prev + emoji)}
                                             style={{ background: 'none', border: 'none', fontSize: '1.4rem', padding: '4px', cursor: 'pointer' }}
                                         >
                                             {emoji}
@@ -889,45 +1325,49 @@ export default function ByteChat() {
                             </div>
                         </div>
                     )}
-                    
+
                     <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
 
-                    <div style={{ 
-                        background: '#fcfaff', 
-                        border: '1px solid rgba(109, 40, 217, 0.1)', 
+                    <div style={{
+                        background: '#fcfaff',
+                        border: '1px solid rgba(109, 40, 217, 0.1)',
                         borderRadius: '20px', padding: '8px 16px',
                         boxShadow: '0 10px 25px rgba(0,0,0,0.02)',
                         display: 'flex', alignItems: 'center', gap: '8px'
                     }}>
                         <div style={{ display: 'flex', gap: '4px' }}>
-                             <div className="input-tool" onClick={() => fileInputRef.current?.click()} style={{ padding: '6px' }}><Paperclip size={16} /></div>
-                             <div className="input-tool" onClick={() => setIsEmojiPickerVisible(!isEmojiPickerVisible)} style={{ padding: '6px' }}><Smile size={16} /></div>
+                            <div className="input-tool" onClick={() => fileInputRef.current?.click()} style={{ padding: '6px' }}><Paperclip size={16} /></div>
+                            <div className="input-tool" onClick={() => setIsEmojiPickerVisible(!isEmojiPickerVisible)} style={{ padding: '6px' }}><Smile size={16} /></div>
+                            <div className="input-tool" onClick={startCamera} style={{ padding: '6px' }}><Camera size={16} /></div>
+                            <div className="input-tool" onClick={startAudioRecording} style={{ padding: '6px' }}><Mic size={16} /></div>
                         </div>
-                        <input 
-                            value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                            placeholder="Type something clever..."
-                            style={{ flex: 1, background: 'none', border: 'none', color: '#1e1b4b', outline: 'none', fontSize: '0.85rem', fontWeight: 600, padding: '10px 0' }}
-                        />
+                        {isAudioRecording ? (
+                            <div style={{ flex: 1, height: '40px', background: 'rgba(109,40,217,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'pulse 1s infinite' }} />
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#1e1b4b', fontFamily: 'monospace' }}>
+                                        {Math.floor(audioTimer / 60).toString().padStart(2, '0')}:{(audioTimer % 60).toString().padStart(2, '0')}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6d28d9', opacity: 0.8 }}>RECORDING AUDIO...</span>
+                                    <button onClick={stopAudioRecording} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800 }}>STOP & SEND</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <input
+                                value={messageInput}
+                                onChange={(e) => setMessageInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                placeholder="Type something clever..."
+                                style={{ flex: 1, background: 'none', border: 'none', color: '#1e1b4b', outline: 'none', fontSize: '0.85rem', fontWeight: 600, padding: '10px 0' }}
+                            />
+                        )}
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                             <div className={`input-tool ai-glow ${isGeneratingAI ? 'generating' : ''}`} onClick={() => setIsAIMenuVisible(!isAIMenuVisible)} style={{ padding: '6px', position: 'relative' }}>
-                                <Sparkles size={16} style={{ animation: isGeneratingAI ? 'spin 1s linear infinite' : 'none' }} />
-                                
-                                {isAIMenuVisible && (
-                                    <motion.div initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} style={{ position: 'absolute', bottom: '50px', right: '0', background: '#fff', borderRadius: '20px', padding: '12px', width: '220px', boxShadow: '0 20px 50px rgba(0,0,0,0.2)', border: '1px solid rgba(109,40,217,0.1)', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#94a3b8', padding: '8px', letterSpacing: '1px' }}>AI COMMANDS</p>
-                                        <button onClick={() => handleAIWrite('PROFESSIONAL')} style={{ padding: '10px 14px', borderRadius: '12px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', fontWeight: 700, color: '#475569', cursor: 'pointer', textAlign: 'left' }}><Activity size={14} /> Professional Rewrite</button>
-                                        <button onClick={() => handleAIWrite('GRAMMAR')} style={{ padding: '10px 14px', borderRadius: '12px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', fontWeight: 700, color: '#475569', cursor: 'pointer', textAlign: 'left' }}><CheckCircle2 size={14} /> Fix English & Grammar</button>
-                                        <button onClick={() => handleAIWrite('FUNNY')} style={{ padding: '10px 14px', borderRadius: '12px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', fontWeight: 700, color: '#475569', cursor: 'pointer', textAlign: 'left' }}><Zap size={14} /> Make it Funny</button>
-                                        <button onClick={() => handleAIWrite('IMAGE')} style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(109,40,217,0.05)', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', fontWeight: 800, color: '#6d28d9', cursor: 'pointer', textAlign: 'left' }}><ImageIcon size={14} /> Generate Visual (AI)</button>
-                                    </motion.div>
-                                )}
-                             </div>
-                            <button 
+                            <button
                                 onClick={() => handleSendMessage()}
-                                style={{ 
-                                    padding: '8px 16px', borderRadius: '12px', 
+                                style={{
+                                    padding: '8px 16px', borderRadius: '12px',
                                     background: 'linear-gradient(135deg, #6d28d9, #4f46e5)',
                                     color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '8px',
                                     cursor: 'pointer', fontWeight: 800, fontSize: '0.75rem'
@@ -945,33 +1385,33 @@ export default function ByteChat() {
                 {isDetailsVisible && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
                         {/* Backdrop */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsDetailsVisible(false)}
                             style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(8px)' }}
                         />
-                        
+
                         {/* Modal Card */}
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            style={{ 
-                                width: '100%', 
-                                maxWidth: '420px', 
-                                background: '#fff', 
-                                borderRadius: '40px', 
-                                padding: '40px', 
-                                position: 'relative', 
+                            style={{
+                                width: '100%',
+                                maxWidth: '420px',
+                                background: '#fff',
+                                borderRadius: '40px',
+                                padding: '40px',
+                                position: 'relative',
                                 boxShadow: '0 30px 60px -12px rgba(30, 27, 75, 0.25)',
                                 border: '1px solid rgba(109, 40, 217, 0.1)',
                                 zIndex: 1001,
                                 overflow: 'hidden'
                             }}
                         >
-                            <button 
+                            <button
                                 onClick={() => setIsDetailsVisible(false)}
                                 style={{ position: 'absolute', top: '24px', right: '24px', padding: '8px', borderRadius: '50%', background: '#f5f3ff', border: 'none', cursor: 'pointer', color: '#6d28d9', zIndex: 10 }}
                             >
@@ -981,10 +1421,10 @@ export default function ByteChat() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #f1f5f9' }}>
                                 <div style={{ display: 'flex', gap: '20px' }}>
                                     {['OVERVIEW', 'MEMBERS'].map(tab => (
-                                        <button 
+                                        <button
                                             key={tab}
                                             onClick={() => setActiveDetailTab(tab as any)}
-                                            style={{ 
+                                            style={{
                                                 background: 'none', border: 'none', padding: '12px 4px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer',
                                                 color: activeDetailTab === tab ? '#6d28d9' : '#94a3b8',
                                                 borderBottom: activeDetailTab === tab ? '2px solid #6d28d9' : '2px solid transparent'
@@ -994,7 +1434,7 @@ export default function ByteChat() {
                                         </button>
                                     ))}
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setIsEditingDetails(!isEditingDetails)}
                                     style={{ background: isEditingDetails ? '#6d28d9' : '#f5f3ff', color: isEditingDetails ? '#fff' : '#6d28d9', padding: '6px 14px', borderRadius: '10px', border: 'none', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
                                 >
@@ -1005,29 +1445,29 @@ export default function ByteChat() {
                             {activeDetailTab === 'OVERVIEW' ? (
                                 <>
                                     <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                                        <div 
+                                        <div
                                             onClick={() => isEditingDetails && fileInputRef.current?.click()}
-                                            style={{ 
-                                                width: 100, height: 100, borderRadius: '35px', 
-                                                background: 'linear-gradient(135deg, #6d28d9, #c026d3)', 
-                                                margin: '0 auto 24px', display: 'flex', alignItems: 'center', 
-                                                justifyContent: 'center', boxShadow: '0 20px 40px rgba(109, 40, 217, 0.25)', 
+                                            style={{
+                                                width: 100, height: 100, borderRadius: '35px',
+                                                background: 'linear-gradient(135deg, #6d28d9, #c026d3)',
+                                                margin: '0 auto 24px', display: 'flex', alignItems: 'center',
+                                                justifyContent: 'center', boxShadow: '0 20px 40px rgba(109, 40, 217, 0.25)',
                                                 overflow: 'hidden', cursor: isEditingDetails ? 'pointer' : 'default',
                                                 position: 'relative'
                                             }}
                                         >
-                                            <input 
-                                                type="file" 
-                                                ref={fileInputRef} 
-                                                onChange={handleFileChange} 
-                                                style={{ display: 'none' }} 
-                                                accept="image/*" 
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleFileChange}
+                                                style={{ display: 'none' }}
+                                                accept="image/*"
                                             />
                                             {(editedChatImage || chats.find(c => c.id === activeChat)?.image) ? (
-                                                <img 
-                                                    src={editedChatImage || chats.find(c => c.id === activeChat)?.image} 
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} 
-                                                    alt="Hub Preview" 
+                                                <img
+                                                    src={editedChatImage || chats.find(c => c.id === activeChat)?.image}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                                                    alt="Hub Preview"
                                                 />
                                             ) : (
                                                 <Hash size={45} color="#fff" style={{ pointerEvents: 'none' }} />
@@ -1039,25 +1479,25 @@ export default function ByteChat() {
                                                 </div>
                                             )}
                                         </div>
-                                        
+
                                         {isEditingDetails ? (
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                                 <div>
                                                     <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textAlign: 'left', marginBottom: '6px' }}>HUB NAME</p>
-                                                    <input 
+                                                    <input
                                                         value={editedChatName}
                                                         onChange={(e) => setEditedChatName(e.target.value)}
                                                         style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #6d28d9', fontSize: '1rem', fontWeight: 700 }}
                                                         placeholder="Group Name"
                                                     />
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={handleUpdateHub}
                                                     disabled={isSaving}
-                                                    style={{ 
-                                                        background: isSaving ? '#94a3b8' : '#6d28d9', 
-                                                        color: '#fff', padding: '14px', borderRadius: '12px', 
-                                                        border: 'none', fontWeight: 800, cursor: isSaving ? 'default' : 'pointer', 
+                                                    style={{
+                                                        background: isSaving ? '#94a3b8' : '#6d28d9',
+                                                        color: '#fff', padding: '14px', borderRadius: '12px',
+                                                        border: 'none', fontWeight: 800, cursor: isSaving ? 'default' : 'pointer',
                                                         marginTop: '10px', transition: 'all 0.3s ease'
                                                     }}
                                                 >
@@ -1115,19 +1555,19 @@ export default function ByteChat() {
                             )}
 
                             <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
-                                <button 
+                                <button
                                     onClick={handleArchiveChat}
                                     style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer' }}
                                 >
                                     {chats.find(c => c.id === activeChat)?.isArchived ? 'UNARCHIVE' : 'ARCHIVE'}
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setIsDetailsVisible(false)}
                                     style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#fff', color: '#6d28d9', border: '1px solid rgba(109, 40, 217, 0.2)', fontWeight: 800, cursor: 'pointer' }}
                                 >
                                     LEAVE
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleDeleteHub}
                                     style={{ flex: 1, padding: '16px', borderRadius: '20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', fontWeight: 800, cursor: 'pointer' }}
                                 >
@@ -1143,14 +1583,14 @@ export default function ByteChat() {
             <AnimatePresence>
                 {isCreateModalVisible && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsCreateModalVisible(false)}
                             style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(8px)' }}
                         />
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
@@ -1159,13 +1599,13 @@ export default function ByteChat() {
                             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '24px' }}>Create New Hub</h3>
                             <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', borderBottom: '1px solid rgba(109, 40, 217, 0.08)' }}>
                                 {[{ id: 'GROUP', label: 'NEW GROUP', icon: <Users size={16} /> }, { id: 'DIRECT', label: 'DIRECT MESSAGE', icon: <User size={16} /> }].map(type => (
-                                    <button 
+                                    <button
                                         key={type.id}
                                         onClick={() => {
                                             setNewChatType(type.id as any);
                                             setSelectedMembers([]);
                                         }}
-                                        style={{ 
+                                        style={{
                                             background: 'none', border: 'none', padding: '12px 4px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer',
                                             color: newChatType === type.id ? '#6d28d9' : '#94a3b8',
                                             borderBottom: newChatType === type.id ? '2px solid #6d28d9' : '2px solid transparent',
@@ -1181,7 +1621,7 @@ export default function ByteChat() {
                                 <>
                                     <div style={{ marginBottom: '24px' }}>
                                         <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '8px' }}>GROUP NAME</p>
-                                        <input 
+                                        <input
                                             value={newChatName}
                                             onChange={(e) => setNewChatName(e.target.value)}
                                             placeholder="Enter community name..."
@@ -1193,10 +1633,10 @@ export default function ByteChat() {
                                         <p style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '10px' }}>HUB PURPOSE (CATEGORY)</p>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             {['CHANNELS', 'TEAM', 'OFFICIAL'].map(cat => (
-                                                <button 
+                                                <button
                                                     key={cat}
                                                     onClick={() => setNewChatCategory(cat as any)}
-                                                    style={{ 
+                                                    style={{
                                                         flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer',
                                                         background: newChatCategory === cat ? 'rgba(109, 40, 217, 0.1)' : '#f8fafc',
                                                         color: newChatCategory === cat ? '#6d28d9' : '#475569',
@@ -1219,7 +1659,7 @@ export default function ByteChat() {
                                     const uId = user._id || user.id;
                                     const isSelected = selectedMembers.includes(uId);
                                     return (
-                                        <div 
+                                        <div
                                             key={uId}
                                             onClick={() => {
                                                 if (newChatType === 'DIRECT') {
@@ -1228,7 +1668,7 @@ export default function ByteChat() {
                                                     setSelectedMembers(prev => isSelected ? prev.filter(id => id !== uId) : [...prev, uId]);
                                                 }
                                             }}
-                                            style={{ 
+                                            style={{
                                                 padding: '12px', borderRadius: '14px', cursor: 'pointer',
                                                 background: isSelected ? 'rgba(109, 40, 217, 0.05)' : 'transparent',
                                                 border: isSelected ? '1px solid rgba(109, 40, 217, 0.1)' : '1px solid transparent',
@@ -1254,7 +1694,7 @@ export default function ByteChat() {
 
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <button onClick={() => setIsCreateModalVisible(false)} style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#f8fafc', border: 'none', fontWeight: 800, cursor: 'pointer' }}>CANCEL</button>
-                                <button 
+                                <button
                                     onClick={handleCreateChat}
                                     style={{ flex: 2, padding: '16px', borderRadius: '20px', background: 'linear-gradient(135deg, #6d28d9, #4f46e5)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', boxShadow: '0 10px 20px rgba(109, 40, 217, 0.15)' }}
                                 >
@@ -1292,8 +1732,8 @@ export default function ByteChat() {
 
                             <div style={{ position: 'relative', marginBottom: '20px' }}>
                                 <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} size={16} />
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     placeholder="Search hubs or members..."
                                     value={forwardSearch}
                                     onChange={(e) => setForwardSearch(e.target.value)}
@@ -1305,27 +1745,313 @@ export default function ByteChat() {
                                 {chats
                                     .filter(c => c.id !== activeChat && c.name.toLowerCase().includes(forwardSearch.toLowerCase()))
                                     .map(chat => (
-                                    <div 
-                                        key={chat.id} 
-                                        onClick={() => handleForwardMessage(chat.id)}
-                                        style={{ padding: '12px 16px', borderRadius: '18px', background: '#f8fafc', border: '1px solid rgba(109,40,217,0.03)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', transition: '0.2s' }}
-                                        className="forward-item"
-                                    >
-                                        <div style={{ 
-                                            width: 38, height: 38, borderRadius: '12px', 
-                                            background: chat.type === 'CHANNEL' ? 'rgba(109,40,217,0.1)' : chat.type === 'TEAM' ? 'rgba(16,185,129,0.1)' : 'rgba(99,102,241,0.1)', 
-                                            color: chat.type === 'CHANNEL' ? '#6d28d9' : chat.type === 'TEAM' ? '#10b981' : '#6366f1',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800 
-                                        }}>
-                                            {chat.type === 'CHANNEL' ? '#' : chat.type === 'TEAM' ? <Users size={16} /> : chat.name[0]}
+                                        <div
+                                            key={chat.id}
+                                            onClick={() => handleForwardMessage(chat.id)}
+                                            style={{ padding: '12px 16px', borderRadius: '18px', background: '#f8fafc', border: '1px solid rgba(109,40,217,0.03)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', transition: '0.2s' }}
+                                            className="forward-item"
+                                        >
+                                            <div style={{
+                                                width: 38, height: 38, borderRadius: '12px',
+                                                background: chat.type === 'CHANNEL' ? 'rgba(109,40,217,0.1)' : chat.type === 'TEAM' ? 'rgba(16,185,129,0.1)' : 'rgba(99,102,241,0.1)',
+                                                color: chat.type === 'CHANNEL' ? '#6d28d9' : chat.type === 'TEAM' ? '#10b981' : '#6366f1',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800
+                                            }}>
+                                                {chat.type === 'CHANNEL' ? '#' : chat.type === 'TEAM' ? <Users size={16} /> : chat.name[0]}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ fontWeight: 800, color: '#1e1b4b', fontSize: '0.9rem' }}>{chat.name}</p>
+                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{chat.type}</p>
+                                            </div>
+                                            <SendHorizontal size={16} color="#6d28d9" style={{ opacity: 0.4 }} />
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={{ fontWeight: 800, color: '#1e1b4b', fontSize: '0.9rem' }}>{chat.name}</p>
-                                            <p style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{chat.type}</p>
-                                        </div>
-                                        <SendHorizontal size={16} color="#6d28d9" style={{ opacity: 0.4 }} />
+                                    ))}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* CAMERA & VIDEO RECORDING MODAL */}
+            <AnimatePresence>
+                {isCameraActive && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 6000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={stopCamera} style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.9)', backdropFilter: 'blur(10px)' }} />
+
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} style={{ position: 'relative', background: '#000', borderRadius: '40px', overflow: 'hidden', width: '100%', maxWidth: '640px', boxShadow: '0 40px 100px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <video ref={videoPreviewRef} autoPlay muted playsInline style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }} />
+
+                            {isRecording && (
+                                <div style={{ position: 'absolute', top: '30px', left: '30px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(239, 68, 68, 0.8)', padding: '8px 16px', borderRadius: '50px', backdropFilter: 'blur(5px)', zIndex: 10 }}>
+                                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fff', animation: 'pulse 1s infinite' }} />
+                                    <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.8rem', letterSpacing: '1px' }}>
+                                        {Math.floor(videoTimer / 60).toString().padStart(2, '0')}:{(videoTimer % 60).toString().padStart(2, '0')}
+                                    </span>
+                                </div>
+                            )}
+
+                            <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', padding: '40px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', display: 'flex', justifyContent: 'center', gap: '30px', zIndex: 10 }}>
+                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={stopCamera} style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)' }}><X size={24} color="#fff" /></motion.div>
+
+                                {!isRecording ? (
+                                    <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
+                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={takePhoto} style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)' }} title="Capture Photo"><ImageIcon size={24} color="#fff" /></motion.div>
+
+                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={startRecording} style={{ width: 80, height: 80, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 0 30px rgba(255,255,255,0.3)' }} title="Start Recording">
+                                            <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#ef4444' }} />
+                                        </motion.div>
                                     </div>
-                                ))}
+                                ) : (
+                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={stopRecording} style={{ width: 80, height: 80, borderRadius: '50%', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 0 30px rgba(239, 68, 68, 0.3)' }} title="Stop Recording">
+                                        <StopCircle size={40} color="#fff" />
+                                    </motion.div>
+                                )}
+
+                                <div style={{ width: 60, height: 60 }} /> {/* Spacer */}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* INCOMING CALL SIGNAL */}
+            <AnimatePresence>
+                {incomingCall && (
+                    <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 7000 }}>
+                        <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} style={{ background: '#fff', padding: '24px', borderRadius: '32px', boxShadow: '0 30px 60px rgba(30,27,75,0.25)', border: '1px solid rgba(109,40,217,0.1)', display: 'flex', alignItems: 'center', gap: '20px', minWidth: '320px' }}>
+                            <div style={{ width: 56, height: 56, borderRadius: '20px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                <img src={incomingCall.initiator?.profileImage || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ fontSize: '0.9rem', fontWeight: 900, color: '#1e1b4b' }}>{incomingCall.initiator?.fullName}</p>
+                                <p style={{ fontSize: '0.7rem', color: '#6d28d9', fontWeight: 700, letterSpacing: '1px' }}>INCOMING {incomingCall.type} CALL...</p>
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <motion.div whileTap={{ scale: 0.9 }} onClick={() => handleCallAction('REJECTED')} style={{ width: 44, height: 44, borderRadius: '50%', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={18} /></motion.div>
+                                <motion.div whileTap={{ scale: 0.9 }} onClick={() => handleCallAction('ACTIVE')} style={{ width: 44, height: 44, borderRadius: '50%', background: '#dcfce7', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Phone size={18} /></motion.div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* EMAIL CORRESPONDENCE MODAL */}
+            <AnimatePresence>
+                {isEmailModalVisible && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 6500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setIsEmailModalVisible(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(10px)' }} />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} style={{ position: 'relative', background: '#fff', borderRadius: '40px', width: '100%', maxWidth: '600px', padding: '40px', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#1e1b4b' }}>Dispatch Correspondence</h2>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>Professional context-aware electronic mail.</p>
+                                </div>
+                                <button onClick={() => setIsEmailModalVisible(false)} style={{ background: '#f8fafc', border: 'none', padding: '12px', borderRadius: '16px', cursor: 'pointer' }}><X size={20} /></button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6d28d9', letterSpacing: '1px', textTransform: 'uppercase' }}>Recipients ({emailData.recipients.filter(r => r.selected).length})</label>
+                                        {emailData.recipients.length > 1 && (
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <button onClick={() => toggleAllRecipients(true)} style={{ background: 'none', border: 'none', color: '#10b981', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer' }}>SELECT ALL</button>
+                                                <button onClick={() => toggleAllRecipients(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer' }}>NONE</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <div style={{ background: '#f8fafc', borderRadius: '24px', padding: '16px', maxHeight: '180px', overflowY: 'auto', border: '1px solid rgba(109,40,217,0.05)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {emailData.recipients.length > 0 ? emailData.recipients.map((r: any) => (
+                                            <div 
+                                                key={r.id} 
+                                                onClick={() => toggleRecipient(r.id)}
+                                                style={{ padding: '10px 16px', borderRadius: '14px', background: r.selected ? '#eeebff' : '#fff', border: '1px solid', borderColor: r.selected ? '#6d28d9' : 'transparent', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: '0.2s' }}
+                                            >
+                                                <div style={{ width: 18, height: 18, borderRadius: '6px', border: '2px solid #6d28d9', background: r.selected ? '#6d28d9' : 'transparent', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {r.selected && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e1b4b' }}>{r.name}</p>
+                                                    <p style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 600 }}>{r.email}</p>
+                                                </div>
+                                            </div>
+                                        )) : (
+                                            <p style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem', fontWeight: 600 }}>No other members in this hub.</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6d28d9', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Subject</label>
+                                    <input value={emailData.subject} onChange={(e) => setEmailData({...emailData, subject: e.target.value})} style={{ width: '100%', padding: '16px 20px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(109,40,217,0.1)', fontSize: '1rem', fontWeight: 700, color: '#1e1b4b', outline: 'none' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6d28d9', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Message Body</label>
+                                    <textarea rows={6} value={emailData.body} onChange={(e) => setEmailData({...emailData, body: e.target.value})} style={{ width: '100%', padding: '20px', borderRadius: '24px', background: '#fff', border: '1px solid rgba(109,40,217,0.1)', fontSize: '1rem', fontWeight: 600, color: '#334155', outline: 'none', resize: 'none' }} />
+                                </div>
+                                
+                                <motion.button 
+                                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                    onClick={handleSendEmail}
+                                    disabled={isSendingEmail}
+                                    style={{ width: '100%', padding: '20px', borderRadius: '20px', background: 'linear-gradient(135deg, #6d28d9, #4f46e5)', color: '#fff', border: 'none', fontWeight: 900, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', boxShadow: '0 20px 40px rgba(109,40,217,0.3)' }}
+                                >
+                                    {isSendingEmail ? 'DISPATCHING...' : <>SEND CORRESPONDENCE <Mail size={18} /></>}
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* CINEMATIC TELECOMMUNICATION OVERLAY (v3) */}
+            <AnimatePresence>
+                {isCalling && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto' }}>
+                        <motion.div 
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, #1e1b4b 0%, #020617 100%)', backdropFilter: 'blur(30px)' }} 
+                        />
+                        
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                            style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                        >
+                            {/* Visual Layer */}
+                            <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {callType === 'VIDEO' ? (
+                                    <video ref={callVideoRef} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <motion.div 
+                                            animate={{ boxShadow: ['0 0 0px 0px rgba(109,40,217,0)', '0 0 100px 20px rgba(109,40,217,0.3)', '0 0 0px 0px rgba(109,40,217,0)'] }}
+                                            transition={{ repeat: Infinity, duration: 3 }}
+                                            style={{ width: 220, height: 220, borderRadius: '80px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '40px', overflow: 'hidden', position: 'relative' }}
+                                        >
+                                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(45deg, rgba(109,40,217,0.2), transparent)' }} />
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} alt="Identity" />
+                                        </motion.div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <h2 style={{ color: '#fff', fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px', marginBottom: '12px' }}>
+                                                {(() => {
+                                                    const chatObj = chats.find(c => c.id === activeChat);
+                                                    if (!chatObj) return 'Organizational Member';
+                                                    if (chatObj.type === 'DIRECT') {
+                                                        const pId = chatObj.participants?.find((p: any) => {
+                                                            const id = (typeof p === 'object' ? (p._id || p.id) : p)?.toString();
+                                                            return id !== (currentUser.id || currentUser._id)?.toString();
+                                                        });
+                                                        const p = typeof pId === 'object' ? pId : allUsers.find(u => (u._id || u.id)?.toString() === pId?.toString());
+                                                        return p?.fullName || p?.name || 'Member';
+                                                    }
+                                                    return chatObj.name;
+                                                })()}
+                                            </h2>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: callStatus === 'CONNECTED' ? '#10b981' : '#f59e0b', boxShadow: '0 0 15px currentColor' }} />
+                                                <p style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 800, letterSpacing: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+                                                    {callStatus === 'CONNECTED' ? (isScreenSharing ? 'SCREEN BROADCAST LIVE' : 'SECURE LINE ACTIVE') : 'ESTABLISHING HANDSHAKE...'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Floating Action Nexus */}
+                            <div style={{ position: 'absolute', bottom: '60px', left: '0', right: '0', display: 'flex', justifyContent: 'center', padding: '0 40px', zIndex: 100 }}>
+                                <motion.div 
+                                    initial={{ y: 100 }} animate={{ y: 0 }}
+                                    style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(40px)', padding: '24px 40px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.5)' }}
+                                >
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} 
+                                        onClick={toggleMic}
+                                        style={{ background: isMicMuted ? '#ef4444' : 'rgba(255,255,255,0.1)', border: 'none', width: 56, height: 56, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', transition: '0.3s' }}
+                                    >
+                                        {isMicMuted ? <MicOff size={28} /> : <Mic size={28} />}
+                                    </motion.button>
+                                    
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} 
+                                        onClick={toggleScreenShare}
+                                        style={{ background: isScreenSharing ? '#6d28d9' : 'rgba(255,255,255,0.1)', border: 'none', width: 64, height: 64, borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', transition: '0.3s' }}
+                                    >
+                                        {isScreenSharing ? <Monitor size={28} /> : <ScreenShare size={28} />}
+                                    </motion.button>
+
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1, rotate: 15 }} whileTap={{ scale: 0.9 }} 
+                                        onClick={() => handleCallAction('ENDED')}
+                                        style={{ background: '#ef4444', border: 'none', width: 80, height: 80, borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', boxShadow: '0 20px 40px rgba(239, 68, 68, 0.4)' }}
+                                    >
+                                        <Phone size={36} style={{ transform: 'rotate(135deg)' }} />
+                                    </motion.button>
+
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} 
+                                        onClick={toggleLocalCamera}
+                                        style={{ background: isLocalCameraOff ? '#ef4444' : 'rgba(255,255,255,0.1)', border: 'none', width: 56, height: 56, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', transition: '0.3s' }}
+                                    >
+                                        {isLocalCameraOff ? <VideoOff size={28} /> : <Video size={28} />}
+                                    </motion.button>
+                                    
+                                    <motion.div style={{ color: '#fff', fontWeight: 900, minWidth: '80px', textAlign: 'center', fontSize: '1.1rem', letterSpacing: '1px' }}>
+                                        {callStatus === 'CONNECTED' ? (
+                                            `${Math.floor(callTimer / 60).toString().padStart(2, '0')}:${(callTimer % 60).toString().padStart(2, '0')}`
+                                        ) : (
+                                            '00:00'
+                                        )}
+                                    </motion.div>
+                                </motion.div>
+                            </div>
+
+                            {/* PERMISSION ERROR SHIELD */}
+                            {permissionError && (
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    style={{ position: 'absolute', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}
+                                >
+                                    <div style={{ maxWidth: '400px', textAlign: 'center' }}>
+                                        <div style={{ width: 80, height: 80, borderRadius: '24px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                                            <Camera size={32} color="#ef4444" />
+                                        </div>
+                                        <h3 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 900, marginBottom: '12px' }}>Access Required</h3>
+                                        <p style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, lineHeight: 1.6, marginBottom: '32px' }}>
+                                            {permissionError}
+                                        </p>
+                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                            <button onClick={() => setPermissionError(null)} style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer' }}>DISMISS</button>
+                                            <button onClick={() => { setPermissionError(null); startCamera(); }} style={{ flex: 2, padding: '16px', borderRadius: '16px', background: '#ef4444', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer' }}>RETRY ACCESS</button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* Status Header */}
+                            <div style={{ position: 'absolute', top: '40px', left: '40px', zIndex: 100 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(0,0,0,0.4)', padding: '12px 24px', borderRadius: '20px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'linear-gradient(135deg, #6d28d9, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <BrainCircuit size={20} color="#fff" />
+                                    </div>
+                                    <div>
+                                        <p style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 900 }}>ByteChat Industrial</p>
+                                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                            {(() => {
+                                                const chatObj = chats.find(c => c.id === activeChat);
+                                                if (chatObj?.type === 'DIRECT') {
+                                                    const pId = chatObj.participants?.find((p: any) => {
+                                                        const id = (typeof p === 'object' ? (p._id || p.id) : p)?.toString();
+                                                        return id !== (currentUser.id || currentUser._id)?.toString();
+                                                    });
+                                                    const p = typeof pId === 'object' ? pId : allUsers.find(u => (u._id || u.id)?.toString() === pId?.toString());
+                                                    return `ENCRYPTED: ${p?.fullName || p?.name || 'MEMBER'}`;
+                                                }
+                                                return 'PDA-CORP SIG-9';
+                                            })()}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
@@ -1342,7 +2068,16 @@ export default function ByteChat() {
                     color: #94a3b8; cursor: pointer; padding: 10px; border-radius: 12px; transition: 0.2s;
                 }
                 .input-tool:hover { background: #f5f3ff; color: #6d28d9; }
-                .ai-glow { color: #6d28d9; background: rgba(109, 40, 217, 0.06); }
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.2); opacity: 0.5; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .spin { animation: spin 1s linear infinite; }
                 ::-webkit-scrollbar { width: 5px; }
                 ::-webkit-scrollbar-thumb { background: rgba(109, 40, 217, 0.1); border-radius: 10px; }
             `}</style>

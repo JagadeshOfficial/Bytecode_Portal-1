@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
+const Call = require('../models/Call');
 
 // @desc    Get a single chat detail
 // @route   GET /api/chat/:id
@@ -152,6 +153,21 @@ router.delete('/messages/:id', async (req, res) => {
 
         if (forEveryone) {
             await Message.findByIdAndDelete(req.params.id);
+            
+            // Re-calculate last message for the chat
+            const lastMsg = await Message.findOne({ chat: message.chat }).sort('-createdAt');
+            if (lastMsg) {
+                await Chat.findByIdAndUpdate(message.chat, {
+                    lastMessage: {
+                        text: lastMsg.text,
+                        sender: lastMsg.sender,
+                        timestamp: lastMsg.createdAt,
+                        type: lastMsg.type
+                    }
+                });
+            } else {
+                await Chat.findByIdAndUpdate(message.chat, { lastMessage: null });
+            }
         } else {
             // Soft delete for specific user
             await Message.findByIdAndUpdate(req.params.id, {
@@ -228,6 +244,67 @@ router.delete('/:id/admins/:userId', async (req, res) => {
         res.status(200).json(chat);
     } catch (err) {
         res.status(400).json({ error: err.message });
+    }
+});
+
+// @desc    Initiate a call
+// @route   POST /api/chat/calls
+router.post('/calls', async (req, res) => {
+    try {
+        const { chatId, initiatorId, type, receiverId } = req.body;
+        const call = await Call.create({
+            chat: chatId,
+            initiator: initiatorId,
+            receiver: receiverId,
+            type
+        });
+        res.status(201).json(call);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// @desc    Get active incoming calls for a user
+// @route   GET /api/chat/calls/active/:userId
+router.get('/calls/active/:userId', async (req, res) => {
+    try {
+        const call = await Call.findOne({
+            receiver: req.params.userId,
+            status: 'RINGING'
+        }).populate('initiator', 'fullName profileImage');
+        res.status(200).json(call);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Update call status (Accept/End)
+// @route   PATCH /api/chat/calls/:id
+router.patch('/calls/:id', async (req, res) => {
+    try {
+        const { status } = req.body;
+        const updateData = { status };
+        if (status === 'ACTIVE') updateData.startedAt = new Date();
+        if (status === 'ENDED' || status === 'REJECTED') updateData.endedAt = new Date();
+
+        const call = await Call.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.status(200).json(call);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// @desc    Send Email (Simulation)
+// @route   POST /api/chat/email
+router.post('/email', async (req, res) => {
+    try {
+        const { to, subject, body } = req.body;
+        console.log(`[EMAIL SYSTEM]: Dispatching to ${to} | Subject: ${subject}`);
+        // Simulate a delay for enterprise processing
+        await new Promise(r => setTimeout(r, 1000));
+        res.status(200).json({ success: true, message: 'Organizational Email Distributed' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
