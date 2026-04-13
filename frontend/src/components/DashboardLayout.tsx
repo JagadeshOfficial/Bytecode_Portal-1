@@ -33,7 +33,7 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'User Management', label: 'Users List', href: '/super-admin/users', icon: <Users size={18} /> },
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
-        { section: 'Pinpoint Tracking', label: 'Students & Trainer Attendance', href: '/super-admin/attendance', icon: <ClipboardCheck size={18} /> },
+        { section: 'Pinpoint Tracking', label: 'Pinpoint Intelligence Nexus', href: '/super-admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'Tutor Full Tracking', href: '/super-admin/tutor-tracking', icon: <Activity size={18} /> },
         { label: 'Admin Full Tracking', href: '/super-admin/admin-tracking', icon: <Fingerprint size={18} /> },
         { label: 'Students Pinpoint Tracking', href: '/super-admin/academic?tab=TRACKING', icon: <Microscope size={18} /> },
