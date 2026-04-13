@@ -19,6 +19,17 @@ const UserSchema = new mongoose.Schema({
     leavesRejected: { type: Number, default: 0 },
     leaveHistory: [String],
     requirementRequests: [String],
+    deviceFingerprints: [String],
+    lastLoginIp: String,
+    lastLocation: {
+        city: String,
+        state: String
+    },
+    geoFence: {
+        center: [Number], // [lat, lng]
+        radius: Number // meters
+    },
+    isRestricted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
 

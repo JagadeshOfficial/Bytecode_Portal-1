@@ -27,9 +27,25 @@ const AttendanceSchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            enum: ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'],
+            enum: ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SUSPICIOUS'],
             default: 'PRESENT'
         },
+        loginTime: Date,
+        logoutTime: Date,
+        deviceInfo: {
+            name: String,
+            os: String,
+            browser: String,
+            fingerprint: String
+        },
+        ipAddress: String,
+        location: {
+            city: String,
+            state: String,
+            coordinates: [Number] // [lat, lng]
+        },
+        isVpnDetected: { type: Boolean, default: false },
+        isMultipleDevice: { type: Boolean, default: false },
         remark: String
     }],
     sessionType: {
@@ -37,7 +53,9 @@ const AttendanceSchema = new mongoose.Schema({
         enum: ['LECTURE', 'PRACTICAL', 'EXAM', 'WORKSHOP'],
         default: 'LECTURE'
     },
-    sessionTopic: String
+    sessionTopic: String,
+    geoFenceEnabled: { type: Boolean, default: false },
+    qrActive: { type: Boolean, default: false }
 }, {
     timestamps: true
 });
