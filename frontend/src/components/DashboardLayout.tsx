@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { 
     Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar, 
     Video, FileText, CheckCircle, Target, Search, Phone, DollarSign, 
     BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap, 
     HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool, Edit2, XCircle,
-    MessageSquare, ClipboardCheck, Microscope, UserPlus, Fingerprint, Terminal
+    MessageSquare, ClipboardCheck, Microscope, UserPlus, Fingerprint, Terminal,
+    ChevronRight
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
@@ -19,6 +21,7 @@ interface MenuItem {
     href: string;
     icon: React.ReactNode;
     section?: string;
+    subItems?: { label: string; href: string; icon?: React.ReactNode; roles?: string[] }[];
 }
 
 interface DashboardLayoutProps {
@@ -26,6 +29,27 @@ interface DashboardLayoutProps {
     role: Role;
     noPadding?: boolean;
 }
+
+const GAMES_SUB_ITEMS = [
+    { label: 'Platform Dashboard', href: '/games?tab=DASHBOARD', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Game Management 🕹️', href: '/games?tab=GAME_MGMT', roles: ['ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Tournament Control 🏆', href: '/games?tab=TOURNAMENT', roles: ['ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Leaderboard Control 📊', href: '/games?tab=LEADERBOARD_MGMT', roles: ['ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Rewards & Monetization 🎁', href: '/games?tab=REWARDS_ECONOMY', roles: ['SUPER_ADMIN'] },
+    { label: 'Analytics & Reports 📈', href: '/games?tab=ANALYTICS', roles: ['ADMIN', 'SUPER_ADMIN'] },
+    { label: 'User Management 👥', href: '/games?tab=USER_MGMT', roles: ['SUPER_ADMIN'] },
+    { label: 'System Settings ⚙️', href: '/games?tab=SETTINGS_CORE', roles: ['SUPER_ADMIN'] },
+    { label: 'Play Zone 🎮', href: '/games?tab=PLAYZONE', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Coding Arena 💻', href: '/games?tab=CODING', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Math & Aptitude 🧮', href: '/games?tab=MATH', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Brain & IQ 🧠', href: '/games?tab=BRAIN', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Multiplayer Battles ⚔️', href: '/games?tab=BATTLES', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Creative Challenges 🎨', href: '/games?tab=CREATIVE', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'Daily Challenges 🔥', href: '/games?tab=DAILY', roles: ['STUDENT'] },
+    { label: 'Game Store 🛒', href: '/games?tab=STORE', roles: ['STUDENT', 'SUPER_ADMIN'] },
+    { label: 'Community Hub 🌐', href: '/games?tab=COMMUNITY', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { label: 'My Progress 📈', href: '/games?tab=PROGRESS', roles: ['STUDENT'] },
+];
 
 const MENUS: Record<string, MenuItem[]> = {
     super_admin: [
@@ -35,44 +59,53 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
         { section: 'Pinpoint Tracking', label: 'Intelligence Nexus', href: '/super-admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'Universal System Audit', href: '/super-admin/global-tracking', icon: <Terminal size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     admin: [
         { section: 'Main', label: 'Admin Home', href: '/admin', icon: <LayoutDashboard size={18} /> },
         { label: 'Students List', href: '/admin/students', icon: <Users size={18} /> },
         { label: 'Batches', href: '/admin/batches', icon: <Layers size={18} /> },
         { label: 'Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     counsellor: [
         { section: 'Performance', label: 'My Targets', href: '/counsellor', icon: <LayoutDashboard size={18} /> },
         { label: 'New Leads', href: '/counsellor/leads', icon: <Target size={18} /> },
         { section: 'Action', label: 'Follow-ups', href: '/counsellor/followup', icon: <Phone size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     tutor: [
         { section: 'Academy', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
         { label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
         { label: 'Students List', href: '/tutor/students', icon: <Users size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     placement: [
         { section: 'Career', label: 'Student Readiness', href: '/placement', icon: <UserCheck size={18} /> },
         { label: 'Interviews', href: '/placement/interviews', icon: <Calendar size={18} /> },
         { label: 'Jobs List', href: '/placement/jobs', icon: <Briefcase size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     social_media: [
         { section: 'Creator', label: 'Content Planner', href: '/social-media', icon: <PenTool size={18} /> },
         { label: 'Campaigns', href: '/social-media/campaigns', icon: <BarChart3 size={18} /> },
         { label: 'Leads Tracking', href: '/social-media/leads', icon: <Target size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     student: [
         { section: 'Learning', label: 'My Learning Hub', href: '/student', icon: <BookOpen size={18} /> },
         { label: 'Exams', href: '/student/tests', icon: <CheckCircle size={18} /> },
         { section: 'Career', label: 'Placements', href: '/student/placements', icon: <Briefcase size={18} /> },
         { label: 'My Progress', href: '/student/progress', icon: <TrendingUp size={18} /> },
+        { label: 'Games Zone 🎮', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ]
 };
 
 export default function DashboardLayout({ children, role, noPadding }: DashboardLayoutProps) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
     const [userName, setUserName] = useState('User');
     const [loggedUser, setLoggedUser] = useState<any>(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -98,12 +131,30 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
         }
     }, [pathname]); // Re-run on pathname change to ensure it's still there
 
-    const menuItems = MENUS[role] || [];
-    const roleDisplay = role.replace(/_/g, ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+    const safeRole = (role || 'student').toLowerCase().replace(/-/g, '_').replace(/\s+/g, '_');
+    const menuItems = MENUS[safeRole] || MENUS.student || [];
+    const roleDisplay = (role || 'student').replace(/_/g, ' ').replace(/-/g, ' ').split(' ').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
     const handleLogout = () => {
         localStorage.removeItem('user');
         window.location.href = '/login';
+    };
+
+    // Auto-expand Games Zone if active
+    useEffect(() => {
+        if (pathname.startsWith('/games')) {
+            setOpenSubmenus(prev => ({ ...prev, 'Games Zone 🎮': true }));
+        }
+    }, [pathname]);
+
+    const toggleSubmenu = (label: string) => {
+        setOpenSubmenus(prev => ({ ...prev, [label]: !prev[label] }));
+    };
+
+    const isLinkActive = (href: string) => {
+        if (!href) return false;
+        const currentFull = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+        return currentFull === href || pathname === href;
     };
 
     const fetchUserProfile = async () => {
@@ -210,20 +261,82 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                 
                 <div id="sidebar-scroll-container" className={styles.sidebarContent}>
                     <ul className={styles.menu}>
-                        {menuItems.map((item, index) => (
-                            <li key={item.href} className={styles.menuItem}>
-                                {item.section && <div className={styles.menuSection}>{item.section}</div>}
-                                <Link
-                                    href={item.href}
-                                    scroll={false}
-                                    className={`${styles.menuLink} ${pathname === item.href ? styles.activeLink : ''}`}
-                                    onClick={() => setIsSidebarOpen(false)}
-                                >
-                                    <span style={{ opacity: 0.8 }}>{item.icon}</span>
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
+                        {menuItems.map((item, index) => {
+                            const hasSubItems = item.subItems && item.subItems.length > 0;
+                            const isSubmenuOpen = openSubmenus[item.label] || (item.label === 'Games Zone 🎮' && pathname === '/games');
+                            const uniqueKey = `${item.label}-${index}`;
+
+                            return (
+                                <li key={uniqueKey} className={styles.menuItem}>
+                                    {item.section && <div className={styles.menuSection}>{item.section}</div>}
+                                    
+                                    {hasSubItems ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    toggleSubmenu(item.label);
+                                                }}
+                                                className={`${styles.menuLink} ${pathname.startsWith(item.href) ? styles.activeLink : ''}`}
+                                                style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <span style={{ opacity: 0.8 }}>{item.icon}</span>
+                                                    {item.label}
+                                                </div>
+                                                <ChevronRight 
+                                                    size={14} 
+                                                    style={{ 
+                                                        transition: '0.3s', 
+                                                        transform: isSubmenuOpen ? 'rotate(90deg)' : 'rotate(0deg)' 
+                                                    }} 
+                                                />
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {isSubmenuOpen && (
+                                                    <motion.ul 
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        style={{ listStyle: 'none', paddingLeft: '45px', overflow: 'hidden' }}
+                                                    >
+                                                        {item.subItems?.filter(sub => {
+                                                            if (!sub.roles) return true;
+                                                            const roleToMatch = (role || 'student').toUpperCase().replace(/[-\s]/g, '_');
+                                                            return sub.roles.includes(roleToMatch as any);
+                                                        }).map((sub, i) => (
+                                                            <li key={i} style={{ marginBottom: '5px' }}>
+                                                                <Link 
+                                                                    href={sub.href} 
+                                                                    className={`${styles.menuLink} ${isLinkActive(sub.href) ? styles.activeLink : ''}`} 
+                                                                    style={{ fontSize: '0.8rem', opacity: isLinkActive(sub.href) ? 1 : 0.7, padding: '8px 0', color: isLinkActive(sub.href) ? 'var(--primary)' : 'inherit' }}
+                                                                    onClick={() => setIsSidebarOpen(false)}
+                                                                >
+                                                                    {sub.label}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </motion.ul>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            href={item.href}
+                                            scroll={false}
+                                            className={`${styles.menuLink} ${pathname === item.href ? styles.activeLink : ''}`}
+                                            onClick={() => setIsSidebarOpen(false)}
+                                        >
+                                            <span style={{ opacity: 0.8 }}>{item.icon}</span>
+                                            {item.label}
+                                        </Link>
+                                    )}
+                                </li>
+                            );
+                        })}
                         
                         <li className={styles.menuItem} style={{ marginTop: '2rem' }}>
                             <div className={styles.menuSection}>Account</div>
@@ -261,7 +374,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                     </div>
                 </header>
                 
-                <div className={styles.content} style={noPadding ? { padding: 0, height: 'calc(100vh - 80px)', overflow: 'hidden' } : {}}>
+                <div className={styles.content} style={noPadding ? { padding: 0, height: 'calc(100vh - 80px)', overflow: 'auto' } : {}}>
                     {children}
                 </div>
             </main>
