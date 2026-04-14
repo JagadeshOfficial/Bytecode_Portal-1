@@ -72,61 +72,58 @@ export default function PinpointDashboard() {
     );
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #f0f4f8 0%, #ffffff 100%)', padding: '40px', color: '#1e1b4b', overflowX: 'hidden' }}>
+        <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #f8fafc 0%, #ffffff 100%)', padding: '1.5rem', color: '#1e1b4b', overflowX: 'hidden' }}>
             
-            {/* HIGH-CONTRAST ROLE NEXUS */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px', flexWrap: 'wrap', gap: '30px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ width: 64, height: 64, borderRadius: '22px', background: 'linear-gradient(135deg, #6d28d9, #10b981)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 15px 30px rgba(109,40,217,0.3)' }}>
-                        <Activity color="#fff" size={32} />
+            {/* STREAMLINED SYSTEM CONTROL & PERSONA SWITCHER */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', background: '#fff', padding: '15px 30px', borderRadius: '24px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '12px', background: 'linear-gradient(135deg, #6d28d9, #10b981)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Activity color="#fff" size={18} />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.8rem', ...gradientText('#1e1b4b', '#6d28d9'), letterSpacing: '-2.5px' }}>Pinpoint<span style={{ color: '#6d28d9' }}>Hub</span></h1>
-                        <p style={{ fontSize: '0.9rem', fontWeight: 900, color: '#94a3b8', letterSpacing: '2px' }}>V4.2 • INTELLIGENCE OPERATING SYSTEM</p>
+                        <h2 style={{ fontSize: '1rem', fontWeight: 1000, letterSpacing: '-0.3px' }}>Intelligence <span style={{ color: '#6d28d9' }}>Hub</span></h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.6rem', fontWeight: 900, color: '#94a3b8' }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} /> SYSTEM LIVE • REAL-TIME AUDIT
+                        </div>
                     </div>
                 </div>
 
-                {/* ADAPTIVE PERSONA SWITCHER - VISIBILITY SECURED */}
-                <div style={{ display: 'flex', gap: '12px', background: '#f8fafc', padding: '12px', borderRadius: '32px', border: '2px solid #cbd5e1', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: '8px', background: '#f8fafc', padding: '8px', borderRadius: '18px', border: '1px solid #e2e8f0' }}>
                     {['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'STUDENT'].map((r) => {
                         const isActive = role === r;
-                        const isStudentRole = r === 'STUDENT';
-                        const themeColor = isStudentRole ? '#10b981' : '#4f46e5'; 
-                        
+                        const themeColor = r === 'STUDENT' ? '#10b981' : '#4f46e5'; 
                         return (
                             <motion.button 
                                 key={r}
                                 onClick={() => setRole(r as any)}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 style={{ 
-                                    padding: '14px 24px', 
-                                    borderRadius: '20px', 
-                                    border: isActive ? `3px solid ${themeColor}` : '2px solid #cbd5e1', 
-                                    background: isActive ? themeColor : '#ffffff', 
-                                    color: '#000000', // ENFORCED ABSOLUTE BLACK AS REQUESTED
+                                    padding: '8px 16px', 
+                                    borderRadius: '12px', 
+                                    border: 'none',
+                                    background: isActive ? themeColor : 'transparent', 
+                                    color: isActive ? '#000000' : '#475569', 
                                     fontWeight: 1000, 
-                                    fontSize: '0.85rem', 
-                                    cursor: 'pointer', 
-                                    boxShadow: isActive ? `0 15px 35px ${themeColor}33` : '0 4px 10px rgba(0,0,0,0.05)', 
-                                    transition: '0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    fontSize: '0.75rem', 
+                                    cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
+                                    gap: '6px',
                                     textTransform: 'uppercase',
-                                    flexShrink: 0
+                                    transition: '0.2s'
                                 }}
                             >
-                                {isActive && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#000' }} />}
-                                {r.replace('_', ' ')}
+                                {isActive && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#000' }} />}
+                                {r.split('_')[0]}
                             </motion.button>
                         );
                     })}
                 </div>
             </div>
 
-            {/* ADAPTIVE MAIN GRID */}
-            <div style={{ display: 'grid', gridTemplateColumns: role === 'STUDENT' ? '280px 1fr' : '280px 1fr 380px', gap: '30px', transition: '0.5s' }}>
+            {/* ADAPTIVE MAIN GRID - REFINED RATIOS */}
+            <div style={{ display: 'grid', gridTemplateColumns: role === 'STUDENT' ? '240px 1fr' : '240px 1fr 340px', gap: '2rem', transition: '0.5s all ease-in-out' }}>
                 
                 {/* SIDEBAR NAVIGATION */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -143,7 +140,7 @@ export default function PinpointDashboard() {
                             key={item.id}
                             whileHover={{ x: 10, background: 'rgba(79, 70, 229, 0.05)' }}
                             onClick={() => setActiveTab(item.id)}
-                            style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '18px 24px', borderRadius: '24px', border: 'none', background: activeTab === item.id ? '#4f46e5' : 'transparent', color: activeTab === item.id ? '#fff' : '#64748b', fontWeight: 900, fontSize: '0.95rem', cursor: 'pointer', transition: '0.3s' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '15px', border: 'none', background: activeTab === item.id ? '#4f46e5' : 'transparent', color: activeTab === item.id ? '#fff' : '#64748b', fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer', transition: '0.3s' }}
                         >
                             <item.icon size={20} />
                             {item.label}
@@ -156,8 +153,8 @@ export default function PinpointDashboard() {
                     ))}
 
                     <div style={{ marginTop: 'auto', padding: '30px', ...glassStyle, background: 'linear-gradient(135deg, #1e1b4b, #4f46e5)', border: 'none', color: '#fff' }}>
-                        <p style={{ fontSize: '0.7rem', fontWeight: 1000, letterSpacing: '2px', opacity: 0.6, marginBottom: '15px' }}>HUB LOAD SYNC</p>
-                        <p style={{ fontSize: '2.4rem', fontWeight: 1000, marginBottom: '20px' }}>{latency}<span style={{ fontSize: '1rem', opacity: 0.5 }}>ms</span></p>
+                        <p style={{ fontSize: '0.6rem', fontWeight: 1000, letterSpacing: '2px', opacity: 0.6, marginBottom: '10px' }}>HUB LOAD SYNC</p>
+                        <p style={{ fontSize: '1.8rem', fontWeight: 1000, marginBottom: '15px' }}>{latency}<span style={{ fontSize: '0.8rem', opacity: 0.5 }}>ms</span></p>
                         <div style={{ display: 'flex', gap: '4px', height: '40px', alignItems: 'flex-end' }}>
                             {hubLoad.map((h, i) => (
                                 <motion.div key={i} animate={{ height: `${h}%` }} style={{ flex: 1, background: '#10b981', borderRadius: '2px' }} />
@@ -174,24 +171,24 @@ export default function PinpointDashboard() {
                             { label: role === 'STUDENT' ? 'Hub Status' : 'Fraud Alerts', value: role === 'STUDENT' ? 'Connected' : '04', icon: role === 'STUDENT' ? Signal : ShieldAlert, color: role === 'STUDENT' ? '#10b981' : '#ef4444' },
                             { label: 'Security Level', value: 'Tier 4', icon: Lock, color: '#6366f1' }
                         ].map((s, i) => (
-                            <div key={i} style={{ ...glassStyle, padding: '28px', display: 'flex', alignItems: 'center', gap: '24px' }}>
-                                <div style={{ width: 54, height: 54, borderRadius: '18px', background: `${s.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <s.icon size={24} color={s.color} />
+                            <div key={i} style={{ ...glassStyle, padding: '15px', display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '24px' }}>
+                                <div style={{ width: 44, height: 44, borderRadius: '14px', background: `${s.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <s.icon size={20} color={s.color} />
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '0.8rem', fontWeight: 1000, color: '#94a3b8', textTransform: 'uppercase' }}>{s.label}</p>
-                                    <p style={{ fontSize: '1.6rem', fontWeight: 1000 }}>{s.value}</p>
+                                    <p style={{ fontSize: '0.7rem', fontWeight: 1000, color: '#94a3b8', textTransform: 'uppercase' }}>{s.label}</p>
+                                    <p style={{ fontSize: '1.3rem', fontWeight: 1000 }}>{s.value}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div style={{ ...glassStyle, padding: '45px', flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-                            <h2 style={{ fontSize: '1.8rem', fontWeight: 1000 }}>{role === 'STUDENT' ? 'Personal Logs' : 'Security Ledger'}</h2>
+                    <div style={{ ...glassStyle, padding: '1.5rem', flex: 1, borderRadius: '24px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h2 style={{ fontSize: '1.4rem', fontWeight: 1000 }}>{role === 'STUDENT' ? 'Personal Logs' : 'Security Ledger'}</h2>
                             {role !== 'STUDENT' && (
-                                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setIsQrModalOpen(true)} style={{ background: '#4f46e5', color: '#fff', border: 'none', padding: '14px 32px', borderRadius: '20px', fontWeight: 1000, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <QrCode size={22} /> SYNC HUB
+                                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setIsQrModalOpen(true)} style={{ background: '#4f46e5', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '15px', fontWeight: 1000, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
+                                    <QrCode size={18} /> SYNC HUB
                                 </motion.button>
                             )}
                         </div>
@@ -202,18 +199,18 @@ export default function PinpointDashboard() {
                                     key={row.id} 
                                     whileHover={{ y: -5, scale: 1.01 }}
                                     onClick={() => setSelectedUser(row)}
-                                    style={{ padding: '28px', background: '#fff', borderRadius: '32px', border: '1px solid rgba(0,0,0,0.04)', display: 'grid', gridTemplateColumns: '1.8fr 1fr 1.5fr 1fr 60px', alignItems: 'center', cursor: 'pointer' }}
+                                    style={{ padding: '15px', background: '#fff', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', display: 'grid', gridTemplateColumns: '1.8fr 1fr 1.5fr 1fr 40px', alignItems: 'center', cursor: 'pointer' }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
-                                        <div style={{ width: 54, height: 54, borderRadius: '20px', background: row.status === 'SUSPICIOUS' ? '#fee2e2' : '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <UserCircle size={28} color={row.status === 'SUSPICIOUS' ? '#ef4444' : '#4f46e5'} />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{ width: 38, height: 38, borderRadius: '12px', background: row.status === 'SUSPICIOUS' ? '#fee2e2' : '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <UserCircle size={24} color={row.status === 'SUSPICIOUS' ? '#ef4444' : '#4f46e5'} />
                                         </div>
-                                        <p style={{ fontWeight: 1000, fontSize: '1.1rem' }}>{row.name}</p>
+                                        <p style={{ fontWeight: 1000, fontSize: '0.95rem' }}>{row.name}</p>
                                     </div>
-                                    <p style={{ fontWeight: 1000, color: '#64748b' }}>{row.batch}</p>
+                                    <p style={{ fontWeight: 1000, color: '#64748b', fontSize: '0.85rem' }}>{row.batch}</p>
                                     <div>
-                                        <p style={{ fontSize: '0.9rem', fontWeight: 1000 }}>{row.device}</p>
-                                        <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{row.ip}</p>
+                                        <p style={{ fontSize: '0.85rem', fontWeight: 1000 }}>{row.device}</p>
+                                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{row.ip}</p>
                                     </div>
                                     <div style={{ background: row.status === 'SUSPICIOUS' ? '#ef4444' : '#10b981', color: '#fff', padding: '8px 15px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 1000, textAlign: 'center' }}>
                                         {row.status}
@@ -230,24 +227,24 @@ export default function PinpointDashboard() {
                 {/* RIGHT SIDEBAR (Admin only) */}
                 {['SUPER_ADMIN', 'ADMIN'].includes(role) && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                        <div style={{ ...glassStyle, padding: '35px', background: '#1e1b4b', color: '#fff', border: 'none' }}>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 1000, display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', color: '#ef4444' }}>
-                                <ShieldAlert size={22} /> FRAUD DISCOVERY
+                        <div style={{ ...glassStyle, padding: '25px', background: '#1e1b4b', color: '#fff', border: 'none' }}>
+                            <h3 style={{ fontSize: '0.95rem', fontWeight: 1000, display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', color: '#ef4444' }}>
+                                <ShieldAlert size={20} /> FRAUD DISCOVERY
                             </h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div style={{ padding: '20px', borderRadius: '24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <p style={{ fontWeight: 1000, marginBottom: '5px' }}>Sneha Rao</p>
-                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Geo-fence violation: Bangalore Hub Node</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ padding: '15px', borderRadius: '18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <p style={{ fontWeight: 1000, marginBottom: '4px', fontSize: '0.9rem' }}>Sneha Rao</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>Geo-fence violation: Bangalore Hub Node</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ ...glassStyle, padding: '35px' }}>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 1000, marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <MapPin size={22} color="#4f46e5" /> Policy Enforcement
+                        <div style={{ ...glassStyle, padding: '25px' }}>
+                            <h3 style={{ fontSize: '0.95rem', fontWeight: 1000, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <MapPin size={20} color="#4f46e5" /> Policy Status
                             </h3>
-                            <div onClick={() => setIsGeoFenceOn(!isGeoFenceOn)} style={{ width: '100%', height: '54px', borderRadius: '18px', background: isGeoFenceOn ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', padding: '0 20px', cursor: 'pointer' }}>
-                                <p style={{ flex: 1, fontWeight: 1000, color: isGeoFenceOn ? '#166534' : '#64748b' }}>Geo-Fence: {isGeoFenceOn ? 'Active' : 'Locked'}</p>
+                            <div onClick={() => setIsGeoFenceOn(!isGeoFenceOn)} style={{ width: '100%', height: '48px', borderRadius: '15px', background: isGeoFenceOn ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', padding: '0 15px', cursor: 'pointer' }}>
+                                <p style={{ flex: 1, fontWeight: 1000, color: isGeoFenceOn ? '#166534' : '#64748b', fontSize: '0.85rem' }}>Geo-Fence: {isGeoFenceOn ? 'On' : 'Off'}</p>
                                 {isGeoFenceOn ? <CheckCircle size={18} color="#166534" /> : <ShieldAlert size={18} color="#64748b" />}
                             </div>
                         </div>

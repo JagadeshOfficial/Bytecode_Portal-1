@@ -1,12 +1,12 @@
 "use client";
 
 import DashboardLayout from '@/components/DashboardLayout';
-import AttendanceTracker from '@/components/Enterprise/Tracking/AttendanceTracker';
+import PinpointDashboard from '@/components/Academic/PinpointDashboard';
 
 export default function AttendancePage() {
     return (
-        <DashboardLayout role="super_admin">
-            <AttendanceTracker />
+        <DashboardLayout role="super_admin" noPadding>
+            <PinpointDashboard />
         </DashboardLayout>
     );
 }
