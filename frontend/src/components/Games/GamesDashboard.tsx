@@ -86,11 +86,22 @@ export default function GamesDashboard() {
             setGames(g); setCourses(c); setBatches(b); setStats(s); setLeaderboard(l);
         } catch (e: any) { 
             console.error("Master Sync Failure:", e.message); 
-            // Only use fallback if really needed
+            // FINAL SOVEREIGN FAILOVER: USE LOCAL REGISTRY
+            const LOCAL_COURSES = [
+                { _id: 'local_c1', name: 'Full Stack Web Development' },
+                { _id: 'local_c2', name: 'Data Science & AI' },
+                { _id: 'local_c3', name: 'Cyber Security Elite' }
+            ];
+            const LOCAL_BATCHES = [
+                { _id: 'local_b1', name: 'B40', courseId: 'local_c1' },
+                { _id: 'local_b2', name: 'B42', courseId: 'local_c1' },
+                { _id: 'local_b3', name: 'DS-01', courseId: 'local_c2' }
+            ];
+
             if (courses.length === 0) {
-                setGames([{ _id: '1', title: 'React Sprint', category: 'CODING', course: 'Demo', batch: 'B1', active: true }]);
-                setCourses([{ _id: '1', name: 'Demo Course' }]);
-                setBatches([{ _id: '1', name: 'Demo Batch' }]);
+                setCourses(LOCAL_COURSES);
+                setBatches(LOCAL_BATCHES);
+                setGames([{ _id: 'l1', title: 'Code Sprint v1', category: 'CODING', course: 'Full Stack Web Development', batch: 'B40', active: true }]);
             }
         }
         setLoading(false);

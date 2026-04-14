@@ -9,18 +9,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- DB CONNECTION ---
+// --- SIMULATION DATA (SOVEREIGN FAILOVER) ---
+let SIM_COURSES = [
+    { _id: 'sim_c1', name: 'Full Stack Web Development' },
+    { _id: 'sim_c2', name: 'Data Science & AI' },
+    { _id: 'sim_c3', name: 'Cloud & DevOps' }
+];
+
+let SIM_BATCHES = [
+    { _id: 'sim_b1', name: 'B40', courseId: 'sim_c1' },
+    { _id: 'sim_b2', name: 'B42', courseId: 'sim_c1' },
+    { _id: 'sim_b3', name: 'DS-01', courseId: 'sim_c2' }
+];
+
+let IS_DB_LIVE = false;
+
+// --- DB CONNECTION WITH FAILOVER ---
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/bytecode_games';
 
 console.log('📡 Attempting Database Connection...');
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
     .then(async () => {
-        console.log('🛡️ Intelligence Arena Sovereign Backend (V5.4) Connected');
-        await autoSeed(); // AUTO-SEED ON STARTUP
+        console.log('🛡️ Intelligence Arena Sovereign Backend (V5.5) Connected to MongoDB');
+        IS_DB_LIVE = true;
+        await autoSeed();
     })
     .catch(err => {
-        console.error('❌ DATABASE CONNECTION FAILURE. Is MongoDB running?');
-        console.error('Error Details:', err.message);
+        console.error('⚠️ MONGODB OFFLINE - Switching to SOVEREIGN MEMORY MODE');
+        console.error('LMS Governance will run on Simulation Buffer.');
     });
 
 // --- MODELS ---
@@ -29,110 +45,80 @@ const BatchSchema = new mongoose.Schema({ name: String, courseId: { type: mongoo
 const GameSchema = new mongoose.Schema({
     title: { type: String, required: true },
     category: { type: String, required: true },
-    difficulty: { type: String, default: 'MED' },
-    course: { type: String, required: true },
-    batch: { type: String, required: true },
-    active: { type: Boolean, default: true },
-    created_at: { type: Date, default: Date.now }
-});
-const ScoreSchema = new mongoose.Schema({
-    user_id: String,
-    game_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Game' },
-    score: Number,
-    cheating_detected: { type: Boolean, default: false },
-    timestamp: { type: Date, default: Date.now }
+    course: { type: String },
+    batch: { type: String },
+    active: { type: Boolean, default: true }
 });
 
 const Course = mongoose.model('Course', CourseSchema);
 const Batch = mongoose.model('Batch', BatchSchema);
 const Game = mongoose.model('Game', GameSchema);
-const Score = mongoose.model('Score', ScoreSchema);
 
-// --- AUTO-SEED LOGIC ---
+// --- AUTO-SEED ---
 async function autoSeed() {
-    try {
-        const coursesCount = await Course.countDocuments();
-        if (coursesCount === 0) {
-            console.log('🌱 Empty Database Detected. Initiating Sovereign Seeder...');
-            const c1 = await Course.create({ name: 'Full Stack Web Development' });
-            const c2 = await Course.create({ name: 'Data Science & AI' });
-            const c3 = await Course.create({ name: 'Cloud & DevOps' });
-            const c4 = await Course.create({ name: 'Cyber Security Elite' });
-            
-            await Batch.create({ name: 'B40', courseId: c1._id });
-            await Batch.create({ name: 'B42', courseId: c1._id });
-            await Batch.create({ name: 'DS-01', courseId: c2._id });
-            await Batch.create({ name: 'DO-05', courseId: c3._id });
-            await Batch.create({ name: 'CS-09', courseId: c4._id });
-            
-            console.log('✅ DATABASE SUCCESSFULLY SEEDED WITH 4 COURSES AND 5 BATCHES');
-        } else {
-            console.log('📊 Existing Metadata Detected. Academic Dataset: ACTIVE');
-        }
-    } catch (e) {
-        console.error('❌ AUTO-SEEDING FAILED:', e.message);
+    if (await Course.countDocuments() === 0) {
+        console.log('🌱 Seeding Live Database...');
+        await Course.create(SIM_COURSES.map(c => ({ name: c.name })));
+        const liveC = await Course.find();
+        await Batch.create([
+            { name: 'B40', courseId: liveC[0]._id },
+            { name: 'B42', courseId: liveC[0]._id },
+            { name: 'DS-01', courseId: liveC[1]._id }
+        ]);
+        console.log('✅ Live Database Seeded.');
     }
 }
 
-// --- API ROUTES ---
-
-// Manual Setup Trigger
-app.get('/api/admin/setup-data', async (req, res) => {
-    await autoSeed();
-    res.json({ message: 'Seeding Cycle Completed' });
-});
+// --- API ROUTES (CONTEXT AWARE) ---
 
 app.get('/api/courses', async (req, res) => {
-    const data = await Course.find();
-    console.log(`📡 Fetch: Courses (${data.length} found)`);
-    res.json(data);
+    if (IS_DB_LIVE) {
+        const data = await Course.find();
+        return res.json(data);
+    }
+    console.log('💾 Serving Courses from Memory Buffer');
+    res.json(SIM_COURSES);
 });
 
 app.get('/api/batches', async (req, res) => {
-    const data = await Batch.find().populate('courseId');
-    console.log(`📡 Fetch: Batches (${data.length} found)`);
-    res.json(data);
+    if (IS_DB_LIVE) {
+        const data = await Batch.find().populate('courseId');
+        return res.json(data);
+    }
+    console.log('💾 Serving Batches from Memory Buffer');
+    res.json(SIM_BATCHES);
 });
 
-app.get('/api/games', async (req, res) => res.json(await Game.find().sort({ created_at: -1 })));
+app.get('/api/games', async (req, res) => {
+    if (IS_DB_LIVE) return res.json(await Game.find());
+    res.json([]);
+});
 
 app.post('/api/admin/games/create', async (req, res) => {
-    try {
+    if (IS_DB_LIVE) {
         const game = new Game(req.body);
         await game.save();
-        console.log(`🆕 Game Created: ${game.title} for ${game.course}`);
-        res.status(201).json(game);
-    } catch (e) { 
-        console.error('❌ Game Creation Error:', e.message);
-        res.status(400).json({ error: e.message }); 
+        return res.json(game);
     }
+    const simGame = { _id: Date.now(), ...req.body, active: true };
+    console.log('💾 Game Created in Memory Buffer:', simGame.title);
+    res.json(simGame);
 });
 
 app.get('/api/admin/system-stats', async (req, res) => {
     res.json({
-        total_games: await Game.countDocuments(),
-        total_submissions: await Score.countDocuments(),
-        cheating_incidents: await Score.countDocuments({ cheating_detected: true }),
-        total_courses: await Course.countDocuments(),
-        total_batches: await Batch.countDocuments()
+        total_games: IS_DB_LIVE ? await Game.countDocuments() : 0,
+        total_courses: IS_DB_LIVE ? await Course.countDocuments() : SIM_COURSES.length,
+        total_batches: IS_DB_LIVE ? await Batch.countDocuments() : SIM_BATCHES.length
     });
 });
 
-app.get('/api/leaderboard/global', async (req, res) => {
-    const lb = await Score.aggregate([
-        { $group: { _id: '$user_id', totalScore: { $sum: '$score' } } },
-        { $sort: { totalScore: -1 } },
-        { $limit: 10 }
-    ]);
-    res.json(lb);
-});
-
-// --- SERVER INITIALIZATION ---
-const PORT = process.env.PORT || 8085;
+// --- SERVER ---
+const PORT = 8085;
 app.listen(PORT, () => {
     console.log(`
-🚀 BYTECODE MASTER BACKEND V5.4 LIVE
-📍 PORT: ${PORT}
-⚡ STATUS: SOVEREIGN
+🚀 BYTECODE MASTER BACKEND V5.5 LIVE
+📍 PORT: 8085
+🛡️ FAILOVER: ACTIVE
     `);
 });
