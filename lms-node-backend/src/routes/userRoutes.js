@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 // @desc    Get all users
@@ -25,6 +26,156 @@ router.get('/:id', async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Update single user
+// @route   PUT /api/users/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('+password');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const allowedFields = [
+            'fullName',
+            'email',
+            'password',
+            'phoneNumber',
+            'branch',
+            'department',
+            'userStatus',
+            'profileImage',
+            'active',
+            'attendanceRate',
+            'isRestricted',
+            'batchId',
+            'batchCode',
+            'batchName',
+            'courseId',
+            'courseName',
+            'lastLoginIp',
+            'lastLocation',
+        ];
+
+        allowedFields.forEach((field) => {
+            if (req.body[field] !== undefined) {
+                user[field] = req.body[field];
+            }
+        });
+
+        const updatedUser = await user.save();
+        res.json({
+            ...updatedUser.toObject(),
+            id: updatedUser._id.toString()
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Assign a user to an academic batch and sync course details
+// @route   PUT /api/users/:id/academic-assignment
+router.put('/:id/academic-assignment', async (req, res) => {
+    try {
+        const { batchId } = req.body;
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const academicDb = mongoose.connection.useDb('academic-db');
+        const userId = user._id.toString();
+
+        await academicDb.collection('batches').updateMany(
+            {},
+            { $pull: { studentIds: userId, trainerIds: userId } }
+        );
+
+        await academicDb.collection('batches').updateMany(
+            { trainerId: userId },
+            { $unset: { trainerId: '', trainerName: '' } }
+        );
+
+        if (!batchId) {
+            user.batchId = '';
+            user.batchCode = '';
+            user.batchName = '';
+            user.courseId = '';
+            user.courseName = '';
+
+            const clearedUser = await user.save();
+            return res.json({
+                message: 'Academic assignment cleared',
+                user: {
+                    ...clearedUser.toObject(),
+                    id: clearedUser._id.toString()
+                }
+            });
+        }
+
+        const batchQueryId = mongoose.Types.ObjectId.isValid(batchId)
+            ? new mongoose.Types.ObjectId(batchId)
+            : batchId;
+
+        const batch = await academicDb.collection('batches').findOne({ _id: batchQueryId });
+        if (!batch) {
+            return res.status(404).json({ error: 'Batch not found' });
+        }
+
+        const isTrainer = user.role === 'TRAINER' || req.body.assignmentType === 'TRAINER';
+
+        if (isTrainer) {
+            await academicDb.collection('batches').updateOne(
+                { _id: batchQueryId },
+                {
+                    $set: {
+                        trainerId: userId,
+                        trainerName: user.fullName
+                    },
+                    $addToSet: {
+                        trainerIds: userId
+                    }
+                }
+            );
+        } else {
+            await academicDb.collection('batches').updateOne(
+                { _id: batchQueryId },
+                {
+                    $addToSet: {
+                        studentIds: userId
+                    }
+                }
+            );
+
+            const refreshedBatch = await academicDb.collection('batches').findOne({ _id: batchQueryId });
+            await academicDb.collection('batches').updateOne(
+                { _id: batchQueryId },
+                {
+                    $set: {
+                        totalStudents: (refreshedBatch?.studentIds || []).length
+                    }
+                }
+            );
+        }
+
+        user.batchId = String(batch._id);
+        user.batchCode = batch.batchCode || '';
+        user.batchName = batch.batchName || batch.name || batch.batchCode || '';
+        user.courseId = batch.courseId || '';
+        user.courseName = batch.courseName || '';
+
+        const updatedUser = await user.save();
+
+        res.json({
+            message: 'Academic assignment updated',
+            user: {
+                ...updatedUser.toObject(),
+                id: updatedUser._id.toString()
+            }
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

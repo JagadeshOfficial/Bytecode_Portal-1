@@ -174,12 +174,12 @@ function StatCard({
     accent: string;
 }) {
     return (
-        <div style={{ ...glassStyle, padding: '20px', display: 'flex', gap: '14px', alignItems: 'center' }}>
+        <div style={{ ...glassStyle, padding: '16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div
                 style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: '16px',
+                    width: 44,
+                    height: 44,
+                    borderRadius: '14px',
                     background: `${accent}14`,
                     color: accent,
                     display: 'flex',
@@ -190,12 +190,12 @@ function StatCard({
             >
                 {icon}
             </div>
-            <div>
-                <p style={{ margin: 0, fontSize: '0.72rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div style={{ minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: '0.68rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     {title}
                 </p>
-                <h3 style={{ margin: '4px 0 2px', fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>{value}</h3>
-                <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', fontWeight: 700 }}>{hint}</p>
+                <h3 style={{ margin: '4px 0 2px', fontSize: '1.3rem', fontWeight: 900, color: '#0f172a' }}>{value}</h3>
+                <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b', fontWeight: 700 }}>{hint}</p>
             </div>
         </div>
     );
@@ -263,7 +263,7 @@ export default function PinpointDashboard() {
     }).sort((a, b) => b.count - a.count);
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%)', padding: '24px', color: '#0f172a' }}>
+        <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%)', padding: '20px', color: '#0f172a', overflowX: 'hidden' }}>
             <div style={{ ...glassStyle, padding: '22px 24px', marginBottom: '22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div
@@ -319,7 +319,7 @@ export default function PinpointDashboard() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px', marginBottom: '22px' }}>
+            <div className="tracking-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '14px', marginBottom: '20px' }}>
                 <StatCard
                     title="Tracked Users"
                     value={String(data?.summary.totalUsers || 0)}
@@ -420,7 +420,7 @@ export default function PinpointDashboard() {
                     </p>
                 </div>
             ) : (
-                <div className="tracking-shell" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '20px', alignItems: 'start' }}>
+                <div className="tracking-shell" style={{ display: 'grid', gridTemplateColumns: '280px minmax(0, 1fr)', gap: '18px', alignItems: 'start' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div style={{ ...glassStyle, padding: '20px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
@@ -486,7 +486,7 @@ export default function PinpointDashboard() {
                         </div>
                     </div>
 
-                    <div style={{ ...glassStyle, padding: '18px' }}>
+                    <div style={{ ...glassStyle, padding: '16px', minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
                             <div>
                                 <h2 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 900 }}>Detailed Records</h2>
@@ -499,18 +499,17 @@ export default function PinpointDashboard() {
                             </div>
                         </div>
 
-                        <div style={{ overflowX: 'auto' }}>
-                            <div style={{ minWidth: 900 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 0.9fr 1.2fr 0.9fr 0.9fr 0.8fr', gap: '12px', padding: '0 14px 10px', color: '#64748b', fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        <div className="tracking-records-shell">
+                                <div className="tracking-record-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr) minmax(78px, 0.72fr) minmax(94px, 0.82fr) minmax(78px, 0.68fr)', gap: '10px', padding: '0 10px 10px', color: '#64748b', fontSize: '0.68rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                     <div>Person</div>
-                                    <div>Role / Batch</div>
+                                    <div>Role / Course / Batch</div>
                                     <div>Device / Network</div>
                                     <div>Progress</div>
                                     <div>Status</div>
                                     <div>Risk</div>
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     {filteredRecords.length === 0 && (
                                         <div style={{ padding: '26px', borderRadius: '18px', background: '#f8fafc', textAlign: 'center', color: '#64748b', fontWeight: 700 }}>
                                             No records match the current filters.
@@ -527,26 +526,28 @@ export default function PinpointDashboard() {
                                                 whileHover={{ y: -2 }}
                                                 type="button"
                                                 onClick={() => setSelectedUser(row)}
+                                                className="tracking-record-row"
                                                 style={{
                                                     width: '100%',
                                                     textAlign: 'left',
                                                     border: '1px solid rgba(15, 23, 42, 0.06)',
                                                     background: '#fff',
-                                                    borderRadius: '22px',
-                                                    padding: '14px',
+                                                    borderRadius: '18px',
+                                                    padding: '12px',
                                                     display: 'grid',
-                                                    gridTemplateColumns: '1.7fr 0.9fr 1.2fr 0.9fr 0.9fr 0.8fr',
-                                                    gap: '12px',
+                                                    gridTemplateColumns: 'minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr) minmax(78px, 0.72fr) minmax(94px, 0.82fr) minmax(78px, 0.68fr)',
+                                                    gap: '10px',
                                                     alignItems: 'center',
                                                     cursor: 'pointer',
+                                                    minWidth: 0,
                                                 }}
                                             >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                                                     <div
                                                         style={{
-                                                            width: 42,
-                                                            height: 42,
-                                                            borderRadius: '14px',
+                                                            width: 38,
+                                                            height: 38,
+                                                            borderRadius: '12px',
                                                             background: row.risk === 'HIGH' ? '#fee2e2' : '#dbeafe',
                                                             color: row.risk === 'HIGH' ? '#b91c1c' : '#1d4ed8',
                                                             display: 'flex',
@@ -559,55 +560,58 @@ export default function PinpointDashboard() {
                                                         {initials(row.name)}
                                                     </div>
                                                     <div style={{ minWidth: 0 }}>
-                                                        <p style={{ margin: 0, fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        <p style={{ margin: 0, fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.92rem' }}>
                                                             {row.name}
                                                         </p>
-                                                        <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        <p style={{ margin: '3px 0 0', color: '#64748b', fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                             {row.email}
                                                         </p>
                                                         {row.flags.length > 0 && (
-                                                            <p style={{ margin: '4px 0 0', color: '#b45309', fontSize: '0.75rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            <p style={{ margin: '3px 0 0', color: '#b45309', fontSize: '0.72rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                                 {row.flags.join(' • ')}
                                                             </p>
                                                         )}
                                                     </div>
                                                 </div>
 
-                                                <div>
-                                                    <p style={{ margin: 0, fontWeight: 900, color: '#0f172a' }}>{humanizeLabel(row.role)}</p>
-                                                    <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.82rem', fontWeight: 700 }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <p style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '0.84rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{humanizeLabel(row.role)}</p>
+                                                    <p style={{ margin: '3px 0 0', color: '#334155', fontSize: '0.76rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {row.courseName || 'No course assigned'}
+                                                    </p>
+                                                    <p style={{ margin: '3px 0 0', color: '#64748b', fontSize: '0.76rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                         {row.batchCode || row.batchName}
                                                     </p>
                                                 </div>
 
-                                                <div>
-                                                    <p style={{ margin: 0, fontWeight: 900, color: '#0f172a' }}>{row.device}</p>
-                                                    <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.8rem', fontWeight: 700 }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <p style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.device}</p>
+                                                    <p style={{ margin: '3px 0 0', color: '#64748b', fontSize: '0.76rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                         {row.ipAddress || 'No IP recorded'}
                                                     </p>
-                                                    <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.76rem', fontWeight: 700 }}>
+                                                    <p style={{ margin: '3px 0 0', color: '#94a3b8', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                         {row.location}
                                                     </p>
                                                 </div>
 
-                                                <div>
-                                                    <p style={{ margin: 0, fontWeight: 900, color: '#0f172a' }}>{row.overallProgress}%</p>
-                                                    <div style={{ marginTop: '8px', height: '8px', borderRadius: '999px', background: '#e2e8f0', overflow: 'hidden' }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <p style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '0.88rem' }}>{row.overallProgress}%</p>
+                                                    <div style={{ marginTop: '7px', height: '7px', borderRadius: '999px', background: '#e2e8f0', overflow: 'hidden' }}>
                                                         <div style={{ width: `${row.overallProgress}%`, height: '100%', borderRadius: '999px', background: 'linear-gradient(90deg, #0f766e, #2563eb)' }} />
                                                     </div>
                                                 </div>
 
-                                                <div>
-                                                    <div style={{ display: 'inline-flex', padding: '7px 12px', borderRadius: '999px', background: statusTone.background, color: statusTone.color, fontWeight: 900, fontSize: '0.78rem' }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <div style={{ display: 'inline-flex', padding: '6px 10px', borderRadius: '999px', background: statusTone.background, color: statusTone.color, fontWeight: 900, fontSize: '0.72rem' }}>
                                                         {humanizeLabel(row.status)}
                                                     </div>
-                                                    <p style={{ margin: '8px 0 0', color: '#64748b', fontSize: '0.76rem', fontWeight: 700 }}>
+                                                    <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                         {row.lastSeen}
                                                     </p>
                                                 </div>
 
-                                                <div>
-                                                    <div style={{ display: 'inline-flex', padding: '7px 12px', borderRadius: '999px', background: riskTone.background, color: riskTone.color, fontWeight: 900, fontSize: '0.78rem' }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <div style={{ display: 'inline-flex', padding: '6px 10px', borderRadius: '999px', background: riskTone.background, color: riskTone.color, fontWeight: 900, fontSize: '0.72rem' }}>
                                                         {humanizeLabel(row.risk)}
                                                     </div>
                                                 </div>
@@ -615,7 +619,6 @@ export default function PinpointDashboard() {
                                         );
                                     })}
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -809,6 +812,17 @@ export default function PinpointDashboard() {
             </AnimatePresence>
 
             <style jsx>{`
+                .tracking-records-shell {
+                    width: 100%;
+                    overflow: hidden;
+                }
+
+                @media (max-width: 1440px) {
+                    .tracking-stats {
+                        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                    }
+                }
+
                 @media (max-width: 1100px) {
                     .tracking-filters,
                     .tracking-shell,
@@ -816,13 +830,44 @@ export default function PinpointDashboard() {
                         grid-template-columns: 1fr !important;
                     }
 
+                    .tracking-stats,
                     .tracking-detail-summary {
                         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                     }
                 }
 
+                @media (max-width: 1380px) {
+                    .tracking-record-grid,
+                    .tracking-record-row {
+                        grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(70px, 0.66fr) minmax(88px, 0.76fr) minmax(72px, 0.62fr) !important;
+                        gap: 8px !important;
+                    }
+                }
+
+                @media (max-width: 1240px) {
+                    .tracking-record-grid,
+                    .tracking-record-row {
+                        grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(64px, 0.6fr) minmax(84px, 0.72fr) minmax(68px, 0.58fr) !important;
+                    }
+                }
+
                 @media (max-width: 720px) {
+                    .tracking-stats,
                     .tracking-detail-summary {
+                        grid-template-columns: 1fr !important;
+                    }
+
+                    .tracking-record-grid {
+                        display: none !important;
+                    }
+
+                    .tracking-record-row {
+                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    }
+                }
+
+                @media (max-width: 560px) {
+                    .tracking-record-row {
                         grid-template-columns: 1fr !important;
                     }
                 }

@@ -5,7 +5,11 @@ const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true },
     fullName: { type: String, required: true },
     password: { type: String, required: true, select: false },
-    role: { type: String, enum: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE', 'STUDENT'], default: 'STUDENT' },
+    role: {
+        type: String,
+        enum: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE', 'STUDENT', 'TRAINER', 'HR', 'COUNSELOR', 'FINANCE', 'PLACEMENT', 'SOCIAL_MEDIA', 'TUTOR'],
+        default: 'STUDENT'
+    },
     branch: String,
     department: String,
     userStatus: { type: String, default: 'Present' },
@@ -21,6 +25,11 @@ const UserSchema = new mongoose.Schema({
     requirementRequests: [String],
     deviceFingerprints: [String],
     lastLoginIp: String,
+    batchId: String,
+    batchCode: String,
+    batchName: String,
+    courseId: String,
+    courseName: String,
     lastLocation: {
         city: String,
         state: String

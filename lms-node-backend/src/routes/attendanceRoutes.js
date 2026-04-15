@@ -199,7 +199,16 @@ router.get('/tracking-center', async (req, res) => {
         const records = users.map((user) => {
             const userId = String(user._id);
             const attendance = latestAttendanceByUserId.get(userId);
-            const batchInfo = batchByUserId.get(userId) || batchById.get(String(user.batchId || ''));
+            const directUserBatchInfo =
+                user.batchId || user.batchName || user.courseName
+                    ? {
+                        id: String(user.batchId || ''),
+                        batchCode: user.batchCode || '',
+                        batchName: user.batchName || 'Unassigned',
+                        courseName: user.courseName || '',
+                    }
+                    : null;
+            const batchInfo = batchByUserId.get(userId) || batchById.get(String(user.batchId || '')) || directUserBatchInfo;
             const interviewStats = interviewStatsByUserId.get(userId) || { count: 0, totalScore: 0 };
             const testStats = testStatsByUserId.get(userId) || { count: 0, totalScore: 0 };
             const avgInterviewScore = interviewStats.count > 0 ? Math.round(interviewStats.totalScore / interviewStats.count) : 0;
@@ -241,8 +250,8 @@ router.get('/tracking-center', async (req, res) => {
                 isRestricted: Boolean(user.isRestricted),
                 batchId: attendance?.batchId || batchInfo?.id || '',
                 batchName: attendance?.batchName || batchInfo?.batchName || 'Unassigned',
-                batchCode: attendance?.batchCode || batchInfo?.batchCode || '',
-                courseName: batchInfo?.courseName || '',
+                batchCode: attendance?.batchCode || batchInfo?.batchCode || user.batchCode || '',
+                courseName: batchInfo?.courseName || user.courseName || '',
                 attendanceRate,
                 status: attendance?.status || 'NO_RECORD',
                 isToday: Boolean(attendance?.isToday),
