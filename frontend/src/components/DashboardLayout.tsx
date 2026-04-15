@@ -218,29 +218,37 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
 
     const handleProfileSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!loggedUser || !loggedUser.id) return;
+        const userId = loggedUser?.id || loggedUser?._id;
+        if (!userId) return;
+
+        const updateData: Record<string, any> = {
+            fullName: profileForm.fullName,
+            email: profileForm.email,
+            phoneNumber: profileForm.phoneNumber,
+            branch: profileForm.branch,
+            department: profileForm.department,
+            userStatus: profileForm.userStatus,
+            profileImage: profileForm.profileImage
+        };
+
+        if (profileForm.password?.trim()) {
+            updateData.password = profileForm.password;
+        }
+
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${loggedUser.id}`, {
+            const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...loggedUser,
-                    fullName: profileForm.fullName,
-                    email: profileForm.email,
-                    password: profileForm.password,
-                    phoneNumber: profileForm.phoneNumber,
-                    branch: profileForm.branch,
-                    department: profileForm.department,
-                    userStatus: profileForm.userStatus,
-                    profileImage: profileForm.profileImage
-                })
+                body: JSON.stringify(updateData)
             });
+
             if (res.ok) {
                 setIsProfileModalOpen(false);
                 fetchUserProfile(); // refresh the header immediately
                 alert('Profile updated successfully!');
             } else {
-                alert('Error updating profile');
+                const errorData = await res.json().catch(() => null);
+                alert(errorData?.error || 'Error updating profile');
             }
         } catch (e) {
             alert('Failed to connect to server');

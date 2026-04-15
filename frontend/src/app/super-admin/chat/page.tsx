@@ -8,7 +8,7 @@ type DashboardRole = 'super_admin' | 'admin';
 export function ChatPageContent({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     return (
         <DashboardLayout role={role} noPadding={true}>
-            <ByteChat />
+            <ByteChat role={role} />
         </DashboardLayout>
     );
 }

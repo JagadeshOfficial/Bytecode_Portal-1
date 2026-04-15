@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search, Plus, Hash, User, MessageSquare,
@@ -15,6 +15,8 @@ import {
     Activity, CornerDownRight, Camera, Circle, StopCircle, BrainCircuit,
     Briefcase, LogOut, Info, Trash2, Share2, Mail, MicOff, VideoOff, Monitor, ScreenShare, ScreenShareOff, StopCircle as StopIcon
 } from 'lucide-react';
+
+type DashboardRole = 'super_admin' | 'admin';
 
 interface Message {
     id: string;
@@ -52,8 +54,10 @@ interface ChatItem {
     isArchived: boolean;
 }
 
-export default function ByteChat() {
+export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRole }) {
     const router = useRouter();
+    const pathname = usePathname();
+    const baseRoute = role === 'admin' ? '/admin' : '/super-admin';
     const [isMounted, setIsMounted] = useState(false);
     const [chats, setChats] = useState<ChatItem[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -993,11 +997,11 @@ export default function ByteChat() {
                     <Zap size={22} color="#fff" />
                 </div>
                 {[
-                    { icon: Home, route: '/super-admin' },
-                    { icon: MessageSquare, route: '/super-admin/chat' },
-                    { icon: BarChart3, route: '/super-admin/global-tracking' },
-                    { icon: Users, route: '/super-admin/academic' },
-                    { icon: Settings, route: '/super-admin/settings' }
+                    { icon: Home, route: `${baseRoute}` },
+                    { icon: MessageSquare, route: `${baseRoute}/chat` },
+                    { icon: BarChart3, route: `${baseRoute}/global-tracking` },
+                    { icon: Users, route: `${baseRoute}/academic` },
+                    { icon: Settings, route: `${baseRoute}/settings` }
                 ].map((item, i) => (
                     <motion.div
                         key={i}
@@ -1007,8 +1011,8 @@ export default function ByteChat() {
                         style={{
                             width: '48px', height: '48px', borderRadius: '16px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: item.route === '/super-admin/chat' ? '#6d28d9' : '#94a3b8',
-                            background: item.route === '/super-admin/chat' ? 'rgba(109, 40, 217, 0.1)' : 'transparent',
+                            color: item.route === pathname ? '#6d28d9' : '#94a3b8',
+                            background: item.route === pathname ? 'rgba(109, 40, 217, 0.1)' : 'transparent',
                             cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
