@@ -14,7 +14,9 @@ import {
 
 const USER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'HR', 'COUNSELOR', 'FINANCE', 'STUDENT'];
 
-export default function UserManagement() {
+type DashboardRole = 'super_admin' | 'admin';
+
+export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const [activeTab, setActiveTab] = useState('ALL');
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -162,7 +164,7 @@ export default function UserManagement() {
     });
 
     return (
-        <DashboardLayout role="super_admin">
+        <DashboardLayout role={role}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
                 {/* --- PAGE HEADER --- */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
@@ -526,6 +528,10 @@ export default function UserManagement() {
             </AnimatePresence>
         </DashboardLayout>
     );
+}
+
+export default function UserManagement() {
+    return <UserManagementPage />;
 }
 
 function InfoCard({ icon, label, value }: any) {

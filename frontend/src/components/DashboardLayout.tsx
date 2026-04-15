@@ -63,9 +63,12 @@ const MENUS: Record<string, MenuItem[]> = {
     ],
     admin: [
         { section: 'Main', label: 'Admin Home', href: '/admin', icon: <LayoutDashboard size={18} /> },
-        { label: 'Students List', href: '/admin/students', icon: <Users size={18} /> },
-        { label: 'Batches', href: '/admin/batches', icon: <Layers size={18} /> },
-        { label: 'Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
+        { section: 'User Management', label: 'Users List', href: '/admin/users', icon: <Users size={18} /> },
+        { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/admin/academic', icon: <BookOpen size={18} /> },
+        { section: 'Communication', label: 'ByteChat Section', href: '/admin/chat', icon: <MessageSquare size={18} /> },
+        { section: 'Tracking', label: 'Tracking Center', href: '/admin/pinpoint-hub', icon: <Activity size={18} /> },
+        { label: 'System Activity Log', href: '/admin/global-tracking', icon: <Terminal size={18} /> },
+        { section: 'Reports', label: 'Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
         { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     counsellor: [

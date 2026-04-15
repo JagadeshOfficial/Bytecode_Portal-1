@@ -27,6 +27,81 @@ function humanizeValue(value) {
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function normalizeKey(value) {
+    return String(value || '').trim();
+}
+
+function normalizeEmail(value) {
+    return normalizeKey(value).toLowerCase();
+}
+
+function buildUserLookups(users) {
+    const byId = new Map();
+    const byEmail = new Map();
+
+    users.forEach((user) => {
+        const id = normalizeKey(user._id);
+        const email = normalizeEmail(user.email);
+
+        if (id) byId.set(id, user);
+        if (email) byEmail.set(email, user);
+    });
+
+    return { byId, byEmail };
+}
+
+function findUserRecord(lookups, ...values) {
+    for (const value of values) {
+        const key = normalizeKey(value);
+        if (!key) continue;
+
+        const directMatch = lookups.byId.get(key);
+        if (directMatch) return directMatch;
+
+        const emailMatch = lookups.byEmail.get(key.toLowerCase());
+        if (emailMatch) return emailMatch;
+    }
+
+    return null;
+}
+
+function resolveUserName(lookups, explicitName, fallback, ...identifiers) {
+    const cleanName = normalizeKey(explicitName);
+    if (cleanName) return cleanName;
+
+    const matchedUser = findUserRecord(lookups, ...identifiers);
+    return matchedUser?.fullName || matchedUser?.email || fallback;
+}
+
+function resolveUserRole(lookups, explicitRole, fallback, ...identifiers) {
+    const cleanRole = normalizeKey(explicitRole);
+    if (cleanRole) return cleanRole;
+
+    const matchedUser = findUserRecord(lookups, ...identifiers);
+    return matchedUser?.role || fallback;
+}
+
+function resolveUserLabelList(lookups, values = [], fallback) {
+    const labels = [];
+    const seen = new Set();
+
+    values.forEach((value) => {
+        const label = resolveUserName(lookups, '', '', value);
+        if (!label) return;
+
+        const normalizedLabel = label.toLowerCase();
+        if (seen.has(normalizedLabel)) return;
+
+        seen.add(normalizedLabel);
+        labels.push(label);
+    });
+
+    if (labels.length === 0) return fallback;
+    if (labels.length <= 2) return labels.join(', ');
+
+    return `${labels.slice(0, 2).join(', ')} +${labels.length - 2} more`;
+}
+
 function pushActivityEvent(events, event) {
     const timestamp = toValidDate(event.timestamp);
     if (!timestamp) return;
@@ -115,6 +190,7 @@ router.get('/system-activity', async (req, res) => {
 
         const [
             systemLogs,
+            allUsers,
             recentUsers,
             attendanceDocs,
             batches,
@@ -126,6 +202,9 @@ router.get('/system-activity', async (req, res) => {
                 .sort({ timestamp: -1 })
                 .limit(50)
                 .populate('user', 'fullName role email')
+                .lean(),
+            User.find()
+                .select('fullName role email createdAt')
                 .lean(),
             User.find()
                 .sort({ createdAt: -1 })
@@ -143,16 +222,21 @@ router.get('/system-activity', async (req, res) => {
         ]);
 
         const events = [];
+        const userLookups = buildUserLookups(allUsers);
 
         systemLogs.forEach((log) => {
+            const matchedUser = log.user
+                ? findUserRecord(userLookups, log.user._id, log.user.email)
+                : null;
+
             pushActivityEvent(events, {
                 id: String(log._id),
                 timestamp: log.timestamp || log.createdAt,
                 module: log.module || 'SYSTEM',
                 action: log.action || 'SYSTEM_EVENT',
                 severity: log.severity || 'INFO',
-                userName: log.user?.fullName || 'System',
-                userRole: log.user?.role || '',
+                userName: log.user?.fullName || matchedUser?.fullName || 'System',
+                userRole: log.user?.role || matchedUser?.role || '',
                 source: log.ipAddress || 'system-log',
                 target: log.details?.target || log.details?.path || '',
                 summary:
@@ -184,6 +268,7 @@ router.get('/system-activity', async (req, res) => {
         });
 
         attendanceDocs.forEach((doc) => {
+            const trainerUser = findUserRecord(userLookups, doc.trainer?._id, doc.trainer?.email, doc.trainer);
             const suspiciousCount = (doc.records || []).filter((record) =>
                 record.status === 'SUSPICIOUS' || record.isVpnDetected || record.isMultipleDevice
             ).length;
@@ -198,8 +283,8 @@ router.get('/system-activity', async (req, res) => {
                 module: 'ATTENDANCE',
                 action: 'ATTENDANCE_CAPTURED',
                 severity: suspiciousCount > 0 ? 'WARNING' : 'INFO',
-                userName: doc.trainer?.fullName || 'Trainer',
-                userRole: doc.trainer?.role || 'TRAINER',
+                userName: doc.trainer?.fullName || trainerUser?.fullName || 'Trainer',
+                userRole: doc.trainer?.role || trainerUser?.role || 'TRAINER',
                 source: 'attendance',
                 target: doc.batch || '',
                 summary: `${presentCount}/${(doc.records || []).length} users marked for ${doc.sessionTopic || doc.sessionType || 'session'}`,
@@ -213,14 +298,15 @@ router.get('/system-activity', async (req, res) => {
         });
 
         batches.forEach((batch) => {
+            const batchTrainer = findUserRecord(userLookups, batch.trainerId, batch.trainerEmail);
             pushActivityEvent(events, {
                 id: `batch-${batch._id}`,
                 timestamp: batch.updatedAt || batch.createdAt,
                 module: 'ACADEMIC',
                 action: batch.updatedAt && batch.createdAt && String(batch.updatedAt) !== String(batch.createdAt) ? 'BATCH_UPDATED' : 'BATCH_CREATED',
                 severity: 'INFO',
-                userName: batch.trainerName || 'Academic Team',
-                userRole: 'TRAINER',
+                userName: batch.trainerName || batchTrainer?.fullName || 'Academic Team',
+                userRole: batchTrainer?.role || 'TRAINER',
                 source: 'academic-db',
                 target: batch.batchCode || batch.batchName || '',
                 summary: `${batch.batchName || batch.batchCode || 'Batch'} linked to ${batch.courseName || 'course'}`,
@@ -235,14 +321,22 @@ router.get('/system-activity', async (req, res) => {
         });
 
         liveSessions.forEach((session) => {
+            const sessionTrainer = findUserRecord(
+                userLookups,
+                session.trainerId,
+                session.hostId,
+                session.trainerEmail,
+                session.hostEmail
+            );
+
             pushActivityEvent(events, {
                 id: `live-${session._id}`,
                 timestamp: session.updatedAt || session.createdAt || session.startTime || session.date,
                 module: 'LIVE',
                 action: session.status ? `LIVE_${String(session.status).toUpperCase()}` : 'LIVE_SESSION_SAVED',
                 severity: 'INFO',
-                userName: session.trainerName || session.hostName || 'Live Session',
-                userRole: 'TRAINER',
+                userName: session.trainerName || session.hostName || sessionTrainer?.fullName || 'Live Session',
+                userRole: sessionTrainer?.role || 'TRAINER',
                 source: 'academic-db',
                 target: session.title || session.topic || session.roomName || '',
                 summary: `${session.title || session.topic || 'Live session'} was updated`,
@@ -255,39 +349,86 @@ router.get('/system-activity', async (req, res) => {
         });
 
         mockInterviews.forEach((interview) => {
+            const resolvedCandidateName = resolveUserName(
+                userLookups,
+                interview.candidateName || interview.studentName,
+                resolveUserLabelList(userLookups, interview.candidateIds || [], 'Candidate'),
+                interview.candidateId,
+                interview.studentId,
+                interview.userId,
+                interview.email
+            );
+            const interviewerName = resolveUserName(
+                userLookups,
+                interview.interviewerName,
+                '',
+                interview.interviewerId,
+                interview.interviewerEmail
+            );
+
             pushActivityEvent(events, {
                 id: `interview-${interview._id}`,
                 timestamp: interview.updatedAt || interview.createdAt || interview.interviewDate,
                 module: 'INTERVIEW',
                 action: 'MOCK_INTERVIEW_RECORDED',
                 severity: Number(interview.aiScore || 0) < 40 ? 'WARNING' : 'INFO',
-                userName: interview.candidateName || interview.studentName || 'Candidate',
-                userRole: 'STUDENT',
+                userName: resolvedCandidateName,
+                userRole: resolveUserRole(
+                    userLookups,
+                    interview.candidateRole || interview.studentRole,
+                    'STUDENT',
+                    interview.candidateId,
+                    interview.studentId,
+                    interview.userId,
+                    interview.email,
+                    ...(interview.candidateIds || [])
+                ),
                 source: 'academic-db',
                 target: interview.position || interview.domain || '',
-                summary: `Mock interview saved with score ${Number(interview.aiScore || 0)}%`,
+                summary: `Mock interview saved for ${resolvedCandidateName} with score ${Number(interview.aiScore || 0)}%`,
                 details: {
                     aiScore: Number(interview.aiScore || 0),
-                    interviewer: interview.interviewerName || '',
+                    interviewer: interviewerName || interview.interviewerName || '',
+                    candidateId: interview.candidateId || interview.studentId || '',
+                    candidateIds: interview.candidateIds || [],
                 },
             });
         });
 
         testSubmissions.forEach((submission) => {
+            const resolvedStudentName = resolveUserName(
+                userLookups,
+                submission.studentName,
+                'Student',
+                submission.studentId,
+                submission.userId,
+                submission.studentEmail,
+                submission.email
+            );
+
             pushActivityEvent(events, {
                 id: `submission-${submission._id}`,
                 timestamp: submission.updatedAt || submission.createdAt || submission.submittedAt,
                 module: 'ASSESSMENT',
                 action: 'TEST_SUBMISSION_RECORDED',
                 severity: Number(submission.score || 0) < 35 ? 'WARNING' : 'INFO',
-                userName: submission.studentName || 'Student',
-                userRole: 'STUDENT',
+                userName: resolvedStudentName,
+                userRole: resolveUserRole(
+                    userLookups,
+                    submission.studentRole,
+                    'STUDENT',
+                    submission.studentId,
+                    submission.userId,
+                    submission.studentEmail,
+                    submission.email
+                ),
                 source: 'academic-db',
                 target: submission.testName || submission.testId || '',
-                summary: `Assessment submission saved with score ${Number(submission.score || 0)}%`,
+                summary: `Assessment submission saved for ${resolvedStudentName} with score ${Number(submission.score || 0)}%`,
                 details: {
                     score: Number(submission.score || 0),
                     testId: submission.testId || '',
+                    studentId: submission.studentId || submission.userId || '',
                 },
             });
         });

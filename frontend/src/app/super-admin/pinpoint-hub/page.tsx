@@ -3,10 +3,16 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import PinpointDashboard from '@/components/Academic/PinpointDashboard';
 
-export default function PinpointHubPage() {
+type DashboardRole = 'super_admin' | 'admin';
+
+export function PinpointHubPageContent({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     return (
-        <DashboardLayout role="super_admin" noPadding>
+        <DashboardLayout role={role} noPadding>
             <PinpointDashboard />
         </DashboardLayout>
     );
+}
+
+export default function PinpointHubPage() {
+    return <PinpointHubPageContent />;
 }

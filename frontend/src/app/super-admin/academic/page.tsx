@@ -19,7 +19,9 @@ import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
 import MockInterviewEngine from '@/components/Academic/MockInterviews/MockInterviewEngine';
 
-export default function AcademicHub() {
+type DashboardRole = 'super_admin' | 'admin';
+
+export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS' | 'EXAMS' | 'ANALYTICS'>('COURSES');
     const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'INTERVIEWS' | 'LIVE_MONITOR' | 'AI_ROOM' | 'ANALYTICS' | 'TESTS' | 'TRACKING'>('DRIVE');
@@ -941,7 +943,7 @@ export default function AcademicHub() {
     ).slice(0, 5);
 
     return (
-        <DashboardLayout role="super_admin">
+        <DashboardLayout role={role}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ paddingBottom: '5rem' }}>
 
                 {/* --- NAVIGATION BREADCRUMBS --- */}
@@ -2631,3 +2633,7 @@ const inputStyle = {
     fontFamily: 'inherit',
     fontSize: '1rem'
 };
+
+export default function AcademicHub() {
+    return <AcademicHubPage />;
+}

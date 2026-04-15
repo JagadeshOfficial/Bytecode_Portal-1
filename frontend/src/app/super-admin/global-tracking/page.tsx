@@ -3,10 +3,16 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import GlobalLogCenter from '@/components/Enterprise/Tracking/GlobalLogCenter';
 
-export default function GlobalTrackingPage() {
+type DashboardRole = 'super_admin' | 'admin';
+
+export function GlobalTrackingPageContent({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     return (
-        <DashboardLayout role="super_admin">
+        <DashboardLayout role={role}>
             <GlobalLogCenter />
         </DashboardLayout>
     );
+}
+
+export default function GlobalTrackingPage() {
+    return <GlobalTrackingPageContent />;
 }
