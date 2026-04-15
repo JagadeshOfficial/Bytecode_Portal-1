@@ -3,6 +3,32 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
+function normalizeRole(value) {
+    return String(value || '').trim().toUpperCase();
+}
+
+async function resolveActingUser(req) {
+    const actingUserId =
+        req.body?.actingUserId ||
+        req.query?.actingUserId ||
+        req.headers['x-acting-user-id'];
+
+    if (!actingUserId || !mongoose.Types.ObjectId.isValid(String(actingUserId))) {
+        return null;
+    }
+
+    return User.findById(String(actingUserId));
+}
+
+function getActingRole(req, actingUser) {
+    return normalizeRole(
+        actingUser?.role ||
+        req.body?.actingUserRole ||
+        req.query?.actingUserRole ||
+        req.headers['x-acting-user-role']
+    );
+}
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private (should be, but for now Public to fix 404)
@@ -38,6 +64,14 @@ router.put('/:id', async (req, res) => {
         const user = await User.findById(req.params.id).select('+password');
         if (!user) return res.status(404).json({ error: 'User not found' });
 
+        const actingUser = await resolveActingUser(req);
+        const actingRole = getActingRole(req, actingUser);
+        const targetRole = normalizeRole(user.role);
+
+        if (actingRole === 'ADMIN' && targetRole === 'SUPER_ADMIN') {
+            return res.status(403).json({ error: 'Admin cannot edit Super Admin accounts' });
+        }
+
         const allowedFields = [
             'fullName',
             'email',
@@ -70,6 +104,32 @@ router.put('/:id', async (req, res) => {
             ...updatedUser.toObject(),
             id: updatedUser._id.toString()
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete single user
+// @route   DELETE /api/users/:id
+router.delete('/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const actingUser = await resolveActingUser(req);
+        const actingRole = getActingRole(req, actingUser);
+        const targetRole = normalizeRole(user.role);
+
+        if (actingUser && String(actingUser._id) === String(user._id)) {
+            return res.status(400).json({ error: 'You cannot delete your own account' });
+        }
+
+        if (targetRole === 'SUPER_ADMIN' && actingRole !== 'SUPER_ADMIN') {
+            return res.status(403).json({ error: 'Only Super Admin can delete Super Admin accounts' });
+        }
+
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'User deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

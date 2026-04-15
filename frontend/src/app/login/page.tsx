@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import styles from '../page.module.css';
 import { motion } from 'framer-motion';
 import { User, Lock, ArrowRight, Loader2, KeyRound } from 'lucide-react';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 export default function Login() {
     const router = useRouter();
@@ -31,14 +32,14 @@ export default function Login() {
 
         try {
             // Attempt real authentication via user-service backend
-            const response = await fetch('http://localhost:8080/api/auth/login', {
+            const response = await fetchJsonSafe<any>('http://localhost:8080/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: userVal, password: passVal })
             });
 
-            if (response.ok) {
-                const data = await response.json();
+            if (response.ok && response.data) {
+                const data = response.data;
                 if (data.status === 'SUCCESS') {
                     // Save user info to localStorage
                     localStorage.setItem('user', JSON.stringify({

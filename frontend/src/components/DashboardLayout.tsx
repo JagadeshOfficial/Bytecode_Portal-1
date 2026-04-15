@@ -13,6 +13,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 type Role = 'super_admin' | 'admin' | 'counsellor' | 'tutor' | 'placement' | 'social_media' | 'student';
 
@@ -168,9 +169,9 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                 setLoggedUser(parsed);
                 if (parsed.id) {
                     try {
-                        const res = await fetch(`http://localhost:8080/api/users/${parsed.id}`);
-                        if (res.ok) {
-                            const data = await res.json();
+                        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${parsed.id}`);
+                        if (result.ok && result.data) {
+                            const data = result.data;
                             const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
                             setUserName(actualName);
                             // Update local storage so it stays fresh with FULL data

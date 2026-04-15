@@ -14,6 +14,7 @@ import {
     Award, TrendingUp, AlertCircle, ChevronRight,
     Search, UserCheck, Activity, Target
 } from 'lucide-react';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 
 const revenueTrend = [
@@ -44,28 +45,34 @@ export default function SuperAdminHome() {
 
     useEffect(() => {
         setIsMounted(true);
-        fetch('http://localhost:8080/api/admin/stats')
-            .then(res => res.json())
-            .then(data => {
-                setMetrics({
-                    totalStudents: data.totalStudents,
-                    activeBatches: data.activeBatches,
-                    trainers: data.totalTrainers,
-                    revenue: data.totalRevenue,
-                    placementRate: data.placementRate
-                });
-                if (data.conversionData) setConversionData(data.conversionData);
-            })
-            .catch(console.error);
 
-        fetch('http://localhost:8080/api/academic/batches')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setMetrics(prev => ({ ...prev, activeBatches: data.length }));
+        const loadHomeData = async () => {
+            const [statsResult, batchesResult] = await Promise.all([
+                fetchJsonSafe<any>('http://localhost:8080/api/admin/stats'),
+                fetchJsonSafe<any[]>('http://localhost:8080/api/academic/batches'),
+            ]);
+
+            if (statsResult.ok && statsResult.data) {
+                const data = statsResult.data;
+                setMetrics({
+                    totalStudents: data.totalStudents || 0,
+                    activeBatches: data.activeBatches || 0,
+                    trainers: data.totalTrainers || 0,
+                    revenue: data.totalRevenue || 0,
+                    placementRate: data.placementRate || 92.4,
+                });
+
+                if (Array.isArray(data.conversionData)) {
+                    setConversionData(data.conversionData);
                 }
-            })
-            .catch(console.error);
+            }
+
+            if (batchesResult.ok && Array.isArray(batchesResult.data)) {
+                setMetrics((prev) => ({ ...prev, activeBatches: batchesResult.data?.length || 0 }));
+            }
+        };
+
+        loadHomeData();
     }, []);
 
     return (

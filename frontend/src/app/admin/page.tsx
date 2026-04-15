@@ -11,6 +11,7 @@ import {
     Users, DollarSign, BookOpen, Briefcase, 
     TrendingUp, Award, Calendar, ChevronRight 
 } from 'lucide-react';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 const revenueData = [
     { month: 'Jan', revenue: 45000, students: 120 },
@@ -56,29 +57,34 @@ export default function AdminDashboard() {
             setAdminName(parsed.name || 'Admin');
         }
 
-        // Fetch metrics from backend
-        fetch('http://localhost:8080/api/admin/stats')
-            .then(res => res.json())
-            .then(data => {
+        const loadDashboardData = async () => {
+            const [statsResult, applicationsResult] = await Promise.all([
+                fetchJsonSafe<any>('http://localhost:8080/api/admin/stats'),
+                fetchJsonSafe<any[]>('http://localhost:8080/api/admin/applications'),
+            ]);
+
+            if (statsResult.ok && statsResult.data) {
+                const data = statsResult.data;
                 setStats({
                     totalUsers: data.totalStudents || 0,
                     activeCourses: data.activeCourses || 0,
                     placements: data.placementRate || 0,
                     revenue: data.totalRevenue || 0,
                     trainers: data.totalTrainers || 0,
-                    jobListings: data.jobListings || 0
+                    jobListings: data.jobListings || 0,
                 });
-                if (data.revenueTrend) setRevenueTrend(data.revenueTrend);
-            })
-            .catch(err => console.error('Stats fetch error:', err));
 
-        // Fetch applications
-        fetch('http://localhost:8080/api/admin/applications')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setApplications(data);
-            })
-            .catch(err => console.error('Applications fetch error:', err));
+                if (Array.isArray(data.revenueTrend)) {
+                    setRevenueTrend(data.revenueTrend);
+                }
+            }
+
+            if (applicationsResult.ok && Array.isArray(applicationsResult.data)) {
+                setApplications(applicationsResult.data);
+            }
+        };
+
+        loadDashboardData();
     }, []);
 
     const containerVariants = {

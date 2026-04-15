@@ -11,6 +11,7 @@ import {
     FileText, User as UserIcon, Book, MessageSquare,
     HelpCircle, Inbox
 } from 'lucide-react';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 const USER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'HR', 'COUNSELOR', 'FINANCE', 'STUDENT'];
 
@@ -21,6 +22,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentUser, setCurrentUser] = useState<any>(null);
     
     // Modals
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -40,16 +42,21 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         setTimeout(() => setNotification(null), 4000);
     };
 
+    const normalizeRole = (value: string) => String(value || '').trim().toUpperCase();
+
     const fetchUsers = () => {
         setLoading(true);
-        fetch('http://localhost:8080/api/users')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setUsers(data);
+        fetchJsonSafe<any[]>('http://localhost:8080/api/users')
+            .then((result) => {
+                if (result.ok && Array.isArray(result.data)) {
+                    setUsers(result.data);
+                } else {
+                    setUsers([]);
+                }
                 setLoading(false);
             })
-            .catch(err => {
-                console.error(err);
+            .catch(() => {
+                setUsers([]);
                 setLoading(false);
             });
     };
@@ -58,19 +65,40 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         fetchUsers();
     }, []);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) return;
+
+        try {
+            setCurrentUser(JSON.parse(storedUser));
+        } catch (err) {
+            console.error('Failed to read current user from storage:', err);
+        }
+    }, []);
+
+    const currentUserRole = String(currentUser?.role || role).toUpperCase();
+    const isAdminActor = currentUserRole === 'ADMIN';
+    const isProtectedForAdmin = (user: any) => isAdminActor && normalizeRole(user?.role) === 'SUPER_ADMIN';
+
     const fetchTrainerBatches = async (trainerId: string) => {
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/trainer/${trainerId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setTrainerBatches(data);
+            const result = await fetchJsonSafe<any[]>(`http://localhost:8080/api/academic/batches/trainer/${trainerId}`);
+            if (result.ok && Array.isArray(result.data)) {
+                setTrainerBatches(result.data);
             }
         } catch (err) {
-            console.error("Error fetching trainer batches:", err);
+            setTrainerBatches([]);
         }
     };
 
     const handleOpenEditModal = (user: any = null) => {
+        if (user && isProtectedForAdmin(user)) {
+            showNotification('Admin cannot edit Super Admin accounts.', 'error');
+            return;
+        }
+
         if (user) {
             setSelectedUser(user);
             setFormData({ 
@@ -119,7 +147,9 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    attendanceRate: selectedUser?.attendanceRate || 92.5
+                    attendanceRate: selectedUser?.attendanceRate || 92.5,
+                    actingUserId: currentUser?.id || currentUser?._id || '',
+                    actingUserRole: currentUserRole,
                 })
             });
             if (res.ok) {
@@ -127,7 +157,8 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                 fetchUsers();
                 showNotification(selectedUser ? 'User updated successfully!' : 'New user added successfully!');
             } else {
-                showNotification('Error saving user.', 'error');
+                const payload = await res.json().catch(() => null);
+                showNotification(payload?.error || 'Error saving user.', 'error');
             }
         } catch (err) {
             console.error(err);
@@ -135,16 +166,32 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (user: any) => {
+        if (isProtectedForAdmin(user)) {
+            showNotification('Admin cannot delete Super Admin accounts.', 'error');
+            return;
+        }
+
         if (!confirm('Are you sure you want to delete this user?')) return;
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${id}`, { method: 'DELETE' });
+            const res = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    actingUserId: currentUser?.id || currentUser?._id || '',
+                    actingUserRole: currentUserRole,
+                }),
+            });
             if (res.ok) {
                 fetchUsers();
                 showNotification('User deleted successfully.');
+            } else {
+                const payload = await res.json().catch(() => null);
+                showNotification(payload?.error || 'Unable to delete user.', 'error');
             }
         } catch (err) {
             console.error(err);
+            showNotification('Server connection failed.', 'error');
         }
     };
 
@@ -154,13 +201,21 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
             (u.email || '').toLowerCase().includes(searchTerm.toLowerCase())
         );
 
+        const normalizedRole = normalizeRole(u.role);
+
         if (activeTab === 'ALL') return matchesSearch;
-        if (activeTab === 'STUDENT') return matchesSearch && u.role === 'STUDENT';
-        if (activeTab === 'TRAINER') return matchesSearch && u.role === 'TRAINER';
+        if (activeTab === 'STUDENT') return matchesSearch && normalizedRole === 'STUDENT';
+        if (activeTab === 'TRAINER') return matchesSearch && normalizedRole === 'TRAINER';
         if (activeTab === 'STAFF') {
-            return matchesSearch && ['HR', 'COUNSELOR', 'FINANCE', 'ADMIN', 'SUPER_ADMIN'].includes(u.role);
+            return matchesSearch && ['HR', 'COUNSELOR', 'FINANCE', 'ADMIN', 'SUPER_ADMIN', 'PLACEMENT', 'SOCIAL_MEDIA', 'TUTOR'].includes(normalizedRole);
         }
         return matchesSearch;
+    });
+
+    const sortedUsers = [...filteredUsers].sort((a, b) => {
+        const nameA = (a.fullName || a.name || a.email || '').toLowerCase();
+        const nameB = (b.fullName || b.name || b.email || '').toLowerCase();
+        return nameA.localeCompare(nameB);
     });
 
     return (
@@ -238,6 +293,10 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                     </div>
                 </div>
 
+                <div style={{ marginBottom: '1rem', color: 'var(--text-dim)', fontWeight: 700, fontSize: '0.9rem' }}>
+                    Showing {sortedUsers.length} users from the database
+                </div>
+
                 {/* --- USERS TABLE --- */}
                 <div className="glass-panel" style={{ borderRadius: '32px', overflow: 'hidden' }}>
                     <div style={{ overflowX: 'auto' }}>
@@ -252,11 +311,20 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                 </tr>
                             </thead>
                             <tbody>
-                                <AnimatePresence>
                                 {loading ? (
-                                    <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', fontWeight: 'bold' }}>FETCHING USERS...</td></tr>
-                                ) : filteredUsers.map((u, i) => (
-                                    <motion.tr 
+                                    <tr>
+                                        <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', fontWeight: 'bold', color: 'var(--text-dim)' }}>
+                                            FETCHING USERS...
+                                        </td>
+                                    </tr>
+                                ) : sortedUsers.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-dim)', fontWeight: 800 }}>
+                                            No users matched the selected filter.
+                                        </td>
+                                    </tr>
+                                ) : sortedUsers.map((u, i) => (
+                                    <motion.tr
                                         key={u.id || i}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
@@ -269,7 +337,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                                       {u.profileImage ? (
                                                            <img src={u.profileImage} alt={u.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                       ) : (
-                                                           u.fullName?.charAt(0) || u.email?.charAt(0).toUpperCase()
+                                                           (u.fullName?.charAt(0) || u.email?.charAt(0) || '?').toUpperCase()
                                                       )}
                                                  </div>
                                                  <div>
@@ -308,13 +376,23 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                         <td style={{ padding: '20px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                 <ActionButton icon={<Eye size={16} />} color="var(--primary)" onClick={() => handleViewDetails(u)} />
-                                                <ActionButton icon={<Edit2 size={16} />} onClick={() => handleOpenEditModal(u)} />
-                                                <ActionButton icon={<Trash2 size={16} />} color="#ef4444" onClick={() => handleDelete(u.id)} />
+                                                <ActionButton
+                                                    icon={<Edit2 size={16} />}
+                                                    onClick={() => handleOpenEditModal(u)}
+                                                    disabled={isProtectedForAdmin(u)}
+                                                    title={isProtectedForAdmin(u) ? 'Admin cannot edit Super Admin accounts' : 'Edit user'}
+                                                />
+                                                <ActionButton
+                                                    icon={<Trash2 size={16} />}
+                                                    color="#ef4444"
+                                                    onClick={() => handleDelete(u)}
+                                                    disabled={isProtectedForAdmin(u)}
+                                                    title={isProtectedForAdmin(u) ? 'Admin cannot delete Super Admin accounts' : 'Delete user'}
+                                                />
                                             </div>
                                         </td>
                                     </motion.tr>
                                 ))}
-                                </AnimatePresence>
                             </tbody>
                         </table>
                     </div>
@@ -546,17 +624,20 @@ function InfoCard({ icon, label, value }: any) {
     );
 }
 
-function ActionButton({ icon, color, onClick }: any) {
+function ActionButton({ icon, color, onClick, disabled, title }: any) {
     return (
         <button 
             onClick={onClick}
+            disabled={disabled}
+            title={title}
             style={{ 
-                background: 'rgba(255,255,255,0.03)', 
+                background: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.03)', 
                 border: '1px solid rgba(255,255,255,0.05)', 
-                color: color || 'var(--text-bright)', 
+                color: disabled ? 'rgba(255,255,255,0.28)' : (color || 'var(--text-bright)'), 
                 padding: '10px', 
                 borderRadius: '10px', 
-                cursor: 'pointer' 
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.55 : 1,
             }}
         >
             {icon}
