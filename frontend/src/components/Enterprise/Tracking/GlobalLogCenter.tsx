@@ -25,9 +25,9 @@ export default function GlobalLogCenter() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '50px' }}>
                 <div>
                     <h1 style={{ fontSize: '2.6rem', fontWeight: 900, marginBottom: '10px', background: 'linear-gradient(90deg, #fff, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        Universal System Audit
+                        System Activity Log
                     </h1>
-                    <p style={{ color: '#aaa', fontWeight: 700, fontSize: '1.1rem' }}>Global monitoring of every interaction, session, and administrative action across Bytecode Trainings.</p>
+                    <p style={{ color: '#aaa', fontWeight: 700, fontSize: '1.1rem' }}>Track interactions, sessions, and admin actions across Bytecode Trainings.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '15px' }}>
                     <button className="export-btn"><FileSpreadsheet size={18} /> EXCEL</button>
