@@ -119,6 +119,14 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
 
     const API_BASE = 'http://localhost:8080/api/chat';
 
+    // Helper to check if message is from current user
+    const isMessageFromCurrentUser = (senderId: string | null | undefined): boolean => {
+        if (!senderId || !currentUser) return false;
+        const senderIdStr = senderId.toString().trim();
+        const currentIdStr = (currentUser?.id || currentUser?._id)?.toString().trim();
+        return senderIdStr === currentIdStr && senderIdStr.length > 0;
+    };
+
     const fetchChats = async () => {
         try {
             const res = await fetch(API_BASE);
@@ -172,17 +180,21 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
             const data = await res.json();
             console.log(`Resolved ${data.length} messages for Hub: ${chatId}`);
             const mapped: Message[] = data.map((msg: any) => {
-                const sId = (msg.sender?._id || msg.sender)?.toString();
+                const sId = (msg.sender?._id || msg.sender?.id || msg.sender)?.toString();
                 const curId = (currentUser?.id || currentUser?._id)?.toString();
                 const isMe = sId === curId;
                 const foundUser = allUsers.find(u => (u.id?.toString() === sId || u._id?.toString() === sId));
+
+                // Prioritize sender object if it's populated with full user data
+                const senderObj = typeof msg.sender === 'object' && msg.sender?._id ? msg.sender : foundUser;
+                const resolvedSenderImage = isMe ? currentUser.profileImage : (senderObj?.profileImage || '');
 
                 return {
                     id: msg._id || msg.id,
                     _id: msg._id || msg.id,
                     senderId: sId,
-                    senderName: isMe ? (currentUser.fullName || currentUser.name || "You") : (msg.sender?.fullName || foundUser?.fullName || 'Member'),
-                    senderImage: isMe ? currentUser.profileImage : (msg.sender?.profileImage || foundUser?.profileImage),
+                    senderName: isMe ? (currentUser.fullName || currentUser.name || "You") : (senderObj?.fullName || 'Member'),
+                    senderImage: resolvedSenderImage,
                     text: msg.text,
                     timestamp: new Date(msg.createdAt),
                     type: msg.type,
@@ -532,10 +544,11 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
             selected: true
         }));
         
+        const userName = currentUser?.fullName || currentUser?.name || 'ByteChat User';
         setEmailData({
             recipients: participantList,
             subject: `ByteChat: Following up on hub "${chatObj.name}"`,
-            body: `Hi there,\n\nI'm reaching out regarding our discussion in the ${chatObj.name} hub on ByteChat.\n\nRegards,\n${currentUser.fullName}`
+            body: `Hi there,\n\nI'm reaching out regarding our discussion in the ${chatObj.name} hub on ByteChat.\n\nRegards,\n${userName}`
         });
         setIsEmailModalVisible(true);
     };
@@ -559,11 +572,45 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
         fetchChats();
         fetchAllUsers();
 
-        const syncUser = () => {
+        const syncUser = async () => {
             const stored = localStorage.getItem('user');
             if (stored) {
                 const parsed = JSON.parse(stored);
-                setCurrentUser(parsed);
+                const userId = parsed.id || parsed._id;
+                
+                // First set from localStorage
+                const normalizedName = parsed.fullName || parsed.name || parsed.email || 'You';
+                setCurrentUser({
+                    ...parsed,
+                    id: userId,
+                    _id: userId,
+                    fullName: normalizedName,
+                    name: normalizedName
+                });
+
+                // Then fetch full profile from API to get all details (profileImage, etc)
+                if (userId) {
+                    try {
+                        const res = await fetch(`http://localhost:8080/api/users/${userId}`);
+                        if (res.ok) {
+                            const fullProfile = await res.json();
+                            const apiName = fullProfile.fullName || fullProfile.name || parsed.name || parsed.email || 'You';
+                            const mergedUser = {
+                                ...parsed,
+                                ...fullProfile,
+                                id: userId,
+                                _id: userId,
+                                fullName: apiName,
+                                name: apiName
+                            };
+                            setCurrentUser(mergedUser);
+                            // Update localStorage with full profile data
+                            localStorage.setItem('user', JSON.stringify(mergedUser));
+                        }
+                    } catch (err) {
+                        console.error('Failed to fetch user profile:', err);
+                    }
+                }
             }
         };
 
@@ -1154,8 +1201,8 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                 display: 'flex',
                                 gap: '14px',
                                 maxWidth: '85%',
-                                alignSelf: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'flex-end' : 'flex-start',
-                                flexDirection: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'row-reverse' : 'row'
+                                alignSelf: isMessageFromCurrentUser(msg.senderId) ? 'flex-end' : 'flex-start',
+                                flexDirection: isMessageFromCurrentUser(msg.senderId) ? 'row-reverse' : 'row'
                             }}
                         >
                             <div style={{ width: 36, height: 36, borderRadius: '12px', background: msg.type === 'AI' ? '#f5f3ff' : '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'flex-start', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
@@ -1169,9 +1216,9 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                     )
                                 )}
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'flex-end' : 'flex-start' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMessageFromCurrentUser(msg.senderId) ? 'flex-end' : 'flex-start' }}>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', marginBottom: '4px', padding: '0 4px' }}>
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e1b4b' }}>{(msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'You' : msg.senderName}</span>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e1b4b' }}>{isMessageFromCurrentUser(msg.senderId) ? 'You' : msg.senderName}</span>
                                     <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 600 }}>{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
 
@@ -1193,18 +1240,18 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                     style={{
                                         position: 'relative',
                                         padding: '12px 18px',
-                                        background: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'linear-gradient(135deg, #6d28d9, #4f46e5)' : '#fff',
-                                        color: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '#fff' : '#334155',
+                                        background: isMessageFromCurrentUser(msg.senderId) ? 'linear-gradient(135deg, #6d28d9, #4f46e5)' : '#fff',
+                                        color: isMessageFromCurrentUser(msg.senderId) ? '#fff' : '#334155',
                                         border: '1px solid rgba(109, 40, 217, 0.08)',
                                         fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.5',
-                                        boxShadow: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '0 10px 25px rgba(109, 40, 217, 0.2)' : '0 4px 15px rgba(0,0,0,0.03)',
-                                        borderRadius: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id)
+                                        boxShadow: isMessageFromCurrentUser(msg.senderId) ? '0 10px 25px rgba(109, 40, 217, 0.2)' : '0 4px 15px rgba(0,0,0,0.03)',
+                                        borderRadius: isMessageFromCurrentUser(msg.senderId)
                                             ? '20px 4px 20px 20px'
                                             : '4px 20px 20px 20px'
                                     }}
                                 >
                                     {/* Action Hover */}
-                                    <div className="message-actions" style={{ position: 'absolute', top: '-10px', right: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? 'none' : '-65px', left: (msg.senderId === currentUser?.id || msg.senderId === currentUser?._id) ? '-65px' : 'none', display: 'flex', gap: '4px', zIndex: 10 }}>
+                                    <div className="message-actions" style={{ position: 'absolute', top: '-10px', right: isMessageFromCurrentUser(msg.senderId) ? 'none' : '-65px', left: isMessageFromCurrentUser(msg.senderId) ? '-65px' : 'none', display: 'flex', gap: '4px', zIndex: 10 }}>
                                         <button onClick={() => setReplyingTo(msg)} title="Reply" style={{ width: 22, height: 22, borderRadius: '50%', background: '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}><CornerDownRight size={10} /></button>
                                         <button onClick={() => setIsForwardingMessage(msg)} title="Forward" style={{ width: 22, height: 22, borderRadius: '50%', background: '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}><Share2 size={10} /></button>
                                         <button onClick={() => setIsDeletingMessage(msg)} title="Delete" style={{ width: 22, height: 22, borderRadius: '50%', background: '#fff', border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}><Trash2 size={10} /></button>
@@ -1544,7 +1591,7 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <p style={{ fontSize: '0.85rem', fontWeight: 800 }}>{p.fullName}</p>
-                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{p.role}</p>
+                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{p.email || p.role || 'Member'}</p>
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px' }}>
                                                 <button onClick={() => handlePromoteAdmin(p._id)} style={{ padding: '6px', borderRadius: '8px', background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer' }}><Shield size={14} color="#6d28d9" /></button>
@@ -1688,7 +1735,7 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <p style={{ fontSize: '0.85rem', fontWeight: 700 }}>{user.fullName}</p>
-                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{user.role}</p>
+                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{user.email || user.role || 'Member'}</p>
                                             </div>
                                             {isSelected && <CheckCircle2 size={18} color="#6d28d9" />}
                                         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { 
     Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar, 
     Video, FileText, CheckCircle, Target, Search, Phone, DollarSign, 
@@ -108,6 +108,9 @@ const MENUS: Record<string, MenuItem[]> = {
 export default function DashboardLayout({ children, role, noPadding }: DashboardLayoutProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const expectedRole = role === 'super_admin' ? 'SUPER_ADMIN' : role === 'admin' ? 'ADMIN' : role?.toUpperCase();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
     const [userName, setUserName] = useState('User');
@@ -167,15 +170,35 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
             if (storedUser) {
                 const parsed = JSON.parse(storedUser);
                 setLoggedUser(parsed);
-                if (parsed.id) {
+                const userId = parsed.id || parsed._id;
+                if (userId) {
                     try {
-                        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${parsed.id}`);
+                        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${userId}`);
                         if (result.ok && result.data) {
                             const data = result.data;
+                                    const apiRole = String(data.role || parsed.role || '').toUpperCase();
                             const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
+
+                            if (expectedRole && apiRole && expectedRole !== apiRole) {
+                                if (expectedRole === 'SUPER_ADMIN') {
+                                    router.push(apiRole === 'ADMIN' ? '/admin' : '/login');
+                                } else if (expectedRole === 'ADMIN') {
+                                    router.push(apiRole === 'SUPER_ADMIN' ? '/super-admin' : '/login');
+                                }
+                                return;
+                            }
+
                             setUserName(actualName);
                             // Update local storage so it stays fresh with FULL data
-                            const updatedUser = { ...parsed, ...data, name: actualName };
+                            const updatedUser = {
+                                ...parsed,
+                                ...data,
+                                id: userId,
+                                _id: userId,
+                                name: actualName,
+                                fullName: actualName,
+                                role: apiRole || parsed.role
+                            };
                             localStorage.setItem('user', JSON.stringify(updatedUser));
                             setProfileForm({ 
                                 fullName: actualName, 
@@ -195,7 +218,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                         setUserName(parsed.name || parsed.fullName || parsed.email || 'User');
                     }
                 } else {
-                    setUserName(parsed.name || 'User');
+                    setUserName(parsed.name || parsed.fullName || parsed.email || 'User');
                 }
             }
         }
