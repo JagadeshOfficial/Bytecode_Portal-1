@@ -12,6 +12,7 @@ import { fetchJsonSafe } from '@/lib/fetchJson';
 
 export default function TutorSalaryPage() {
     const [user, setUser] = useState<any>(null);
+    const [payouts, setPayouts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [leaveReason, setLeaveReason] = useState('');
@@ -28,7 +29,9 @@ export default function TutorSalaryPage() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const parsed = JSON.parse(storedUser);
-            fetchUserData(parsed.id || parsed._id);
+            const userId = parsed.id || parsed._id;
+            fetchUserData(userId);
+            fetchPayouts(userId);
         }
     }, []);
 
@@ -39,6 +42,13 @@ export default function TutorSalaryPage() {
             setUser(result.data);
         }
         setLoading(false);
+    };
+
+    const fetchPayouts = async (userId: string) => {
+        const result = await fetchJsonSafe<any[]>(`http://localhost:8080/api/payouts/user/${userId}`);
+        if (result.ok && Array.isArray(result.data)) {
+            setPayouts(result.data);
+        }
     };
 
     const handleApplyLeave = async (e: React.FormEvent) => {
@@ -84,12 +94,6 @@ export default function TutorSalaryPage() {
     const totalDeductions = deductions + leaveDeduction;
     const netSalary = salary - totalDeductions;
 
-    const paymentHistory = [
-        { month: 'April 2026', amount: netSalary, status: 'PAID', date: '2026-04-15' },
-        { month: 'March 2026', amount: netSalary, status: 'PAID', date: '2026-03-15' },
-        { month: 'February 2026', amount: netSalary, status: 'PAID', date: '2026-02-15' },
-    ];
-
     return (
         <DashboardLayout role="tutor">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -116,7 +120,7 @@ export default function TutorSalaryPage() {
                     {/* --- LEAVE LOGS & REQUESTS --- */}
                     <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Leave & Request History</h3>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Pending Applications</h3>
                          </div>
                          
                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -132,9 +136,26 @@ export default function TutorSalaryPage() {
                             )) : (
                                 <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-dim)' }}>
                                     <Info size={40} style={{ marginBottom: '15px', opacity: 0.2 }} />
-                                    <p>No recent requests or leave records.</p>
+                                    <p>No pending leave applications.</p>
                                 </div>
                             )}
+                         </div>
+
+                         <div style={{ marginTop: '3rem' }}>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Official history</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {user?.leaveHistory?.length > 0 ? [...user.leaveHistory].reverse().map((log: string, i: number) => {
+                                    const isApproved = log.startsWith('APPROVED:');
+                                    return (
+                                        <div key={i} style={{ padding: '12px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', borderLeft: `3px solid ${isApproved ? '#10b981' : '#ef4444'}`, fontSize: '0.8rem' }}>
+                                            <div style={{ fontWeight: 900, color: isApproved ? '#10b981' : '#ef4444', fontSize: '0.65rem' }}>{isApproved ? 'APPROVED' : 'REJECTED'}</div>
+                                            <div style={{ marginTop: '4px' }}>{log.replace('APPROVED: ', '').replace('REJECTED: ', '')}</div>
+                                        </div>
+                                    );
+                                }) : (
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>No historical records.</p>
+                                )}
+                            </div>
                          </div>
                     </div>
 
@@ -143,30 +164,32 @@ export default function TutorSalaryPage() {
                         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
                             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Quotas & Utilization</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <UtilizationRow label="Allocated Leaves" value={user?.leavesTotal || 10} total={15} color="var(--primary)" />
-                                <UtilizationRow label="Approved Leaves" value={user?.leavesAccepted || 0} total={user?.leavesTotal || 10} color="#10b981" />
-                                <UtilizationRow label="Rejected Requests" value={user?.leavesRejected || 0} total={5} color="#ef4444" />
+                                <UtilizationRow label="Allocated Leaves" value={user?.leavesTotal ?? 0} total={25} color="var(--primary)" />
+                                <UtilizationRow label="Approved Leaves" value={user?.leavesAccepted ?? 0} total={user?.leavesTotal ?? 0} color="#10b981" />
+                                <UtilizationRow label="Rejected Requests" value={user?.leavesRejected ?? 0} total={5} color="#ef4444" />
                             </div>
                         </div>
 
-                        {/* --- PAYMENT HISTORY --- */}
-                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '1.5rem' }}>Recent Settlements</h3>
+                         {/* --- PAYOUT HISTORY --- */}
+                         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Payout History</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {paymentHistory.map((p, i) => (
+                                {payouts.length > 0 ? payouts.map((p, i) => (
                                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px' }}>
                                         <div>
                                             <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{p.month}</div>
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{p.date}</div>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{new Date(p.payoutDate).toLocaleDateString()}</div>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>₹{p.amount.toLocaleString()}</div>
-                                            <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#10b981' }}>SUCCESS</div>
+                                            <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>₹{(p.netAmount || 0).toLocaleString()}</div>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 900, color: p.status === 'PAID' ? '#10b981' : '#f59e0b' }}>{p.status}</div>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)', fontSize: '0.75rem' }}>No settlement records found.</div>
+                                )}
                             </div>
-                        </div>
+                         </div>
                     </div>
                 </div>
             </motion.div>

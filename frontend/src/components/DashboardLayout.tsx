@@ -136,6 +136,11 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [shouldShake, setShouldShake] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // --- SIDEBAR SCROLL PERSISTENCE ---
     useEffect(() => {
@@ -370,7 +375,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                 
                 <div id="sidebar-scroll-container" className={styles.sidebarContent}>
                     <ul className={styles.menu}>
-                        {menuItems.map((item, index) => {
+                        {mounted && menuItems.map((item, index) => {
                             const hasSubItems = item.subItems && item.subItems.length > 0;
                             const isSubmenuOpen = openSubmenus[item.label] || (item.label === 'Games' && pathname === '/games');
                             const uniqueKey = `${item.label}-${index}`;

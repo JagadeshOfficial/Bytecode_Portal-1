@@ -3310,3 +3310,392 @@ Found 1 notifications
 GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
 Found 1 notifications
 [0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.367 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.764 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.634 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 46.406 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.678 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.015 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.438 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.082 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.545 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 252.641 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.730 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 64.812 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 50.333 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 47.999 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.500 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.986 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 143.190 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 41.341 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.850 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 28.258 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.747 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 147.442 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 37.130 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 28.512 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 37.288 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.916 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 41.721 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.876 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 142.290 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 27.995 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 60.065 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 36.824 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 35.722 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 28.046 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.347 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.797 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.945 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.481 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.550 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.553 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.467 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 151.091 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 27.555 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.894 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.754 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.996 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.833 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.418 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 59.168 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.256 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.303 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.917 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 46.599 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.804 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.317 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.657 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.618 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.361 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.407 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.286 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.570 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.811 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.702 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.045 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.824 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 42.719 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 178.718 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 42.246 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.716 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 78.684 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 45.448 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 27.966 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 124.439 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 38.302 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 30.553 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 150.169 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 32.070 ms - -[0m
+[0mGET /api/users [32m200[0m 233.814 ms - 637202[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 45.378 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 32.797 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.346 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 30.538 ms - -[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76b8 [32m204[0m 1.977 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76b8 [32m200[0m 203.235 ms - 378754[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 38.125 ms - 378695[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.431 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 34.431 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 32.013 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 115.013 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 27.443 ms - -[0m
+[0mGET /api/users [32m200[0m 174.925 ms - 637281[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.217 ms - -[0m
+[0mGET /api/academic/batches/trainer/698cb02cc71948c3567e76b8 [33m404[0m 5.091 ms - 192[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 58.992 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 66.156 ms - -[0m
+[0mGET /api/academic/batches/trainer/698cb02cc71948c3567e76b8 [33m404[0m 7.223 ms - 192[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76b8 [32m204[0m 0.485 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76b8 [32m200[0m 321.992 ms - 378764[0m
+[0mGET /api/users [32m200[0m 84.811 ms - 637291[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 61.439 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 33.441 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.029 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 148.685 ms - 378705[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 34.475 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 27.351 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 33.700 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.349 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 50.406 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 34.041 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 34.307 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.524 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.386 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 34.993 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.514 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 56.199 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 56.046 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 44.544 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 49.532 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 35.208 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 215.905 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 39.627 ms - -[0m
+[0mGET /api/users [32m200[0m 446.462 ms - 637291[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 42.853 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 59.139 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 48.089 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 63.764 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 53.093 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 82.863 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 45.420 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 45.810 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 66.540 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.938 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.143 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.006 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/payouts/user/698cb02cc71948c3567e76b8 [32m200[0m 45.122 ms - 2[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.984 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 218.951 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 35.608 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 27.457 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.733 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.682 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.146 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 43.846 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 55.003 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.997 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.073 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 38.428 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.363 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.113 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.070 ms - -[0m

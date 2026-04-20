@@ -3,7 +3,7 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import PinpointDashboard from '@/components/Academic/PinpointDashboard';
 
-type DashboardRole = 'super_admin' | 'admin';
+type DashboardRole = 'super_admin' | 'admin' | 'tutor';
 
 export function PinpointHubPageContent({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     return (

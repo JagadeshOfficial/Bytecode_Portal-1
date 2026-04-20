@@ -16,7 +16,7 @@ import {
     Briefcase, LogOut, Info, Trash2, Share2, Mail, MicOff, VideoOff, Monitor, ScreenShare, ScreenShareOff, StopCircle as StopIcon
 } from 'lucide-react';
 
-type DashboardRole = 'super_admin' | 'admin';
+type DashboardRole = 'super_admin' | 'admin' | 'tutor';
 
 interface Message {
     id: string;
@@ -59,7 +59,7 @@ interface ChatItem {
 export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRole }) {
     const router = useRouter();
     const pathname = usePathname();
-    const baseRoute = role === 'admin' ? '/admin' : '/super-admin';
+    const baseRoute = role === 'admin' ? '/admin' : role === 'tutor' ? '/tutor' : '/super-admin';
     const [isMounted, setIsMounted] = useState(false);
     const [chats, setChats] = useState<ChatItem[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);

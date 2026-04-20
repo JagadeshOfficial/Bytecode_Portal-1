@@ -17,6 +17,7 @@ const UserSchema = new mongoose.Schema({
     profileImage: String,
     active: { type: Boolean, default: true },
     salary: Number,
+    deductions: Number,
     attendanceRate: { type: Number, default: 0 },
     leavesTotal: { type: Number, default: 0 },
     leavesAccepted: { type: Number, default: 0 },

@@ -1336,3 +1336,25 @@
  GET /icon?d878d31cd40b5385 200 in 59ms (compile: 20ms, render: 38ms)
  GET /tutor/reports 200 in 1769ms (compile: 1739ms, render: 30ms)
 ✓ Compiled in 1829ms
+ GET /tutor/salary 200 in 1765ms (compile: 1377ms, render: 389ms)
+ GET /tutor/salary 200 in 147ms (compile: 8ms, render: 138ms)
+ GET /tutor/salary 200 in 183ms (compile: 15ms, render: 167ms)
+ GET /icon?d878d31cd40b5385 200 in 78ms (compile: 6ms, render: 72ms)
+ GET /icon?d878d31cd40b5385 200 in 30ms (compile: 24ms, render: 6ms)
+✓ Compiled in 137ms
+✓ Compiled in 101ms
+✓ Compiled in 278ms
+✓ Compiled in 98ms
+✓ Compiled in 118ms
+ GET /tutor/salary 200 in 1139ms (compile: 420ms, render: 719ms)
+ GET /icon?d878d31cd40b5385 200 in 70ms (compile: 4ms, render: 66ms)
+ GET /super-admin/users 200 in 583ms (compile: 127ms, render: 456ms)
+ GET /super-admin/users 200 in 104ms (compile: 17ms, render: 87ms)
+ GET /tutor/salary 200 in 119ms (compile: 17ms, render: 103ms)
+ GET /icon?d878d31cd40b5385 200 in 47ms (compile: 4ms, render: 43ms)
+✓ Compiled in 314ms
+ GET /super-admin/users 200 in 125ms (compile: 18ms, render: 107ms)
+✓ Compiled in 257ms
+✓ Compiled in 81ms
+✓ Compiled in 70ms
+✓ Compiled in 129ms

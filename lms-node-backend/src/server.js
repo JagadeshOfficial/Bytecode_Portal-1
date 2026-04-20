@@ -36,6 +36,7 @@ app.use('/api/academic', require('./routes/academicRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/attendance', require('./routes/attendanceRoutes'));
+app.use('/api/payouts', require('./routes/payoutRoutes'));
 
 app.use(require('./middleware/errorMiddleware'));
 

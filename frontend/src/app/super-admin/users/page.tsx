@@ -212,8 +212,71 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         if (activeTab === 'STAFF') {
             return matchesSearch && ['HR', 'COUNSELOR', 'FINANCE', 'ADMIN', 'SUPER_ADMIN', 'PLACEMENT', 'SOCIAL_MEDIA', 'TUTOR'].includes(normalizedRole);
         }
+        if (activeTab === 'REQUESTS') {
+            return matchesSearch && u.requirementRequests?.length > 0;
+        }
         return matchesSearch;
     });
+
+    const handleLeaveApproval = async (user: any, requestIndex: number) => {
+        if (!confirm('Approve this leave request?')) return;
+        const requestText = user.requirementRequests[requestIndex];
+        const updatedRequests = user.requirementRequests.filter((_: any, i: number) => i !== requestIndex);
+        const updatedHistory = [...(user.leaveHistory || []), `APPROVED: ${requestText}`];
+        
+        try {
+            const res = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requirementRequests: updatedRequests,
+                    leaveHistory: updatedHistory,
+                    leavesAccepted: (user.leavesAccepted || 0) + 1,
+                    actingUserId: currentUser?.id || currentUser?._id || '',
+                    actingUserRole: currentUserRole,
+                })
+            });
+            if (res.ok) {
+                showNotification('Leave request approved.');
+                fetchUsers();
+                if (selectedUser?.id === user.id) {
+                    setSelectedUser({ ...user, requirementRequests: updatedRequests, leaveHistory: updatedHistory, leavesAccepted: (user.leavesAccepted || 0) + 1 });
+                }
+            }
+        } catch (err) {
+            showNotification('Failed to approve request.', 'error');
+        }
+    };
+
+    const handleLeaveRejection = async (user: any, requestIndex: number) => {
+        if (!confirm('Reject this leave request?')) return;
+        const requestText = user.requirementRequests[requestIndex];
+        const updatedRequests = user.requirementRequests.filter((_: any, i: number) => i !== requestIndex);
+        const updatedHistory = [...(user.leaveHistory || []), `REJECTED: ${requestText}`];
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requirementRequests: updatedRequests,
+                    leaveHistory: updatedHistory,
+                    leavesRejected: (user.leavesRejected || 0) + 1,
+                    actingUserId: currentUser?.id || currentUser?._id || '',
+                    actingUserRole: currentUserRole,
+                })
+            });
+            if (res.ok) {
+                showNotification('Leave request rejected.');
+                fetchUsers();
+                if (selectedUser?.id === user.id) {
+                    setSelectedUser({ ...user, requirementRequests: updatedRequests, leaveHistory: updatedHistory, leavesRejected: (user.leavesRejected || 0) + 1 });
+                }
+            }
+        } catch (err) {
+            showNotification('Failed to reject request.', 'error');
+        }
+    };
 
     const sortedUsers = [...filteredUsers].sort((a, b) => {
         const nameA = (a.fullName || a.name || a.email || '').toLowerCase();
@@ -245,26 +308,35 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
 
                 {/* --- ROLE FILTER TABS --- */}
                 <div style={{ display: 'flex', gap: '15px', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '10px' }}>
-                    {['ALL', 'STUDENT', 'TRAINER', 'STAFF'].filter(r => isFullAdmin || r !== 'STAFF').map(role => (
-                        <button 
-                            key={role}
-                            onClick={() => setActiveTab(role)}
-                            style={{
-                                padding: '10px 20px',
-                                borderRadius: '12px',
-                                background: activeTab === role ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
-                                border: activeTab === role ? 'none' : '1px solid rgba(255,255,255,0.05)',
-                                color: activeTab === role ? '#000' : 'var(--text-dim)',
-                                fontWeight: 800,
-                                fontSize: '0.8rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                whiteSpace: 'nowrap'
-                            }}
-                        >
-                            {role === 'TRAINER' ? 'TUTORS' : role === 'STAFF' ? 'STAFF / HR / ADMIN' : role}
-                        </button>
-                    ))}
+                    {['ALL', 'STUDENT', 'TRAINER', 'STAFF', 'REQUESTS'].filter(r => isFullAdmin || r !== 'STAFF').map(role => {
+                        const requestCount = users.filter(u => u.requirementRequests?.length > 0).length;
+                        return (
+                            <button 
+                                key={role}
+                                onClick={() => setActiveTab(role)}
+                                style={{
+                                    padding: '10px 20px',
+                                    borderRadius: '12px',
+                                    background: activeTab === role ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
+                                    border: activeTab === role ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                                    color: activeTab === role ? '#000' : 'var(--text-dim)',
+                                    fontWeight: 800,
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    whiteSpace: 'nowrap',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                {role === 'TRAINER' ? 'TUTORS' : role === 'STAFF' ? 'STAFF / HR / ADMIN' : role === 'REQUESTS' ? 'LEAVE REQUESTS' : role}
+                                {role === 'REQUESTS' && requestCount > 0 && (
+                                    <span style={{ background: '#ef4444', color: '#fff', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '6px' }}>{requestCount}</span>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* --- FILTER & SEARCH BAR --- */}
@@ -458,9 +530,21 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                     <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '20px', minHeight: '100px' }}>
                                          {selectedUser.requirementRequests?.length > 0 ? (
                                               selectedUser.requirementRequests.map((req: string, i: number) => (
-                                                  <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', fontSize: '0.85rem' }}>
-                                                      <HelpCircle size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
-                                                      <p>{req}</p>
+                                                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                      <div style={{ display: 'flex', gap: '10px' }}>
+                                                          <HelpCircle size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+                                                          <p style={{ margin: 0, fontSize: '0.85rem' }}>{req}</p>
+                                                      </div>
+                                                      <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                                                           <button 
+                                                               onClick={() => handleLeaveApproval(selectedUser, i)}
+                                                               style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                                           >APPROVE</button>
+                                                           <button 
+                                                               onClick={() => handleLeaveRejection(selectedUser, i)}
+                                                               style={{ padding: '6px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                                           >REJECT</button>
+                                                      </div>
                                                   </div>
                                               ))
                                          ) : (
