@@ -91,6 +91,13 @@ router.put('/:id', async (req, res) => {
             'courseName',
             'lastLoginIp',
             'lastLocation',
+            'salary',
+            'deductions',
+            'leavesTotal',
+            'leavesAccepted',
+            'leavesRejected',
+            'leaveHistory',
+            'requirementRequests',
         ];
 
         allowedFields.forEach((field) => {

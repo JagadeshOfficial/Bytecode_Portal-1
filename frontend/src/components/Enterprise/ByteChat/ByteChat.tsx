@@ -51,6 +51,8 @@ interface ChatItem {
     status?: 'ONLINE' | 'OFFLINE' | 'AWAY';
     category: 'OFFICIAL' | 'CHANNELS' | 'TEAM' | 'SYSTEM' | 'DIRECT';
     participants: any[];
+    admins: string[];
+    createdBy?: string;
     isArchived: boolean;
 }
 
@@ -118,6 +120,11 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
     const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     const API_BASE = 'http://localhost:8080/api/chat';
+    const currentChat = chats.find(c => c.id === activeChat);
+    const curUserId = String(currentUser?.id || currentUser?._id || '');
+    const isCurrentUserAdmin = currentChat?.admins?.some(a => String(a) === curUserId) || 
+                               (currentChat?.createdBy && String(currentChat.createdBy) === curUserId) ||
+                               (role === 'super_admin' && currentChat?.participants?.some(p => String(p._id || p.id || p) === curUserId));
 
     // Helper to check if message is from current user
     const isMessageFromCurrentUser = (senderId: string | null | undefined): boolean => {
@@ -129,20 +136,39 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
 
     const fetchChats = async () => {
         try {
-            const res = await fetch(API_BASE);
+            // Get user from state or localStorage
+            let userId = currentUser?.id || currentUser?._id;
+            if (!userId) {
+                const stored = localStorage.getItem('user');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    userId = parsed.id || parsed._id;
+                }
+            }
+
+            const url = userId ? `${API_BASE}?userId=${userId}` : API_BASE;
+            const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch chats');
             const data = await res.json();
             const formatted = data.map((c: any) => {
                 let chatName = c.name;
-                if (c.type === 'DIRECT' && currentUser) {
-                    const other = c.participants?.find((p: any) => (p._id || p) !== (currentUser.id || currentUser._id));
-                    if (other && typeof other === 'object') chatName = other.fullName;
+                let chatImage = c.image;
+
+                if (c.type === 'DIRECT' && userId) {
+                    const other = c.participants?.find((p: any) => {
+                        const pid = typeof p === 'object' ? (p._id || p.id) : p;
+                        return String(pid) !== String(userId);
+                    });
+                    if (other && typeof other === 'object') {
+                        chatName = other.fullName;
+                        chatImage = other.profileImage;
+                    }
                 }
 
                 return {
                     id: c._id,
                     name: chatName || 'Personal Chat',
-                    image: c.image,
+                    image: chatImage,
                     type: c.type,
                     lastMessage: c.lastMessage?.text || 'No messages yet...',
                     time: c.lastMessage?.timestamp ? new Date(c.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
@@ -150,11 +176,13 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                     category: c.type === 'DIRECT' ? 'DIRECT' : (c.category || 'CHANNELS'),
                     status: 'ONLINE',
                     participants: c.participants,
+                    admins: c.admins || [],
+                    createdBy: c.createdBy,
                     isArchived: !!c.isArchived
                 };
             });
             setChats(formatted);
-            if (!activeChat && formatted.length > 0) setActiveChat(formatted[0].id);
+            if (!activeChatRef.current && formatted.length > 0) setActiveChat(formatted[0].id);
 
             // Sync activeChatRef
             if (activeChat) activeChatRef.current = activeChat;
@@ -861,7 +889,9 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                 name: newChatType === 'DIRECT' ? 'Private Chat' : newChatName,
                 type: newChatType,
                 category: newChatType === 'DIRECT' ? 'DIRECT' : newChatCategory,
-                participants: [currentUser?.id || currentUser?._id, ...selectedMembers].filter(Boolean)
+                participants: [currentUser?.id || currentUser?._id, ...selectedMembers].filter(Boolean),
+                admins: [currentUser?.id || currentUser?._id].filter(Boolean),
+                createdBy: currentUser?.id || currentUser?._id
             };
             console.log('Creating Hub with payload:', payload);
 
@@ -916,9 +946,21 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId })
             });
-            if (res.ok) fetchParticipants(activeChat);
+            if (res.ok) fetchChats();
         } catch (err) {
             console.error('Admin promotion error:', err);
+        }
+    };
+
+    const handleRemoveAdmin = async (userId: string) => {
+        if (!activeChat) return;
+        try {
+            const res = await fetch(`${API_BASE}/${activeChat}/admins/${userId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) fetchChats();
+        } catch (err) {
+            console.error('Admin removal error:', err);
         }
     };
 
@@ -1485,12 +1527,14 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                         </button>
                                     ))}
                                 </div>
-                                <button
-                                    onClick={() => setIsEditingDetails(!isEditingDetails)}
-                                    style={{ background: isEditingDetails ? '#6d28d9' : '#f5f3ff', color: isEditingDetails ? '#fff' : '#6d28d9', padding: '6px 14px', borderRadius: '10px', border: 'none', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
-                                >
-                                    {isEditingDetails ? 'SAVE' : 'EDIT'}
-                                </button>
+                                {isCurrentUserAdmin && (
+                                    <button
+                                        onClick={() => setIsEditingDetails(!isEditingDetails)}
+                                        style={{ background: isEditingDetails ? '#6d28d9' : '#f5f3ff', color: isEditingDetails ? '#fff' : '#6d28d9', padding: '6px 14px', borderRadius: '10px', border: 'none', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
+                                    >
+                                        {isEditingDetails ? 'SAVE' : 'EDIT'}
+                                    </button>
+                                )}
                             </div>
 
                             {activeDetailTab === 'OVERVIEW' ? (
@@ -1584,47 +1628,77 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                 </>
                             ) : (
                                 <div style={{ height: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                    {participants.map(p => (
-                                        <div key={p._id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '16px', background: '#fcfaff' }}>
-                                            <div style={{ width: 36, height: 36, borderRadius: '10px', background: p.profileImage ? 'none' : '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem', overflow: 'hidden' }}>
-                                                {p.profileImage ? <img src={p.profileImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (p.fullName?.[0] || 'U')}
+                                    {participants.map(p => {
+                                        const pId = String(p._id || p.id);
+                                        const isMemberAdmin = currentChat?.admins?.some(a => String(a) === pId);
+                                        const isSelf = pId === String(currentUser?.id || currentUser?._id);
+                                        
+                                        return (
+                                            <div key={pId} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '16px', background: '#fcfaff' }}>
+                                                <div style={{ width: 36, height: 36, borderRadius: '10px', background: p.profileImage ? 'none' : '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem', overflow: 'hidden' }}>
+                                                    {p.profileImage ? <img src={p.profileImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (p.fullName?.[0] || 'U')}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <p style={{ fontSize: '0.85rem', fontWeight: 800 }}>{p.fullName}</p>
+                                                        {isMemberAdmin && <Shield size={12} color="#6d28d9" fill="#f5f3ff" />}
+                                                    </div>
+                                                    <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{p.email || p.role || 'Member'}</p>
+                                                </div>
+                                                {isCurrentUserAdmin && !isSelf && (
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <button 
+                                                            onClick={() => isMemberAdmin ? handleRemoveAdmin(p._id) : handlePromoteAdmin(p._id)} 
+                                                            title={isMemberAdmin ? "Demote from Admin" : "Promote to Admin"}
+                                                            style={{ padding: '6px', borderRadius: '8px', background: isMemberAdmin ? 'rgba(109, 40, 217, 0.1)' : '#fff', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                                                        >
+                                                            <Shield size={14} color="#6d28d9" fill={isMemberAdmin ? "#6d28d9" : "none"} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleKickMember(p._id)} 
+                                                            title="Remove Member"
+                                                            style={{ padding: '6px', borderRadius: '8px', background: '#fff', border: '1px solid #fee2e2', cursor: 'pointer' }}
+                                                        >
+                                                            <LogOut size={14} color="#ef4444" />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div style={{ flex: 1 }}>
-                                                <p style={{ fontSize: '0.85rem', fontWeight: 800 }}>{p.fullName}</p>
-                                                <p style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{p.email || p.role || 'Member'}</p>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button onClick={() => handlePromoteAdmin(p._id)} style={{ padding: '6px', borderRadius: '8px', background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer' }}><Shield size={14} color="#6d28d9" /></button>
-                                                <button onClick={() => handleKickMember(p._id)} style={{ padding: '6px', borderRadius: '8px', background: '#fff', border: '1px solid #fee2e2', cursor: 'pointer' }}><LogOut size={14} color="#ef4444" /></button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <button style={{ width: '100%', padding: '14px', borderRadius: '16px', background: '#6d28d9', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', marginTop: '10px' }}>
-                                        ADD MEMBER
-                                    </button>
-                                </div>
+                                        );
+                                    })}
+                            {(activeDetailTab === 'MEMBERS' && isCurrentUserAdmin) && (
+                                <button 
+                                    onClick={() => setIsAddMemberVisible(true)}
+                                    style={{ width: '100%', padding: '14px', borderRadius: '16px', background: '#6d28d9', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', marginTop: '10px' }}
+                                >
+                                    ADD MEMBER
+                                </button>
                             )}
+                        </div>
+                    )}
 
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
-                                <button
-                                    onClick={handleArchiveChat}
-                                    style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer' }}
-                                >
-                                    {chats.find(c => c.id === activeChat)?.isArchived ? 'UNARCHIVE' : 'ARCHIVE'}
-                                </button>
-                                <button
-                                    onClick={() => setIsDetailsVisible(false)}
-                                    style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#fff', color: '#6d28d9', border: '1px solid rgba(109, 40, 217, 0.2)', fontWeight: 800, cursor: 'pointer' }}
-                                >
-                                    LEAVE
-                                </button>
-                                <button
-                                    onClick={handleDeleteHub}
-                                    style={{ flex: 1, padding: '16px', borderRadius: '20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', fontWeight: 800, cursor: 'pointer' }}
-                                >
-                                    DELETE
-                                </button>
-                            </div>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+                        <button
+                            onClick={handleArchiveChat}
+                            style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer' }}
+                        >
+                            {currentChat?.isArchived ? 'UNARCHIVE' : 'ARCHIVE'}
+                        </button>
+                        <button
+                            onClick={() => setIsDetailsVisible(false)}
+                            style={{ flex: 1, padding: '16px', borderRadius: '20px', background: '#fff', color: '#6d28d9', border: '1px solid rgba(109, 40, 217, 0.2)', fontWeight: 800, cursor: 'pointer' }}
+                        >
+                            LEAVE
+                        </button>
+                        {isCurrentUserAdmin && (
+                            <button
+                                onClick={handleDeleteHub}
+                                style={{ flex: 1, padding: '16px', borderRadius: '20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', fontWeight: 800, cursor: 'pointer' }}
+                            >
+                                DELETE
+                            </button>
+                        )}
+                    </div>
                         </motion.div>
                     </div>
                 )}
@@ -1949,6 +2023,69 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                                 >
                                     {isSendingEmail ? 'DISPATCHING...' : <>SEND CORRESPONDENCE <Mail size={18} /></>}
                                 </motion.button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* ADD MEMBER MODAL */}
+            <AnimatePresence>
+                {isAddMemberVisible && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 6600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setIsAddMemberVisible(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(10px)' }} />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} style={{ position: 'relative', background: '#fff', borderRadius: '40px', width: '100%', maxWidth: '450px', padding: '40px', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                                <h3 style={{ fontSize: '1.3rem', fontWeight: 800 }}>Add New Member</h3>
+                                <button onClick={() => setIsAddMemberVisible(false)} style={{ background: '#f8fafc', border: 'none', padding: '8px', borderRadius: '12px', cursor: 'pointer' }}><X size={18} /></button>
+                            </div>
+
+                            <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                <Search size={16} color="#94a3b8" />
+                                <input 
+                                    placeholder="Search organizational registry..." 
+                                    style={{ background: 'none', border: 'none', width: '100%', fontSize: '0.9rem', fontWeight: 600, outline: 'none' }}
+                                    onChange={(e) => setForwardSearch(e.target.value)} 
+                                />
+                            </div>
+
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {allUsers
+                                    .filter(u => {
+                                        const isAlreadyIn = participants.some(p => (p._id === u.id || p._id === u._id || p.id === u.id));
+                                        const matchesSearch = u.fullName?.toLowerCase().includes(forwardSearch.toLowerCase()) || u.email?.toLowerCase().includes(forwardSearch.toLowerCase());
+                                        return !isAlreadyIn && matchesSearch;
+                                    })
+                                    .map(user => (
+                                        <div 
+                                            key={user.id || user._id}
+                                            onClick={async () => {
+                                                if (!activeChat) return;
+                                                const res = await fetch(`${API_BASE}/${activeChat}/members`, {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ userId: user.id || user._id })
+                                                });
+                                                if (res.ok) {
+                                                    fetchChats();
+                                                    fetchParticipants(activeChat);
+                                                    setIsAddMemberVisible(false);
+                                                }
+                                            }}
+                                            style={{ padding: '12px', borderRadius: '16px', background: '#fcfaff', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', border: '1px solid transparent' }}
+                                            onMouseEnter={(e) => e.currentTarget.style.borderColor = '#6d28d9'}
+                                            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
+                                        >
+                                            <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem' }}>
+                                                {user.fullName?.[0] || 'U'}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ fontSize: '0.85rem', fontWeight: 800 }}>{user.fullName}</p>
+                                                <p style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{user.email || user.role}</p>
+                                            </div>
+                                            <Plus size={16} color="#6d28d9" />
+                                        </div>
+                                    ))
+                                }
                             </div>
                         </motion.div>
                     </div>

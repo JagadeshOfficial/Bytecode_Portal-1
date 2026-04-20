@@ -19,7 +19,7 @@ import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
 import MockInterviewEngine from '@/components/Academic/MockInterviews/MockInterviewEngine';
 
-type DashboardRole = 'super_admin' | 'admin';
+type DashboardRole = 'super_admin' | 'admin' | 'tutor';
 
 export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const router = useRouter();

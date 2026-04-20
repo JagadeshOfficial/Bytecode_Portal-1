@@ -15,7 +15,7 @@ import { fetchJsonSafe } from '@/lib/fetchJson';
 
 const USER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'HR', 'COUNSELOR', 'FINANCE', 'STUDENT'];
 
-type DashboardRole = 'super_admin' | 'admin';
+type DashboardRole = 'super_admin' | 'admin' | 'tutor';
 
 export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const [activeTab, setActiveTab] = useState('ALL');

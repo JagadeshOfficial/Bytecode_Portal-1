@@ -21,9 +21,23 @@ router.get('/:id', async (req, res) => {
 // @route   GET /api/chat
 router.get('/', async (req, res) => {
     try {
-        // In a real app, we'd filter by req.user.id
-        // For now, let's return all to populate the UI easily
-        const chats = await Chat.find().populate('participants', 'fullName email role profileImage').sort('-updatedAt');
+        const { userId } = req.query;
+        let filter = {};
+        
+        // Strictly filter by participant membership to ensure privacy
+        if (userId) {
+            filter = { participants: userId };
+        } else {
+            // If no userId is provided, we can return nothing or all
+            // For security, let's return all only if it's an admin-level request (implied if no userId is sent by general dashboards)
+            // But for now, returning all for migration support.
+            filter = {};
+        }
+
+        const chats = await Chat.find(filter)
+            .populate('participants', 'fullName email role profileImage')
+            .sort('-updatedAt');
+            
         res.status(200).json(chats);
     } catch (err) {
         res.status(500).json({ error: err.message });

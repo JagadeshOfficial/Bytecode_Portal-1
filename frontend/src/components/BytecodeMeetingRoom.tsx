@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Mic, MicOff, Video, VideoOff, MonitorUp, MessageSquare, 
     Users, Settings, PhoneOff, Maximize, Circle, Square,
-    Hand, Smile, MoreVertical, X, LayoutGrid, LayoutTemplate, Share2
+    Hand, Smile, MoreVertical, X, LayoutGrid, LayoutTemplate, Share2,
+    LogOut, XCircle
 } from 'lucide-react';
 
 export default function BytecodeMeetingRoom({ session, roomName, onLeave, onRecordingSaved, currentUserRole = 'SUPER_ADMIN', currentUserName = 'Mewin', students = [] }: any) {
@@ -526,9 +527,49 @@ export default function BytecodeMeetingRoom({ session, roomName, onLeave, onReco
                 </div>
 
                 {/* Right End Call */}
-                <button onClick={handleLeave} style={{ padding: '0 30px', height: '56px', borderRadius: '20px', background: '#ef4444', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)', transition: 'all 0.2s' }}>
-                    End Call
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <button 
+                        onClick={() => {
+                            if (isHost) {
+                                // For hosts, show dropdown or toggle state
+                                (window as any)._leaveDropdownOpen = !(window as any)._leaveDropdownOpen;
+                                // Force re-render simple way
+                                setParticipants([...participants]); 
+                            } else {
+                                handleLeave();
+                            }
+                        }} 
+                        style={{ padding: '0 30px', height: '56px', borderRadius: '20px', background: '#ef4444', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)', transition: 'all 0.2s' }}
+                    >
+                        <PhoneOff size={20} />
+                        {isHost ? 'LEAVE' : 'LEAVE MEETING'}
+                    </button>
+                    
+                    {isHost && (window as any)._leaveDropdownOpen && (
+                        <div style={{ position: 'absolute', bottom: '70px', right: 0, width: '220px', background: '#18181b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '8px', zIndex: 1000, boxShadow: '0 15px 30px rgba(0,0,0,0.5)' }}>
+                            <button 
+                                onClick={() => { (window as any)._leaveDropdownOpen = false; handleLeave(); }}
+                                style={{ width: '100%', padding: '12px', background: 'none', border: 'none', color: '#fff', textAlign: 'left', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                            >
+                                <LogOut size={16} /> Leave Meeting
+                            </button>
+                            <button 
+                                onClick={() => { 
+                                    (window as any)._leaveDropdownOpen = false;
+                                    if (jitsiApi) jitsiApi.executeCommand('hangup');
+                                    handleLeave();
+                                }}
+                                style={{ width: '100%', padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', textAlign: 'left', fontWeight: 900, fontSize: '0.9rem', cursor: 'pointer', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                            >
+                                <XCircle size={16} /> End Meeting for All
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Hidden Capture Vault for Digital Director Engine */}

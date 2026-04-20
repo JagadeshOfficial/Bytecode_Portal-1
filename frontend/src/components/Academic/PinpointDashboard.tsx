@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
     Activity,
@@ -209,6 +209,7 @@ export default function PinpointDashboard() {
     const [selectedRole, setSelectedRole] = useState('ALL');
     const [selectedBatch, setSelectedBatch] = useState('ALL');
     const [selectedUser, setSelectedUser] = useState<TrackingRecord | null>(null);
+    const [viewerRole, setViewerRole] = useState<string>('');
 
     const loadTrackingData = async () => {
         setLoading(true);
@@ -230,12 +231,27 @@ export default function PinpointDashboard() {
     };
 
     useEffect(() => {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+            try {
+                const user = JSON.parse(stored);
+                setViewerRole(user.role || '');
+            } catch (e) {}
+        }
         loadTrackingData();
     }, []);
 
     const records = data?.records || [];
+    const isTutorViewing = viewerRole === 'TUTOR';
+
+    const governanceRecords = useMemo(() => {
+        if (!data) return [];
+        if (!isTutorViewing) return data.records;
+        return data.records.filter(r => ['STUDENT', 'TUTOR'].includes(r.role));
+    }, [data, isTutorViewing]);
+
     const loweredSearch = searchTerm.trim().toLowerCase();
-    const filteredRecords = records.filter((row) => {
+    const filteredRecords = governanceRecords.filter((row) => {
         const matchesRole = selectedRole === 'ALL' || row.role === selectedRole;
         const matchesBatch = selectedBatch === 'ALL' || row.batchId === selectedBatch;
         const haystack = [
@@ -256,11 +272,42 @@ export default function PinpointDashboard() {
         return matchesRole && matchesBatch && matchesSearch;
     });
 
-    const highSeverityAlerts = (data?.alerts || []).filter((alert) => alert.severity === 'CRITICAL' || alert.severity === 'WARNING');
+    // Filter alerts for Tutors
+    const allAlerts = (data?.alerts || []).filter((alert) => {
+        if (isTutorViewing && !['STUDENT', 'TUTOR'].includes(alert.role)) {
+            return false;
+        }
+        return true;
+    });
+
+    const highSeverityAlerts = allAlerts.filter((alert) => alert.severity === 'CRITICAL' || alert.severity === 'WARNING');
+
+    const derivedSummary = useMemo(() => {
+        if (!data) return null;
+        if (!isTutorViewing) return data.summary;
+
+        const filtered = governanceRecords;
+        const presentToday = filtered.filter((row) => row.isToday && ['PRESENT', 'LATE', 'SUSPICIOUS'].includes(row.status)).length;
+        const suspiciousCount = filtered.filter((row) => row.risk === 'HIGH' || row.status === 'SUSPICIOUS').length;
+        const avgAttendanceRate = filtered.length > 0
+                ? Number((filtered.reduce((sum, row) => sum + (row.attendanceRate || 0), 0) / filtered.length).toFixed(1))
+                : 0;
+
+        return {
+            ...data.summary,
+            totalUsers: filtered.length,
+            totalStudents: filtered.filter(r => r.role === 'STUDENT').length,
+            totalStaff: filtered.filter(r => r.role === 'TUTOR').length,
+            presentToday,
+            suspiciousCount,
+            avgAttendanceRate
+        };
+    }, [data, records, isTutorViewing]);
+
     const batchCoverage = (data?.filters.batches || []).map((batch) => {
-        const count = records.filter((row) => row.batchId === batch.id).length;
+        const count = governanceRecords.filter((row) => row.batchId === batch.id).length;
         return { ...batch, count };
-    }).sort((a, b) => b.count - a.count);
+    }).filter(b => b.count > 0).sort((a, b) => b.count - a.count);
 
     return (
         <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%)', padding: '20px', color: '#0f172a', overflowX: 'hidden' }}>
@@ -322,42 +369,42 @@ export default function PinpointDashboard() {
             <div className="tracking-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '14px', marginBottom: '20px' }}>
                 <StatCard
                     title="Tracked Users"
-                    value={String(data?.summary.totalUsers || 0)}
-                    hint={`${data?.summary.totalStudents || 0} students and ${data?.summary.totalStaff || 0} staff`}
+                    value={String(derivedSummary?.totalUsers || 0)}
+                    hint={`${derivedSummary?.totalStudents || 0} students and ${derivedSummary?.totalStaff || 0} ${isTutorViewing ? 'tutors' : 'staff'}`}
                     icon={<Users size={22} />}
                     accent="#2563eb"
                 />
                 <StatCard
                     title="Present Today"
-                    value={String(data?.summary.presentToday || 0)}
+                    value={String(derivedSummary?.presentToday || 0)}
                     hint="Users with attendance activity in today's sessions"
                     icon={<CheckCircle2 size={22} />}
                     accent="#059669"
                 />
                 <StatCard
                     title="Alerts"
-                    value={String(data?.summary.suspiciousCount || 0)}
+                    value={String(derivedSummary?.suspiciousCount || 0)}
                     hint={`${highSeverityAlerts.length} active warning or critical alerts`}
                     icon={<ShieldAlert size={22} />}
                     accent="#dc2626"
                 />
                 <StatCard
                     title="Avg Attendance"
-                    value={`${data?.summary.avgAttendanceRate || 0}%`}
+                    value={`${derivedSummary?.avgAttendanceRate || 0}%`}
                     hint="Average attendance rate across tracked users"
                     icon={<Activity size={22} />}
                     accent="#7c3aed"
                 />
                 <StatCard
                     title="Tracked Batches"
-                    value={String(data?.summary.trackedBatches || 0)}
-                    hint={`${data?.summary.geoFenceEnabledSessions || 0} geo-fenced sessions recorded`}
+                    value={String(derivedSummary?.trackedBatches || 0)}
+                    hint={`${derivedSummary?.geoFenceEnabledSessions || 0} geo-fenced sessions recorded`}
                     icon={<BookOpen size={22} />}
                     accent="#0f766e"
                 />
                 <StatCard
                     title="QR Sessions"
-                    value={String(data?.summary.qrEnabledSessions || 0)}
+                    value={String(derivedSummary?.qrEnabledSessions || 0)}
                     hint="Attendance sessions with QR enabled"
                     icon={<Wifi size={22} />}
                     accent="#ea580c"
@@ -389,7 +436,7 @@ export default function PinpointDashboard() {
                     style={{ borderRadius: '14px', border: '1px solid #dbe3ef', padding: '12px 14px', background: '#fff', fontWeight: 800, color: '#0f172a' }}
                 >
                     <option value="ALL">All Roles</option>
-                    {(data?.filters.roles || []).map((role) => (
+                    {(data?.filters.roles || []).filter(r => !isTutorViewing || ['STUDENT', 'TUTOR'].includes(r)).map((role) => (
                         <option key={role} value={role}>{humanizeLabel(role)}</option>
                     ))}
                 </select>
@@ -426,7 +473,7 @@ export default function PinpointDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                                 <h2 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 900 }}>Alert Feed</h2>
                                 <span style={{ fontSize: '0.78rem', fontWeight: 900, color: '#dc2626' }}>
-                                    {highSeverityAlerts.length} high-priority
+                                    {highSeverityAlerts.length} priority
                                 </span>
                             </div>
 
@@ -437,7 +484,7 @@ export default function PinpointDashboard() {
                                     </div>
                                 )}
 
-                                {(data?.alerts || []).map((alert) => {
+                                {(allAlerts || []).map((alert) => {
                                     const tone = alert.severity === 'CRITICAL' ? '#dc2626' : alert.severity === 'WARNING' ? '#d97706' : '#2563eb';
 
                                     return (

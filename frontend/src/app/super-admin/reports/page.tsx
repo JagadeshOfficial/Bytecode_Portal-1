@@ -9,9 +9,9 @@ import {
     Download, Activity, Layers, Users, DollarSign
 } from 'lucide-react';
 
-export default function ReportsManagement() {
+export function ReportsManagementPage({ role = 'super_admin' }: { role?: string } = {}) {
     return (
-        <DashboardLayout role="super_admin">
+        <DashboardLayout role={role as any}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3.5rem' }}>
                     <div>
@@ -44,6 +44,10 @@ export default function ReportsManagement() {
             </motion.div>
         </DashboardLayout>
     );
+}
+
+export default function ReportsManagement() {
+    return <ReportsManagementPage />;
 }
 
 function ReportCategoryCard({ icon, title, desc, color }: any) {
