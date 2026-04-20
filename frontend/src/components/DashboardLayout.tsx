@@ -118,7 +118,7 @@ const MENUS: Record<string, MenuItem[]> = {
     ],
     student: [
         { section: 'Overview', label: 'Student Dashboard', href: '/student', icon: <LayoutDashboard size={18} /> },
-        { section: 'Academic', label: 'Curriculum Hub', href: '/admin/academic', icon: <BookOpen size={18} /> },
+        { section: 'Academic', label: 'Curriculum Hub', href: '/student/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Connect', href: '/admin/chat', icon: <MessageSquare size={18} /> },
         { section: 'Reports', label: 'Analytics Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
         { section: 'Utilities', label: 'Online Compiler', href: '/student/compiler', icon: <Code size={18} /> },

@@ -19,7 +19,7 @@ import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
 import MockInterviewEngine from '@/components/Academic/MockInterviews/MockInterviewEngine';
 
-type DashboardRole = 'super_admin' | 'admin' | 'tutor';
+type DashboardRole = 'super_admin' | 'admin' | 'tutor' | 'student';
 
 export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const router = useRouter();
@@ -117,6 +117,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
     const fetchData = async () => {
         setLoading(true);
         try {
+            const userId = currentUser?.id || currentUser?._id;
             const safeFetch = async (url: string) => {
                 try {
                     const res = await fetch(url);
@@ -125,24 +126,56 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 return null;
             };
 
+            // Dynamic logic: If student, restrict data stream to assigned nodes only
+            const isStudent = currentUserRole === 'STUDENT';
+            
+            const batchUrl = isStudent 
+                ? `http://localhost:8080/api/academic/batches/student/${userId}`
+                : 'http://localhost:8080/api/academic/batches';
+                
             const [cData, bData, uData, aData, sData, rData] = await Promise.all([
                 safeFetch('http://localhost:8080/api/courses'),
-                safeFetch('http://localhost:8080/api/academic/batches'),
+                safeFetch(batchUrl),
                 safeFetch('http://localhost:8080/api/users'),
                 safeFetch('http://localhost:8080/api/academic/assignments'),
                 safeFetch('http://localhost:8080/api/academic/sessions'),
                 safeFetch('http://localhost:8080/api/academic/session-requests')
             ]);
             
-            if (Array.isArray(cData)) setCourses(cData);
-            if (Array.isArray(bData)) setBatches(bData);
+            if (Array.isArray(bData)) {
+                setBatches(bData);
+                
+                if (isStudent) {
+                    // Extract unique course IDs from assigned batches
+                    const assignedCourseIds = new Set(bData.map((b: any) => b.courseId));
+                    if (Array.isArray(cData)) {
+                        setCourses(cData.filter(c => assignedCourseIds.has(c.id) || assignedCourseIds.has(c._id)));
+                    }
+
+                    // Filter sessions to only those in the assigned batches
+                    const assignedBatchIds = new Set(bData.map((b: any) => b.id || b._id));
+                    if (Array.isArray(sData)) {
+                        setLiveSessions(sData.filter(s => assignedBatchIds.has(s.batchId)));
+                    }
+
+                    // Filter assignments to only those in the assigned batches
+                    if (Array.isArray(aData)) {
+                        setAssignments(aData.filter(a => assignedBatchIds.has(a.batchId)));
+                    }
+                } else {
+                    if (Array.isArray(cData)) setCourses(cData);
+                    if (Array.isArray(sData)) setLiveSessions(sData);
+                    if (Array.isArray(aData)) setAssignments(aData);
+                }
+            } else {
+                if (Array.isArray(cData)) setCourses(cData);
+            }
+            
             if (Array.isArray(uData)) setAllUsers(uData);
-            if (Array.isArray(aData)) setAssignments(aData);
-            if (Array.isArray(sData)) setLiveSessions(sData);
 
             if (Array.isArray(rData)) {
-                if (currentUserRole === 'STUDENT') {
-                    setSessionRequests(rData.filter(r => r.requestedById === currentUser?.id));
+                if (isStudent) {
+                    setSessionRequests(rData.filter(r => r.requestedById === userId));
                 } else {
                     setSessionRequests(rData);
                 }
