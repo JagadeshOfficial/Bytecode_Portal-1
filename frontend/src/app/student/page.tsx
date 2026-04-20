@@ -29,6 +29,8 @@ export default function StudentDashboard() {
         message: ''
     });
     const [selectedLiveSession, setSelectedLiveSession] = useState<any>(null);
+    const [studentBatches, setStudentBatches] = useState<any[]>([]);
+    const [liveSessions, setLiveSessions] = useState<any[]>([]);
 
     useEffect(() => {
         const stored = localStorage.getItem('user');
@@ -95,18 +97,30 @@ export default function StudentDashboard() {
             const bRes = await fetch(`http://localhost:8080/api/academic/batches/student/${studentId}`);
             if (!bRes.ok) return;
             const batches = await bRes.json();
+            setStudentBatches(batches);
             
             const allAss: any[] = [];
+            const allLive: any[] = [];
+
             for (const b of batches) {
+                // Fetch assignments
                 const aRes = await fetch(`http://localhost:8080/api/academic/assignments/batch/${b.id}`);
                 if (aRes.ok) {
                     const data = await aRes.json();
                     allAss.push(...data);
                 }
+
+                // Fetch live sessions
+                const sRes = await fetch(`http://localhost:8080/api/academic/sessions/batch/${b.id}`);
+                if (sRes.ok) {
+                    const sessions = await sRes.json();
+                    allLive.push(...sessions);
+                }
             }
             setAssignments(allAss);
+            setLiveSessions(allLive);
         } catch (e) {
-            console.error("Failed to sync assignments:", e);
+            console.error("Failed to sync student data:", e);
         }
     };
 
@@ -221,31 +235,60 @@ export default function StudentDashboard() {
                                 <AnimatePresence mode="wait">
                                     {subTab === 'COURSES' && (
                                         <motion.div key="courses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                            <CourseCard title="Mastering Spring Boot Microservices" progress={85} instructor="Vamsi Krishna" next="Module 12: K8s Ingress Control" />
-                                            <CourseCard title="React & Next.js Performance Optimization" progress={42} instructor="Sai Kiran" next="Chapter 4: Server Components" />
+                                            {studentBatches.map((b, idx) => (
+                                                <CourseCard 
+                                                    key={idx} 
+                                                    title={b.courseName || b.name || "Assigned Course"} 
+                                                    progress={b.progress || 0} 
+                                                    instructor={b.trainerName || "Associate Mentor"} 
+                                                    next={b.batchCode || b.batchName} 
+                                                />
+                                            ))}
+                                            {studentBatches.length === 0 && (
+                                                <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', borderRadius: '32px', color: 'var(--text-dim)' }}>
+                                                    No ongoing course tracks assigned to your profile.
+                                                </div>
+                                            )}
                                         </motion.div>
                                     )}
 
                                     {subTab === 'LIVE' && (
                                         <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', borderLeft: '6px solid #ef4444' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                    <span style={{ color: '#ef4444', fontWeight: 900, fontSize: '0.7rem' }}>● BROADCASTING NOW</span>
+                                            {liveSessions.map((s, idx) => (
+                                                <div key={idx} className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', borderLeft: s.status === 'LIVE' ? '6px solid #ef4444' : '6px solid var(--primary)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                        <span style={{ color: s.status === 'LIVE' ? '#ef4444' : 'var(--primary)', fontWeight: 900, fontSize: '0.7rem' }}>
+                                                            ● {s.status === 'LIVE' ? 'BROADCASTING NOW' : (s.status || 'SCHEDULED')}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{s.date} • {s.startTime}</span>
+                                                    </div>
+                                                    <h3 style={{ fontWeight: 900 }}>{s.title}</h3>
+                                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>
+                                                        Managed by {s.trainerName || "Academic Hub"} • {s.batchName || "Assigned Batch"}
+                                                    </p>
+                                                    <button 
+                                                        className="btn-quantum" 
+                                                        style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}
+                                                        onClick={() => {
+                                                            setSelectedLiveSession(s);
+                                                            setRequestForm(prev => ({ 
+                                                                ...prev, 
+                                                                courseName: s.courseName || 'Active Stream', 
+                                                                batchName: s.batchName || 'Default Batch' 
+                                                            }));
+                                                            setIsSessionRequestModalOpen(true);
+                                                        }}
+                                                    >
+                                                        {s.status === 'LIVE' ? 'JOIN STREAM' : 'REQUEST ENROLLMENT'}
+                                                    </button>
                                                 </div>
-                                                <h3 style={{ fontWeight: 900 }}>Advanced K8s Deployment Patterns</h3>
-                                                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>Managed by Vamsi Krishna • Starting soon (10:00 AM)</p>
-                                                <button 
-                                                    className="btn-quantum" 
-                                                    style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}
-                                                    onClick={() => {
-                                                        setSelectedLiveSession({ id: 'live-1', title: 'Advanced K8s Deployment Patterns' });
-                                                        setRequestForm(prev => ({ ...prev, courseName: 'Full Stack Java', batchName: 'Batch-12' }));
-                                                        setIsSessionRequestModalOpen(true);
-                                                    }}
-                                                >
-                                                    JOIN STREAM
-                                                </button>
-                                            </div>
+                                            ))}
+
+                                            {liveSessions.length === 0 && (
+                                                <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px', color: 'var(--text-dim)' }}>
+                                                    No live transmissions scheduled for your active nodes.
+                                                </div>
+                                            )}
                                         </motion.div>
                                     )}
 

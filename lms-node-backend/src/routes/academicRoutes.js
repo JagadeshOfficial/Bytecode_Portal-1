@@ -148,6 +148,29 @@ router.get('/batches/course/:courseId', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// @desc    Get batches by student
+// @route   GET /api/academic/batches/student/:studentId
+router.get('/batches/student/:studentId', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const studentId = req.params.studentId;
+        const batches = await db.collection('batches').find({ 
+            $or: [
+                { studentIds: studentId },
+                { trainerIds: studentId },
+                { trainerId: studentId }
+            ]
+        }).toArray();
+        const mappedBatches = batches.map(b => ({
+            ...b,
+            id: b._id.toString()
+        }));
+        res.json(mappedBatches);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 router.get('/curriculum', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
@@ -378,6 +401,19 @@ router.get('/assignments', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
         const assignments = await db.collection('assignments').find().toArray();
+        const mapped = assignments.map(a => ({ ...a, id: a._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Get assignments by batch
+// @route   GET /api/academic/assignments/batch/:batchId
+router.get('/assignments/batch/:batchId', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const assignments = await db.collection('assignments').find({ batchId: req.params.batchId }).toArray();
         const mapped = assignments.map(a => ({ ...a, id: a._id.toString() }));
         res.json(mapped);
     } catch (err) {
