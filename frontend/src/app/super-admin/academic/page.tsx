@@ -167,18 +167,40 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
     const handleSessionRequestAction = async (requestId: string, action: 'APPROVED' | 'REJECTED') => {
         try {
+            const reqData = sessionRequests.find(r => (r.id === requestId || r._id === requestId));
+            const reviewerId = currentUser?.id || '';
+            const reviewerName = currentUser?.fullName || 'Admin';
+
             const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}/action`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action,
-                    reviewerId: currentUser?.id,
-                    reviewerName: currentUser?.fullName || currentUser?.email
-                })
+                body: JSON.stringify({ action, reviewerId, reviewerName })
             });
+
             if (res.ok) {
+                // ADD NOTIFICATION FOR TUTOR
+                if (reqData && reqData.requestedById) {
+                    const isDownload = reqData.type === 'DOWNLOAD_RECORDING';
+                    const titleText = isDownload ? `Recording Download ${action}` : `Request ${action}`;
+                    let msgText = `Your request for "${reqData.data?.title || 'a session/recording'}" has been ${action.toLowerCase()} by ${reviewerName}.`;
+                    
+                    if (isDownload && action === 'APPROVED') {
+                        msgText = `Your download request for "${reqData.data?.title}" has been approved. You can now use this link: ${reqData.data?.recordingUrl}`;
+                    }
+
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: reqData.requestedById,
+                            title: titleText,
+                            message: msgText,
+                            type: action === 'APPROVED' ? 'SUCCESS' : 'ERROR'
+                        })
+                    });
+                }
                 alert(`Request has been ${action.toLowerCase()} successfully.`);
-                fetchData(); // Refresh everything
+                fetchData();
             }
         } catch (e) {
             console.error("Action failed:", e);
@@ -186,14 +208,22 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
     };
 
     const handleDeleteRequest = async (requestId: string) => {
-        if (!confirm("Are you sure you want to withdraw this request?")) return;
+        const req = sessionRequests.find(r => (r.id === requestId || r._id === requestId));
+        const isHistorical = req && req.status !== 'PENDING';
+        
+        const confirmMsg = isHistorical 
+            ? "Are you sure you want to delete this historical request log? This action is permanent."
+            : "Are you sure you want to withdraw this request?";
+            
+        if (!confirm(confirmMsg)) return;
+        
         try {
             const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
                 setSessionRequests(sessionRequests.filter(r => (r.id !== requestId && r._id !== requestId)));
-                alert("Request withdrawn successfully.");
+                alert(isHistorical ? "Log entry deleted." : "Request withdrawn successfully.");
             }
         } catch (e) {
             console.error("Delete request failed:", e);
@@ -357,30 +387,106 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         }
     };
 
-    const handleDeleteRecording = (sessionId: string, e: any) => {
+    const handleDeleteRecording = async (sessionId: string, e: any) => {
         e.stopPropagation();
         const session = liveSessions.find((s: any) => s.id === sessionId || s._id === sessionId);
-        if (session) {
+        if (!session) return;
+
+        if (isFullAdmin) {
             setSessionToDelete(session);
             setIsDeleteConfirmOpen(true);
+        } else {
+            if (!confirm("Your request to delete this recording will be sent to Admin for approval. Continue?")) return;
+            try {
+                const reqPayload = {
+                    type: 'DELETE_RECORDING',
+                    sessionId: sessionId,
+                    data: { title: session.title, batchName: session.batchName, batchId: session.batchId, recordingUrl: session.recordingUrl },
+                    requestedBy: currentUser?.fullName || currentUser?.email,
+                    requestedById: currentUser?.id
+                };
+                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reqPayload)
+                });
+                if (res.ok) {
+                    const createdReq = await res.json();
+                    setSessionRequests([createdReq, ...sessionRequests]);
+                    
+                    // NOTIFY ADMINS
+                    const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a recording for ${session.batchName}.`;
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'ADMIN', title: 'Recording Delete Request', message: notifMsg, type: 'WARNING' })
+                    });
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Recording Delete Request', message: notifMsg, type: 'WARNING' })
+                    });
+
+                    alert("Delete request sent to Admin.");
+                }
+            } catch (e) { console.error(e); }
         }
     };
 
     const confirmDeleteRecording = async () => {
         if (!sessionToDelete) return;
+        const sessionId = sessionToDelete.id || sessionToDelete._id;
         try {
-            const id = sessionToDelete.id || sessionToDelete._id;
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${id}/recording`, {
+            const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}/recording`, {
                 method: 'DELETE'
             });
             if (res.ok) {
-                setLiveSessions(liveSessions.map((s: any) => (s.id === id || s._id === id) ? { ...s, recordingUrl: null } : s));
+                setLiveSessions(liveSessions.map(s => (s.id === sessionId || s._id === sessionId) ? { ...s, recordingUrl: null } : s));
                 setIsDeleteConfirmOpen(false);
                 setSessionToDelete(null);
+                alert("Recording deleted successfully.");
             }
         } catch (e) {
-            console.error(e);
+            console.error("Failed to delete recording", e);
         }
+    };
+
+    const handleDownloadRequest = async (ls: any) => {
+        if (!ls) return;
+        if (isFullAdmin) {
+            window.open(`${ls.recordingUrl}?download=true`, '_blank');
+            return;
+        }
+
+        if (!confirm("Your request to download this recording will be sent to Admin. Continue?")) return;
+        try {
+            const reqPayload = {
+                type: 'DOWNLOAD_RECORDING',
+                sessionId: ls.id || ls._id,
+                data: { title: ls.title, batchName: ls.batchName, batchId: ls.batchId, recordingUrl: ls.recordingUrl },
+                requestedBy: currentUser?.fullName || currentUser?.email,
+                requestedById: currentUser?.id
+            };
+            const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reqPayload)
+            });
+            if (res.ok) {
+                const createdReq = await res.json();
+                setSessionRequests([createdReq, ...sessionRequests]);
+
+                // NOTIFY ADMINS
+                const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to download a recording for ${ls.batchName}.`;
+                await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: 'ADMIN', title: 'Recording Download Request', message: notifMsg, type: 'INFO' })
+                });
+
+                alert("Download request sent to Admin.");
+            }
+        } catch (e) { console.error(e); }
     };
 
     const initiateShare = async (ls: any) => {
@@ -842,6 +948,20 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 });
                 if (res.ok) {
                     const createdReq = await res.json();
+                    
+                    // NOTIFY ADMINS
+                    const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to schedule a new session for ${selectedBatch?.batchName || 'a batch'}.`;
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'ADMIN', title: 'New Session Request', message: notifMsg, type: 'INFO' })
+                    });
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'New Session Request', message: notifMsg, type: 'INFO' })
+                    });
+
                     setSessionRequests([createdReq, ...sessionRequests]);
                     alert("Your request to schedule a new session has been sent to Admin for approval.");
                     setIsScheduleLiveModalOpen(false);
@@ -880,6 +1000,20 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 });
                 if (res.ok) {
                     const createdReq = await res.json();
+
+                    // NOTIFY ADMINS
+                    const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a session in ${selectedBatch?.batchName || 'a batch'}.`;
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'ADMIN', title: 'Session Delete Request', message: notifMsg, type: 'WARNING' })
+                    });
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Session Delete Request', message: notifMsg, type: 'WARNING' })
+                    });
+
                     setSessionRequests([createdReq, ...sessionRequests]);
                     alert("Your request to delete this session has been sent to Admin for approval.");
                 }
@@ -929,6 +1063,20 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 });
                 if (res.ok) {
                     const createdReq = await res.json();
+
+                    // NOTIFY ADMINS
+                    const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to edit a session in ${selectedBatch?.batchName || 'a batch'}.`;
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'ADMIN', title: 'Session Edit Request', message: notifMsg, type: 'INFO' })
+                    });
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Session Edit Request', message: notifMsg, type: 'INFO' })
+                    });
+
                     setSessionRequests([createdReq, ...sessionRequests]);
                     alert("Your request to edit this session has been sent to Admin for approval.");
                     setIsEditSessionModalOpen(false);
@@ -1007,12 +1155,56 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
     const handleDeleteAssignment = async (id: string, e: any) => {
         e.stopPropagation();
-        if (!confirm("Remove this assignment? Students will no longer be able to submit.")) return;
-        try {
-            await fetch(`http://localhost:8080/api/academic/assignments/${id}`, { method: 'DELETE' });
-            setAssignments(assignments.filter(a => a.id !== id));
-        } catch (e) {
-            console.error(e);
+        const assignment = assignments.find(a => (a.id === id || a._id === id));
+        if (!assignment) return;
+
+        if (isFullAdmin) {
+            if (!confirm("Remove this assignment? Students will no longer be able to submit.")) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/academic/assignments/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    setAssignments(assignments.filter(a => a.id !== id));
+                    alert("Assignment deleted successfully.");
+                }
+            } catch (e) { console.error(e); }
+        } else {
+            if (!confirm("Your request to delete this assignment will be sent to Admin for approval. Continue?")) return;
+            try {
+                const reqPayload = {
+                    type: 'DELETE_ASSIGNMENT',
+                    assignmentId: id,
+                    data: { title: assignment.title, batchName: assignment.batchName, batchId: assignment.batchId },
+                    requestedBy: currentUser?.fullName || currentUser?.email,
+                    requestedById: currentUser?.id
+                };
+                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reqPayload)
+                });
+                if (res.ok) {
+                    const createdReq = await res.json();
+                    setSessionRequests([createdReq, ...sessionRequests]);
+                    
+                    // NOTIFY ADMINS
+                    const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete an assignment: "${assignment.title}".`;
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'ADMIN', title: 'Assignment Delete Request', message: notifMsg, type: 'WARNING' })
+                    });
+                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Assignment Delete Request', message: notifMsg, type: 'WARNING' })
+                    });
+
+                    alert("Delete request sent to Admin.");
+                }
+            } catch (e) {
+                console.error("Delete request failed:", e);
+                alert("Failed to send delete request.");
+            }
         }
     };
 
@@ -1317,80 +1509,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                 {batchTab === 'LIVE' && (
                                     <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
                                         
-                                        {/* ADMIN APPROVAL QUEUE */}
-                                        {isFullAdmin && sessionRequests.filter(r => r.status === 'PENDING').length > 0 && (
-                                            <div style={{ marginBottom: '3rem', padding: '2rem', background: 'rgba(255, 193, 7, 0.05)', border: '2px solid rgba(255, 193, 7, 0.2)', borderRadius: '32px' }}>
-                                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#d97706', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                                                    <Shield size={20} /> SESSION REQUESTS PENDING APPROVAL
-                                                </h3>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                    {sessionRequests.filter(r => r.status === 'PENDING').map(req => (
-                                                        <div key={req.id} style={{ background: '#fff', padding: '1.2rem', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, padding: '4px 8px', borderRadius: '6px', background: req.type === 'DELETE' ? '#fef2f2' : (req.type === 'EDIT' ? '#f0f9ff' : '#ecfdf5'), color: req.type === 'DELETE' ? '#ef4444' : (req.type === 'EDIT' ? '#0ea5e9' : '#10b981') }}>{req.type}</span>
-                                                                <div>
-                                                                    <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '0.95rem' }}>{req.data?.title || req.data?.name || "Untitled Session"} <span style={{ color: '#718096', fontWeight: 600 }}>by</span> <span style={{ color: 'var(--primary)' }}>{req.requestedBy}</span></div>
-                                                                    <div style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700, display: 'flex', gap: '15px', marginTop: '4px' }}>
-                                                                        <span>📅 {req.data?.startTime ? new Date(req.data.startTime).toLocaleString() : 'N/A'}</span>
-                                                                        <span>⏱️ {req.data?.duration || '60'} Mins</span>
-                                                                        <span>🌐 {req.data?.platform || 'Bytecode'}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div style={{ display: 'flex', gap: '10px' }}>
-                                                                <button onClick={() => handleSessionRequestAction(req.id, 'REJECTED')} style={{ padding: '8px 16px', borderRadius: '10px', background: '#fef2f2', color: '#ef4444', border: 'none', fontWeight: 900, cursor: 'pointer' }}>REJECT</button>
-                                                                <button onClick={() => handleSessionRequestAction(req.id, 'APPROVED')} className="btn-quantum" style={{ padding: '8px 16px', borderRadius: '10px', fontSize: '0.85rem' }}>APPROVE</button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* TUTOR MY REQUESTS QUEUE */}
-                                        {!isFullAdmin && currentUserRole !== 'STUDENT' && sessionRequests.filter(r => r.requestedById === currentUser?.id).length > 0 && (
-                                            <div style={{ marginBottom: '3rem', padding: '2rem', background: 'rgba(139, 92, 246, 0.05)', border: '2px solid rgba(139, 92, 246, 0.2)', borderRadius: '32px' }}>
-                                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                                                    <Clock size={20} /> MY SESSION REQUESTS STATUS
-                                                </h3>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                    {sessionRequests.filter(r => r.requestedById === currentUser?.id).map(req => (
-                                                        <div key={req.id} style={{ background: '#fff', padding: '1.2rem', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, padding: '4px 8px', borderRadius: '6px', background: req.type === 'DELETE' ? '#fef2f2' : (req.type === 'EDIT' ? '#f0f9ff' : '#ecfdf5'), color: req.type === 'DELETE' ? '#ef4444' : (req.type === 'EDIT' ? '#0ea5e9' : '#10b981') }}>{req.type}</span>
-                                                                <div>
-                                                                    <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '0.95rem' }}>{req.data?.title || req.data?.name || "Untitled Session"}</div>
-                                                                    <div style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700, display: 'flex', gap: '15px', marginTop: '4px' }}>
-                                                                        <span>📅 {req.data?.startTime ? new Date(req.data.startTime).toLocaleString() : 'N/A'}</span>
-                                                                        <span>⏱️ {req.data?.duration || '60'} Mins</span>
-                                                                        <span>🌐 {req.data?.platform || 'Bytecode'}</span>
-                                                                    </div>
-                                                                    <div style={{ fontSize: '0.7rem', color: '#a0aec0', fontWeight: 600, marginTop: '4px' }}>Requested on: {new Date(req.createdAt).toLocaleDateString()}</div>
-                                                                </div>
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                                <span style={{ 
-                                                                    fontSize: '0.75rem', 
-                                                                    fontWeight: 900, 
-                                                                    padding: '6px 12px', 
-                                                                    borderRadius: '10px', 
-                                                                    background: req.status === 'APPROVED' ? '#ecfdf5' : (req.status === 'REJECTED' ? '#fef2f2' : '#fff7ed'),
-                                                                    color: req.status === 'APPROVED' ? '#10b981' : (req.status === 'REJECTED' ? '#ef4444' : '#f59e0b'),
-                                                                    border: `1px solid ${req.status === 'APPROVED' ? '#10b98130' : (req.status === 'REJECTED' ? '#ef444430' : '#f59e0b30')}`
-                                                                }}>
-                                                                    {req.status}
-                                                                </span>
-                                                                {req.status === 'APPROVED' && (
-                                                                    <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                        <CheckCircle size={14} /> APPLIED
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                        {/* SESSION REQUESTS ARE NOW MANAGED VIA THE "Session Requests" BUTTON IN THE SIDEBAR MODAL */}
 
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1514,10 +1633,22 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                                 <button onClick={() => initiateShare(ls)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} title="Share to Batch Drive">
                                                                     <Share2 size={16} />
                                                                 </button>
-                                                                <a href={`${ls.recordingUrl}?download=true`} download={`recording-${ls.id}.webm`} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download Recording">
+                                                                {/* CONDITIONAL DOWNLOAD ACTION */}
+                                                                <button 
+                                                                    onClick={() => handleDownloadRequest(ls)} 
+                                                                    className="btn-quantum" 
+                                                                    style={{ flex: 1, padding: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                                                                    title={isFullAdmin ? "Download Recording" : "Request Download"}
+                                                                >
                                                                     <Download size={16} />
-                                                                </a>
-                                                                <button onClick={(e) => handleDeleteRecording(ls.id || ls._id, e)} className="btn-quantum" style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }} title="Delete Recording">
+                                                                </button>
+                                                                {/* CONDITIONAL DELETE ACTION */}
+                                                                <button 
+                                                                    onClick={(e) => handleDeleteRecording(ls.id || ls._id, e)} 
+                                                                    className="btn-quantum" 
+                                                                    style={{ flex: 1, padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }} 
+                                                                    title={isFullAdmin ? "Delete Recording" : "Request Deletion"}
+                                                                >
                                                                     <Trash2 size={16} />
                                                                 </button>
                                                             </div>
@@ -1789,7 +1920,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                         <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
                                         <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : '09/04/2026'} />
                                         <div 
-                                            onClick={() => { setIsRequestDetailModalOpen(true); }}
+                                            onClick={() => { setIsRequestDetailModalOpen(true); fetchData(); }}
                                             style={{ 
                                                 marginTop: '10px',
                                                 padding: '12px 20px', 
@@ -1806,7 +1937,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                 <Send size={16} /> Session Requests
                                             </span>
                                             <span style={{ background: 'var(--primary)', color: '#000', fontSize: '0.7rem', fontWeight: 900, padding: '2px 8px', borderRadius: '8px' }}>
-                                                {sessionRequests.filter(r => r.data?.batchId === selectedBatch?.id && r.status === 'PENDING').length}
+                                                {sessionRequests.filter(r => (r.data?.batchId === selectedBatch?.id || r.data?.batchId === selectedBatch?._id) && r.status === 'PENDING').length}
                                             </span>
                                         </div>
                                     </div>
@@ -2781,11 +2912,18 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                         fontWeight: 900, 
                                                         padding: '8px 16px', 
                                                         borderRadius: '12px', 
-                                                        background: req.status === 'APPROVED' ? '#ecfdf5' : (req.status === 'REJECTED' ? '#fef2f2' : 'rgba(255,255,255,0.05)'),
-                                                        color: req.status === 'APPROVED' ? '#10b981' : (req.status === 'REJECTED' ? '#ef4444' : '#f59e0b')
+                                                        background: req.status === 'APPROVED' ? '#ecfdf5' : (req.status === 'REJECTED' ? '#fef2f2' : (req.status === 'PENDING' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)')),
+                                                        color: req.status === 'APPROVED' ? '#10b981' : (req.status === 'REJECTED' ? '#ef4444' : (req.status === 'PENDING' ? '#3b82f6' : '#f59e0b')),
+                                                        border: `1px solid ${req.status === 'APPROVED' ? '#10b98130' : (req.status === 'REJECTED' ? '#ef444430' : 'transparent')}`
                                                     }}>{req.status}</span>
-                                                    {(req.status === 'PENDING' && (isFullAdmin || req.requestedById === currentUser?.id)) && (
-                                                        <button onClick={() => handleDeleteRequest(req.id || req._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Withdraw Request"><Trash2 size={18} /></button>
+                                                    {req.status === 'APPROVED' && (
+                                                        <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <CheckCircle size={14} /> APPLIED
+                                                        </span>
+                                                    )}
+                                                    {/* Admins can delete any request (history cleanup), Tutors can only delete (withdraw) PENDING ones */}
+                                                    {(isFullAdmin || (req.status === 'PENDING' && req.requestedById === currentUser?.id)) && (
+                                                        <button onClick={() => handleDeleteRequest(req.id || req._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title={req.status === 'PENDING' ? "Withdraw Request" : "Delete Log Entry"}><Trash2 size={18} /></button>
                                                     )}
                                                 </div>
                                             </div>
@@ -2807,11 +2945,19 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                 </div>
                                             )}
 
-                                            {req.type === 'DELETE' && (
+                                            {(req.type === 'DELETE' || req.type === 'DELETE_RECORDING') && (
                                                 <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.1)', marginTop: '1rem' }}>
                                                     <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#ef4444', marginBottom: '10px', letterSpacing: '1px' }}>TARGET FOR DELETION</p>
-                                                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.data?.title || "Session"}</p>
-                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '5px' }}>This session will be permanently removed from the schedule.</p>
+                                                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.data?.title || "Session/Recording"}</p>
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '5px' }}>This {req.type === 'DELETE_RECORDING' ? 'recording' : 'session'} will be permanently removed.</p>
+                                                </div>
+                                            )}
+
+                                            {req.type === 'DOWNLOAD_RECORDING' && (
+                                                <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(59, 130, 246, 0.1)', marginTop: '1rem' }}>
+                                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#3b82f6', marginBottom: '10px', letterSpacing: '1px' }}>DOWNLOAD REQUEST</p>
+                                                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.data?.title || "Recording"}</p>
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-bright)', marginTop: '5px' }}>Tutor has requested to download this video file.</p>
                                                 </div>
                                             )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
@@ -10,7 +10,7 @@ import {
     BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap, 
     HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool, Edit2, XCircle,
     MessageSquare, ClipboardCheck, Microscope, UserPlus, Fingerprint, Terminal,
-    ChevronRight
+    ChevronRight, Bell, BellRing, Trash2, Check, Send
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 import { fetchJsonSafe } from '@/lib/fetchJson';
@@ -29,6 +29,16 @@ interface DashboardLayoutProps {
     children: React.ReactNode;
     role: Role;
     noPadding?: boolean;
+}
+
+interface Notification {
+    id: string;
+    _id?: string;
+    title: string;
+    message: string;
+    type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
+    status: 'READ' | 'UNREAD';
+    createdAt: string;
 }
 
 const GAMES_SUB_ITEMS = [
@@ -132,6 +142,10 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
         fullName: '', email: '', password: '', 
         phoneNumber: '', branch: '', department: '', userStatus: '', profileImage: ''
     });
+
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [shouldShake, setShouldShake] = useState(false);
 
     // --- SIDEBAR SCROLL PERSISTENCE ---
     useEffect(() => {
@@ -259,9 +273,55 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
         }
     };
 
+    const fetchNotifications = useCallback(async () => {
+        if (!loggedUser) return;
+        const userId = loggedUser.id || loggedUser._id;
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/notifications?userId=${userId}&role=${expectedRole}`);
+            if (res.ok) {
+                const data = await res.json();
+                
+                setNotifications(prev => {
+                    const newUnreadCount = data.filter((n: any) => n.status === 'UNREAD').length;
+                    const oldUnreadCount = prev.filter(n => n.status === 'UNREAD').length;
+
+                    if (newUnreadCount > oldUnreadCount) {
+                        setShouldShake(true);
+                        setTimeout(() => setShouldShake(false), 2000);
+                    }
+                    return data;
+                });
+            }
+        } catch (e) {
+            console.error("Notif fetch error:", e);
+        }
+    }, [loggedUser, expectedRole]);
+
+    const markNotifRead = async (id: string) => {
+        try {
+            await fetch(`http://localhost:8080/api/academic/notifications/${id}/read`, { method: 'PATCH' });
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: 'READ' } : n));
+        } catch (e) { console.error(e); }
+    };
+
+    const deleteNotif = async (id: string) => {
+        try {
+            await fetch(`http://localhost:8080/api/academic/notifications/${id}`, { method: 'DELETE' });
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        } catch (e) { console.error(e); }
+    };
+
     useEffect(() => {
         fetchUserProfile();
     }, []);
+
+    useEffect(() => {
+        if (loggedUser) {
+            fetchNotifications();
+            const interval = setInterval(fetchNotifications, 10000); // Polling every 10s
+            return () => clearInterval(interval);
+        }
+    }, [loggedUser, fetchNotifications]);
 
     const handleProfileSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -421,14 +481,81 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                         <h2 className={styles.headerTitle}>{roleDisplay} Panel</h2>
                     </div>
                     
-                    <div className={styles.userProfile} onClick={() => setIsProfileModalOpen(true)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span>{userName}</span>
-                        <div className={styles.avatar}>
-                            {loggedUser?.profileImage ? (
-                                <img src={loggedUser.profileImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                            ) : (
-                                <span>{userName.charAt(0).toUpperCase()}</span>
-                            )}
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        {/* Notification Bell */}
+                        <div style={{ position: 'relative' }}>
+                            <motion.button
+                                animate={shouldShake ? { rotate: [0, -15, 15, -15, 15, 0], scale: [1, 1.1, 1.1, 1] } : {}}
+                                transition={{ duration: 0.5, repeat: shouldShake ? 3 : 0 }}
+                                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                                style={{ background: 'none', border: 'none', color: '#4a5568', cursor: 'pointer', position: 'relative', padding: '8px' }}
+                            >
+                                {notifications.some(n => n.status === 'UNREAD') ? <BellRing size={24} color="var(--primary)" /> : <Bell size={24} />}
+                                {notifications.filter(n => n.status === 'UNREAD').length > 0 && (
+                                    <span style={{ position: 'absolute', top: '5px', right: '5px', background: '#ef4444', color: '#fff', fontSize: '10px', fontWeight: 900, padding: '2px 6px', borderRadius: '50%', border: '2px solid #fff' }}>
+                                        {notifications.filter(n => n.status === 'UNREAD').length}
+                                    </span>
+                                )}
+                            </motion.button>
+
+                            <AnimatePresence>
+                                {isNotifOpen && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                                        style={{ position: 'absolute', top: '100%', right: 0, width: '350px', background: '#fff', borderRadius: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.15)', zIndex: 11000, marginTop: '15px', border: '1px solid #e2e8f0', overflow: 'hidden' }}
+                                    >
+                                        <div style={{ padding: '20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                                            <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>Notifications</h3>
+                                            <button onClick={() => setIsNotifOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={18} /></button>
+                                        </div>
+                                        <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '10px' }}>
+                                            {notifications.length === 0 ? (
+                                                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                                                    <Bell size={32} style={{ opacity: 0.2, marginBottom: '10px' }} />
+                                                    <p style={{ fontSize: '0.85rem', fontWeight: 700 }}>All caught up!</p>
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {notifications.map((n) => (
+                                                        <div key={n.id} style={{ padding: '15px', borderRadius: '16px', background: n.status === 'UNREAD' ? '#f0f9ff' : '#fff', border: '1px solid #f1f5f9', position: 'relative' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                                                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: n.status === 'UNREAD' ? 'var(--primary)' : '#4a5568' }}>{n.title}</span>
+                                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                                    {n.status === 'UNREAD' && (
+                                                                        <button onClick={() => markNotifRead(n.id)} style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer' }} title="Mark as Read"><Check size={14} /></button>
+                                                                    )}
+                                                                    <button onClick={() => deleteNotif(n.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Delete"><Trash2 size={14} /></button>
+                                                                </div>
+                                                            </div>
+                                                            <p style={{ fontSize: '0.8rem', color: '#718096', lineHeight: 1.4 }}>{n.message}</p>
+                                                            <span style={{ fontSize: '0.65rem', color: '#cbd5e1', fontWeight: 700, marginTop: '8px', display: 'block' }}>{new Date(n.createdAt).toLocaleString()}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {notifications.length > 0 && (
+                                            <div style={{ padding: '15px', textAlign: 'center', borderTop: '1px solid #f1f5f9' }}>
+                                                <button onClick={() => setNotifications([])} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 900, cursor: 'pointer' }}>CLEAR ALL HISTORY</button>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        <div className={styles.userProfile} onClick={() => setIsProfileModalOpen(true)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span>{userName}</span>
+                            <div className={styles.avatar}>
+                                {loggedUser?.profileImage ? (
+                                    <img src={loggedUser.profileImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                ) : (
+                                    <span>{userName.charAt(0).toUpperCase()}</span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </header>

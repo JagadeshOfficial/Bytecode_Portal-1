@@ -52,14 +52,41 @@ export default function BytecodeWebRTCRoom() {
     const [isSaving,      setIsSaving]      = useState(false);
     const [saveSuccess,   setSaveSuccess]   = useState(false);
     const [isFullscreen,  setIsFullscreen]  = useState(false);
+    const [isLeaveMenuOpen, setIsLeaveMenuOpen] = useState(false);
     
-    // Mock participants
-    const [participants,  setParticipants]  = useState([
-        { id: 1, name: 'You (Host)', avatar: 'Y', isMuted: false, isVideoOff: false, role: 'Tutor' },
-        { id: 2, name: 'Suryavardhan', avatar: 'S', isMuted: true, isVideoOff: true, role: 'Student' },
-        { id: 3, name: 'Rahul Kumar', avatar: 'R', isMuted: false, isVideoOff: false, role: 'Student' },
-        { id: 4, name: 'Priya Sharma', avatar: 'P', isMuted: true, isVideoOff: false, role: 'Student' },
-    ]);
+    // Room participants
+    const [participants, setParticipants] = useState<any[]>([]);
+
+    // ── Load Current User & Sync Identity ──────────────────────────────
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                try {
+                    const user = JSON.parse(storedUser);
+                    const name = user.fullName || user.email || 'User';
+                    const isStaff = ['tutor', 'super_admin', 'admin'].includes(user.role?.toLowerCase());
+                    const roleLabel = isStaff ? (user.role.replace(/_/g, ' ').toUpperCase()) : 'STUDENT';
+                    
+                    setParticipants([
+                        { 
+                            id: user.id || user._id || 1, 
+                            name: `${name} (You)`, 
+                            avatar: name.charAt(0).toUpperCase(), 
+                            isMuted: false, 
+                            isVideoOff: false, 
+                            role: roleLabel,
+                            canEndSession: isStaff
+                        }
+                    ]);
+                } catch (e) {
+                    setParticipants([{ id: 1, name: 'You', avatar: 'Y', isMuted: false, isVideoOff: false, role: 'Tutor' }]);
+                }
+            } else {
+                setParticipants([{ id: 1, name: 'You', avatar: 'Y', isMuted: false, isVideoOff: false, role: 'Tutor' }]);
+            }
+        }
+    }, []);
 
     // ── Init camera + mic ─────────────────────────────────────────────
     useEffect(() => {
@@ -71,7 +98,6 @@ export default function BytecodeWebRTCRoom() {
                     audio: true,
                 });
                 localStreamRef.current = stream;
-                // Double ensure these are attached
                 if (localVideoRef.current) localVideoRef.current.srcObject = stream;
                 if (hiddenCamRef.current) {
                     hiddenCamRef.current.srcObject = stream;
@@ -89,6 +115,72 @@ export default function BytecodeWebRTCRoom() {
              cleanupStreams();
         };
     }, []); // eslint-disable-line
+
+    // ── Real-time Synchronization (Heartbeat & Polling) ────────────────
+    useEffect(() => {
+        if (!participants[0]) return;
+        const localUser = participants[0];
+
+        const sendHeartbeat = async () => {
+            try {
+                await fetch(`http://localhost:8080/api/academic/rooms/${roomId}/heartbeat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: localUser.id,
+                        name: localUser.name.replace(' (You)', ''),
+                        role: localUser.role,
+                        isMuted: isMuted,
+                        isVideoOff: isVideoOff
+                    })
+                });
+            } catch (e) { console.error("Heartbeat error", e); }
+        };
+
+        const fetchOthers = async () => {
+            try {
+                const res = await fetch(`http://localhost:8080/api/academic/rooms/${roomId}/participants`);
+                if (res.ok) {
+                    const allData = await res.json();
+                    
+                    // If room is terminated and I am NOT the one who ended it, others will be empty
+                    // but better yet, check if the actual session is COMPLETED in the schedule
+                    const sessionRes = await fetch(`http://localhost:8080/api/academic/sessions/${roomId}`);
+                    if (sessionRes.ok) {
+                        const sess = await sessionRes.json();
+                        if (sess.status === 'COMPLETED') {
+                            alert("This session has been ended by the host.");
+                            handleLeave();
+                            return;
+                        }
+                    }
+
+                    setParticipants(prev => {
+                        if (prev.length === 0) return prev;
+                        const local = prev[0];
+                        const others = allData.filter((p: any) => p.userId !== local.id).map((p: any) => ({
+                            id: p.userId,
+                            name: p.name,
+                            avatar: p.name.charAt(0).toUpperCase(),
+                            isMuted: p.isMuted,
+                            isVideoOff: p.isVideoOff,
+                            role: p.role
+                        }));
+                        return [local, ...others];
+                    });
+                }
+            } catch (e) { console.error("Poll error", e); }
+        };
+
+        sendHeartbeat();
+        const hInterval = setInterval(sendHeartbeat, 10000); // 10s heartbeat
+        const pInterval = setInterval(fetchOthers, 5000);   // 5s poll
+
+        return () => {
+            clearInterval(hInterval);
+            clearInterval(pInterval);
+        };
+    }, [roomId, isMuted, isVideoOff, camReady]); // Re-run when local state changes
 
     const cleanupStreams = () => {
         console.log("Cleaning up all media streams...");
@@ -173,7 +265,7 @@ export default function BytecodeWebRTCRoom() {
         const tracks = localStreamRef.current?.getAudioTracks() ?? [];
         tracks.forEach(t => { t.enabled = !t.enabled; });
         setIsMuted(p => !p);
-        setParticipants(prev => prev.map(p => p.id === 1 ? { ...p, isMuted: !p.isMuted } : p));
+        setParticipants(prev => prev.map((p, i) => i === 0 ? { ...p, isMuted: !p.isMuted } : p));
     };
 
     const toggleVideo = () => {
@@ -182,7 +274,7 @@ export default function BytecodeWebRTCRoom() {
         tracks.forEach(t => { t.enabled = !next; });
         isVideoOffRef.current = next;
         setIsVideoOff(next);
-        setParticipants(prev => prev.map(p => p.id === 1 ? { ...p, isVideoOff: next } : p));
+        setParticipants(prev => prev.map((p, i) => i === 0 ? { ...p, isVideoOff: next } : p));
     };
 
     const toggleScreen = async () => {
@@ -359,13 +451,30 @@ export default function BytecodeWebRTCRoom() {
         setChatInput('');
     };
 
-    const leave = async () => {
-        const confirmExit = window.confirm("Are you sure you want to end this session for everyone?");
-        if (!confirmExit) return;
-        
+    const handleLeave = () => {
+        if (isRecording) {
+            if (!confirm("Recording is active. Leaving now will stop and save the recording. Continue?")) return;
+            stopRecording();
+        } else {
+            cleanupStreams();
+            router.back();
+        }
+    };
+
+    const handleEndForEveryone = async () => {
+        const confirmEnd = window.confirm("Are you sure you want to end this session for EVERYONE? Participants will be disconnected.");
+        if (!confirmEnd) return;
+
+        try {
+            // Mark session as completed in DB (assuming we want to reflect this in the schedule)
+            await fetch(`http://localhost:8080/api/academic/sessions/${roomId}/complete`, { method: 'PATCH' });
+            
+            // Signal room termination via heartbeat or custom endpoint
+            await fetch(`http://localhost:8080/api/academic/rooms/${roomId}/terminate`, { method: 'POST' });
+        } catch (e) { console.error("End session error", e); }
+
         if (isRecording) {
             stopRecording();
-            // Wait for upload in the overlay
         } else {
             cleanupStreams();
             router.back();
@@ -447,11 +556,13 @@ export default function BytecodeWebRTCRoom() {
                         </div>
                     ) : (
                         <div style={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '20px', padding: '20px' }}>
-                             {/* Mock Gallery View */}
-                             <div style={{ position: 'relative', width: 'min(780px, calc(100% - 40px))', aspectRatio: '16/9', borderRadius: 24, overflow: 'hidden', background: '#111', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                {isVideoOff ? <div style={avatarBox}>{participants[0].avatar}</div> : <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />}
-                                <div style={participantLabel}>You (Tutor)</div>
-                             </div>
+                             {/* Gallery View */}
+                             {participants.length > 0 && (
+                                 <div style={{ position: 'relative', width: 'min(780px, calc(100% - 40px))', aspectRatio: '16/9', borderRadius: 24, overflow: 'hidden', background: '#111', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    {isVideoOff ? <div style={avatarBox}>{participants[0].avatar}</div> : <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />}
+                                    <div style={participantLabel}>{participants[0].name}</div>
+                                 </div>
+                             )}
                              {participants.slice(1).map(p => (
                                  <div key={p.id} style={{ position: 'relative', width: '280px', aspectRatio: '16/9', borderRadius: 20, overflow: 'hidden', background: '#1c1c1f', border: '1px solid rgba(255,255,255,0.05)' }}>
                                      <div style={avatarBox}>{p.avatar}</div>
@@ -529,9 +640,30 @@ export default function BytecodeWebRTCRoom() {
                     )}
                 </div>
 
-                <button onClick={leave} style={{ padding: '0 30px', height: 54, borderRadius: '18px', background: '#ef4444', color: '#fff', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 20px rgba(239,68,68,0.2)' }}>
-                    <PhoneOff size={20} /> END SESSION
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <AnimatePresence>
+                        {isLeaveMenuOpen && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} style={{ position: 'absolute', bottom: '70px', right: 0, background: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '10px', width: '220px', display: 'flex', flexDirection: 'column', gap: '5px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 100 }}>
+                                <button onClick={handleLeave} style={{ padding: '12px 15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', textAlign: 'left', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <X size={16} /> Just Leave Call
+                                </button>
+                                <button onClick={handleEndForEveryone} style={{ padding: '12px 15px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', textAlign: 'left', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <PhoneOff size={16} /> End for Everyone
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {!participants[0]?.canEndSession ? (
+                        <button onClick={handleLeave} style={{ padding: '0 30px', height: 54, borderRadius: '18px', background: '#ef4444', color: '#fff', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 20px rgba(239,68,68,0.2)' }}>
+                            <PhoneOff size={20} /> LEAVE CALL
+                        </button>
+                    ) : (
+                        <button onClick={() => setIsLeaveMenuOpen(!isLeaveMenuOpen)} style={{ padding: '0 30px', height: 54, borderRadius: '18px', background: '#ef4444', color: '#fff', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 20px rgba(239,68,68,0.2)' }}>
+                            <PhoneOff size={20} /> EXIT SESSION
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* COMPOSITOR SOURCES */}

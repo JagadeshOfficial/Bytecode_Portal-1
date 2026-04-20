@@ -724,6 +724,20 @@ router.put('/session-requests/:id/action', async (req, res) => {
                     );
                 } else if (request.type === 'DELETE') {
                     await academicDb.collection('live_sessions').deleteOne(sessionFilter);
+                } else if (request.type === 'DELETE_RECORDING') {
+                    await academicDb.collection('live_sessions').updateOne(
+                        sessionFilter,
+                        { $set: { recordingUrl: null, updatedAt: new Date() } }
+                    );
+                } else if (request.type === 'DOWNLOAD_RECORDING') {
+                    // No database change required on the session itself for downloads,
+                    // just marking the request as APPROVED serves as the audit log.
+                } else if (request.type === 'DELETE_ASSIGNMENT') {
+                    if (request.assignmentId) {
+                        await academicDb.collection('assignments').deleteOne({ 
+                            _id: new mongoose.Types.ObjectId(request.assignmentId) 
+                        });
+                    }
                 }
             }
         }
@@ -741,6 +755,75 @@ router.put('/session-requests/:id/action', async (req, res) => {
     }
 });
 
+// --- NOTIFICATION ROUTES ---
+
+// @desc    Get notifications for a user OR role
+router.get('/notifications', async (req, res) => {
+    try {
+        const { userId, role } = req.query;
+        console.log(`GET /notifications user=${userId} role=${role}`);
+        const db = mongoose.connection.useDb('academic-db');
+        
+        let filter = {};
+        if (userId && role) {
+            filter = { $or: [{ userId: userId }, { role: role }, { role: 'ALL' }] };
+        } else if (userId) {
+            filter = { $or: [{ userId: userId }, { role: 'ALL' }] };
+        } else if (role) {
+            filter = { $or: [{ role: role }, { role: 'ALL' }] };
+        }
+
+        const notifications = await db.collection('notifications').find(filter).sort({ createdAt: -1 }).limit(50).toArray();
+        console.log(`Found ${notifications.length} notifications`);
+        const mapped = notifications.map(n => ({ ...n, id: n._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Create a notification
+router.post('/notifications', async (req, res) => {
+    try {
+        console.log(`POST /notifications:`, req.body);
+        const db = mongoose.connection.useDb('academic-db');
+        const notification = {
+            ...req.body,
+            status: 'UNREAD',
+            createdAt: new Date()
+        };
+        const result = await db.collection('notifications').insertOne(notification);
+        res.status(201).json({ ...notification, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Mark notification as read
+router.patch('/notifications/:id/read', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('notifications').updateOne(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: { status: 'READ', readAt: new Date() } }
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete notification
+router.delete('/notifications/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('notifications').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Withdrawal/Delete a session request
 router.delete('/session-requests/:id', async (req, res) => {
     try {
@@ -750,6 +833,81 @@ router.delete('/session-requests/:id', async (req, res) => {
             _id: new mongoose.Types.ObjectId(id) 
         });
         if (result.deletedCount === 0) return res.status(404).json({ error: 'Request not found' });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// --- LIVE ROOM PARTICIPANT TRACKING ---
+
+// @desc    Update participant heartbeat
+router.post('/rooms/:id/heartbeat', async (req, res) => {
+    try {
+        const { id: roomId } = req.params;
+        const { userId, name, role, isMuted, isVideoOff } = req.body;
+        const db = mongoose.connection.useDb('academic-db');
+
+        await db.collection('room_participants').updateOne(
+            { roomId, userId },
+            { 
+                $set: { 
+                    name, 
+                    role, 
+                    isMuted, 
+                    isVideoOff, 
+                    lastSeen: new Date() 
+                } 
+            },
+            { upsert: true }
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Get active participants in a room
+router.get('/rooms/:id/participants', async (req, res) => {
+    try {
+        const { id: roomId } = req.params;
+        const db = mongoose.connection.useDb('academic-db');
+
+        // Consider a participant active if they checked in within the last 20 seconds
+        const cutoff = new Date(Date.now() - 20000);
+        const participants = await db.collection('room_participants')
+            .find({ roomId, lastSeen: { $gt: cutoff } })
+            .toArray();
+
+        res.json(participants);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Mark session as completed
+router.patch('/sessions/:id/complete', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('live_sessions').updateOne(
+            { _id: new mongoose.Types.ObjectId(id) },
+            { $set: { status: 'COMPLETED', completedAt: new Date() } }
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Terminate a room (clear all participants)
+router.post('/rooms/:id/terminate', async (req, res) => {
+    try {
+        const { id: roomId } = req.params;
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('room_participants').deleteMany({ roomId });
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
