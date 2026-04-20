@@ -1923,7 +1923,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                 {/* --- MOCK INTERVIEWS CONTENT --- */}
                                 {['INTERVIEWS', 'LIVE_MONITOR', 'AI_ROOM', 'ANALYTICS'].includes(batchTab) && (
                                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
-                                        <MockInterviewEngine activeView={batchTab === 'INTERVIEWS' ? 'DASHBOARD' : batchTab} />
+                                        <MockInterviewEngine activeView={batchTab === 'AI_ROOM' ? 'AI_ROOM' : (batchTab === 'INTERVIEWS' ? 'DASHBOARD' : batchTab)} role={currentUserRole} />
                                     </motion.div>
                                 )}
 

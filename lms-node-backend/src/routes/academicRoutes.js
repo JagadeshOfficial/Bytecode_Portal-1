@@ -1024,6 +1024,33 @@ router.put('/mock-interviews/:id', async (req, res) => {
     }
 });
 
+// @desc    Get mock interviews for a specific student
+router.get('/mock-interviews/student/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const db = mongoose.connection.useDb('academic-db');
+        
+        // 1. Get batches student belongs to
+        const studentBatches = await db.collection('batches').find({ 
+            studentIds: studentId 
+        }).toArray();
+        const batchIds = studentBatches.map(b => b._id.toString());
+
+        // 2. Find interviews assigned to these batches (ALL) OR specifically to this student
+        const interviews = await db.collection('mock_interviews').find({
+            $or: [
+                { batchId: { $in: batchIds }, candidateType: 'ALL' },
+                { candidateIds: studentId }
+            ]
+        }).sort({ date: -1 }).toArray();
+
+        const mapped = interviews.map(i => ({ ...i, id: i._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // @desc    Delete mock interview
 router.delete('/mock-interviews/:id', async (req, res) => {
     try {

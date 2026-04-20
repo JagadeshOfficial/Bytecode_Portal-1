@@ -352,3 +352,98 @@
 ✓ Compiled in 978ms
  GET /sw.js 404 in 177ms (compile: 22ms, render: 155ms)
 ✓ Compiled in 154ms
+ GET /sw.js 404 in 157ms (compile: 57ms, render: 100ms)
+ GET /sw.js 404 in 128ms (compile: 55ms, render: 74ms)
+✓ Compiled in 901ms
+⨯ ReferenceError: Share2 is not defined
+    at module evaluation (src/components/Academic/MockInterviews/MockInterviewEngine.tsx:33:14)
+    at module evaluation (src/app/super-admin/academic/page.tsx:20:1)
+    at module evaluation (src/app/admin/academic/page.tsx:3:1)
+  31 |     Users: <Users size={20} />,
+  32 |     CheckCircle: <CheckCircle size={20} />,
+> 33 |     Share2: <Share2 size={20} />
+     |              ^
+  34 | };
+  35 |
+  36 | const controlBtnStyle = { {
+  digest: '1162675625'
+}
+⨯ ReferenceError: Share2 is not defined
+    at module evaluation (src/components/Academic/MockInterviews/MockInterviewEngine.tsx:33:14)
+    at module evaluation (src/app/super-admin/academic/page.tsx:20:1)
+    at module evaluation (src/app/admin/academic/page.tsx:3:1)
+  31 |     Users: <Users size={20} />,
+  32 |     CheckCircle: <CheckCircle size={20} />,
+> 33 |     Share2: <Share2 size={20} />
+     |              ^
+  34 | };
+  35 |
+  36 | const controlBtnStyle = { {
+  digest: '1162675625'
+}
+ GET /admin/academic 500 in 1922ms (compile: 280ms, render: 1642ms)
+ GET /sw.js 404 in 814ms (compile: 752ms, render: 62ms)
+ GET /admin/academic 500 in 840ms (compile: 12ms, render: 829ms)
+ GET /icon?d878d31cd40b5385 200 in 51ms (compile: 3ms, render: 47ms)
+ GET /sw.js 404 in 52ms (compile: 13ms, render: 38ms)
+ GET /sw.js 404 in 65ms (compile: 18ms, render: 47ms)
+✓ Compiled in 344ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/Academic/MockInterviews/MockInterviewEngine.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /admin/academic 200 in 378ms (compile: 116ms, render: 262ms)
+ GET /admin/academic 200 in 29ms (compile: 2ms, render: 27ms)
+ GET /icon?d878d31cd40b5385 200 in 35ms (compile: 11ms, render: 25ms)
+ GET /sw.js 404 in 43ms (compile: 7ms, render: 36ms)
+ GET /sw.js 404 in 81ms (compile: 3ms, render: 77ms)
+ GET /admin/academic 200 in 132ms (compile: 48ms, render: 84ms)
+ GET /icon?d878d31cd40b5385 200 in 27ms (compile: 1740µs, render: 25ms)
+ GET /sw.js 404 in 60ms (compile: 7ms, render: 52ms)
+ GET /admin/academic 200 in 162ms (compile: 53ms, render: 109ms)
+ GET /icon?d878d31cd40b5385 200 in 47ms (compile: 5ms, render: 42ms)
+ GET /sw.js 404 in 45ms (compile: 10ms, render: 35ms)
+ GET /admin/academic 200 in 72ms (compile: 15ms, render: 56ms)
+ GET /icon?d878d31cd40b5385 200 in 14ms (compile: 2ms, render: 12ms)
+✓ Compiled in 243ms
+ GET /sw.js 404 in 62ms (compile: 12ms, render: 51ms)
+ GET /admin/academic 200 in 137ms (compile: 71ms, render: 66ms)
+ GET /admin/academic 200 in 14ms (compile: 1362µs, render: 12ms)
+ GET /icon?d878d31cd40b5385 200 in 6ms (compile: 1151µs, render: 5ms)
+✓ Compiled in 426ms
+ GET /sw.js 404 in 78ms (compile: 15ms, render: 63ms)
+ GET /admin/academic 200 in 396ms (compile: 129ms, render: 267ms)
+ GET /icon?d878d31cd40b5385 200 in 21ms (compile: 1076µs, render: 20ms)
+ GET /sw.js 404 in 36ms (compile: 8ms, render: 28ms)
+ GET /admin/academic 200 in 99ms (compile: 30ms, render: 70ms)
+ GET /icon?d878d31cd40b5385 200 in 18ms (compile: 2ms, render: 16ms)
+ GET /sw.js 404 in 48ms (compile: 11ms, render: 37ms)
+ GET /super-admin/academic 200 in 159ms (compile: 85ms, render: 73ms)
+ GET /super-admin/academic 200 in 117ms (compile: 1415µs, render: 116ms)
+ GET /super-admin/academic 200 in 64ms (compile: 8ms, render: 56ms)
+✓ Compiled in 183ms
+✓ Compiled in 503ms
+ GET /super-admin/academic 200 in 365ms (compile: 139ms, render: 226ms)
+ GET /icon?d878d31cd40b5385 200 in 78ms (compile: 40ms, render: 37ms)
+ GET /sw.js 404 in 84ms (compile: 26ms, render: 58ms)
+✓ Compiled in 504ms
+ GET /super-admin/academic 200 in 359ms (compile: 125ms, render: 234ms)
+✓ Compiled in 666ms
+ GET /sw.js 404 in 101ms (compile: 38ms, render: 63ms)
+✓ Compiled in 169ms
+ GET /sw.js 404 in 74ms (compile: 17ms, render: 57ms)
+✓ Compiled in 269ms
+ GET /sw.js 404 in 95ms (compile: 19ms, render: 77ms)
+ GET /super-admin/academic 200 in 315ms (compile: 130ms, render: 184ms)
+ GET /sw.js 404 in 106ms (compile: 25ms, render: 81ms)
+✓ Compiled in 166ms
+ GET /sw.js 404 in 105ms (compile: 40ms, render: 65ms)
+✓ Compiled in 336ms
+ GET /sw.js 404 in 124ms (compile: 29ms, render: 95ms)
+✓ Compiled in 109ms
+ GET /sw.js 404 in 67ms (compile: 15ms, render: 52ms)
+✓ Compiled in 199ms
+ GET /sw.js 404 in 95ms (compile: 39ms, render: 57ms)
+ GET /sw.js 404 in 120ms (compile: 41ms, render: 78ms)
+ GET /sw.js 404 in 181ms (compile: 93ms, render: 87ms)
+ GET /sw.js 404 in 75ms (compile: 22ms, render: 53ms)
+ GET /sw.js 404 in 94ms (compile: 40ms, render: 55ms)

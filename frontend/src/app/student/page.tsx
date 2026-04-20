@@ -122,17 +122,9 @@ export default function StudentDashboard() {
             setLiveSessions(allLive);
 
             // Fetch mock interviews
-            const miRes = await fetch(`http://localhost:8080/api/academic/mock-interviews`);
+            const miRes = await fetch(`http://localhost:8080/api/academic/mock-interviews/student/${studentId}`);
             if (miRes.ok) {
-                const allInterviews = await miRes.json();
-                const studentId = loggedUser?.id || loggedUser?._id;
-                const batchIds = batches.map((b: any) => b.id || b._id);
-                
-                // Filter for student's batches OR specific candidateIds
-                const filtered = allInterviews.filter((mi: any) => 
-                    batchIds.includes(mi.batchId) && 
-                    (mi.candidateType === 'ALL' || (Array.isArray(mi.candidateIds) && mi.candidateIds.includes(studentId)))
-                );
+                const filtered = await miRes.json();
                 setMockInterviews(filtered);
             }
         } catch (e) {

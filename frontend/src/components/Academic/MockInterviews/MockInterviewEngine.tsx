@@ -8,8 +8,8 @@ import {
     CheckCircle, Clock, Zap, Target, 
     Shield, Activity, Bot, Mic, 
     Monitor, Brain, Clipboard, UserPlus,
-    X, ChevronRight, ChevronLeft, Flag,
-    Edit2, Trash2, Copy, Play, Check
+    X as CloseIcon, ChevronRight, ChevronLeft, Flag,
+    Edit2, Trash2, Copy, Play, Check, Share2, ScreenShare, Circle
 } from 'lucide-react';
 
 // --- STYLES & ACCENTS ---
@@ -29,17 +29,177 @@ const ICON_MAP: Record<string, any> = {
     Target: <Target size={20} />,
     Play: <Play size={20} />,
     Users: <Users size={20} />,
-    CheckCircle: <CheckCircle size={20} />
+    CheckCircle: <CheckCircle size={20} />,
+    Share2: <Share2 size={20} />
 };
 
-export default function MockInterviewEngine({ activeView }: { activeView?: string }) {
-    const [subView, setSubView] = useState<'DASHBOARD' | 'LIVE_MONITOR' | 'ANALYTICS' | 'AI_ROOM'>('DASHBOARD');
+const controlBtnStyle = {
+    padding: '12px',
+    borderRadius: '12px',
+    background: 'rgba(255,255,255,0.1)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    color: '#fff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+};
+
+export default function MockInterviewEngine({ activeView, role = 'super_admin' }: { activeView?: string, role?: string }) {
+    const isAdmin = role === 'super_admin' || role === 'admin';
+    const [subView, setSubView] = useState<'DASHBOARD' | 'LIVE_MONITOR' | 'ANALYTICS' | 'AI_ROOM' | 'RECORDINGS'>('DASHBOARD');
+    const [isMuted, setIsMuted] = useState(false);
+    const [isVideoOff, setIsVideoOff] = useState(false);
+    const [isScreenSharing, setIsScreenSharing] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    const screenRef = React.useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         if (activeView) {
             setSubView(activeView as any);
         }
     }, [activeView]);
+
+    useEffect(() => {
+        if (subView === 'AI_ROOM') {
+            startCamera();
+        } else {
+            stopCamera();
+        }
+    }, [subView]);
+
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            console.error("Camera access failed:", err);
+        }
+    };
+
+    const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+            tracks.forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+        }
+    };
+
+    const toggleMute = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const audioTracks = (videoRef.current.srcObject as MediaStream).getAudioTracks();
+            audioTracks.forEach(track => track.enabled = isMuted);
+            setIsMuted(!isMuted);
+        }
+    };
+
+    const toggleVideo = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const videoTracks = (videoRef.current.srcObject as MediaStream).getVideoTracks();
+            videoTracks.forEach(track => track.enabled = isVideoOff);
+            setIsVideoOff(!isVideoOff);
+        }
+    };
+
+    const toggleScreenShare = async () => {
+        try {
+            if (!isScreenSharing) {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                setIsScreenSharing(true);
+                // In a real app, you'd switch the video stream source
+            } else {
+                setIsScreenSharing(false);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const startRecording = () => {
+        setIsRecording(true);
+        setRecordedUrl(null);
+        // Simulation of recording start
+    };
+
+    const stopRecording = async () => {
+        setIsRecording(false);
+        const mockUrl = `https://bytecode-storage.s3.amazonaws.com/mock-interviews/rec-${Date.now()}.mp4`;
+        const mockTranscript = [
+            { time: "00:05", speaker: "Interviewer", text: "Welcome to the simulation. Let's start with your background." },
+            { time: "00:30", speaker: "Candidate", text: "I have been working on full-stack projects using React and Node.js for 2 years." },
+            { time: "01:00", speaker: "AI Insight", text: "Clear technical introduction.", type: "insight" },
+            { time: "01:45", speaker: "Interviewer", text: "Can you explain how you handle race conditions in the distributed system?" }
+        ];
+        
+        setRecordedUrl(mockUrl);
+
+        // Auto-save to database if session is selected
+        if (selectedInterviewId) {
+            try {
+                const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recordedUrl: mockUrl,
+                        transcript: mockTranscript,
+                        status: 'COMPLETED',
+                        aiScore: Math.floor(Math.random() * (95 - 75 + 1) + 75) // Random score for now
+                    })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    setInterviews(prev => prev.map(i => i.id === updated.id ? updated : i));
+                }
+            } catch (err) {
+                console.error("Failed to auto-save recording:", err);
+            }
+        }
+    };
+
+    const shareToBatchDrive = async (session: any) => {
+        if (!session || !recordedUrl) return;
+        try {
+            // Find the batch
+            const bRes = await fetch(`http://localhost:8080/api/academic/batches/${session.batchId}`);
+            if (!bRes.ok) return;
+            const batch = await bRes.json();
+            
+            const newFile = {
+                name: `MOCK_INTERVIEW_${session.title}_${new Date().toLocaleDateString().replace(/\//g, '-')}.mp4`,
+                size: '42.5 MB',
+                type: 'video/mp4',
+                uploadDate: new Date().toISOString(),
+                url: recordedUrl
+            };
+
+            // Add to 'Mock Interviews' folder or create it
+            batch.folders = batch.folders || [];
+            let folder = batch.folders.find((f: any) => f.name === 'Mock Interview Recordings');
+            if (!folder) {
+                folder = { name: 'Mock Interview Recordings', files: [], sharedWith: [] };
+                batch.folders.push(folder);
+            }
+            folder.files.push(newFile);
+
+            const upRes = await fetch(`http://localhost:8080/api/academic/batches/${session.batchId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(batch)
+            });
+
+            if (upRes.ok) {
+                alert("Recording shared to Batch Drive successfully!");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardStep, setWizardStep] = useState(1);
     
@@ -160,18 +320,17 @@ export default function MockInterviewEngine({ activeView }: { activeView?: strin
         <div style={{ padding: '0 0.5rem' }}>
             {/* --- TOP SUB-NAV --- */}
             <div style={{ display: 'flex', gap: '15px', marginBottom: '3rem' }}>
-                <button onClick={() => setSubView('DASHBOARD')} style={subView === 'DASHBOARD' ? activeBtnStyle : inactiveBtnStyle}>
-                    <Monitor size={16} /> DASHBOARD
-                </button>
-                <button onClick={() => setSubView('LIVE_MONITOR')} style={subView === 'LIVE_MONITOR' ? activeBtnStyle : inactiveBtnStyle}>
-                    <Activity size={16} /> LIVE MONITOR
-                </button>
-                <button onClick={() => setSubView('AI_ROOM')} style={subView === 'AI_ROOM' ? activeBtnStyle : inactiveBtnStyle}>
-                    <Bot size={16} /> AI ROOM
-                </button>
-                <button onClick={() => setSubView('ANALYTICS')} style={subView === 'ANALYTICS' ? activeBtnStyle : inactiveBtnStyle}>
-                    <BarChart2 size={16} /> ANALYTICS
-                </button>
+                {[
+                    { id: 'DASHBOARD', label: 'DASHBOARD', icon: <Monitor size={18} /> },
+                    { id: 'LIVE_MONITOR', label: 'LIVE MONITOR', icon: <Activity size={18} /> },
+                    { id: 'AI_ROOM', label: 'AI ROOM', icon: <Bot size={18} /> },
+                    { id: 'ANALYTICS', label: 'ANALYTICS', icon: <BarChart2 size={18} /> },
+                    { id: 'RECORDINGS', label: 'RECORDINGS', icon: <Video size={18} /> }
+                ].map((tab) => (
+                    <button key={tab.id} onClick={() => setSubView(tab.id as any)} style={subView === tab.id ? activeBtnStyle : inactiveBtnStyle}>
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
                 <div style={{ flex: 1 }} />
                 <button onClick={() => { setIsEditing(false); setNewInterview({ ...newInterview, title: '', description: '', date: '', startTime: '' }); setIsWizardOpen(true); }} className="btn-quantum" style={{ padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Plus size={18} /> CREATE INTERVIEW
@@ -275,17 +434,35 @@ export default function MockInterviewEngine({ activeView }: { activeView?: strin
 
                 {subView === 'AI_ROOM' && (
                     <motion.div key="ai" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <AIRoomView session={interviews.find(i => i.id === selectedInterviewId || i._id === selectedInterviewId)} />
+                        <AIRoomView 
+                            session={interviews.find(i => i.id === selectedInterviewId || i._id === selectedInterviewId)} 
+                            isAdmin={isAdmin}
+                            videoRef={videoRef}
+                            isMuted={isMuted}
+                            isVideoOff={isVideoOff}
+                            isScreenSharing={isScreenSharing}
+                            isRecording={isRecording}
+                            recordedUrl={recordedUrl}
+                            toggleMute={toggleMute}
+                            toggleVideo={toggleVideo}
+                            toggleScreenShare={toggleScreenShare}
+                            startRecording={startRecording}
+                            stopRecording={stopRecording}
+                            shareToBatchDrive={shareToBatchDrive}
+                            onEndSession={() => setSubView('DASHBOARD')}
+                        />
+                    </motion.div>
+                )}
+
+                {subView === 'RECORDINGS' && (
+                    <motion.div key="recordings" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                        <RecordingsHistoryView interviews={interviews} />
                     </motion.div>
                 )}
 
                 {subView === 'ANALYTICS' && (
                     <motion.div key="analysis" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <div style={{ ...glassStyle, padding: '4rem', textAlign: 'center' }}>
-                            <BarChart2 size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                            <h2 style={{ color: '#111' }}>Advanced Analytics Engine</h2>
-                            <p style={{ color: '#666' }}>Detailed insights and performance trends are being calculated...</p>
-                        </div>
+                        <AnalyticsEngineView interviews={interviews} />
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -300,7 +477,7 @@ export default function MockInterviewEngine({ activeView }: { activeView?: strin
                                     <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#111' }}>Mock Interview Scheduler</h2>
                                     <p style={{ fontSize: '0.8rem', color: '#666' }}>Step {wizardStep} of 8: {getStepTitle(wizardStep)}</p>
                                 </div>
-                                <button onClick={() => setIsWizardOpen(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><X size={24} /></button>
+                                <button onClick={() => setIsWizardOpen(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><CloseIcon size={24} /></button>
                             </div>
 
                             <div style={{ padding: '2.5rem', flex: 1, overflowY: 'auto', background: '#fefefe' }}>
@@ -761,7 +938,13 @@ function LiveMonitoringView({ interviews, onJoin }: { interviews: any[], onJoin:
     );
 }
 
-function AIRoomView({ session }: { session: any }) {
+function AIRoomView({ 
+    session, isAdmin, videoRef, isMuted, isVideoOff, isScreenSharing, isRecording, recordedUrl, 
+    toggleMute, toggleVideo, toggleScreenShare, startRecording, stopRecording, shareToBatchDrive, onEndSession
+}: { 
+    session: any, isAdmin: boolean, videoRef: any, isMuted: boolean, isVideoOff: boolean, isScreenSharing: boolean, isRecording: boolean, recordedUrl: string | null,
+    toggleMute: any, toggleVideo: any, toggleScreenShare: any, startRecording: any, stopRecording: any, shareToBatchDrive: any, onEndSession: any
+}) {
     if (!session) {
         return (
             <div style={{ ...glassStyle, padding: '5rem', textAlign: 'center' }}>
@@ -775,14 +958,54 @@ function AIRoomView({ session }: { session: any }) {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2.5rem' }}>
             <div style={{ ...glassStyle, background: '#111', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: '2rem', left: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
-                    <span style={{ fontWeight: 900 }}>LIVE FEED: {session.interviewerName} vs CANDIDATE</span>
+                <div style={{ position: 'absolute', top: '2rem', left: '2rem', display: 'flex', alignItems: 'center', gap: '10px', zIndex: 10 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444', animation: isRecording ? 'pulse 1s infinite' : 'none' }} />
+                    <span style={{ fontWeight: 900, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                        LIVE FEED: {session.interviewerName} vs CANDIDATE {isRecording && '(RECORDING...)'}
+                    </span>
                 </div>
-                <Bot size={120} style={{ opacity: 0.2, animation: 'float 3s infinite ease-in-out' }} />
-                <div style={{ position: 'absolute', bottom: '2rem', left: '2rem', right: '2rem', display: 'flex', gap: '15px' }}>
+                
+                {/* VIDEO ELEMENT */}
+                <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    muted={isMuted}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isVideoOff ? 0 : 1 }} 
+                />
+                
+                {isVideoOff && (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
+                        <Bot size={120} style={{ opacity: 0.2, animation: 'float 3s infinite ease-in-out' }} />
+                    </div>
+                )}
+
+                <div style={{ position: 'absolute', bottom: '2rem', left: '2rem', right: '2rem', display: 'flex', flexDirection: 'column', gap: '15px', zIndex: 10 }}>
+                    {/* Controls */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+                        <button onClick={toggleMute} style={controlBtnStyle}>
+                            {isMuted ? <Mic size={20} color="#ef4444" /> : <Mic size={20} />}
+                        </button>
+                        <button onClick={toggleVideo} style={controlBtnStyle}>
+                            {isVideoOff ? <Monitor size={20} color="#ef4444" /> : <Monitor size={20} />}
+                        </button>
+                        <button onClick={toggleScreenShare} style={controlBtnStyle}>
+                            <ScreenShare size={20} color={isScreenSharing ? 'var(--primary)' : '#fff'} />
+                        </button>
+                        
+                        {isAdmin && (
+                            <>
+                                <button onClick={isRecording ? stopRecording : startRecording} style={{ ...controlBtnStyle, border: isRecording ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', background: isRecording ? 'rgba(239,68,68,0.1)' : 'transparent' }}>
+                                    <Circle size={20} fill={isRecording ? "#ef4444" : "none"} color={isRecording ? "#ef4444" : "#fff"} />
+                                </button>
+                                <button onClick={onEndSession} style={{ ...controlBtnStyle, background: '#ef4444', borderRadius: '12px', padding: '10px 20px', fontWeight: 900, minWidth: '130px' }}>
+                                    END MEETING
+                                </button>
+                            </>
+                        )}
+                    </div>
+
                     <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
-                        <div style={{ width: '45%', height: '100%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} />
+                        <div style={{ width: isRecording ? '100%' : '45%', height: '100%', background: isRecording ? '#ef4444' : 'var(--primary)', boxShadow: isRecording ? '0 0 10px #ef4444' : '0 0 10px var(--primary)', transition: 'width 0.5s' }} />
                     </div>
                 </div>
             </div>
@@ -855,6 +1078,238 @@ function AIRoomView({ session }: { session: any }) {
                     50% { transform: translateY(-20px); }
                 }
             `}</style>
+        </div>
+    );
+}
+
+function AnalyticsEngineView({ interviews }: { interviews: any[] }) {
+    const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+    const completed = interviews.filter(i => i.status === 'COMPLETED');
+    const avgScore = completed.length > 0 ? (completed.reduce((acc, i) => acc + (i.aiScore || 85), 0) / completed.length).toFixed(1) : "0.0";
+
+    // Extract unique candidates
+    const candidates = Array.from(new Set(completed.map(i => i.candidateName || 'Unknown')));
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h2 style={{ fontWeight: 900 }}>Advanced Performance Matrix</h2>
+                    <p style={{ fontSize: '0.8rem', color: '#666' }}>Comprehensive batch intelligence and behavioral scoring.</p>
+                </div>
+                <div style={{ background: 'var(--primary)', color: '#fff', padding: '12px 24px', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 900, boxShadow: '0 10px 20px rgba(79, 70, 229, 0.2)' }}>BATCH AVG: {avgScore}%</div>
+            </div>
+
+            {/* --- CANDIDATE SPOTLIGHT --- */}
+            <div style={{ ...glassStyle, padding: '2.5rem', background: '#fff' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                    <h3 style={{ fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}><Target size={20} color="var(--primary)" /> CANDIDATE SPOTLIGHT</h3>
+                    <select 
+                        onChange={(e) => setSelectedStudent(e.target.value)} 
+                        style={{ padding: '12px 20px', borderRadius: '12px', border: '1px solid #eee', fontSize: '0.8rem', fontWeight: 800, background: '#f9f9f9' }}
+                    >
+                        <option value="">SELECT STUDENT FOR DEEP DIVE</option>
+                        {candidates.map(c => <option key={c as string} value={c as string}>{c as string}</option>)}
+                    </select>
+                </div>
+
+                {selectedStudent ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                        <div>
+                            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: '#999', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Individual Mock Timeline (Date-wise)</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {completed.filter(i => i.candidateName === selectedStudent).map((mock, idx) => (
+                                    <div key={idx} style={{ padding: '1.5rem', border: '1px solid #f0f0f0', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)' }}>{mock.date}</p>
+                                            <h5 style={{ fontWeight: 800, fontSize: '1rem' }}>{mock.title}</h5>
+                                            <p style={{ fontSize: '0.75rem', color: '#666' }}>Type: {mock.type}</p>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: (mock.aiScore || 85) >= 80 ? '#10b981' : '#f59e0b' }}>{mock.aiScore || 85}%</div>
+                                            <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#999' }}>AI RAW SCORE</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div style={{ background: '#fcfcfc', padding: '2rem', borderRadius: '24px', border: '1px dotted #e0e0e0' }}>
+                            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: '#999', marginBottom: '1.5rem', textTransform: 'uppercase' }}>AI Sentiment & Transcript Insight</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '15px' }}>
+                                    <div style={{ width: '4px', background: '#10b981', borderRadius: '2px' }} />
+                                    <div>
+                                        <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#10b981' }}>STRENGTHS</p>
+                                        <p style={{ fontSize: '0.85rem', color: '#444' }}>Strong grasp of Big O notation. Consistent eye contact maintained during technical explanation.</p>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '15px' }}>
+                                    <div style={{ width: '4px', background: '#f59e0b', borderRadius: '2px' }} />
+                                    <div>
+                                        <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#f59e0b' }}>GROWTH AREAS</p>
+                                        <p style={{ fontSize: '0.85rem', color: '#444' }}>Needs to improve depth in multi-threading concepts. Occasional hesitation when discussing edge cases.</p>
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: '1rem', padding: '1rem', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
+                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#111', marginBottom: '8px' }}>LATEST TRANSCRIPT SNIPPET</p>
+                                    <p style={{ fontSize: '0.75rem', color: '#777', fontStyle: 'italic', lineHeight: '1.5' }}>
+                                        "My approach to the LRU cache involves using a Doubly Linked List paired with a Hash Map to ensure constant time complexity for both put and get operations..."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '4rem', border: '2px dashed #f0f0f0', borderRadius: '24px' }}>
+                        <Users size={32} style={{ color: '#ccc', marginBottom: '1rem' }} />
+                        <p style={{ fontSize: '0.9rem', color: '#999', fontWeight: 800 }}>Please select a candidate from the dropdown to see individual performance trends and transcripts.</p>
+                    </div>
+                )}
+            </div>
+
+            {/* --- GLOBAL BATCH STATS --- */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                {/* Score Trends */}
+                <div style={{ ...glassStyle, padding: '2rem', background: '#fff' }}>
+                    <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '0.9rem' }}>SCORE PROGRESSION (LATEST 10)</h4>
+                    <div style={{ height: '150px', display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+                        {[72, 85, 78, 92, 88, 95, 82, 90, 85, 96].map((h, i) => (
+                            <div key={i} style={{ flex: 1, background: 'var(--primary)', height: `${h}%`, borderRadius: '4px 4px 0 0', opacity: 0.1 + (i * 0.1), position: 'relative' }}>
+                                <div style={{ position: 'absolute', top: '-25px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6rem', fontWeight: 900 }}>{h}</div>
+                            </div>
+                        ))}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                        <span style={{ fontSize: '0.7rem', color: '#999', fontWeight: 800 }}>BATCH START</span>
+                        <span style={{ fontSize: '0.7rem', color: '#999', fontWeight: 800 }}>CURRENT</span>
+                    </div>
+                </div>
+
+                {/* Cognitive Distribution */}
+                <div style={{ ...glassStyle, padding: '2rem', background: '#fff' }}>
+                    <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '0.9rem' }}>COGNITIVE PARAMETERS</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        {[
+                            { label: 'Technical Depth', val: 82, color: 'var(--primary)' },
+                            { label: 'Problem Solving', val: 78, color: 'var(--secondary)' },
+                            { label: 'Communication', val: 94, color: '#10b981' },
+                            { label: 'System Design', val: 65, color: '#f59e0b' }
+                        ].map((p, i) => (
+                            <div key={i}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 800, marginBottom: '5px' }}>
+                                    <span>{p.label}</span>
+                                    <span>{p.val}%</span>
+                                </div>
+                                <div style={{ height: '6px', background: '#f0f0f0', borderRadius: '3px' }}>
+                                    <div style={{ width: `${p.val}%`, height: '100%', background: p.color, borderRadius: '3px', boxShadow: `0 0 10px ${p.color}44` }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                <InsightCard title="Placement Readiness" value="HIGH" desc="85% of batch mimics production-grade logic." color="#10b981" />
+                <InsightCard title="Top Blocker" value="Optim Logic" desc="Time complexity remains a hurdle in 40% of cases." color="#ef4444" />
+                <InsightCard title="Mock Saturation" value="92%" desc="Average student has completed 4 simulations." color="var(--primary)" />
+            </div>
+        </div>
+    );
+}
+
+function InsightCard({ title, value, desc, color }: any) {
+    return (
+        <div style={{ ...glassStyle, padding: '2rem', background: '#fff', borderLeft: `5px solid ${color}` }}>
+            <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>{title}</p>
+            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#111', marginBottom: '10px' }}>{value}</h3>
+            <p style={{ fontSize: '0.8rem', color: '#666', lineHeight: '1.5' }}>{desc}</p>
+        </div>
+    );
+}
+
+function RecordingsHistoryView({ interviews }: { interviews: any[] }) {
+    const [selectedRec, setSelectedRec] = useState<any>(null);
+    const [viewMode, setViewMode] = useState<'VIDEO' | 'TRANSCRIPT' | null>(null);
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <h2 style={{ fontWeight: 900 }}>Mock Interview Archive</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
+                {interviews.filter(i => i.status === 'COMPLETED').map(rec => (
+                    <div key={rec.id || rec._id} style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
+                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div style={{ padding: '12px', background: 'rgba(124, 58, 237, 0.1)', borderRadius: '12px', color: 'var(--primary)' }}><Video size={24} /></div>
+                            <div>
+                                <h4 style={{ fontWeight: 900 }}>{rec.title}</h4>
+                                <p style={{ fontSize: '0.7rem', color: '#666' }}>{rec.date} • {rec.duration}m</p>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button 
+                                onClick={() => { setSelectedRec(rec); setViewMode('VIDEO'); }}
+                                className="btn-quantum" style={{ flex: 1, padding: '10px' }}
+                            >
+                                PLAY RECAP
+                            </button>
+                            <button 
+                                onClick={() => { setSelectedRec(rec); setViewMode('TRANSCRIPT'); }}
+                                style={{ ...secondaryBtnStyle, flex: 1 }}
+                            >
+                                AI TRANSCRIPT
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <AnimatePresence>
+                {selectedRec && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', padding: '2rem' }}>
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }} 
+                            animate={{ scale: 1, opacity: 1 }} 
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            style={{ ...glassStyle, width: '100%', maxWidth: '900px', maxHeight: '90vh', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                        >
+                            <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <h3 style={{ fontWeight: 900 }}>{viewMode === 'VIDEO' ? 'Session Playback' : 'AI Performance Transcript'}</h3>
+                                <button onClick={() => setSelectedRec(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><CloseIcon size={24} /></button>
+                            </div>
+
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+                                {viewMode === 'VIDEO' ? (
+                                    <div style={{ background: '#000', borderRadius: '16px', overflow: 'hidden', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexDirection: 'column', gap: '1rem', minHeight: '400px' }}>
+                                        {selectedRec.recordedUrl ? (
+                                            <video src={selectedRec.recordedUrl} controls autoPlay style={{ width: '100%', height: '100%', maxHeight: '500px' }} />
+                                        ) : (
+                                            <>
+                                                <Play size={48} />
+                                                <p style={{ fontWeight: 800 }}>Streaming: {selectedRec.title}</p>
+                                                <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>No real media source found. Using preview mode.</p>
+                                            </>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        {(selectedRec.transcript || [
+                                            { time: "00:00", speaker: "System", text: "Transcript is being processed for this session..." }
+                                        ]).map((line: any, i: number) => (
+                                            <div key={i} style={{ display: 'flex', gap: '1rem', background: line.type === 'insight' ? 'rgba(79, 70, 229, 0.05)' : 'transparent', padding: line.type === 'insight' ? '1rem' : '0', borderRadius: '12px' }}>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', width: '45px' }}>{line.time}</span>
+                                                <div>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: line.type === 'insight' ? 'var(--primary)' : '#111' }}>{line.speaker}</span>
+                                                    <p style={{ fontSize: '0.9rem', color: '#444', marginTop: '4px', lineHeight: '1.6' }}>{line.text}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
