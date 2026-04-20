@@ -79,8 +79,11 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
     }, []);
 
     const currentUserRole = String(currentUser?.role || role).toUpperCase();
-    const isAdminActor = currentUserRole === 'ADMIN';
-    const isProtectedForAdmin = (user: any) => isAdminActor && normalizeRole(user?.role) === 'SUPER_ADMIN';
+    const isSuperAdmin = currentUserRole === 'SUPER_ADMIN';
+    const isAdmin = currentUserRole === 'ADMIN';
+    const isFullAdmin = isSuperAdmin || isAdmin;
+    
+    const isProtectedForAdmin = (user: any) => isAdmin && normalizeRole(user?.role) === 'SUPER_ADMIN';
 
     const fetchTrainerBatches = async (trainerId: string) => {
         try {
@@ -227,20 +230,22 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                         <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px' }}>User Management</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage system accounts and user permissions.</p>
                     </div>
-                    <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleOpenEditModal()}
-                        className="btn-quantum" 
-                        style={{ padding: '14px 28px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}
-                    >
-                        <Plus size={18} /> ADD NEW USER
-                    </motion.button>
+                    {isFullAdmin && (
+                        <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleOpenEditModal()}
+                            className="btn-quantum" 
+                            style={{ padding: '14px 28px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                            <Plus size={18} /> ADD NEW USER
+                        </motion.button>
+                    )}
                 </div>
 
                 {/* --- ROLE FILTER TABS --- */}
                 <div style={{ display: 'flex', gap: '15px', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '10px' }}>
-                    {['ALL', 'STUDENT', 'TRAINER', 'STAFF'].map(role => (
+                    {['ALL', 'STUDENT', 'TRAINER', 'STAFF'].filter(r => isFullAdmin || r !== 'STAFF').map(role => (
                         <button 
                             key={role}
                             onClick={() => setActiveTab(role)}
@@ -375,20 +380,24 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                         </td>
                                         <td style={{ padding: '20px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <ActionButton icon={<Eye size={16} />} color="var(--primary)" onClick={() => handleViewDetails(u)} />
-                                                <ActionButton
-                                                    icon={<Edit2 size={16} />}
-                                                    onClick={() => handleOpenEditModal(u)}
-                                                    disabled={isProtectedForAdmin(u)}
-                                                    title={isProtectedForAdmin(u) ? 'Admin cannot edit Super Admin accounts' : 'Edit user'}
-                                                />
-                                                <ActionButton
-                                                    icon={<Trash2 size={16} />}
-                                                    color="#ef4444"
-                                                    onClick={() => handleDelete(u)}
-                                                    disabled={isProtectedForAdmin(u)}
-                                                    title={isProtectedForAdmin(u) ? 'Admin cannot delete Super Admin accounts' : 'Delete user'}
-                                                />
+                                                <ActionButton icon={<Eye size={16} />} color="var(--primary)" onClick={() => handleViewDetails(u)} title="View profile details" />
+                                                {isFullAdmin && (
+                                                    <>
+                                                        <ActionButton
+                                                            icon={<Edit2 size={16} />}
+                                                            onClick={() => handleOpenEditModal(u)}
+                                                            disabled={isProtectedForAdmin(u)}
+                                                            title={isProtectedForAdmin(u) ? 'Admin cannot edit Super Admin accounts' : 'Edit user'}
+                                                        />
+                                                        <ActionButton
+                                                            icon={<Trash2 size={16} />}
+                                                            color="#ef4444"
+                                                            onClick={() => handleDelete(u)}
+                                                            disabled={isProtectedForAdmin(u)}
+                                                            title={isProtectedForAdmin(u) ? 'Admin cannot delete Super Admin accounts' : 'Delete user'}
+                                                        />
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </motion.tr>

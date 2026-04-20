@@ -164,7 +164,8 @@ router.get('/sessions', async (req, res) => {
         const db = mongoose.connection.useDb('academic-db');
         const filter = req.query.batchId ? { batchId: req.query.batchId } : {};
         const sessions = await db.collection('live_sessions').find(filter).toArray();
-        res.json(sessions);
+        const mapped = sessions.map(s => ({ ...s, id: s._id.toString() }));
+        res.json(mapped);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -175,7 +176,8 @@ router.get('/sessions/batch/:batchId', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
         const sessions = await db.collection('live_sessions').find({ batchId: req.params.batchId }).toArray();
-        res.json(sessions);
+        const mapped = sessions.map(s => ({ ...s, id: s._id.toString() }));
+        res.json(mapped);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -197,7 +199,7 @@ router.post('/sessions', async (req, res) => {
 router.put('/sessions/:id', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
-        const { id, ...updateData } = req.body;
+        const { id, _id, ...updateData } = req.body;
         await db.collection('live_sessions').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
             { $set: updateData }
@@ -653,6 +655,102 @@ router.get('/batches/:batchId/student-tracking', async (req, res) => {
         }));
 
         res.json(trackingData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- SESSION REQUEST ROUTES (Tutor Support) ---
+
+// @desc    Get all session requests
+router.get('/session-requests', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const requests = await db.collection('session_requests').find().sort({ createdAt: -1 }).toArray();
+        const mapped = requests.map(r => ({ ...r, id: r._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Create a session request
+router.post('/session-requests', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const request = { 
+            ...req.body, 
+            status: 'PENDING',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        const result = await db.collection('session_requests').insertOne(request);
+        res.status(201).json({ ...request, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Approve/Reject a session request
+router.put('/session-requests/:id/action', async (req, res) => {
+    try {
+        const { action, reviewerId, reviewerName } = req.body; // action: 'APPROVED' or 'REJECTED'
+        const requestId = req.params.id;
+        const db = mongoose.connection.useDb('academic-db');
+
+        const request = await db.collection('session_requests').findOne({ _id: new mongoose.Types.ObjectId(requestId) });
+        if (!request) return res.status(404).json({ error: 'Request not found' });
+
+        if (action === 'APPROVED') {
+            const academicDb = mongoose.connection.useDb('academic-db');
+            
+            // Execute the actual operation based on request type
+            if (request.type === 'CREATE') {
+                const sessionPayload = { ...request.data, createdAt: new Date() };
+                await academicDb.collection('live_sessions').insertOne(sessionPayload);
+            } else {
+                if (!request.sessionId) {
+                    console.error("Critical: Approval failed because sessionId is missing in request document", request);
+                    return res.status(400).json({ error: "Session identification missing in request" });
+                }
+
+                const sessionFilter = { _id: new mongoose.Types.ObjectId(request.sessionId) };
+
+                if (request.type === 'EDIT') {
+                    const { id, _id, ...updateData } = request.data;
+                    await academicDb.collection('live_sessions').updateOne(
+                        sessionFilter,
+                        { $set: { ...updateData, updatedAt: new Date() } }
+                    );
+                } else if (request.type === 'DELETE') {
+                    await academicDb.collection('live_sessions').deleteOne(sessionFilter);
+                }
+            }
+        }
+
+        // Update request status
+        await db.collection('session_requests').updateOne(
+            { _id: new mongoose.Types.ObjectId(requestId) },
+            { $set: { status: action, reviewerId, reviewerName, updatedAt: new Date() } }
+        );
+
+        res.json({ success: true, status: action });
+    } catch (err) {
+        console.error("Action error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Withdrawal/Delete a session request
+router.delete('/session-requests/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const db = mongoose.connection.db;
+        const result = await db.collection('session_requests').deleteOne({ 
+            _id: new mongoose.Types.ObjectId(id) 
+        });
+        if (result.deletedCount === 0) return res.status(404).json({ error: 'Request not found' });
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

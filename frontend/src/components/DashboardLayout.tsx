@@ -79,9 +79,21 @@ const MENUS: Record<string, MenuItem[]> = {
         { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     tutor: [
-        { section: 'Academy', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
-        { label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
+        { section: 'Overview', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
+        { section: 'User Management', label: 'Users List', href: '/super-admin/users', icon: <Users size={18} /> },
         { label: 'Students List', href: '/tutor/students', icon: <Users size={18} /> },
+        { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
+        { label: 'Batches', href: '/super-admin/batches', icon: <Layers size={18} /> },
+        { label: 'Assignments', href: '/super-admin/assignments', icon: <FileText size={18} /> },
+        { label: 'Tests & Exams', href: '/super-admin/tests', icon: <CheckCircle size={18} /> },
+        { label: 'Recordings', href: '/super-admin/recordings', icon: <Video size={18} /> },
+        { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
+        { label: 'Live Sessions', href: '/super-admin/live', icon: <Video size={18} /> },
+        { section: 'Tracking', label: 'Tracking Center', href: '/super-admin/pinpoint-hub', icon: <Activity size={18} /> },
+        { label: 'Tutor Activity Log', href: '/super-admin/tutor-tracking', icon: <Terminal size={18} /> },
+        { label: 'Global Tracking', href: '/super-admin/global-tracking', icon: <Globe size={18} /> },
+        { section: 'Finance', label: 'Salary & Payouts', href: '/super-admin/salary', icon: <DollarSign size={18} /> },
+        { section: 'Reports', label: 'Reports', href: '/super-admin/reports', icon: <BarChart3 size={18} /> },
         { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     placement: [
@@ -180,12 +192,24 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                             const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
 
                             if (expectedRole && apiRole && expectedRole !== apiRole) {
-                                if (expectedRole === 'SUPER_ADMIN') {
-                                    router.push(apiRole === 'ADMIN' ? '/admin' : '/login');
-                                } else if (expectedRole === 'ADMIN') {
-                                    router.push(apiRole === 'SUPER_ADMIN' ? '/super-admin' : '/login');
+                                // Specific logic for Tutor/Trainer compatibility
+                                const isTutorCompat = (expectedRole === 'TUTOR' || expectedRole === 'TRAINER') && 
+                                                     (apiRole === 'TUTOR' || apiRole === 'TRAINER');
+                                
+                                // Also allow TRAINER/TUTOR to access ADMIN/SUPER_ADMIN sections they are linked to
+                                const isTrainerAuthorized = (apiRole === 'TRAINER' || apiRole === 'TUTOR') && 
+                                                           (expectedRole === 'ADMIN' || expectedRole === 'SUPER_ADMIN');
+
+                                if (!isTutorCompat && !isTrainerAuthorized) {
+                                    if (expectedRole === 'SUPER_ADMIN') {
+                                        router.push(apiRole === 'ADMIN' ? '/admin' : '/login');
+                                    } else if (expectedRole === 'ADMIN') {
+                                        router.push(apiRole === 'SUPER_ADMIN' ? '/super-admin' : '/login');
+                                    } else {
+                                        router.push('/login');
+                                    }
+                                    return;
                                 }
-                                return;
                             }
 
                             setUserName(actualName);

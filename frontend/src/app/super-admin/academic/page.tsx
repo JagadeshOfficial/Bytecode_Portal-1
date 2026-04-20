@@ -12,7 +12,7 @@ import {
     CheckCircle, Calendar, Play, FileText,
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle, MinusCircle,
-    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip,
+    ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip, Shield,
     Zap, Activity, Terminal, BarChart2, Monitor, Bot
 } from 'lucide-react';
 import ExamManagement from '@/components/Academic/Exams/ExamManagement';
@@ -30,7 +30,9 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
     const [studentTracking, setStudentTracking] = useState<any[]>([]);
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [liveSessions, setLiveSessions] = useState<any[]>([]);
+    const [sessionRequests, setSessionRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     // Selection state
     const [selectedCourse, setSelectedCourse] = useState<any>(null);
@@ -100,6 +102,9 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
     const [accessSearchTerm, setAccessSearchTerm] = useState('');
     const [accessRole, setAccessRole] = useState('VIEWER');
 
+    const [isRequestDetailModalOpen, setIsRequestDetailModalOpen] = useState(false);
+    const [selectedRequestForDetail, setSelectedRequestForDetail] = useState<any>(null);
+
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
@@ -113,19 +118,21 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 return null;
             };
 
-            const [cData, bData, uData, aData, sData] = await Promise.all([
+            const [cData, bData, uData, aData, sData, rData] = await Promise.all([
                 safeFetch('http://localhost:8080/api/courses'),
                 safeFetch('http://localhost:8080/api/academic/batches'),
                 safeFetch('http://localhost:8080/api/users'),
                 safeFetch('http://localhost:8080/api/academic/assignments'),
-                safeFetch('http://localhost:8080/api/academic/sessions')
+                safeFetch('http://localhost:8080/api/academic/sessions'),
+                safeFetch('http://localhost:8080/api/academic/session-requests')
             ]);
-
+            
             if (Array.isArray(cData)) setCourses(cData);
             if (Array.isArray(bData)) setBatches(bData);
             if (Array.isArray(uData)) setAllUsers(uData);
             if (Array.isArray(aData)) setAssignments(aData);
             if (Array.isArray(sData)) setLiveSessions(sData);
+            if (Array.isArray(rData)) setSessionRequests(rData);
         } catch (err) {
             console.error(err);
         }
@@ -144,6 +151,54 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
             setBatchTab('TRACKING');
         }
     }, [activeTabParam]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                setCurrentUser(JSON.parse(storedUser));
+            } catch (e) { console.error("Stored user parse error", e); }
+        }
+    }, []);
+
+    const currentUserRole = String(currentUser?.role || role).toUpperCase();
+    const isFullAdmin = currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'ADMIN';
+
+    const handleSessionRequestAction = async (requestId: string, action: 'APPROVED' | 'REJECTED') => {
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}/action`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action,
+                    reviewerId: currentUser?.id,
+                    reviewerName: currentUser?.fullName || currentUser?.email
+                })
+            });
+            if (res.ok) {
+                alert(`Request has been ${action.toLowerCase()} successfully.`);
+                fetchData(); // Refresh everything
+            }
+        } catch (e) {
+            console.error("Action failed:", e);
+        }
+    };
+
+    const handleDeleteRequest = async (requestId: string) => {
+        if (!confirm("Are you sure you want to withdraw this request?")) return;
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                setSessionRequests(sessionRequests.filter(r => (r.id !== requestId && r._id !== requestId)));
+                alert("Request withdrawn successfully.");
+            }
+        } catch (e) {
+            console.error("Delete request failed:", e);
+        }
+    };
 
     useEffect(() => {
         const fetchTracking = async () => {
@@ -629,10 +684,11 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         setSelectedFolder(null); // Reset folder view
         setViewMode('DETAILS');
 
+        const batchId = batch.id || batch._id;
         // Fetch Live Sessions for this batch
-        if (batch.id) {
+        if (batchId) {
             try {
-                const res = await fetch(`http://localhost:8080/api/academic/sessions/batch/${batch.id}`);
+                const res = await fetch(`http://localhost:8080/api/academic/sessions/batch/${batchId}`);
                 if (res.ok) {
                     const sessions = await res.json();
                     setLiveSessions(sessions);
@@ -735,11 +791,14 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
             finalLink = `${selectedBatch.batchCode}-${Date.now()}`;
         }
 
+        const batchId = selectedBatch.id || selectedBatch._id;
+        const courseId = selectedCourse.id || selectedCourse._id;
+
         const payload = {
             title: newLiveSession.title,
-            courseId: selectedCourse.id,
+            courseId: courseId,
             courseName: selectedCourse.title,
-            batchId: selectedBatch.id,
+            batchId: batchId,
             batchName: selectedBatch.batchName,
             mentorId: newLiveSession.tutorId,
             mentorName: allUsers.find(u => u.id === newLiveSession.tutorId)?.fullName || allUsers.find(u => u.id === newLiveSession.tutorId)?.email || 'Unassigned',
@@ -752,20 +811,41 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         };
 
         try {
-            const res = await fetch('http://localhost:8080/api/academic/sessions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const created = await res.json();
-                setLiveSessions([...liveSessions, created]);
-                setIsScheduleLiveModalOpen(false);
-                setNewLiveSession({
-                    title: '', startTime: '', endDate: '',
-                    durationHours: 1, durationMinutes: 0,
-                    tutorId: '', platform: 'Bytecode Meetings', meetingLink: ''
+            if (isFullAdmin) {
+                const res = await fetch('http://localhost:8080/api/academic/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
+                if (res.ok) {
+                    const created = await res.json();
+                    setLiveSessions([...liveSessions, created]);
+                    setIsScheduleLiveModalOpen(false);
+                    setNewLiveSession({
+                        title: '', startTime: '', endDate: '',
+                        durationHours: 1, durationMinutes: 0,
+                        tutorId: '', platform: 'Bytecode Meetings', meetingLink: ''
+                    });
+                }
+            } else {
+                // Submit Request
+                const reqPayload = {
+                    type: 'CREATE',
+                    data: payload,
+                    requestedBy: currentUser?.fullName || currentUser?.email,
+                    requestedById: currentUser?.id
+                };
+                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reqPayload)
+                });
+                if (res.ok) {
+                    const createdReq = await res.json();
+                    setSessionRequests([createdReq, ...sessionRequests]);
+                    alert("Your request to schedule a new session has been sent to Admin for approval.");
+                    setIsScheduleLiveModalOpen(false);
+                }
             }
         } catch (e) {
             console.error("Failed to schedule live class", e);
@@ -774,11 +854,35 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
     const handleDeleteSession = async (id: string, e: any) => {
         e.stopPropagation();
+        const sessionId = id || e.currentTarget?.dataset?.id; // Fallback
+        if (!sessionId) return console.error("No sessionId provided");
         if (!confirm("Are you sure you want to delete this live session?")) return;
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                setLiveSessions(liveSessions.filter(s => s.id !== id));
+            if (isFullAdmin) {
+                const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    setLiveSessions(liveSessions.filter(s => (s.id !== sessionId && s._id !== sessionId)));
+                }
+            } else {
+                // Submit Request
+                const session = liveSessions.find(s => (s.id === sessionId || s._id === sessionId));
+                const reqPayload = {
+                    type: 'DELETE',
+                    sessionId: sessionId,
+                    data: { title: session?.title, batchName: session?.batchName, batchId: session?.batchId },
+                    requestedBy: currentUser?.fullName || currentUser?.email,
+                    requestedById: currentUser?.id
+                };
+                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reqPayload)
+                });
+                if (res.ok) {
+                    const createdReq = await res.json();
+                    setSessionRequests([createdReq, ...sessionRequests]);
+                    alert("Your request to delete this session has been sent to Admin for approval.");
+                }
             }
         } catch (e) {
             console.error(e);
@@ -794,15 +898,42 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
     const handleUpdateSession = async (e: any) => {
         e.preventDefault();
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${editingSession.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editingSession)
-            });
-            if (res.ok) {
-                setLiveSessions(liveSessions.map(s => s.id === editingSession.id ? editingSession : s));
-                setIsEditSessionModalOpen(false);
-                setEditingSession(null);
+            if (isFullAdmin) {
+                const sessionId = editingSession.id || editingSession._id;
+                const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(editingSession)
+                });
+                if (res.ok) {
+                    setLiveSessions(liveSessions.map(s => (s.id === sessionId || s._id === sessionId) ? editingSession : s));
+                    setIsEditSessionModalOpen(false);
+                    setEditingSession(null);
+                }
+            } else {
+                // Submit Request
+                const sessionId = editingSession.id || editingSession._id;
+                const originalSession = liveSessions.find(s => (s.id === sessionId || s._id === sessionId));
+                const reqPayload = {
+                    type: 'EDIT',
+                    sessionId: sessionId,
+                    data: editingSession,
+                    oldData: originalSession,
+                    requestedBy: currentUser?.fullName || currentUser?.email,
+                    requestedById: currentUser?.id
+                };
+                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reqPayload)
+                });
+                if (res.ok) {
+                    const createdReq = await res.json();
+                    setSessionRequests([createdReq, ...sessionRequests]);
+                    alert("Your request to edit this session has been sent to Admin for approval.");
+                    setIsEditSessionModalOpen(false);
+                    setEditingSession(null);
+                }
             }
         } catch (e) {
             console.error(e);
@@ -813,11 +944,14 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         e.preventDefault();
         if (!selectedBatch) return;
 
+        const batchId = selectedBatch.id || selectedBatch._id;
+        const courseId = selectedCourse.id || selectedCourse._id;
+
         const payload = {
             ...newAssignment,
-            batchId: selectedBatch.id,
+            batchId: batchId,
             batchName: selectedBatch.batchName,
-            courseId: selectedCourse.id,
+            courseId: courseId,
             courseName: selectedCourse.title,
             trainerId: selectedBatch.trainerId,
             trainerName: tutor?.fullName || "Unassigned",
@@ -999,7 +1133,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     </div>
                     {viewMode !== 'COURSES' && (
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            {viewMode === 'BATCHES' && (
+                            {viewMode === 'BATCHES' && isFullAdmin && (
                                 <button onClick={() => setIsCreateBatchOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
                                     <Plus size={16} /> NEW BATCH
                                 </button>
@@ -1111,17 +1245,18 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                         </button>
                                     ))}
                                 </div>
-
-                                {/* --- DRIVE CONTENT --- */}
                                 {batchTab === 'DRIVE' && (
-                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
+                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', flex: 1 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                {selectedFolder ? <Folder color="var(--primary)" /> : <HardDrive color="var(--primary)" />}
-                                                {selectedFolder ? selectedFolder.name : "My Drive"}
+                                                {selectedFolder ? (
+                                                    <><button onClick={() => setSelectedFolder(null)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><ChevronLeft size={24} /></button> {selectedFolder.name}</>
+                                                ) : (
+                                                    <><HardDrive color="var(--primary)" /> Drive Workspace</>
+                                                )}
                                             </h3>
                                             <div style={{ display: 'flex', gap: '10px' }}>
-                                                {!selectedFolder && (
+                                                {!selectedFolder && isFullAdmin && (
                                                     <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
                                                         <Plus size={16} /> NEW FOLDER
                                                     </button>
@@ -1181,13 +1316,91 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                 {/* --- LIVE SESSIONS CONTENT --- */}
                                 {batchTab === 'LIVE' && (
                                     <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
+                                        
+                                        {/* ADMIN APPROVAL QUEUE */}
+                                        {isFullAdmin && sessionRequests.filter(r => r.status === 'PENDING').length > 0 && (
+                                            <div style={{ marginBottom: '3rem', padding: '2rem', background: 'rgba(255, 193, 7, 0.05)', border: '2px solid rgba(255, 193, 7, 0.2)', borderRadius: '32px' }}>
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#d97706', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                                                    <Shield size={20} /> SESSION REQUESTS PENDING APPROVAL
+                                                </h3>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                    {sessionRequests.filter(r => r.status === 'PENDING').map(req => (
+                                                        <div key={req.id} style={{ background: '#fff', padding: '1.2rem', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, padding: '4px 8px', borderRadius: '6px', background: req.type === 'DELETE' ? '#fef2f2' : (req.type === 'EDIT' ? '#f0f9ff' : '#ecfdf5'), color: req.type === 'DELETE' ? '#ef4444' : (req.type === 'EDIT' ? '#0ea5e9' : '#10b981') }}>{req.type}</span>
+                                                                <div>
+                                                                    <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '0.95rem' }}>{req.data?.title || req.data?.name || "Untitled Session"} <span style={{ color: '#718096', fontWeight: 600 }}>by</span> <span style={{ color: 'var(--primary)' }}>{req.requestedBy}</span></div>
+                                                                    <div style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700, display: 'flex', gap: '15px', marginTop: '4px' }}>
+                                                                        <span>📅 {req.data?.startTime ? new Date(req.data.startTime).toLocaleString() : 'N/A'}</span>
+                                                                        <span>⏱️ {req.data?.duration || '60'} Mins</span>
+                                                                        <span>🌐 {req.data?.platform || 'Bytecode'}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                                <button onClick={() => handleSessionRequestAction(req.id, 'REJECTED')} style={{ padding: '8px 16px', borderRadius: '10px', background: '#fef2f2', color: '#ef4444', border: 'none', fontWeight: 900, cursor: 'pointer' }}>REJECT</button>
+                                                                <button onClick={() => handleSessionRequestAction(req.id, 'APPROVED')} className="btn-quantum" style={{ padding: '8px 16px', borderRadius: '10px', fontSize: '0.85rem' }}>APPROVE</button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* TUTOR MY REQUESTS QUEUE */}
+                                        {!isFullAdmin && currentUserRole !== 'STUDENT' && sessionRequests.filter(r => r.requestedById === currentUser?.id).length > 0 && (
+                                            <div style={{ marginBottom: '3rem', padding: '2rem', background: 'rgba(139, 92, 246, 0.05)', border: '2px solid rgba(139, 92, 246, 0.2)', borderRadius: '32px' }}>
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                                                    <Clock size={20} /> MY SESSION REQUESTS STATUS
+                                                </h3>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                    {sessionRequests.filter(r => r.requestedById === currentUser?.id).map(req => (
+                                                        <div key={req.id} style={{ background: '#fff', padding: '1.2rem', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, padding: '4px 8px', borderRadius: '6px', background: req.type === 'DELETE' ? '#fef2f2' : (req.type === 'EDIT' ? '#f0f9ff' : '#ecfdf5'), color: req.type === 'DELETE' ? '#ef4444' : (req.type === 'EDIT' ? '#0ea5e9' : '#10b981') }}>{req.type}</span>
+                                                                <div>
+                                                                    <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '0.95rem' }}>{req.data?.title || req.data?.name || "Untitled Session"}</div>
+                                                                    <div style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700, display: 'flex', gap: '15px', marginTop: '4px' }}>
+                                                                        <span>📅 {req.data?.startTime ? new Date(req.data.startTime).toLocaleString() : 'N/A'}</span>
+                                                                        <span>⏱️ {req.data?.duration || '60'} Mins</span>
+                                                                        <span>🌐 {req.data?.platform || 'Bytecode'}</span>
+                                                                    </div>
+                                                                    <div style={{ fontSize: '0.7rem', color: '#a0aec0', fontWeight: 600, marginTop: '4px' }}>Requested on: {new Date(req.createdAt).toLocaleDateString()}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                <span style={{ 
+                                                                    fontSize: '0.75rem', 
+                                                                    fontWeight: 900, 
+                                                                    padding: '6px 12px', 
+                                                                    borderRadius: '10px', 
+                                                                    background: req.status === 'APPROVED' ? '#ecfdf5' : (req.status === 'REJECTED' ? '#fef2f2' : '#fff7ed'),
+                                                                    color: req.status === 'APPROVED' ? '#10b981' : (req.status === 'REJECTED' ? '#ef4444' : '#f59e0b'),
+                                                                    border: `1px solid ${req.status === 'APPROVED' ? '#10b98130' : (req.status === 'REJECTED' ? '#ef444430' : '#f59e0b30')}`
+                                                                }}>
+                                                                    {req.status}
+                                                                </span>
+                                                                {req.status === 'APPROVED' && (
+                                                                    <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <CheckCircle size={14} /> APPLIED
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <Video color="var(--primary)" /> Live Sessions Hub
                                             </h3>
-                                            <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-                                                <Plus size={16} /> SCHEDULE SESSION
-                                            </button>
+                                            {currentUserRole !== 'STUDENT' && (
+                                                <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
+                                                    <Plus size={16} /> SCHEDULE SESSION
+                                                </button>
+                                            )}
                                         </div>
 
                                         {liveSessions.length === 0 ? (
@@ -1195,7 +1408,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                 <Video size={64} color="var(--secondary)" style={{ marginBottom: '1.5rem', WebkitFilter: 'drop-shadow(0 0 20px rgba(168,85,247,0.4))' }} />
                                                 <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>No Upcoming Live Sessions</h2>
                                                 <p style={{ color: 'var(--text-dim)', fontSize: '1rem', textAlign: 'center', maxWidth: '400px' }}>Schedule virtual classes and they will appear here.</p>
-                                                <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ marginTop: '2rem', padding: '12px 24px', fontSize: '0.9rem' }}>SCHEDULE LIVE CLASS</button>
+                                                {currentUserRole !== 'STUDENT' && <button onClick={() => setIsScheduleLiveModalOpen(true)} className="btn-quantum" style={{ marginTop: '2rem', padding: '12px 24px', fontSize: '0.9rem' }}>SCHEDULE LIVE CLASS</button>}
                                             </div>
                                         ) : (
                                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "2rem" }}>
@@ -1222,11 +1435,21 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                                 <h4 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
                                                                 <span style={{ fontSize: "0.75rem", fontWeight: 900, color: "var(--primary)", letterSpacing: "2px", textTransform: "uppercase" }}>Live Transmission</span>
                                                             </div>
-                                                            <div style={{ display: "flex", gap: "8px" }}>
-                                                                <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
-                                                                <button onClick={(e) => handleDeleteSession(ls.id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
+                                                                {currentUserRole !== 'STUDENT' && (
+                                                                  <div style={{ display: "flex", gap: "8px" }}>
+                                                                        {sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'PENDING') ? (
+                                                                            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#f59e0b', background: '#fffbeb', padding: '6px 12px', borderRadius: '10px', border: '1px solid #fef3c7', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                                                <Clock size={12} /> PENDING {sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'PENDING')?.type}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <>
+                                                                                <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
+                                                                                <button onClick={(e) => handleDeleteSession(ls.id || ls._id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        </div>
                                                         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                                                             <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#2d3748" }}>
                                                                 <User size={18} color="var(--primary)" />
@@ -1564,22 +1787,45 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                         <InfoSnippet icon={<User size={18} />} label="Faculty / Tutors" value={assignedTutors.length > 0 ? assignedTutors.map(t => t.fullName || t.email?.split('@')[0]).join(', ') : 'Pending'} />
                                         <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
-                                        <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : 'Just Now'} />
+                                        <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : '09/04/2026'} />
+                                        <div 
+                                            onClick={() => { setIsRequestDetailModalOpen(true); }}
+                                            style={{ 
+                                                marginTop: '10px',
+                                                padding: '12px 20px', 
+                                                background: 'rgba(59, 130, 246, 0.05)', 
+                                                border: '1px solid rgba(59, 130, 246, 0.2)', 
+                                                borderRadius: '16px', 
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <Send size={16} /> Session Requests
+                                            </span>
+                                            <span style={{ background: 'var(--primary)', color: '#000', fontSize: '0.7rem', fontWeight: 900, padding: '2px 8px', borderRadius: '8px' }}>
+                                                {sessionRequests.filter(r => r.data?.batchId === selectedBatch?.id && r.status === 'PENDING').length}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <button onClick={() => {
-                                            setEditBatchData({
-                                                ...selectedBatch,
-                                                startDate: selectedBatch.startDate ? selectedBatch.startDate.split('T')[0] : '',
-                                                endDate: selectedBatch.endDate ? selectedBatch.endDate.split('T')[0] : ''
-                                            });
-                                            setIsEditBatchOpen(true);
-                                        }} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%', background: 'var(--primary)' }}>EDIT BATCH</button>
-                                        <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
-                                        <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "var(--secondary)", width: "100%" }}>MANAGE BATCH STUDENTS</button>
-                                        <button onClick={() => handleOpenAccess(selectedBatch)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--primary)", color: "var(--primary)" }}>MANAGE BATCH ACCESS</button>
-                                        <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "#ef4444", width: "100%", border: "none" }}>DELETE BATCH</button>
-                                    </div>
+                                    {isFullAdmin && (
+                                        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            <button onClick={() => {
+                                                setEditBatchData({
+                                                    ...selectedBatch,
+                                                    startDate: selectedBatch.startDate ? selectedBatch.startDate.split('T')[0] : '',
+                                                    endDate: selectedBatch.endDate ? selectedBatch.endDate.split('T')[0] : ''
+                                                });
+                                                setIsEditBatchOpen(true);
+                                            }} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%', background: 'var(--primary)' }}>EDIT BATCH</button>
+                                            <button onClick={() => setIsTutorModalOpen(true)} className="btn-quantum" style={{ padding: '10px', fontSize: '0.8rem', width: '100%' }}>ASSIGN TUTOR</button>
+                                            <button onClick={() => setIsStudentModalOpen(true)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "var(--secondary)", width: "100%" }}>MANAGE BATCH STUDENTS</button>
+                                            <button onClick={() => handleOpenAccess(selectedBatch)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--primary)", color: "var(--primary)" }}>MANAGE BATCH ACCESS</button>
+                                            <button onClick={(e) => handleDeleteBatch(selectedBatch.id, e)} className="btn-quantum" style={{ padding: "10px", fontSize: "0.8rem", background: "#ef4444", width: "100%", border: "none" }}>DELETE BATCH</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
@@ -2493,6 +2739,100 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button onClick={() => setIsDeleteConfirmOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 800 }}>CANCEL</button>
                                 <button onClick={confirmDeleteRecording} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 900 }}>DELETE NOW</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* --- SESSION REQUEST TRACKER MODAL --- */}
+            <AnimatePresence>
+                {isRequestDetailModalOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <Send size={32} color="var(--primary)" /> Request Tracker
+                                    </h2>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '5px' }}>Audit log and pending approvals for {selectedBatch?.name || selectedBatch?.batchName}</p>
+                                </div>
+                                <button onClick={() => setIsRequestDetailModalOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '10px', borderRadius: '50%', cursor: 'pointer' }}><X size={24} /></button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {sessionRequests.filter(r => (r.data?.batchId === selectedBatch?.id || r.data?.batchId === selectedBatch?._id)).length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px' }}>
+                                        <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>No requests found for this batch.</p>
+                                    </div>
+                                ) : (
+                                    sessionRequests.filter(r => (r.data?.batchId === selectedBatch?.id || r.data?.batchId === selectedBatch?._id)).map((req, idx) => (
+                                        <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '2rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'flex-start' }}>
+                                                <div>
+                                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+                                                        <span style={{ fontSize: '0.7rem', fontWeight: 900, padding: '5px 12px', borderRadius: '8px', background: req.type === 'DELETE' ? '#ef444420' : '#3b82f620', color: req.type === 'DELETE' ? '#ef4444' : '#3b82f6' }}>{req.type} REQUEST</span>
+                                                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-dim)' }}>by {req.requestedBy}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 600 }}>Requested on {new Date(req.createdAt).toLocaleString()}</div>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                    <span style={{ 
+                                                        fontSize: '0.8rem', 
+                                                        fontWeight: 900, 
+                                                        padding: '8px 16px', 
+                                                        borderRadius: '12px', 
+                                                        background: req.status === 'APPROVED' ? '#ecfdf5' : (req.status === 'REJECTED' ? '#fef2f2' : 'rgba(255,255,255,0.05)'),
+                                                        color: req.status === 'APPROVED' ? '#10b981' : (req.status === 'REJECTED' ? '#ef4444' : '#f59e0b')
+                                                    }}>{req.status}</span>
+                                                    {(req.status === 'PENDING' && (isFullAdmin || req.requestedById === currentUser?.id)) && (
+                                                        <button onClick={() => handleDeleteRequest(req.id || req._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Withdraw Request"><Trash2 size={18} /></button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {req.type === 'EDIT' && (
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
+                                                    <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                                                        <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#ef4444', marginBottom: '10px', letterSpacing: '1px' }}>OLD DETAILS</p>
+                                                        <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.oldData?.title || 'Unknown Title'}</p>
+                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '5px' }}>📅 {req.oldData?.startTime ? new Date(req.oldData.startTime).toLocaleString() : 'N/A'}</p>
+                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>🌐 {req.oldData?.platform} • ⏱️ {req.oldData?.duration} Mins</p>
+                                                    </div>
+                                                    <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                                                        <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#10b981', marginBottom: '10px', letterSpacing: '1px' }}>NEW DETAILS</p>
+                                                        <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.data?.title}</p>
+                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-bright)', marginTop: '5px' }}>📅 {req.data?.startTime ? new Date(req.data.startTime).toLocaleString() : 'N/A'}</p>
+                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-bright)' }}>🌐 {req.data?.platform} • ⏱️ {req.data?.duration} Mins</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {req.type === 'DELETE' && (
+                                                <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.1)', marginTop: '1rem' }}>
+                                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#ef4444', marginBottom: '10px', letterSpacing: '1px' }}>TARGET FOR DELETION</p>
+                                                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.data?.title || "Session"}</p>
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '5px' }}>This session will be permanently removed from the schedule.</p>
+                                                </div>
+                                            )}
+
+                                            {req.type === 'CREATE' && (
+                                                <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(59, 130, 246, 0.1)', marginTop: '1rem' }}>
+                                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#3b82f6', marginBottom: '10px', letterSpacing: '1px' }}>PROPOSED SESSION</p>
+                                                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>{req.data?.title}</p>
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-bright)', marginTop: '5px' }}>📅 {req.data?.startTime ? new Date(req.data.startTime).toLocaleString() : 'N/A'}</p>
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-bright)' }}>🌐 {req.data?.platform} • ⏱️ {req.data?.duration} Mins</p>
+                                                </div>
+                                            )}
+
+                                            {isFullAdmin && req.status === 'PENDING' && (
+                                                <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
+                                                    <button onClick={() => handleSessionRequestAction(req.id || req._id, 'REJECTED')} style={{ flex: 1, padding: '14px', borderRadius: '16px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fee2e2', fontWeight: 900, cursor: 'pointer' }}>REJECT</button>
+                                                    <button onClick={() => handleSessionRequestAction(req.id || req._id, 'APPROVED')} className="btn-quantum" style={{ flex: 2, padding: '14px', borderRadius: '16px', fontWeight: 900 }}>APPROVE & APPLY CHANGES</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </motion.div>
                     </div>

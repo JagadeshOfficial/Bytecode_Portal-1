@@ -59,7 +59,9 @@ export default function Login() {
                         router.push('/admin');
                     } else if (role === 'STUDENT') {
                         router.push('/student');
-                    } else if (role === 'TRAINER' || role === 'HR' || role === 'COUNSELOR' || role === 'FINANCE') {
+                    } else if (role === 'TUTOR' || role === 'TRAINER') {
+                        router.push('/tutor');
+                    } else if (role === 'HR' || role === 'COUNSELOR' || role === 'FINANCE') {
                         router.push('/employee');
                     } else {
                         router.push('/employee'); // Fallback for other staff roles

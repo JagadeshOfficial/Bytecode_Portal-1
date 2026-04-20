@@ -7,7 +7,7 @@
 [33m[nodemon] watching path(s): *.*[39m
 [33m[nodemon] watching extensions: js,mjs,cjs,json[39m
 [32m[nodemon] starting `node server.js`[39m
-◇ injecting env (4) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
-◇ injecting env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injecting env (4) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injecting env (0) from .env // tip: ⌘ enable debugging { debug: true }
 B-EMS Server running on port 5001
-B-EMS MongoDB Connected: localhost
+B-EMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net

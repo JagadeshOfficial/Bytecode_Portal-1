@@ -1,0 +1,408 @@
+
+> lms-node-backend@1.0.0 dev
+> nodemon src/server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net
+[0mOPTIONS /api/auth/login [32m204[0m 1.790 ms - 0[0m
+Checking password for trainer@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiOCIsImlhdCI6MTc3NjY2MTc1MSwiZXhwIjoxNzc5MjUzNzUxfQ.Yx18jdWl2BsxLdVxGqZ-l0EtD3SNtAHGxQrIP7zSzII',
+  id: new ObjectId('698cb02cc71948c3567e76b8'),
+  email: 'trainer@bytecode.com',
+  name: 'Mahendra Nath Chamnoor',
+  role: 'TRAINER'
+}
+[0mPOST /api/auth/login [32m200[0m 42.782 ms - 314[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 39.526 ms - 497[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 36.123 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 43.652 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 33.833 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 35.466 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 29.551 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 33.998 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 34.948 ms - -[0m
+[0mGET /api/users [32m200[0m 155.131 ms - 259083[0m
+[0mGET /api/users [32m200[0m 65.010 ms - 259083[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 42.246 ms - 497[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 44.466 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 29.764 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 28.911 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.414 ms - -[0m
+[0mGET /api/users [32m200[0m 144.235 ms - 259083[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76b8 [32m204[0m 0.515 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76b8 [32m200[0m 87.799 ms - 609[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 33.672 ms - 550[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 37.285 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 36.941 ms - -[0m
+[0mGET /api/users [32m200[0m 180.133 ms - 259136[0m
+[0mGET /api/users [32m200[0m 106.001 ms - 259136[0m
+[0mOPTIONS /api/auth/login [32m204[0m 0.546 ms - 0[0m
+Checking password for trainer@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiOCIsImlhdCI6MTc3NjY2MjAwMCwiZXhwIjoxNzc5MjU0MDAwfQ.pEfOvSHKxoDW7wHC8x-RFlqmhgiANnUk3-6e3AhLD5A',
+  id: new ObjectId('698cb02cc71948c3567e76b8'),
+  email: 'trainer@bytecode.com',
+  name: 'Mahendra Nath Chamnoor',
+  role: 'TRAINER'
+}
+[0mPOST /api/auth/login [32m200[0m 52.626 ms - 314[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 30.589 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 33.475 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 28.375 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 27.107 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.154 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 27.995 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.099 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 28.029 ms - -[0m
+[0mGET /api/users [32m200[0m 149.856 ms - 259136[0m
+[0mGET /api/users [32m200[0m 36.383 ms - 259136[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 33.575 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 27.724 ms - -[0m
+[0mGET /api/users [32m200[0m 140.871 ms - 259136[0m
+[0mGET /api/users [32m200[0m 34.039 ms - 259136[0m
+[0mOPTIONS /api/auth/login [32m204[0m 0.876 ms - 0[0m
+Checking password for trainer@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiOCIsImlhdCI6MTc3NjY2MjEzOCwiZXhwIjoxNzc5MjU0MTM4fQ.8LWqVvjuNlEQiPeIoLquA9bPtT1ID27VI8RXBWHOHMc',
+  id: new ObjectId('698cb02cc71948c3567e76b8'),
+  email: 'trainer@bytecode.com',
+  name: 'Mahendra Nath Chamnoor',
+  role: 'TRAINER'
+}
+[0mPOST /api/auth/login [32m200[0m 54.594 ms - 314[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 34.422 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 29.536 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 27.571 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 27.541 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 29.344 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 28.163 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 29.128 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 30.407 ms - -[0m
+[0mGET /api/users [32m200[0m 143.611 ms - 259136[0m
+[0mGET /api/users [32m200[0m 35.901 ms - 259136[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 30.016 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 27.800 ms - -[0m
+[0mGET /api/users [32m200[0m 147.280 ms - 259136[0m
+[0mGET /api/users [32m200[0m 88.955 ms - 259136[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 47.930 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.224 ms - -[0m
+[0mGET /api/courses [36m304[0m 34.523 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 27.356 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 29.727 ms - -[0m
+[0mGET /api/courses [36m304[0m 35.020 ms - -[0m
+[0mGET /api/users [32m200[0m 143.601 ms - 259136[0m
+[0mGET /api/users [32m200[0m 39.630 ms - 259136[0m
+[0mGET /api/academic/sessions [36m304[0m 269.427 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 289.501 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.859 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 31.689 ms - -[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 36.450 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 35.460 ms - -[0m
+[0mGET /api/courses [36m304[0m 33.836 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 35.199 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 36.298 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 32.804 ms - -[0m
+[0mGET /api/users [32m200[0m 149.253 ms - 259136[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 39.121 ms - -[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76b8 [32m204[0m 0.688 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76b8 [32m200[0m 217.945 ms - 378675[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 151.009 ms - 378616[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net
+[0mGET /api/academic/session-requests [32m200[0m 32.334 ms - 2[0m
+[0mGET /api/courses [36m304[0m 32.320 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 48.810 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.605 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 158.791 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 266.286 ms - -[0m
+[0mGET /api/users [32m200[0m 408.614 ms - 637202[0m
+[0mOPTIONS /api/auth/login [32m204[0m 1.633 ms - 0[0m
+Checking password for bytecodetrainings@gmail.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiNiIsImlhdCI6MTc3NjY2Mjg2MCwiZXhwIjoxNzc5MjU0ODYwfQ.ajdpS2gTHRljbRkIosSJK4Ot1dSqK7duWBaXTu3d1Oc',
+  id: new ObjectId('698cb02cc71948c3567e76b6'),
+  email: 'bytecodetrainings@gmail.com',
+  name: 'Koushik Krishna',
+  role: 'SUPER_ADMIN'
+}
+[0mPOST /api/auth/login [32m200[0m 140.702 ms - 318[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [32m200[0m 33.923 ms - 1223[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [32m200[0m 233.030 ms - 123314[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [32m200[0m 193.799 ms - 123314[0m
+[0mGET /api/admin/stats [32m200[0m 343.920 ms - 2188[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [32m200[0m 347.586 ms - 1223[0m
+[0mGET /api/admin/stats [32m200[0m 408.587 ms - 2188[0m
+[0mGET /api/courses [32m200[0m 36.455 ms - 1190[0m
+[0mGET /api/academic/assignments [32m200[0m 28.822 ms - 718[0m
+[0mGET /api/academic/sessions [32m200[0m 30.364 ms - 1624[0m
+[0mGET /api/academic/session-requests [32m200[0m 29.178 ms - 2[0m
+[0mGET /api/courses [32m200[0m 28.734 ms - 1190[0m
+[0mGET /api/academic/assignments [32m200[0m 29.075 ms - 718[0m
+[0mGET /api/academic/session-requests [32m200[0m 28.033 ms - 2[0m
+[0mGET /api/academic/sessions [32m200[0m 28.663 ms - 1624[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 27.279 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.378 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 117.452 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 127.874 ms - -[0m
+[0mGET /api/users [32m200[0m 195.541 ms - 637202[0m
+[0mGET /api/users [32m200[0m 998.932 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [32m200[0m 27.643 ms - 632[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 46.002 ms - -[0m
+[0mOPTIONS /api/academic/session-requests [32m204[0m 3.308 ms - 0[0m
+[0mPOST /api/academic/session-requests [32m201[0m 109.388 ms - 897[0m
+[0mGET /api/courses [36m304[0m 28.321 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.357 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 44.084 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 43.026 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 40.313 ms - 899[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 126.713 ms - -[0m
+[0mGET /api/users [32m200[0m 529.668 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 35.687 ms - -[0m
+[0mOPTIONS /api/academic/session-requests/69e5ba431b6f1236dd469255/action [32m204[0m 0.293 ms - 0[0m
+[0mPUT /api/academic/session-requests/69e5ba431b6f1236dd469255/action [32m200[0m 101.629 ms - 36[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 33.294 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 32.783 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 32.451 ms - -[0m
+[0mGET /api/courses [36m304[0m 40.029 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 32.902 ms - 973[0m
+[0mGET /api/users [32m200[0m 200.612 ms - 637202[0m
+[0mOPTIONS /api/academic/session-requests [32m204[0m 0.540 ms - 0[0m
+[0mPOST /api/academic/session-requests [32m201[0m 40.480 ms - 897[0m
+[0mGET /api/academic/session-requests [32m200[0m 36.239 ms - 1871[0m
+[0mGET /api/academic/assignments [36m304[0m 27.517 ms - -[0m
+[0mGET /api/courses [36m304[0m 28.737 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.185 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 27.886 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 144.718 ms - -[0m
+[0mGET /api/users [32m200[0m 178.692 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 28.969 ms - -[0m
+[0mOPTIONS /api/academic/sessions/undefined [32m204[0m 0.421 ms - 0[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 3.121 ms - 86[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 0.813 ms - 86[0m
+[0mGET /api/academic/assignments [36m304[0m 32.613 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 36.361 ms - -[0m
+[0mGET /api/courses [36m304[0m 40.650 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 31.274 ms - 1871[0m
+[0mGET /api/academic/sessions [36m304[0m 35.602 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 120.320 ms - -[0m
+[0mGET /api/users [32m200[0m 187.360 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 35.353 ms - -[0m
+[0mOPTIONS /api/academic/session-requests/69e5ba611b6f1236dd469269/action [32m204[0m 0.294 ms - 0[0m
+[0mPUT /api/academic/session-requests/69e5ba611b6f1236dd469269/action [32m200[0m 106.163 ms - 36[0m
+[0mGET /api/courses [36m304[0m 28.393 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.001 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.979 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 27.717 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 28.158 ms - 1945[0m
+[0mGET /api/users [32m200[0m 246.819 ms - 637202[0m
+[0mOPTIONS /api/academic/sessions/undefined [32m204[0m 0.362 ms - 0[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 0.945 ms - 86[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 0.496 ms - 86[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 2.795 ms - 86[0m
+[0mOPTIONS /api/academic/sessions/undefined [32m204[0m 0.157 ms - 0[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 0.690 ms - 86[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 29.685 ms - -[0m
+[0mGET /api/courses [36m304[0m 28.203 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 27.205 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.101 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 29.706 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 115.227 ms - -[0m
+[0mGET /api/users [32m200[0m 201.893 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 38.537 ms - -[0m
+[0mGET /api/courses [36m304[0m 31.947 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 29.606 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 34.837 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 33.208 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 34.586 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 120.084 ms - -[0m
+[0mGET /api/users [32m200[0m 180.648 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 28.778 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 44.795 ms - -[0m
+[0mGET /api/courses [36m304[0m 47.563 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 50.240 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 50.498 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 30.694 ms - 1945[0m
+[0mGET /api/courses [36m304[0m 29.637 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.334 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 30.525 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 27.554 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 30.062 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 151.847 ms - -[0m
+[0mGET /api/users [32m200[0m 178.179 ms - 637202[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 36.392 ms - -[0m
+[0mGET /api/users [32m200[0m 49.853 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 30.554 ms - -[0m
+[0mOPTIONS /api/academic/sessions/undefined [32m204[0m 1.089 ms - 0[0m
+[0mPUT /api/academic/sessions/undefined [31m500[0m 9.067 ms - 86[0m
+[0mPUT /api/academic/sessions/undefined [31m500[0m 0.185 ms - 86[0m
+[0mOPTIONS /api/academic/sessions/undefined [32m204[0m 0.511 ms - 0[0m
+[0mPUT /api/academic/sessions/undefined [31m500[0m 2.224 ms - 86[0m
+[0mPUT /api/academic/sessions/undefined [31m500[0m 0.553 ms - 86[0m
+[0mPUT /api/academic/sessions/undefined [31m500[0m 0.798 ms - 86[0m
+[0mPUT /api/academic/sessions/undefined [31m500[0m 0.551 ms - 86[0m
+[0mOPTIONS /api/academic/session-requests [32m204[0m 0.260 ms - 0[0m
+[0mPOST /api/academic/session-requests [32m201[0m 50.253 ms - 1538[0m
+[0mGET /api/academic/session-requests [32m200[0m 50.503 ms - 3484[0m
+[0mGET /api/courses [36m304[0m 29.931 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 35.794 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 35.108 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 30.284 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 151.822 ms - -[0m
+[0mGET /api/users [32m200[0m 227.510 ms - 637202[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.809 ms - -[0m
+[0mGET /api/courses [36m304[0m 27.115 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 29.143 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.033 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 27.861 ms - 3484[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 115.066 ms - -[0m
+[0mGET /api/users [32m200[0m 174.320 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 28.726 ms - -[0m
+[0mGET /api/courses [36m304[0m 30.656 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 29.433 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 28.850 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.765 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 31.225 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 118.565 ms - -[0m
+[0mGET /api/users [32m200[0m 182.569 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 32.387 ms - -[0m
+[0mOPTIONS /api/academic/session-requests/69e5bbea1b6f1236dd4692a4/action [32m204[0m 0.302 ms - 0[0m
+[0mPUT /api/academic/session-requests/69e5bbea1b6f1236dd4692a4/action [32m200[0m 96.237 ms - 36[0m
+[0mGET /api/courses [36m304[0m 43.267 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 42.335 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 34.275 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 33.711 ms - 3558[0m
+[0mGET /api/academic/assignments [36m304[0m 48.833 ms - -[0m
+[0mGET /api/users [32m200[0m 226.329 ms - 637202[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 33.226 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 29.327 ms - -[0m
+[0mGET /api/courses [36m304[0m 31.252 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 29.440 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 29.402 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 116.544 ms - -[0m
+[0mGET /api/users [32m200[0m 242.074 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 38.749 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.106 ms - -[0m
+[0mGET /api/courses [36m304[0m 30.245 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 29.415 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 30.093 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 31.882 ms - 3558[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 146.080 ms - -[0m
+[0mGET /api/users [32m200[0m 178.117 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 32.441 ms - -[0m
+[0mOPTIONS /api/academic/session-requests [32m204[0m 0.327 ms - 0[0m
+[0mPOST /api/academic/session-requests [32m201[0m 34.614 ms - 308[0m
+[0mGET /api/courses [36m304[0m 33.611 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.731 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 31.306 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 30.532 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 29.257 ms - 3867[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 116.662 ms - -[0m
+[0mGET /api/users [32m200[0m 225.769 ms - 637202[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 204.169 ms - -[0m
+[0mOPTIONS /api/academic/session-requests/69e5bc1b1b6f1236dd4692d7/action [32m204[0m 1.559 ms - 0[0m
+[0mPUT /api/academic/session-requests/69e5bc1b1b6f1236dd4692d7/action [32m200[0m 101.343 ms - 36[0m
+[0mGET /api/courses [36m304[0m 29.682 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.812 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 27.849 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 28.858 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 250.462 ms - 3941[0m
+[0mGET /api/users [32m200[0m 421.767 ms - 637202[0m
+[0mGET /api/courses [36m304[0m 31.562 ms - -[0m
+[0mGET /api/academic/session-requests [32m200[0m 35.537 ms - 3941[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 30.102 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 28.619 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 27.824 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 154.753 ms - -[0m
+[0mGET /api/users [32m200[0m 199.843 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 32.195 ms - -[0m
+[0mOPTIONS /api/academic/sessions/undefined [32m204[0m 2.356 ms - 0[0m
+[0mDELETE /api/academic/sessions/undefined [31m500[0m 1.902 ms - 86[0m
+[0mGET /api/courses [36m304[0m 29.872 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.076 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 29.524 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 28.863 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 32.632 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 117.227 ms - -[0m
+[0mGET /api/users [32m200[0m 182.123 ms - 637202[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [36m304[0m 37.010 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net
+[0mOPTIONS /api/academic/sessions/69d87fc575b83fa1a0198438 [32m204[0m 0.818 ms - 0[0m
+[0mDELETE /api/academic/sessions/69d87fc575b83fa1a0198438 [32m200[0m 36.975 ms - 16[0m
+[0mGET /api/courses [36m304[0m 31.162 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 34.554 ms - -[0m
+[0mGET /api/academic/session-requests [36m304[0m 30.691 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 169.192 ms - -[0m
+[0mGET /api/users [32m200[0m 195.733 ms - 637202[0m
+[0mGET /api/academic/sessions [32m200[0m 252.377 ms - 1057[0m
+[0mGET /api/academic/assignments [36m304[0m 263.225 ms - -[0m
+[0mGET /api/academic/sessions/batch/69d755db019d3ef3b357fe96 [32m200[0m 38.484 ms - 2[0m
