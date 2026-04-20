@@ -349,3 +349,6 @@
  GET /icon?d878d31cd40b5385 200 in 29ms (compile: 1767µs, render: 27ms)
  GET /sw.js 404 in 45ms (compile: 5ms, render: 40ms)
  GET /sw.js 404 in 124ms (compile: 61ms, render: 63ms)
+✓ Compiled in 978ms
+ GET /sw.js 404 in 177ms (compile: 22ms, render: 155ms)
+✓ Compiled in 154ms

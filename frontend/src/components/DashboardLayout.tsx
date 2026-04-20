@@ -67,6 +67,7 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Overview', label: 'Dashboard Home', href: '/super-admin', icon: <LayoutDashboard size={18} /> },
         { section: 'User Management', label: 'Users List', href: '/super-admin/users', icon: <Users size={18} /> },
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
+        { label: 'Mock Interview Index', href: '/super-admin/academic?tab=INTERVIEWS', icon: <Target size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
         { section: 'Tracking', label: 'Tracking Center', href: '/super-admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'System Activity Log', href: '/super-admin/global-tracking', icon: <Terminal size={18} /> },

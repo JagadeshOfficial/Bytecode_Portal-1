@@ -239,7 +239,23 @@ export default function MockInterviewEngine({ activeView }: { activeView?: strin
                                                     if(res.ok) {
                                                         const updated = await res.json();
                                                         setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
+                                                        setSelectedInterviewId(item.id || item._id);
                                                         setSubView('LIVE_MONITOR');
+                                                    }
+                                                } catch(err) { console.error(err); }
+                                            }}
+                                            onFinish={async () => {
+                                                if (!confirm("Are you sure you want to conclude this session? AI will generate the final report.")) return;
+                                                try {
+                                                    const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
+                                                        method: 'PUT',
+                                                        headers: {'Content-Type': 'application/json'},
+                                                        body: JSON.stringify({...item, status: 'COMPLETED', completedAt: new Date()})
+                                                    });
+                                                    if(res.ok) {
+                                                        const updated = await res.json();
+                                                        setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
+                                                        alert("Protocol Concluded: AI Evaluation Report generated.");
                                                     }
                                                 } catch(err) { console.error(err); }
                                             }}
@@ -608,15 +624,15 @@ function ReviewStep({ data }: any) {
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
                     <p style={labelStyle}>TARGET</p>
-                    <p style={{ fontWeight: 800 }}>{data.batchName} ({data.courseName})</p>
+                    <p style={{ fontWeight: 800 }}>{data.batchName || 'Not Selected'} ({data.courseName || 'Not Selected'})</p>
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
                     <p style={labelStyle}>INTERVIEWER</p>
-                    <p style={{ fontWeight: 800 }}>{data.interviewerName} ({data.interviewerRole})</p>
+                    <p style={{ fontWeight: 800 }}>{data.interviewerName || 'AI Engine'}</p>
                 </div>
                 <div>
                     <p style={labelStyle}>SCHEDULE</p>
-                    <p style={{ fontWeight: 800 }}>{data.date} at {data.startTime} ({data.duration} mins)</p>
+                    <p style={{ fontWeight: 800 }}>{data.date || 'TBD'} at {data.startTime || 'TBD'} ({data.duration} mins)</p>
                 </div>
             </div>
         </div>
@@ -625,14 +641,26 @@ function ReviewStep({ data }: any) {
 
 // --- SUB-COMPONENTS CORE ---
 
-function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any, onStart: any }) {
+function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart, onFinish }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any, onStart: any, onFinish: any }) {
+    const isCompleted = data.status === 'COMPLETED';
+    const isLive = data.status === 'LIVE';
+
     return (
-        <motion.div whileHover={{ y: -5 }} style={{ ...glassStyle, padding: '0', overflow: 'hidden', background: '#fff' }}>
+        <motion.div whileHover={{ y: -5 }} style={{ ...glassStyle, padding: '0', overflow: 'hidden', background: '#fff', opacity: isCompleted ? 0.8 : 1 }}>
             <div style={{ padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                    <div style={{ background: data.status === 'LIVE' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: data.status === 'LIVE' ? '#ef4444' : '#10b981', boxShadow: data.status === 'LIVE' ? '0 0 10px #ef4444' : 'none' }} />
-                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: data.status === 'LIVE' ? '#ef4444' : '#10b981' }}>{data.status || 'SCHEDULED'}</span>
+                    <div style={{ 
+                        background: isLive ? 'rgba(239, 68, 68, 0.1)' : isCompleted ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
+                        padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px' 
+                    }}>
+                        <div style={{ 
+                            width: 8, height: 8, borderRadius: '50%', 
+                            background: isLive ? '#ef4444' : isCompleted ? '#3b82f6' : '#10b981', 
+                            boxShadow: isLive ? '0 0 10px #ef4444' : 'none' 
+                        }} />
+                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: isLive ? '#ef4444' : isCompleted ? '#3b82f6' : '#10b981' }}>
+                            {data.status || 'SCHEDULED'}
+                        </span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button onClick={onEdit} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={16} /></button>
@@ -651,7 +679,7 @@ function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart }: {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0', marginBottom: '2rem' }}>
                     <div>
                         <p style={labelStyle}>INTERVIEWER</p>
-                        <p style={valueStyle}>{data.interviewerName}</p>
+                        <p style={valueStyle}>{data.interviewerName || 'AI Engine'}</p>
                     </div>
                     <div>
                         <p style={labelStyle}>BATCH</p>
@@ -668,12 +696,17 @@ function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart }: {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    {data.status === 'LIVE' ? (
-                        <button onClick={onJoin} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>MONITOR LIVE</button>
+                    {isLive ? (
+                        <>
+                            <button onClick={onJoin} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>MONITOR LIVE</button>
+                            <button onClick={onFinish} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#111', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>FINISH</button>
+                        </>
+                    ) : isCompleted ? (
+                        <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>VIEW AI REPORT</button>
                     ) : (
                         <button onClick={onStart} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#10b981', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>START SESSION</button>
                     )}
-                    <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>VIEW REPORTS</button>
+                    {!isLive && !isCompleted && <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>HISTORY</button>}
                 </div>
             </div>
         </motion.div>

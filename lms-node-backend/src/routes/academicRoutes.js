@@ -955,3 +955,82 @@ router.post('/rooms/:id/terminate', async (req, res) => {
 });
 
 module.exports = router;
+// --- MOCK INTERVIEW ENGINE ROUTES ---
+
+// @desc    Get all mock interviews
+router.get('/mock-interviews', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const interviews = await db.collection('mock_interviews').find().sort({ createdAt: -1 }).toArray();
+        const mapped = interviews.map(i => ({ ...i, id: i._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Get mock interview stats
+router.get('/mock-interviews/stats', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const countTotal = await db.collection('mock_interviews').countDocuments();
+        const countLive = await db.collection('mock_interviews').countDocuments({ status: 'LIVE' });
+        
+        // Mock stats for the premium dashboard look
+        const stats = [
+            { label: 'Total Assessments', value: countTotal, change: '+12%', iconType: 'Video' },
+            { label: 'Live Sessions', value: countLive, change: '+5%', iconType: 'Activity' },
+            { label: 'AI Score Avg', value: '78%', change: '+3%', iconType: 'Brain' },
+            { label: 'Placement Ready', value: '42', change: '+18%', iconType: 'Target' }
+        ];
+        res.json(stats);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Create mock interview
+router.post('/mock-interviews', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const interview = {
+            ...req.body,
+            status: 'SCHEDULED',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        const result = await db.collection('mock_interviews').insertOne(interview);
+        res.status(201).json({ ...interview, id: result.insertedId.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Update mock interview
+router.put('/mock-interviews/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const { id, _id, ...updateData } = req.body;
+        
+        await db.collection('mock_interviews').updateOne(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: { ...updateData, updatedAt: new Date() } }
+        );
+        
+        const updated = await db.collection('mock_interviews').findOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        res.json({ ...updated, id: updated._id.toString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Delete mock interview
+router.delete('/mock-interviews/:id', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        await db.collection('mock_interviews').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});

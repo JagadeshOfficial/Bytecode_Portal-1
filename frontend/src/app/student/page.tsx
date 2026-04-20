@@ -31,6 +31,7 @@ export default function StudentDashboard() {
     const [selectedLiveSession, setSelectedLiveSession] = useState<any>(null);
     const [studentBatches, setStudentBatches] = useState<any[]>([]);
     const [liveSessions, setLiveSessions] = useState<any[]>([]);
+    const [mockInterviews, setMockInterviews] = useState<any[]>([]);
 
     useEffect(() => {
         const stored = localStorage.getItem('user');
@@ -119,6 +120,21 @@ export default function StudentDashboard() {
             }
             setAssignments(allAss);
             setLiveSessions(allLive);
+
+            // Fetch mock interviews
+            const miRes = await fetch(`http://localhost:8080/api/academic/mock-interviews`);
+            if (miRes.ok) {
+                const allInterviews = await miRes.json();
+                const studentId = loggedUser?.id || loggedUser?._id;
+                const batchIds = batches.map((b: any) => b.id || b._id);
+                
+                // Filter for student's batches OR specific candidateIds
+                const filtered = allInterviews.filter((mi: any) => 
+                    batchIds.includes(mi.batchId) && 
+                    (mi.candidateType === 'ALL' || (Array.isArray(mi.candidateIds) && mi.candidateIds.includes(studentId)))
+                );
+                setMockInterviews(filtered);
+            }
         } catch (e) {
             console.error("Failed to sync student data:", e);
         }
@@ -346,11 +362,53 @@ export default function StudentDashboard() {
                         )}
 
                         {selectedTab === 'CAREER' && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                <CareerOpportunity company="Google" role="Cloud Architect Intern" location="Remote" match="95% Sync" />
-                                <CareerOpportunity company="TechCorp" role="Frontend Performance Eng" location="Hybrid" match="88% Sync" />
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                
+                                {/* Mock Interviews Assessment Section */}
+                                <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                        <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Mock Assessment Nodes</h3>
+                                        <div style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}>{mockInterviews.length} SESSIONS ACTIVE</div>
+                                    </div>
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                        {mockInterviews.map((mi, idx) => (
+                                            <div key={idx} style={{ padding: '2rem', borderRadius: '24px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
+                                                    <span style={{ fontSize: '0.65rem', fontWeight: 900, color: mi.status === 'LIVE' ? '#ef4444' : '#10b981', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px' }}>
+                                                        {mi.status || 'SCHEDULED'}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{mi.date}</span>
+                                                </div>
+                                                <h4 style={{ fontWeight: 900, fontSize: '1.2rem', marginBottom: '0.5rem' }}>{mi.title}</h4>
+                                                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem', opacity: 0.7 }}>{mi.description}</p>
+                                                
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: 800 }}>
+                                                        <span style={{ color: 'var(--text-dim)' }}>TYPE: </span> {mi.type}
+                                                    </div>
+                                                    <button className="btn-quantum" style={{ padding: '10px 20px', borderRadius: '12px', background: mi.status === 'LIVE' ? '#ef4444' : 'var(--primary)' }}>
+                                                        {mi.status === 'LIVE' ? 'JOIN NOW' : mi.status === 'COMPLETED' ? 'VIEW FEEDBACK' : 'ENTER ROOM'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {mockInterviews.length === 0 && (
+                                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: 'var(--text-dim)' }}>No upcoming interview assessments for your profile.</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2rem' }}>Strategic Opportunities</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <CareerOpportunity company="Google" role="Cloud Architect Intern" location="Remote" match="95% Sync" />
+                                        <CareerOpportunity company="Microsoft" role="Full Stack Developer" location="Bangalore" match="88% Sync" />
+                                    </div>
+                                </div>
                             </motion.div>
                         )}
+
                         {selectedTab === 'REQUESTS' && (
                             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>

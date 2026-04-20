@@ -447,3 +447,118 @@ Found 0 notifications
 GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
 Found 0 notifications
 [0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 41.613 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 38.234 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 37.137 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 30.477 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 31.647 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 43.697 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 30.168 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 34.671 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 28.276 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 29.950 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 40.304 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 38.310 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 29.441 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 31.769 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 35.698 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 29.609 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 33.967 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 28.079 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 34.223 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 40.371 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 37.929 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 32.905 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 33.355 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 38.604 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 29.550 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 30.805 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 41.119 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 29.119 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 34.968 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 30.220 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 31.764 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 29.187 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 36.936 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 32.215 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 28.220 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 31.735 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 34.717 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=ADMIN [36m304[0m 30.721 ms - -[0m
