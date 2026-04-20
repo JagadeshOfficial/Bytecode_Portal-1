@@ -169,3 +169,5 @@
  GET /icon?d878d31cd40b5385 200 in 36ms (compile: 5ms, render: 31ms)
 ✓ Compiled in 429ms
 ✓ Compiled in 570ms
+ GET /super-admin/chat 200 in 1615ms (compile: 1579ms, render: 36ms)
+ GET /icon?d878d31cd40b5385 200 in 36ms (compile: 8ms, render: 28ms)

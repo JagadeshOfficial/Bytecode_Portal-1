@@ -1549,3 +1549,113 @@ Found 1 notifications
 GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
 Found 1 notifications
 [0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 36.799 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 38.241 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 164.822 ms - -[0m
+[0mGET /api/users [32m200[0m 239.661 ms - 637202[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 76.548 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 82.883 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 345.893 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+[0mGET /api/users [32m200[0m 137.508 ms - 637202[0m
+[0mGET /api/chat [32m200[0m 355.122 ms - 3340101[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 29.775 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 73.663 ms - -[0m
+[0mGET /api/chat [36m304[0m 362.664 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 66.763 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 32.606 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [32m200[0m 43.512 ms - 4[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 193.522 ms - -[0m
+[0mGET /api/chat [36m304[0m 367.536 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 34.113 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 30.638 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 193.228 ms - -[0m
+[0mGET /api/chat [36m304[0m 579.460 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 28.098 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 188.122 ms - -[0m
+[0mGET /api/chat [36m304[0m 399.378 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 35.637 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 29.159 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 29.662 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 178.934 ms - -[0m
+[0mGET /api/chat [36m304[0m 502.516 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 37.524 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 196.003 ms - -[0m
+[0mGET /api/chat [36m304[0m 578.514 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 30.487 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 29.256 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 174.651 ms - -[0m
+[0mGET /api/chat [36m304[0m 453.443 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 40.920 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 219.212 ms - -[0m
+[0mGET /api/chat [36m304[0m 588.711 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 30.047 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 31.099 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 29.238 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 172.397 ms - -[0m
+[0mGET /api/chat [36m304[0m 332.945 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 34.983 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 209.013 ms - -[0m
+[0mGET /api/chat [36m304[0m 451.780 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 50.349 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 35.255 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 194.405 ms - -[0m
+[0mGET /api/chat [36m304[0m 337.166 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 40.059 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 184.065 ms - -[0m
+[0mGET /api/chat [36m304[0m 473.752 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 36.607 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 30.531 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 31.925 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 185.018 ms - -[0m
+[0mGET /api/chat [36m304[0m 362.900 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 38.656 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 203.490 ms - -[0m
+[0mGET /api/chat [36m304[0m 491.833 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 47.961 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 35.607 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 190.865 ms - -[0m
+[0mGET /api/chat [36m304[0m 329.112 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 37.487 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 181.223 ms - -[0m
+[0mGET /api/chat [36m304[0m 425.160 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 38.313 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 31.504 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 31.639 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 205.807 ms - -[0m
+[0mGET /api/chat [36m304[0m 346.168 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 37.987 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 208.369 ms - -[0m
+[0mGET /api/chat [36m304[0m 363.435 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 29.957 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=SUPER_ADMIN
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=SUPER_ADMIN [36m304[0m 38.212 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 194.356 ms - -[0m
+[0mGET /api/chat [36m304[0m 336.755 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 29.351 ms - -[0m
+[0mGET /api/chat/69da2f81c75a0b9a449c5cb0/messages [36m304[0m 193.479 ms - -[0m
+[0mGET /api/chat [36m304[0m 409.839 ms - -[0m
+[0mGET /api/chat/calls/active/698cb02cc71948c3567e76b8 [36m304[0m 30.962 ms - -[0m
