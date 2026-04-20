@@ -12,7 +12,6 @@ import { fetchJsonSafe } from '@/lib/fetchJson';
 
 export default function TutorSalaryPage() {
     const [user, setUser] = useState<any>(null);
-    const [payouts, setPayouts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [leaveReason, setLeaveReason] = useState('');
@@ -31,7 +30,6 @@ export default function TutorSalaryPage() {
             const parsed = JSON.parse(storedUser);
             const userId = parsed.id || parsed._id;
             fetchUserData(userId);
-            fetchPayouts(userId);
         }
     }, []);
 
@@ -42,13 +40,6 @@ export default function TutorSalaryPage() {
             setUser(result.data);
         }
         setLoading(false);
-    };
-
-    const fetchPayouts = async (userId: string) => {
-        const result = await fetchJsonSafe<any[]>(`http://localhost:8080/api/payouts/user/${userId}`);
-        if (result.ok && Array.isArray(result.data)) {
-            setPayouts(result.data);
-        }
     };
 
     const handleApplyLeave = async (e: React.FormEvent) => {
@@ -85,11 +76,12 @@ export default function TutorSalaryPage() {
         }
     };
 
-    const salary = user?.salary || 0;
-    const deductions = user?.deductions || 0;
+    const salary = user?.salary ?? 0;
+    const deductions = user?.deductions ?? 0;
+    const attendanceRate = user?.attendanceRate ?? 0;
     
     // Auto-calculate logic: If leaves accepted > total allowed, deduct proportionally
-    const extraLeaves = Math.max(0, (user?.leavesAccepted || 0) - (user?.leavesTotal || 10));
+    const extraLeaves = Math.max(0, (user?.leavesAccepted ?? 0) - (user?.leavesTotal ?? 0));
     const leaveDeduction = extraLeaves > 0 ? Math.round((salary / 30) * extraLeaves) : 0;
     const totalDeductions = deductions + leaveDeduction;
     const netSalary = salary - totalDeductions;
@@ -99,20 +91,20 @@ export default function TutorSalaryPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                     <div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px' }}>Salary & Compensation</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage your payouts, leaf tracking, and financial history.</p>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px' }}>Attendance & Leaves</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Track your presence, manage leave requests, and view quotas.</p>
                     </div>
                     <button className="btn-quantum" onClick={() => setIsLeaveModalOpen(true)} style={{ padding: '14px 28px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Send size={18} /> APPLY FOR LEAVE
                     </button>
                 </div>
 
-                {/* --- FINANCIAL SNAPSHOT --- */}
+                {/* --- ATTENDANCE & LEAVE SNAPSHOT --- */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
-                    <StatBox icon={<DollarSign size={20} />} label="Base Salary" value={`₹${salary.toLocaleString()}`} color="#10b981" />
-                    <StatBox icon={<AlertCircle size={20} />} label="Misc Deductions" value={`₹${deductions.toLocaleString()}`} color="#f59e0b" />
-                    <StatBox icon={<Calendar size={20} />} label="Leave Impact" value={`-₹${leaveDeduction.toLocaleString()}`} color="#ef4444" hint={`${extraLeaves} unpaid leaves`} />
-                    <StatBox icon={<TrendingUp size={20} />} label="Expected Payout" value={`₹${netSalary.toLocaleString()}`} color="#3b82f6" isBold />
+                    <StatBox icon={<Activity size={20} />} label="Attendance Rate" value={`${attendanceRate}%`} color="#3b82f6" />
+                    <StatBox icon={<Calendar size={20} />} label="Approved Leaves" value={user?.leavesAccepted ?? 0} color="#10b981" />
+                    <StatBox icon={<AlertCircle size={20} />} label="Rejected Requests" value={user?.leavesRejected ?? 0} color="#ef4444" />
+                    <StatBox icon={<TrendingUp size={20} />} label="Allowed Quota" value={user?.leavesTotal ?? 0} color="#8b5cf6" isBold />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
@@ -120,7 +112,7 @@ export default function TutorSalaryPage() {
                     {/* --- LEAVE LOGS & REQUESTS --- */}
                     <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Pending Applications</h3>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Active Applications</h3>
                          </div>
                          
                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -136,13 +128,13 @@ export default function TutorSalaryPage() {
                             )) : (
                                 <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-dim)' }}>
                                     <Info size={40} style={{ marginBottom: '15px', opacity: 0.2 }} />
-                                    <p>No pending leave applications.</p>
+                                    <p>No active leave requests.</p>
                                 </div>
                             )}
                          </div>
 
                          <div style={{ marginTop: '3rem' }}>
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Official history</h3>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Resolution History</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {user?.leaveHistory?.length > 0 ? [...user.leaveHistory].reverse().map((log: string, i: number) => {
                                     const isApproved = log.startsWith('APPROVED:');
@@ -160,36 +152,26 @@ export default function TutorSalaryPage() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                         {/* --- LEAVE SUMMARY --- */}
+                         {/* --- QUOTA UTILIZATION --- */}
                         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Quotas & Utilization</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <UtilizationRow label="Allocated Leaves" value={user?.leavesTotal ?? 0} total={25} color="var(--primary)" />
-                                <UtilizationRow label="Approved Leaves" value={user?.leavesAccepted ?? 0} total={user?.leavesTotal ?? 0} color="#10b981" />
-                                <UtilizationRow label="Rejected Requests" value={user?.leavesRejected ?? 0} total={5} color="#ef4444" />
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Leave Quotas</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <UtilizationRow label="Personal Leave Quota" value={user?.leavesTotal ?? 0} total={25} color="var(--primary)" />
+                                <UtilizationRow label="Approved Absences" value={user?.leavesAccepted ?? 0} total={user?.leavesTotal ?? 0} color="#10b981" />
                             </div>
                         </div>
 
-                         {/* --- PAYOUT HISTORY --- */}
-                         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Payout History</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {payouts.length > 0 ? payouts.map((p, i) => (
-                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px' }}>
-                                        <div>
-                                            <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{p.month}</div>
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{new Date(p.payoutDate).toLocaleDateString()}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>₹{(p.netAmount || 0).toLocaleString()}</div>
-                                            <div style={{ fontSize: '0.65rem', fontWeight: 900, color: p.status === 'PAID' ? '#10b981' : '#f59e0b' }}>{p.status}</div>
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)', fontSize: '0.75rem' }}>No settlement records found.</div>
-                                )}
+                        {/* --- ATTENDANCE TRACKER --- */}
+                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '32px' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '1.2rem' }}>Attendance Insights</h3>
+                            <div style={{ padding: '2rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '24px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--primary)' }}>{attendanceRate}%</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase', marginTop: '5px' }}>Current Month Presence</div>
                             </div>
-                         </div>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '1.5rem', lineHeight: 1.6 }}>
+                                Keep your attendance rate above 90% to maintain eligibility for performance incentives.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -235,6 +217,9 @@ export default function TutorSalaryPage() {
     );
 }
 
+// Re-importing Activity since it's used now
+import { Activity } from 'lucide-react';
+
 function StatBox({ icon, label, value, color, hint, isBold }: any) {
     return (
         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', borderLeft: `4px solid ${color}` }}>
@@ -247,7 +232,7 @@ function StatBox({ icon, label, value, color, hint, isBold }: any) {
 }
 
 function UtilizationRow({ label, value, total, color }: any) {
-    const percentage = Math.min(100, (value / total) * 100);
+    const percentage = total > 0 ? Math.min(100, (value / total) * 100) : 0;
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>

@@ -423,7 +423,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                                          <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}> ({u.email})</span>
                                                      </div>
                                                  </div>
-                                            </div>
+                                             </div>
                                         </td>
                                         <td style={{ padding: '20px' }}>
                                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -537,13 +537,13 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                                       </div>
                                                       <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
                                                            <button 
-                                                               onClick={() => handleLeaveApproval(selectedUser, i)}
-                                                               style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
-                                                           >APPROVE</button>
+                                                                onClick={() => handleLeaveApproval(selectedUser, i)}
+                                                                style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                                            >APPROVE</button>
                                                            <button 
-                                                               onClick={() => handleLeaveRejection(selectedUser, i)}
-                                                               style={{ padding: '6px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
-                                                           >REJECT</button>
+                                                                onClick={() => handleLeaveRejection(selectedUser, i)}
+                                                                style={{ padding: '6px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                                            >REJECT</button>
                                                       </div>
                                                   </div>
                                               ))
@@ -553,11 +553,31 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                     </div>
                                 </div>
 
-                                {/* --- ROLE SPECIFIC SECTION --- */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    {selectedUser.role === 'TRAINER' ? (
-                                        <>
-                                            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--secondary)', paddingLeft: '1rem' }}>Assigned Batches</h3>
+                                    {/* --- COMMON: LEAVE HISTORY --- */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid #ef4444', paddingLeft: '1rem' }}>Resolution History</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+                                            {selectedUser.leaveHistory?.length > 0 ? [...selectedUser.leaveHistory].reverse().map((log: string, idx: number) => {
+                                                const isApproved = log.startsWith('APPROVED:');
+                                                return (
+                                                    <div key={idx} style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', borderLeft: `3px solid ${isApproved ? '#10b981' : '#ef4444'}`, fontSize: '0.8rem' }}>
+                                                        <div style={{ fontWeight: 900, color: isApproved ? '#10b981' : '#ef4444', fontSize: '0.65rem', marginBottom: '4px' }}>{isApproved ? 'APPROVED' : 'REJECTED'}</div>
+                                                        <div style={{ color: 'var(--text-bright)' }}>{log.replace('APPROVED: ', '').replace('REJECTED: ', '')}</div>
+                                                    </div>
+                                                );
+                                            }) : (
+                                                <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(255,255,255,0.01)', borderRadius: '20px' }}>
+                                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>No historical records found.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* --- TRAINER SPECIFIC: BATCHES --- */}
+                                    {selectedUser.role === 'TRAINER' && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                                            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--secondary)', paddingLeft: '1rem' }}>Trainer Batch Assignments</h3>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
                                                 {trainerBatches.length > 0 ? trainerBatches.map((b, idx) => (
                                                     <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -567,33 +587,11 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
                                                                 <Clock size={12} /> {b.startTime} - {b.endTime}
                                                             </div>
                                                         </div>
-                                                        <div style={{ background: 'rgba(124, 58, 237, 0.1)', color: 'var(--primary)', padding: '5px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900 }}>
-                                                            <BookOpen size={12} style={{ marginRight: '5px' }} /> ACADEMIC
-                                                        </div>
+                                                        <div style={{ background: 'rgba(124, 58, 237, 0.1)', color: 'var(--primary)', padding: '5px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900 }}>ACADEMIC</div>
                                                     </div>
-                                                )) : <p style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '2rem' }}>No batches assigned yet.</p>}
+                                                )) : <p style={{ color: 'var(--text-dim)', textAlign: 'center' }}>No batches assigned.</p>}
                                             </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, borderLeft: '4px solid var(--secondary)', paddingLeft: '1rem' }}>Leave History</h3>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
-                                                {selectedUser.leaveHistory?.length > 0 ? selectedUser.leaveHistory.map((leave: string, idx: number) => (
-                                                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                            <Inbox size={18} color="var(--primary)" />
-                                                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{leave}</div>
-                                                        </div>
-                                                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-dim)' }}>PROCESSED</span>
-                                                    </div>
-                                                )) : (
-                                                    <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.01)', borderRadius: '20px' }}>
-                                                        <MessageSquare size={32} color="var(--text-dim)" style={{ marginBottom: '10px' }} />
-                                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>No historical leave records found.</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
+                                        </div>
                                     )}
                                 </div>
                             </div>

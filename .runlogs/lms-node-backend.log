@@ -3699,3 +3699,442 @@ Found 1 notifications
 GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
 Found 1 notifications
 [0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.070 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.025 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 38.009 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 34.272 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 45.533 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.425 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.126 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 42.366 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.090 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.440 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 34.720 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 167.502 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 38.160 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 28.954 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.583 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.419 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 170.793 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 48.527 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.722 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.301 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.174 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.121 ms - -[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76b8 [32m204[0m 0.874 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76b8 [32m200[0m 204.227 ms - 378865[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 39.541 ms - 378806[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.902 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 32.079 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 29.262 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 33.824 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 148.494 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 33.134 ms - -[0m
+[0mGET /api/users [32m200[0m 196.460 ms - 637392[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.556 ms - -[0m
+[0mGET /api/academic/batches/trainer/698cb02cc71948c3567e76b8 [33m404[0m 8.994 ms - 192[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76b8 [32m204[0m 0.486 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76b8 [32m200[0m 233.167 ms - 378876[0m
+[0mGET /api/users [32m200[0m 79.262 ms - 637403[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 44.951 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 38.978 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.373 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 155.761 ms - 378817[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 36.871 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.327 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 30.207 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 53.607 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 40.279 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.976 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.304 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.347 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.491 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.047 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.449 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.065 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.398 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.975 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.011 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 53.805 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.147 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.101 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.823 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.501 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 38.366 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.147 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.863 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 44.594 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 45.166 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.674 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 40.230 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.155 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.585 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 49.915 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.808 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.856 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 38.211 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 45.681 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.773 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 34.046 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 55.302 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.616 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 37.259 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.590 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.971 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 43.605 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.416 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 29.695 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 32.104 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b6 [36m304[0m 126.990 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 28.802 ms - -[0m
+[0mGET /api/users [32m200[0m 187.276 ms - 637403[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 46.405 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b6 role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b6&role=SUPER_ADMIN [36m304[0m 39.958 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 32.968 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TRAINER
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TRAINER [32m200[0m 34.960 ms - 325[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 197.506 ms - -[0m
+[0mOPTIONS /api/auth/login [32m204[0m 0.401 ms - 0[0m
+Checking password for trainer@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiOCIsImlhdCI6MTc3NjY3Mjc2NiwiZXhwIjoxNzc5MjY0NzY2fQ.fXD9Nw4jJFc-7akPUzXwvI7wRaZ49EyknsLvgOVwUhI',
+  id: new ObjectId('698cb02cc71948c3567e76b8'),
+  email: 'trainer@bytecode.com',
+  name: 'Mahendra Nath Chamnoor',
+  role: 'TRAINER'
+}
+[0mPOST /api/auth/login [32m200[0m 178.394 ms - 314[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 33.086 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 120.662 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 38.874 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 28.605 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 38.388 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 31.823 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 32.257 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 49.643 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 41.789 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 29.409 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 29.239 ms - -[0m
+[0mGET /api/users [32m200[0m 178.206 ms - 637403[0m
+[0mGET /api/users [32m200[0m 48.119 ms - 637403[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 45.833 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TRAINER
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TRAINER [36m304[0m 31.792 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 148.764 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 41.041 ms - -[0m
+[0mOPTIONS /api/auth/login [32m204[0m 1.220 ms - 0[0m
+Checking password for trainer@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiOCIsImlhdCI6MTc3NjY3MjkzOCwiZXhwIjoxNzc5MjY0OTM4fQ.qHOMdRl5OF_WdMtI95VE3iXDAmojl9-sYAKLzL8yYCU',
+  id: new ObjectId('698cb02cc71948c3567e76b8'),
+  email: 'trainer@bytecode.com',
+  name: 'Mahendra Nath Chamnoor',
+  role: 'TRAINER'
+}
+[0mPOST /api/auth/login [32m200[0m 178.088 ms - 314[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [32m200[0m 49.033 ms - 325[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [32m200[0m 116.051 ms - 378817[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 55.749 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 35.716 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 58.924 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 61.395 ms - -[0m
+[0mGET /api/users [32m200[0m 60.445 ms - 637403[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 149.965 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 36.451 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.948 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 28.886 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 29.080 ms - -[0m
+[0mGET /api/users [32m200[0m 180.035 ms - 637403[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 31.612 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 156.573 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 41.252 ms - -[0m
+[0mOPTIONS /api/auth/login [32m204[0m 0.655 ms - 0[0m
+Checking password for trainer@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiOCIsImlhdCI6MTc3NjY3MzIxMSwiZXhwIjoxNzc5MjY1MjExfQ.9ghSvgRAEgwvFXQaGZroDWrY3lQ77luwl1szd0N0uD4',
+  id: new ObjectId('698cb02cc71948c3567e76b8'),
+  email: 'trainer@bytecode.com',
+  name: 'Mahendra Nath Chamnoor',
+  role: 'TRAINER'
+}
+[0mPOST /api/auth/login [32m200[0m 180.615 ms - 314[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 30.996 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 89.141 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 38.276 ms - -[0m
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.061 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 49.476 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 43.283 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 44.857 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 28.041 ms - -[0m
+[0mGET /api/users [32m200[0m 186.025 ms - 637403[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 147.413 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 27.859 ms - -[0m
+Fetched 2 batches from academic-db
+[0mGET /api/academic/batches [36m304[0m 29.683 ms - -[0m
+[0mGET /api/users [32m200[0m 193.526 ms - 637403[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.952 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 148.412 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 27.551 ms - -[0m
+[0mGET /api/users/698cb02cc71948c3567e76b8 [36m304[0m 60.878 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 27.317 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 38.793 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.378 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 39.679 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 29.930 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76b8 role=TUTOR
+Found 1 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76b8&role=TUTOR [36m304[0m 36.916 ms - -[0m
+[0mOPTIONS /api/auth/login [32m204[0m 0.785 ms - 0[0m
+Checking password for student@bytecode.com. Stored: YES
+Plain text match: true
+Sending login success response: {
+  status: 'SUCCESS',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGNiMDJjYzcxOTQ4YzM1NjdlNzZiYyIsImlhdCI6MTc3NjY3MzMwMCwiZXhwIjoxNzc5MjY1MzAwfQ.u_Akam5bK0jHv3BgTB5D81d504hLlH4Z3A-uAmMuvrg',
+  id: new ObjectId('698cb02cc71948c3567e76bc'),
+  email: 'student@bytecode.com',
+  name: 'Vikas Koud',
+  role: 'STUDENT'
+}
+[0mPOST /api/auth/login [32m200[0m 46.486 ms - 302[0m
+[0mGET /api/academic/batches/student/698cb02cc71948c3567e76bc [33m404[0m 5.251 ms - 192[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+[0mGET /api/academic/batches/student/698cb02cc71948c3567e76bc [33m404[0m 1.343 ms - 192[0m
+[0mGET /api/users/698cb02cc71948c3567e76bc [32m200[0m 38.664 ms - 514[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [32m200[0m 45.739 ms - 2[0m
+[0mGET /api/users/698cb02cc71948c3567e76bc [36m304[0m 34.349 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 34.358 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 29.787 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 42.701 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 41.991 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 39.513 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 30.748 ms - -[0m
+[0mOPTIONS /api/users/698cb02cc71948c3567e76bc [32m204[0m 0.226 ms - 0[0m
+[0mPUT /api/users/698cb02cc71948c3567e76bc [32m200[0m 88.370 ms - 599[0m
+[0mGET /api/users/698cb02cc71948c3567e76bc [32m200[0m 37.138 ms - 540[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 38.887 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 30.517 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 35.724 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 30.561 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 34.908 ms - -[0m
+GET /notifications user=698cb02cc71948c3567e76bc role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=698cb02cc71948c3567e76bc&role=STUDENT [36m304[0m 49.594 ms - -[0m

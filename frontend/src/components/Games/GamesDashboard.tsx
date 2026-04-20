@@ -99,8 +99,6 @@ export default function GamesDashboard() {
         }
         setLoading(false);
     };
-        setLoading(false);
-    };
 
     useEffect(() => {
         setIsMounted(true);

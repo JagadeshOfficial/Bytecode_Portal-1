@@ -93,8 +93,14 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'User Management', label: 'Users List', href: '/tutor/users', icon: <Users size={18} /> },
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
-        { section: 'Finance', label: 'Salary & Payouts', href: '/tutor/salary', icon: <DollarSign size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
+        { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
+    ],
+    trainer: [
+        { section: 'Main', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
+        { section: 'User Management', label: 'Users List', href: '/tutor/users', icon: <Users size={18} /> },
+        { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
+        { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
+        { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
     ],
     placement: [
         { section: 'Career', label: 'Student Readiness', href: '/placement', icon: <UserCheck size={18} /> },
@@ -200,16 +206,18 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                     const apiRole = String(data.role || parsed.role || '').toUpperCase();
                             const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
 
-                            if (expectedRole && apiRole && expectedRole !== apiRole) {
-                                // Specific logic for Tutor/Trainer compatibility
-                                const isTutorCompat = (expectedRole === 'TUTOR' || expectedRole === 'TRAINER') && 
-                                                     (apiRole === 'TUTOR' || apiRole === 'TRAINER');
-                                
-                                // Also allow TRAINER/TUTOR to access ADMIN/SUPER_ADMIN sections they are linked to
-                                const isTrainerAuthorized = (apiRole === 'TRAINER' || apiRole === 'TUTOR') && 
-                                                           (expectedRole === 'ADMIN' || expectedRole === 'SUPER_ADMIN');
+                            const currentRoleStr = (expectedRole || '').toUpperCase();
+                            const actualRoleStr = (apiRole || '').toUpperCase();
 
-                                if (!isTutorCompat && !isTrainerAuthorized) {
+                            if (currentRoleStr !== actualRoleStr) {
+                                // Specific logic for Tutor/Trainer/Staff compatibility
+                                const tutorFamily = ['TUTOR', 'TRAINER', 'STAFF', 'HR', 'ADMIN', 'SUPER_ADMIN'];
+                                const isTutorCompat = tutorFamily.includes(currentRoleStr) && tutorFamily.includes(actualRoleStr);
+                                
+                                // Also allow TRAINER/TUTOR/STAFF to access common areas
+                                const isCommonAuthorized = (actualRoleStr === 'TRAINER' || actualRoleStr === 'TUTOR' || actualRoleStr === 'ADMIN' || actualRoleStr === 'SUPER_ADMIN');
+
+                                if (!isTutorCompat && !isCommonAuthorized) {
                                     if (expectedRole === 'SUPER_ADMIN') {
                                         router.push(apiRole === 'ADMIN' ? '/admin' : '/login');
                                     } else if (expectedRole === 'ADMIN') {
