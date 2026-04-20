@@ -6,12 +6,12 @@ import { useState, useEffect } from 'react';
 import { 
     BookOpen, Video, FileText, CheckCircle, 
     Briefcase, TrendingUp, Play, Clock, 
-    Calendar, Award, Star, MessageSquare, X
+    Calendar, Award, Star, MessageSquare, X, Activity
 } from 'lucide-react';
 
 export default function StudentDashboard() {
     const [selectedTab, setSelectedTab] = useState('LEARNING');
-    const [subTab, setSubTab] = useState<'COURSES' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS'>('COURSES');
+    const [subTab, setSubTab] = useState<'COURSES' | 'LIVE' | 'ASSIGNMENTS'>('COURSES');
     
     // --- ACADEMIC STATE ---
     const [assignments, setAssignments] = useState<any[]>([]);
@@ -20,23 +20,82 @@ export default function StudentDashboard() {
     const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
     const [submissionForm, setSubmissionForm] = useState({ url: '', remarks: '' });
 
+    const [isSessionRequestModalOpen, setIsSessionRequestModalOpen] = useState(false);
+    const [sessionRequests, setSessionRequests] = useState<any[]>([]);
+    const [requestForm, setRequestForm] = useState({
+        studentName: '',
+        courseName: '',
+        batchName: '',
+        message: ''
+    });
+    const [selectedLiveSession, setSelectedLiveSession] = useState<any>(null);
+
     useEffect(() => {
         const stored = localStorage.getItem('user');
         if (stored) {
             const user = JSON.parse(stored);
             setLoggedUser(user);
             fetchStudentAssignments(user.id);
+            fetchStudentRequests(user.id);
+            setRequestForm(prev => ({ ...prev, studentName: user.fullName || user.name || user.email }));
         }
     }, []);
 
+    const fetchStudentRequests = async (studentId: string) => {
+        try {
+            const res = await fetch(`http://localhost:8080/api/academic/session-requests`);
+            if (res.ok) {
+                const all = await res.json();
+                setSessionRequests(all.filter((r: any) => r.requestedById === studentId));
+            }
+        } catch (e) {
+            console.error("Failed to fetch requests:", e);
+        }
+    };
+
+    const handleSessionRequestSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!loggedUser || !selectedLiveSession) return;
+
+        const payload = {
+            type: 'JOIN_SESSION',
+            sessionId: selectedLiveSession.id || selectedLiveSession._id,
+            requestedBy: requestForm.studentName,
+            requestedById: loggedUser.id,
+            data: {
+                title: selectedLiveSession.title,
+                courseName: requestForm.courseName,
+                batchName: requestForm.batchName,
+                message: requestForm.message
+            },
+            status: 'PENDING',
+            createdAt: new Date().toISOString()
+        };
+
+        try {
+            const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                setSessionRequests([saved, ...sessionRequests]);
+                setIsSessionRequestModalOpen(false);
+                setRequestForm(prev => ({ ...prev, message: '' }));
+                alert("Access request sent to Command Center. Awaiting authorization.");
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     const fetchStudentAssignments = async (studentId: string) => {
         try {
-            // 1. Get student's batches
             const bRes = await fetch(`http://localhost:8080/api/academic/batches/student/${studentId}`);
             if (!bRes.ok) return;
             const batches = await bRes.json();
             
-            // 2. Fetch assignments for each batch
             const allAss: any[] = [];
             for (const b of batches) {
                 const aRes = await fetch(`http://localhost:8080/api/academic/assignments/batch/${b.id}`);
@@ -89,6 +148,7 @@ export default function StudentDashboard() {
 
     const TABS = [
         { id: 'LEARNING', label: 'My Learning Hub', icon: <BookOpen size={18} /> },
+        { id: 'REQUESTS', label: 'Session Tracking', icon: <Activity size={18} /> },
         { id: 'TESTS', label: 'Exam Node', icon: <CheckCircle size={18} /> },
         { id: 'CAREER', label: 'Career Launch', icon: <Briefcase size={18} /> },
     ];
@@ -142,7 +202,6 @@ export default function StudentDashboard() {
                                     {[
                                         { id: 'COURSES', label: 'Course Tracks', icon: <BookOpen size={16} /> },
                                         { id: 'LIVE', label: 'Live Classes', icon: <Video size={16} /> },
-                                        { id: 'RECORDINGS', label: 'Recorded Hub', icon: <Play size={16} /> },
                                         { id: 'ASSIGNMENTS', label: 'Assignments', icon: <FileText size={16} /> },
                                     ].map(st => (
                                         <button 
@@ -175,20 +234,21 @@ export default function StudentDashboard() {
                                                 </div>
                                                 <h3 style={{ fontWeight: 900 }}>Advanced K8s Deployment Patterns</h3>
                                                 <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>Managed by Vamsi Krishna • Starting soon (10:00 AM)</p>
-                                                <button className="btn-quantum" style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}>JOIN STREAM</button>
+                                                <button 
+                                                    className="btn-quantum" 
+                                                    style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}
+                                                    onClick={() => {
+                                                        setSelectedLiveSession({ id: 'live-1', title: 'Advanced K8s Deployment Patterns' });
+                                                        setRequestForm(prev => ({ ...prev, courseName: 'Full Stack Java', batchName: 'Batch-12' }));
+                                                        setIsSessionRequestModalOpen(true);
+                                                    }}
+                                                >
+                                                    JOIN STREAM
+                                                </button>
                                             </div>
                                         </motion.div>
                                     )}
 
-                                    {subTab === 'RECORDINGS' && (
-                                        <motion.div key="recordings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ fontWeight: 900, marginBottom: '5px' }}>Docker Container Security</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Session: 14 MAR 2026 • 1h 45m</div>
-                                                <button style={{ marginTop: '1rem', background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}><Play size={14} /> WATCH AGAIN</button>
-                                            </div>
-                                        </motion.div>
-                                    )}
 
                                     {subTab === 'ASSIGNMENTS' && (
                                         <motion.div key="assignments" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
@@ -248,8 +308,81 @@ export default function StudentDashboard() {
                                 <CareerOpportunity company="TechCorp" role="Frontend Performance Eng" location="Hybrid" match="88% Sync" />
                             </motion.div>
                         )}
+                        {selectedTab === 'REQUESTS' && (
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>My Session Authorization Logs</h3>
+                                    <div style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 800 }}>{sessionRequests.length} REQUESTS TOTAL</div>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {sessionRequests.map((r, idx) => {
+                                        const color = r.status === 'APPROVED' ? '#10b981' : r.status === 'REJECTED' ? '#ef4444' : '#f59e0b';
+                                        return (
+                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+                                                        <h4 style={{ fontWeight: 800 }}>{r.data?.title || "Join Request"}</h4>
+                                                    </div>
+                                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                                                        {r.data?.courseName} • {r.data?.batchName}
+                                                    </p>
+                                                    {r.data?.message && <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '5px', opacity: 0.6 }}>Note: {r.data.message}</p>}
+                                                </div>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, color, background: `${color}15`, padding: '4px 12px', borderRadius: '8px', letterSpacing: '1px', marginBottom: '5px' }}>{r.status}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{new Date(r.createdAt).toLocaleDateString()}</div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    {sessionRequests.length === 0 && (
+                                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>No session requests initiated yet.</div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
                     </div>
                 </div>
+
+                {/* --- SESSION REQUEST MODAL --- */}
+                <AnimatePresence>
+                    {isSessionRequestModalOpen && selectedLiveSession && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                            <motion.div initial={{ scale: 0.95, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '550px', padding: '3rem', borderRadius: '40px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
+                                    <div>
+                                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Authorization Protocol</h2>
+                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '5px' }}>Requesting access to: {selectedLiveSession.title}</p>
+                                    </div>
+                                    <button onClick={() => setIsSessionRequestModalOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}><X size={18} /></button>
+                                </div>
+
+                                <form onSubmit={handleSessionRequestSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Student Identity</label>
+                                        <input value={requestForm.studentName} onChange={e => setRequestForm({...requestForm, studentName: e.target.value})} style={inputStyle} required />
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                        <div>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Course Stream</label>
+                                            <input value={requestForm.courseName} onChange={e => setRequestForm({...requestForm, courseName: e.target.value})} placeholder="e.g. Java Master" style={inputStyle} required />
+                                        </div>
+                                        <div>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Active Batch</label>
+                                            <input value={requestForm.batchName} onChange={e => setRequestForm({...requestForm, batchName: e.target.value})} placeholder="e.g. B-24" style={inputStyle} required />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Deployment Message</label>
+                                        <textarea value={requestForm.message} onChange={e => setRequestForm({...requestForm, message: e.target.value})} placeholder="Why do you need to join? (Optional)" rows={3} style={{...inputStyle, resize: 'none'}} />
+                                    </div>
+                                    <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '14px', width: '100%', marginTop: '1rem' }}>SUBMIT AUTHORIZATION REQUEST</button>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
 
                 {/* --- SUBMISSION MODAL --- */}
                 <AnimatePresence>

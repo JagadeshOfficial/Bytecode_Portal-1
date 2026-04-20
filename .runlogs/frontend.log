@@ -1649,3 +1649,244 @@ See more info here: https://nextjs.org/docs/messages/large-page-data
  GET /sw.js 404 in 115ms (compile: 6ms, render: 109ms)
  GET /sw.js 404 in 112ms (compile: 17ms, render: 95ms)
  GET /student 200 in 2.0s (compile: 1999ms, render: 21ms)
+✓ Compiled in 185ms
+⨯ ReferenceError: Code is not defined
+    at module evaluation (src/components/DashboardLayout.tsx:96:96)
+    at module evaluation (src/app/student/page.tsx:3:1)
+  94 |         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
+  95 |         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
+> 96 |         { section: 'Support Tools', label: 'Online Compiler', href: '/online-compiler', icon: <Code size={18} /> },
+     |                                                                                                ^
+  97 |         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
+  98 |         { section: 'Tracking', label: 'Tracking Center', href: '/tutor/pinpoint-hub', icon: <Activity size={18} /> },
+  99 |         { section: 'Reports', label: 'Student Progress', href: '/tutor/reports', icon: <BarChart3 size={18} /> }, {
+  digest: '2572321240'
+}
+ GET /student 500 in 3.6s (compile: 261ms, render: 3.4s)
+⨯ ReferenceError: Code is not defined
+    at module evaluation (src/components/DashboardLayout.tsx:96:96)
+    at module evaluation (src/app/student/page.tsx:3:1)
+  94 |         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
+  95 |         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
+> 96 |         { section: 'Support Tools', label: 'Online Compiler', href: '/online-compiler', icon: <Code size={18} /> },
+     |                                                                                                ^
+  97 |         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
+  98 |         { section: 'Tracking', label: 'Tracking Center', href: '/tutor/pinpoint-hub', icon: <Activity size={18} /> },
+  99 |         { section: 'Reports', label: 'Student Progress', href: '/tutor/reports', icon: <BarChart3 size={18} /> }, {
+  digest: '2572321240'
+}
+ GET /sw.js 404 in 376ms (compile: 20ms, render: 356ms)
+ GET /student 500 in 369ms (compile: 45ms, render: 324ms)
+⨯ ReferenceError: Code is not defined
+    at module evaluation (src/components/DashboardLayout.tsx:96:96)
+    at module evaluation (src/app/student/page.tsx:3:1)
+  94 |         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
+  95 |         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
+> 96 |         { section: 'Support Tools', label: 'Online Compiler', href: '/online-compiler', icon: <Code size={18} /> },
+     |                                                                                                ^
+  97 |         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
+  98 |         { section: 'Tracking', label: 'Tracking Center', href: '/tutor/pinpoint-hub', icon: <Activity size={18} /> },
+  99 |         { section: 'Reports', label: 'Student Progress', href: '/tutor/reports', icon: <BarChart3 size={18} /> }, {
+  digest: '2572321240'
+}
+ GET /login 200 in 4.6s (compile: 38ms, render: 4.6s)
+ GET /student 500 in 470ms (compile: 5ms, render: 465ms)
+ GET /icon?d878d31cd40b5385 200 in 129ms (compile: 33ms, render: 96ms)
+ GET /icon?d878d31cd40b5385 200 in 25ms (compile: 3ms, render: 22ms)
+ GET /sw.js 404 in 73ms (compile: 14ms, render: 59ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 943ms
+ GET /student 200 in 704ms (compile: 286ms, render: 419ms)
+ GET /student 200 in 46ms (compile: 4ms, render: 42ms)
+ GET /student 200 in 36ms (compile: 1807µs, render: 34ms)
+ GET /sw.js 404 in 168ms (compile: 38ms, render: 130ms)
+ GET /icon?d878d31cd40b5385 200 in 200ms (compile: 47ms, render: 153ms)
+ GET /sw.js 404 in 89ms (compile: 24ms, render: 65ms)
+ GET /student 200 in 195ms (compile: 38ms, render: 157ms)
+ GET /icon?d878d31cd40b5385 200 in 74ms (compile: 15ms, render: 59ms)
+ GET /sw.js 404 in 81ms (compile: 18ms, render: 63ms)
+✓ Compiled in 883ms
+✓ Compiled in 435ms
+ GET /sw.js 404 in 127ms (compile: 23ms, render: 104ms)
+ GET /sw.js 404 in 81ms (compile: 25ms, render: 56ms)
+ GET /sw.js 404 in 134ms (compile: 45ms, render: 89ms)
+ GET /sw.js 404 in 96ms (compile: 22ms, render: 74ms)
+ GET /sw.js 404 in 112ms (compile: 31ms, render: 81ms)
+ GET /sw.js 404 in 112ms (compile: 18ms, render: 94ms)
+ GET /sw.js 404 in 105ms (compile: 22ms, render: 82ms)
+ GET /sw.js 404 in 90ms (compile: 16ms, render: 73ms)
+ GET /sw.js 404 in 106ms (compile: 19ms, render: 87ms)
+ GET /super-admin/users 200 in 728ms (compile: 663ms, render: 64ms)
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./frontend/src/components/DashboardLayout.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /super-admin/users 200 in 518ms (compile: 23ms, render: 495ms)
+ GET /sw.js 404 in 155ms (compile: 30ms, render: 126ms)
+ GET /sw.js 404 in 58ms (compile: 16ms, render: 42ms)
+ GET /sw.js 404 in 116ms (compile: 37ms, render: 79ms)
+ GET /sw.js 404 in 151ms (compile: 31ms, render: 120ms)
+ GET /sw.js 404 in 97ms (compile: 25ms, render: 72ms)
+ GET /sw.js 404 in 103ms (compile: 22ms, render: 81ms)
+ GET /sw.js 404 in 115ms (compile: 26ms, render: 90ms)
+ GET /sw.js 404 in 126ms (compile: 54ms, render: 72ms)
+ GET /sw.js 404 in 113ms (compile: 37ms, render: 76ms)
+ GET /sw.js 404 in 145ms (compile: 27ms, render: 118ms)
+ GET /student 200 in 1168ms (compile: 808ms, render: 359ms)
+ GET /icon?d878d31cd40b5385 200 in 73ms (compile: 7ms, render: 66ms)
+ GET /sw.js 404 in 59ms (compile: 13ms, render: 45ms)
+✓ Compiled in 452ms
+✓ Compiled in 250ms
+✓ Compiled in 90ms
+✓ Compiled in 100ms
+✓ Compiled in 147ms
+ GET /admin/academic 200 in 1284ms (compile: 1191ms, render: 93ms)
+ GET /login 200 in 115ms (compile: 16ms, render: 99ms)
+ GET /login 200 in 37ms (compile: 4ms, render: 33ms)
+✓ Finished filesystem cache database compaction in 11.1s
+ GET /sw.js 404 in 303ms (compile: 41ms, render: 262ms)
+✓ Compiled in 388ms
+ GET /student 200 in 448ms (compile: 341ms, render: 107ms)
+ GET /admin/academic 200 in 54ms (compile: 27ms, render: 27ms)
+✓ Compiled in 199ms
+✓ Compiled in 413ms
+✓ Compiled in 126ms
+ GET /admin/academic 200 in 3.3s (compile: 208ms, render: 3.1s)
+ GET /icon?d878d31cd40b5385 200 in 238ms (compile: 80ms, render: 157ms)
+ GET /sw.js 404 in 101ms (compile: 34ms, render: 67ms)
+✓ Compiled in 1448ms
+ GET /sw.js 404 in 113ms (compile: 20ms, render: 93ms)
+✓ Compiled in 405ms
+ GET /sw.js 404 in 105ms (compile: 25ms, render: 80ms)
+ GET /sw.js 404 in 107ms (compile: 20ms, render: 87ms)
+ GET /admin/academic 200 in 1825ms (compile: 592ms, render: 1233ms)
+ GET /icon?d878d31cd40b5385 200 in 121ms (compile: 43ms, render: 78ms)
+ GET /sw.js 404 in 102ms (compile: 17ms, render: 85ms)
+ GET /super-admin/live/room/PDA-April-1776664599405 200 in 81ms (compile: 61ms, render: 20ms)
+ GET /sw.js 404 in 145ms (compile: 43ms, render: 102ms)
+✓ Compiled in 564ms
+✓ Compiled in 527ms
+✓ Compiled in 246ms
+✓ Compiled in 165ms
+✓ Compiled in 262ms
+ GET /super-admin/users 200 in 1630ms (compile: 875ms, render: 755ms)
+ GET /super-admin/chat 200 in 1016ms (compile: 627ms, render: 389ms)
+ GET /super-admin/academic 200 in 1809ms (compile: 747ms, render: 1062ms)
+ GET /super-admin/academic 200 in 533ms (compile: 24ms, render: 509ms)
+ GET /sw.js 404 in 185ms (compile: 49ms, render: 136ms)
+ GET /admin/academic 200 in 997ms (compile: 445ms, render: 552ms)
+ GET /icon?d878d31cd40b5385 200 in 99ms (compile: 19ms, render: 80ms)
+ GET /sw.js 404 in 200ms (compile: 21ms, render: 179ms)
+ GET /sw.js 404 in 96ms (compile: 26ms, render: 70ms)
+ GET /sw.js 404 in 82ms (compile: 28ms, render: 54ms)
+✓ Compiled in 703ms
+✓ Compiled in 233ms
+ GET /sw.js 404 in 497ms (compile: 24ms, render: 473ms)
+ GET /sw.js 404 in 165ms (compile: 16ms, render: 149ms)
+ GET /sw.js 404 in 123ms (compile: 18ms, render: 104ms)
+ GET /sw.js 404 in 116ms (compile: 22ms, render: 94ms)
+ GET /sw.js 404 in 126ms (compile: 26ms, render: 100ms)
+ GET /sw.js 404 in 91ms (compile: 18ms, render: 74ms)
+ GET /sw.js 404 in 110ms (compile: 15ms, render: 96ms)
+ GET /sw.js 404 in 109ms (compile: 23ms, render: 85ms)
+ GET /sw.js 404 in 671ms (compile: 338ms, render: 333ms)
+ GET /sw.js 404 in 250ms (compile: 43ms, render: 207ms)
+ GET /sw.js 404 in 123ms (compile: 22ms, render: 101ms)
+ GET /sw.js 404 in 159ms (compile: 126ms, render: 33ms)
+ GET /sw.js 404 in 117ms (compile: 25ms, render: 92ms)
+ GET /sw.js 404 in 120ms (compile: 29ms, render: 91ms)
+ GET /sw.js 404 in 110ms (compile: 19ms, render: 91ms)
+ GET /sw.js 404 in 117ms (compile: 23ms, render: 94ms)
+ GET /sw.js 404 in 115ms (compile: 20ms, render: 95ms)
+ GET /sw.js 404 in 488ms (compile: 46ms, render: 442ms)
+ GET /sw.js 404 in 211ms (compile: 22ms, render: 189ms)
+ GET /sw.js 404 in 256ms (compile: 99ms, render: 157ms)
+ GET /sw.js 404 in 128ms (compile: 32ms, render: 95ms)
+ GET /sw.js 404 in 128ms (compile: 27ms, render: 101ms)
+ GET /sw.js 404 in 106ms (compile: 20ms, render: 86ms)
+ GET /sw.js 404 in 128ms (compile: 26ms, render: 101ms)
+ GET /sw.js 404 in 104ms (compile: 18ms, render: 86ms)
+ GET /sw.js 404 in 113ms (compile: 23ms, render: 90ms)
+ GET /sw.js 404 in 116ms (compile: 22ms, render: 94ms)
+ GET /sw.js 404 in 128ms (compile: 27ms, render: 101ms)
+ GET /sw.js 404 in 127ms (compile: 24ms, render: 103ms)
+ GET /sw.js 404 in 93ms (compile: 20ms, render: 73ms)
+ GET /sw.js 404 in 115ms (compile: 28ms, render: 87ms)
+ GET /sw.js 404 in 125ms (compile: 24ms, render: 102ms)
+ GET /sw.js 404 in 99ms (compile: 15ms, render: 84ms)
+ GET /sw.js 404 in 104ms (compile: 19ms, render: 86ms)
+ GET /sw.js 404 in 111ms (compile: 21ms, render: 90ms)
+ GET /sw.js 404 in 225ms (compile: 34ms, render: 191ms)
+ GET /sw.js 404 in 340ms (compile: 52ms, render: 289ms)
+✓ Compiled in 756ms
+ GET /login 200 in 5.3s (compile: 229ms, render: 5.1s)
+ GET /admin/academic 200 in 5.3s (compile: 4.7s, render: 607ms)
+ GET /login 200 in 495ms (compile: 20ms, render: 475ms)
+ GET /admin/academic 200 in 510ms (compile: 46ms, render: 463ms)
+ GET /login 200 in 414ms (compile: 9ms, render: 405ms)
+ GET /admin/academic 200 in 432ms (compile: 67ms, render: 365ms)
+ GET /icon?d878d31cd40b5385 200 in 247ms (compile: 45ms, render: 202ms)
+ GET /icon?d878d31cd40b5385 200 in 124ms (compile: 44ms, render: 79ms)
+ GET /sw.js 404 in 140ms (compile: 21ms, render: 119ms)
+ GET /sw.js 404 in 223ms (compile: 153ms, render: 70ms)
+ GET /sw.js 404 in 230ms (compile: 47ms, render: 183ms)
+ GET /sw.js 404 in 429ms (compile: 46ms, render: 383ms)
+ GET /sw.js 404 in 147ms (compile: 24ms, render: 123ms)
+ GET /sw.js 404 in 116ms (compile: 37ms, render: 79ms)
+ GET /sw.js 404 in 122ms (compile: 25ms, render: 96ms)
+ GET /sw.js 404 in 130ms (compile: 25ms, render: 105ms)
+ GET /sw.js 404 in 161ms (compile: 52ms, render: 108ms)
+ GET /sw.js 404 in 1304ms (compile: 323ms, render: 982ms)
+ GET /sw.js 404 in 156ms (compile: 24ms, render: 132ms)
+ GET /sw.js 404 in 188ms (compile: 46ms, render: 142ms)
+ GET /sw.js 404 in 194ms (compile: 40ms, render: 154ms)
+ GET /sw.js 404 in 196ms (compile: 26ms, render: 170ms)
+ GET /sw.js 404 in 135ms (compile: 28ms, render: 107ms)
+ GET /sw.js 404 in 116ms (compile: 19ms, render: 97ms)
+ GET /sw.js 404 in 141ms (compile: 33ms, render: 108ms)
+ GET /sw.js 404 in 130ms (compile: 24ms, render: 106ms)
+ GET /sw.js 404 in 138ms (compile: 19ms, render: 120ms)
+ GET /sw.js 404 in 141ms (compile: 17ms, render: 123ms)
+ GET /sw.js 404 in 128ms (compile: 16ms, render: 112ms)
+ GET /sw.js 404 in 126ms (compile: 34ms, render: 93ms)
+ GET /sw.js 404 in 137ms (compile: 20ms, render: 118ms)
+ GET /sw.js 404 in 126ms (compile: 23ms, render: 102ms)
+ GET /sw.js 404 in 126ms (compile: 18ms, render: 108ms)
+ GET /sw.js 404 in 790ms (compile: 43ms, render: 747ms)
+ GET /sw.js 404 in 147ms (compile: 55ms, render: 92ms)
+ GET /super-admin/academic 200 in 1279ms (compile: 1084ms, render: 195ms)
+ GET /super-admin/academic 200 in 68ms (compile: 11ms, render: 57ms)
+ GET /super-admin/academic 200 in 72ms (compile: 32ms, render: 40ms)
+ GET /sw.js 404 in 379ms (compile: 129ms, render: 250ms)
+ GET /sw.js 404 in 128ms (compile: 65ms, render: 63ms)
+ GET /sw.js 404 in 177ms (compile: 87ms, render: 90ms)
+ GET /sw.js 404 in 122ms (compile: 25ms, render: 97ms)
+ GET /sw.js 404 in 138ms (compile: 64ms, render: 74ms)
+ GET /sw.js 404 in 160ms (compile: 41ms, render: 120ms)
+ GET /sw.js 404 in 191ms (compile: 92ms, render: 99ms)
+ GET /sw.js 404 in 161ms (compile: 76ms, render: 85ms)
+ GET /sw.js 404 in 179ms (compile: 57ms, render: 123ms)
+ GET /sw.js 404 in 144ms (compile: 73ms, render: 72ms)
+ GET /sw.js 404 in 132ms (compile: 46ms, render: 86ms)
+ GET /sw.js 404 in 152ms (compile: 72ms, render: 79ms)
+ GET /sw.js 404 in 171ms (compile: 60ms, render: 110ms)
+ GET /sw.js 404 in 161ms (compile: 65ms, render: 96ms)
+ GET /sw.js 404 in 162ms (compile: 67ms, render: 95ms)
+ GET /sw.js 404 in 127ms (compile: 55ms, render: 72ms)
+ GET /sw.js 404 in 118ms (compile: 35ms, render: 83ms)
+ GET /sw.js 404 in 159ms (compile: 72ms, render: 87ms)
+ GET /sw.js 404 in 144ms (compile: 39ms, render: 105ms)
+ GET /sw.js 404 in 120ms (compile: 53ms, render: 67ms)
+ GET /sw.js 404 in 137ms (compile: 44ms, render: 93ms)
+ GET /sw.js 404 in 104ms (compile: 41ms, render: 63ms)
+ GET /sw.js 404 in 312ms (compile: 22ms, render: 290ms)
+ GET /sw.js 404 in 160ms (compile: 78ms, render: 82ms)
+ GET /sw.js 404 in 106ms (compile: 25ms, render: 81ms)
+ GET /sw.js 404 in 106ms (compile: 48ms, render: 57ms)
+[?25h

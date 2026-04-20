@@ -738,6 +738,10 @@ router.put('/session-requests/:id/action', async (req, res) => {
                             _id: new mongoose.Types.ObjectId(request.assignmentId) 
                         });
                     }
+                } else if (request.type === 'JOIN_SESSION') {
+                    // Approval of JOIN_SESSION is primarily used for frontend access control.
+                    // No direct modification to the live_sessions collection is required,
+                    // but the request document status update (done below) acts as the permission flag.
                 }
             }
         }

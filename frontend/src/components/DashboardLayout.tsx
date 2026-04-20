@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
-import { 
-    Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar, 
-    Video, FileText, CheckCircle, Target, Search, Phone, DollarSign, 
-    BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap, 
+import {
+    Menu, X, LogOut, LayoutDashboard, Users, BookOpen, Layers, Calendar,
+    Video, FileText, CheckCircle, Target, Search, Phone, DollarSign,
+    BarChart3, UserCheck, TrendingUp, Settings, Shield, Globe, Zap,
     HeartPulse, Activity, MousePointer2, Briefcase, Smile, PenTool, Edit2, XCircle,
-    MessageSquare, ClipboardCheck, Microscope, UserPlus, Fingerprint, Terminal,
+    MessageSquare, ClipboardCheck, Microscope, UserPlus, Fingerprint, Terminal, Code,
     ChevronRight, Bell, BellRing, Trash2, Check, Send
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
@@ -94,6 +94,7 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
+        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     trainer: [
         { section: 'Main', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
@@ -101,6 +102,7 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
+        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     placement: [
         { section: 'Career', label: 'Student Readiness', href: '/placement', icon: <UserCheck size={18} /> },
@@ -115,11 +117,15 @@ const MENUS: Record<string, MenuItem[]> = {
         { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     student: [
-        { section: 'Learning', label: 'My Learning Hub', href: '/student', icon: <BookOpen size={18} /> },
-        { label: 'Exams', href: '/student/tests', icon: <CheckCircle size={18} /> },
-        { section: 'Career', label: 'Placements', href: '/student/placements', icon: <Briefcase size={18} /> },
-        { label: 'My Progress', href: '/student/progress', icon: <TrendingUp size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
+        { section: 'Overview', label: 'Student Dashboard', href: '/student', icon: <LayoutDashboard size={18} /> },
+        { section: 'Academic', label: 'Curriculum Hub', href: '/admin/academic', icon: <BookOpen size={18} /> },
+        { section: 'Communication', label: 'ByteChat Connect', href: '/admin/chat', icon: <MessageSquare size={18} /> },
+        { section: 'Reports', label: 'Analytics Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
+        { section: 'Utilities', label: 'Online Compiler', href: '/student/compiler', icon: <Code size={18} /> },
+        { section: 'Learning', label: 'Exams & Tests', href: '/student/tests', icon: <CheckCircle size={18} /> },
+        { section: 'Career', label: 'Placement Portal', href: '/student/placements', icon: <Briefcase size={18} /> },
+        { label: 'Growth Progress', href: '/student/progress', icon: <TrendingUp size={18} /> },
+        { label: 'Games Dashboard', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ]
 };
 
@@ -134,8 +140,8 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
     const [userName, setUserName] = useState('User');
     const [loggedUser, setLoggedUser] = useState<any>(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-    const [profileForm, setProfileForm] = useState({ 
-        fullName: '', email: '', password: '', 
+    const [profileForm, setProfileForm] = useState({
+        fullName: '', email: '', password: '',
         phoneNumber: '', branch: '', department: '', userStatus: '', profileImage: ''
     });
 
@@ -163,11 +169,12 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
             sidebar.addEventListener('scroll', handleScroll);
             return () => sidebar.removeEventListener('scroll', handleScroll);
         }
-    }, [pathname]); // Re-run on pathname change to ensure it's still there
+    }, [pathname]); 
 
-    const safeRole = (role || 'student').toLowerCase().replace(/-/g, '_').replace(/\s+/g, '_');
-    const menuItems = MENUS[safeRole] || MENUS.student || [];
-    const roleDisplay = (role || 'student').replace(/_/g, ' ').replace(/-/g, ' ').split(' ').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+    // Determine the menu items based on the LOGGED IN user's role, not the page's requested role
+    const activeUserRole = (loggedUser?.role || role || 'student').toLowerCase().replace(/-/g, '_').replace(/\s+/g, '_');
+    const menuItems = MENUS[activeUserRole] || MENUS.student || [];
+    const roleDisplay = (loggedUser?.role || role || 'student').replace(/_/g, ' ').replace(/-/g, ' ').split(' ').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -203,21 +210,21 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                         const result = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${userId}`);
                         if (result.ok && result.data) {
                             const data = result.data;
-                                    const apiRole = String(data.role || parsed.role || '').toUpperCase();
+                            const apiRole = String(data.role || parsed.role || '').toUpperCase();
                             const actualName = data.fullName || data.name || parsed.name || data.email || 'User';
 
                             const currentRoleStr = (expectedRole || '').toUpperCase();
                             const actualRoleStr = (apiRole || '').toUpperCase();
 
                             if (currentRoleStr !== actualRoleStr) {
-                                // Specific logic for Tutor/Trainer/Staff compatibility
-                                const tutorFamily = ['TUTOR', 'TRAINER', 'STAFF', 'HR', 'ADMIN', 'SUPER_ADMIN'];
-                                const isTutorCompat = tutorFamily.includes(currentRoleStr) && tutorFamily.includes(actualRoleStr);
+                                // Specific logic for Platform wide compatibility (Staff & Student)
+                                const authorizedFamily = ['TUTOR', 'TRAINER', 'STAFF', 'HR', 'ADMIN', 'SUPER_ADMIN', 'STUDENT'];
+                                const isFamilyCompat = authorizedFamily.includes(currentRoleStr) && authorizedFamily.includes(actualRoleStr);
                                 
-                                // Also allow TRAINER/TUTOR/STAFF to access common areas
-                                const isCommonAuthorized = (actualRoleStr === 'TRAINER' || actualRoleStr === 'TUTOR' || actualRoleStr === 'ADMIN' || actualRoleStr === 'SUPER_ADMIN');
+                                // Also allow common dashboard access
+                                const isCommonAuthorized = (actualRoleStr === 'TRAINER' || actualRoleStr === 'TUTOR' || actualRoleStr === 'ADMIN' || actualRoleStr === 'SUPER_ADMIN' || actualRoleStr === 'STUDENT');
 
-                                if (!isTutorCompat && !isCommonAuthorized) {
+                                if (!isFamilyCompat && !isCommonAuthorized) {
                                     if (expectedRole === 'SUPER_ADMIN') {
                                         router.push(apiRole === 'ADMIN' ? '/admin' : '/login');
                                     } else if (expectedRole === 'ADMIN') {
@@ -241,9 +248,9 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                 role: apiRole || parsed.role
                             };
                             localStorage.setItem('user', JSON.stringify(updatedUser));
-                            setProfileForm({ 
-                                fullName: actualName, 
-                                email: data.email || '', 
+                            setProfileForm({
+                                fullName: actualName,
+                                email: data.email || '',
                                 password: data.password || '',
                                 phoneNumber: data.phoneNumber || '',
                                 branch: data.branch || '',
@@ -283,7 +290,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
             const res = await fetch(`http://localhost:8080/api/academic/notifications?userId=${userId}&role=${expectedRole}`);
             if (res.ok) {
                 const data = await res.json();
-                
+
                 setNotifications(prev => {
                     const newUnreadCount = data.filter((n: any) => n.status === 'UNREAD').length;
                     const oldUnreadCount = prev.filter(n => n.status === 'UNREAD').length;
@@ -371,7 +378,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
 
             <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.brand}>
-                    <span>🔷</span> 
+                    <span>🔷</span>
                     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
                         <span style={{ fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--primary)' }}>Bytecode</span>
                         <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase' }}>{roleDisplay}</span>
@@ -380,7 +387,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                         <X size={20} />
                     </button>
                 </div>
-                
+
                 <div id="sidebar-scroll-container" className={styles.sidebarContent}>
                     <ul className={styles.menu}>
                         {mounted && menuItems.map((item, index) => {
@@ -391,10 +398,10 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                             return (
                                 <li key={uniqueKey} className={styles.menuItem}>
                                     {item.section && <div className={styles.menuSection}>{item.section}</div>}
-                                    
+
                                     {hasSubItems ? (
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <button 
+                                            <button
                                                 type="button"
                                                 onClick={(e) => {
                                                     e.preventDefault();
@@ -408,18 +415,18 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                                     <span style={{ opacity: 0.8 }}>{item.icon}</span>
                                                     {item.label}
                                                 </div>
-                                                <ChevronRight 
-                                                    size={14} 
-                                                    style={{ 
-                                                        transition: '0.3s', 
-                                                        transform: isSubmenuOpen ? 'rotate(90deg)' : 'rotate(0deg)' 
-                                                    }} 
+                                                <ChevronRight
+                                                    size={14}
+                                                    style={{
+                                                        transition: '0.3s',
+                                                        transform: isSubmenuOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+                                                    }}
                                                 />
                                             </button>
 
                                             <AnimatePresence>
                                                 {isSubmenuOpen && (
-                                                    <motion.ul 
+                                                    <motion.ul
                                                         initial={{ height: 0, opacity: 0 }}
                                                         animate={{ height: 'auto', opacity: 1 }}
                                                         exit={{ height: 0, opacity: 0 }}
@@ -431,9 +438,9 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                                             return sub.roles.includes(roleToMatch as any);
                                                         }).map((sub, i) => (
                                                             <li key={i} style={{ marginBottom: '5px' }}>
-                                                                <Link 
-                                                                    href={sub.href} 
-                                                                    className={`${styles.menuLink} ${isLinkActive(sub.href) ? styles.activeLink : ''}`} 
+                                                                <Link
+                                                                    href={sub.href}
+                                                                    className={`${styles.menuLink} ${isLinkActive(sub.href) ? styles.activeLink : ''}`}
                                                                     style={{ fontSize: '0.8rem', opacity: isLinkActive(sub.href) ? 1 : 0.7, padding: '8px 0', color: isLinkActive(sub.href) ? 'var(--primary)' : 'inherit' }}
                                                                     onClick={() => setIsSidebarOpen(false)}
                                                                 >
@@ -459,7 +466,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                 </li>
                             );
                         })}
-                        
+
                         <li className={styles.menuItem} style={{ marginTop: '2rem' }}>
                             <div className={styles.menuSection}>Account</div>
                             <button onClick={() => setIsProfileModalOpen(true)} className={styles.menuLink} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
@@ -483,8 +490,8 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                         </button>
                         <h2 className={styles.headerTitle}>{roleDisplay} Panel</h2>
                     </div>
-                    
-                    
+
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }}>
@@ -504,7 +511,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
 
                             <AnimatePresence>
                                 {isNotifOpen && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, y: 15, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 15, scale: 0.95 }}
@@ -562,7 +569,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                         </div>
                     </div>
                 </header>
-                
+
                 <div className={styles.content} style={noPadding ? { padding: 0, height: 'calc(100vh - 80px)', overflow: 'auto' } : {}}>
                     {children}
                 </div>
@@ -572,19 +579,19 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
             {isProfileModalOpen && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
                     <div className="glass-panel" style={{ width: '95%', maxWidth: '850px', padding: 0, borderRadius: '40px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        
+
                         {/* Top Accent Bar */}
                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: 'linear-gradient(90deg, var(--primary), var(--secondary))' }} />
-                        
+
                         <button onClick={() => setIsProfileModalOpen(false)} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px', borderRadius: '50%', cursor: 'pointer', display: 'flex', zIndex: 10, transition: 'all 0.3s ease' }}>
                             <X size={20} />
                         </button>
-                        
+
                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(250px, 30%) 1fr', minHeight: '500px' }}>
                             {/* Left Panel: Avatar & Brand Focus */}
                             <div style={{ background: 'rgba(0,0,0,0.4)', padding: '3rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ 
-                                    width: '160px', height: '160px', borderRadius: '50%', 
+                                <div style={{
+                                    width: '160px', height: '160px', borderRadius: '50%',
                                     border: '4px solid rgba(255,255,255,0.1)',
                                     boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.1)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -597,19 +604,19 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                         <span style={{ fontSize: '4rem', fontWeight: 900 }}>{userName.charAt(0).toUpperCase()}</span>
                                     )}
                                 </div>
-                                
+
                                 <h3 style={{ fontSize: '1.4rem', fontWeight: 900, textAlign: 'center', marginBottom: '0.5rem', background: 'linear-gradient(90deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{userName}</h3>
                                 <p style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '2.5rem' }}>{roleDisplay}</p>
-                                
+
                                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <input 
-                                        type="file" 
-                                        id="profileImageInput" 
-                                        accept="image/*" 
-                                        onChange={handleImageUpload} 
-                                        style={{ display: 'none' }} 
+                                    <input
+                                        type="file"
+                                        id="profileImageInput"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        style={{ display: 'none' }}
                                     />
-                                    <button 
+                                    <button
                                         onClick={() => document.getElementById('profileImageInput')?.click()}
                                         style={{ padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.3s ease' }}
                                     >
@@ -625,23 +632,23 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                 </h2>
 
                                 <form onSubmit={handleProfileSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                    
+
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>FULL NAME</label>
-                                            <input 
-                                                value={profileForm.fullName} 
-                                                onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} 
-                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }} 
-                                                required 
+                                            <input
+                                                value={profileForm.fullName}
+                                                onChange={e => setProfileForm({ ...profileForm, fullName: e.target.value })}
+                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }}
+                                                required
                                             />
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>EMAIL ADDRESS</label>
-                                            <input 
-                                                value={profileForm.email} 
-                                                onChange={e => setProfileForm({...profileForm, email: e.target.value})} 
-                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }} 
+                                            <input
+                                                value={profileForm.email}
+                                                onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
+                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }}
                                                 required type="email"
                                             />
                                         </div>
@@ -650,18 +657,18 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>PHONE NUMBER</label>
-                                            <input 
-                                                value={profileForm.phoneNumber} 
-                                                onChange={e => setProfileForm({...profileForm, phoneNumber: e.target.value})} 
-                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }} 
+                                            <input
+                                                value={profileForm.phoneNumber}
+                                                onChange={e => setProfileForm({ ...profileForm, phoneNumber: e.target.value })}
+                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }}
                                             />
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>UPDATE PASSWORD</label>
-                                            <input 
-                                                value={profileForm.password} 
-                                                onChange={e => setProfileForm({...profileForm, password: e.target.value})} 
-                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }} 
+                                            <input
+                                                value={profileForm.password}
+                                                onChange={e => setProfileForm({ ...profileForm, password: e.target.value })}
+                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }}
                                                 type="password" placeholder="Leave blank to keep same"
                                             />
                                         </div>
@@ -670,31 +677,31 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>BRANCH</label>
-                                            <input 
-                                                value={profileForm.branch} 
-                                                onChange={e => setProfileForm({...profileForm, branch: e.target.value})} 
-                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }} 
+                                            <input
+                                                value={profileForm.branch}
+                                                onChange={e => setProfileForm({ ...profileForm, branch: e.target.value })}
+                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }}
                                             />
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)' }}>DEPARTMENT</label>
-                                            <input 
-                                                value={profileForm.department} 
-                                                onChange={e => setProfileForm({...profileForm, department: e.target.value})} 
-                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }} 
+                                            <input
+                                                value={profileForm.department}
+                                                onChange={e => setProfileForm({ ...profileForm, department: e.target.value })}
+                                                style={{ padding: '14px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.3s ease' }}
                                             />
                                         </div>
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: profileForm.userStatus === 'Inactive' ? '#ef4444' : '#10b981', boxShadow: profileForm.userStatus === 'Inactive' ? '0 0 10px rgba(239, 68, 68, 0.5)' : '0 0 10px rgba(16, 185, 129, 0.5)' }} />
-                                             <input 
-                                                 value={profileForm.userStatus} 
-                                                 onChange={e => setProfileForm({...profileForm, userStatus: e.target.value})} 
-                                                 style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', outline: 'none' }}
-                                                 placeholder="Status (e.g. Active)"
-                                             />
+                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: profileForm.userStatus === 'Inactive' ? '#ef4444' : '#10b981', boxShadow: profileForm.userStatus === 'Inactive' ? '0 0 10px rgba(239, 68, 68, 0.5)' : '0 0 10px rgba(16, 185, 129, 0.5)' }} />
+                                            <input
+                                                value={profileForm.userStatus}
+                                                onChange={e => setProfileForm({ ...profileForm, userStatus: e.target.value })}
+                                                style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', outline: 'none' }}
+                                                placeholder="Status (e.g. Active)"
+                                            />
                                         </div>
                                         <button type="submit" className="btn-quantum" style={{ padding: '14px 30px', borderRadius: '100px', fontWeight: 900, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 25px rgba(139, 92, 246, 0.3)' }}>
                                             <CheckCircle size={18} /> SAVE CHANGES
