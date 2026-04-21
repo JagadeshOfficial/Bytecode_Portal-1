@@ -309,7 +309,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
         }
     };
 
-    const isStudent = role === 'student';
+    const isStudent = role?.toLowerCase() === 'student';
 
     return (
         <div style={{ padding: '0 0.5rem' }}>

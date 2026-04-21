@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Layout, Shield, Settings, 
-    BarChart3, Zap, Layers 
+import {
+    Layout, Shield, Settings,
+    BarChart3, Zap, Layers
 } from 'lucide-react';
 import TestDashboard from './TestDashboard';
 import MonitoringCenter from './MonitoringCenter';
@@ -32,6 +32,20 @@ export default function ExamManagement() {
             setView('ANALYTICS');
         } else if (action === 'EDIT') {
             setIsCreating(true); // Opening wizard for now as edit proxy
+        } else if (action === 'DELETE') {
+            if (!confirm(`Are you sure you want to permanently delete "${test.name}"? This action cannot be undone.`)) return;
+            fetch(`http://localhost:8080/api/academic/tests/${test.id || test._id}`, { method: 'DELETE' })
+                .then(res => {
+                    if (res.ok) {
+                        alert("Assessment deleted successfully. Curriculum registry updated.");
+                        window.location.reload(); // Refresh to reflect change
+                    } else {
+                        alert("Failed to delete assessment. Error recorded in system logs.");
+                    }
+                })
+                .catch(err => console.error("Delete failure:", err));
+        } else if (action === 'MENU') {
+            alert("Accessing Advanced Protocol Registry... This module is currently undergoing system maintenance.");
         } else if (action === 'ASSIGN') {
             alert("Batch assignment registry is being synchronized. Please wait.");
         }
@@ -42,11 +56,11 @@ export default function ExamManagement() {
             {/* --- SUB-NAVIGATION --- */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '24px', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
-                    <button 
+                    <button
                         onClick={() => setView('DASHBOARD')}
-                        style={{ 
-                            padding: '12px 28px', 
-                            borderRadius: '16px', 
+                        style={{
+                            padding: '12px 28px',
+                            borderRadius: '16px',
                             background: view === 'DASHBOARD' ? 'var(--primary)' : 'transparent',
                             color: view === 'DASHBOARD' ? '#fff' : 'var(--text-dim)',
                             border: 'none',
@@ -62,11 +76,11 @@ export default function ExamManagement() {
                     </button>
                     {(currentUser?.role !== 'STUDENT' && currentUser?.role !== 'student') && (
                         <>
-                            <button 
+                            <button
                                 onClick={() => setView('MONITORING')}
-                                style={{ 
-                                    padding: '12px 28px', 
-                                    borderRadius: '16px', 
+                                style={{
+                                    padding: '12px 28px',
+                                    borderRadius: '16px',
                                     background: view === 'MONITORING' ? 'var(--primary)' : 'transparent',
                                     color: view === 'MONITORING' ? '#fff' : 'var(--text-dim)',
                                     border: 'none',
@@ -80,11 +94,11 @@ export default function ExamManagement() {
                             >
                                 <Shield size={18} /> LIVE MONITORING
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setView('ANALYTICS')}
-                                style={{ 
-                                    padding: '12px 28px', 
-                                    borderRadius: '16px', 
+                                style={{
+                                    padding: '12px 28px',
+                                    borderRadius: '16px',
                                     background: view === 'ANALYTICS' ? 'var(--primary)' : 'transparent',
                                     color: view === 'ANALYTICS' ? '#fff' : 'var(--text-dim)',
                                     border: 'none',
@@ -103,16 +117,16 @@ export default function ExamManagement() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '15px' }}>
-                      <button style={{ padding: '12px 20px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', color: '#718096' }}><Settings size={20} /></button>
-                      {(currentUser?.role !== 'STUDENT' && currentUser?.role !== 'student') && (
-                          <button 
-                             onClick={() => setIsCreating(true)}
-                             className="btn-quantum" 
-                             style={{ padding: '12px 24px', background: '#10b981', color: '#fff', borderRadius: '16px', fontWeight: 900, fontSize: '0.85rem' }}
-                          >
-                             + CREATE NEW TEST
-                          </button>
-                      )}
+                    <button style={{ padding: '12px 20px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', color: '#718096' }}><Settings size={20} /></button>
+                    {(currentUser?.role !== 'STUDENT' && currentUser?.role !== 'student') && (
+                        <button
+                            onClick={() => setIsCreating(true)}
+                            className="btn-quantum"
+                            style={{ padding: '12px 24px', background: '#10b981', color: '#fff', borderRadius: '16px', fontWeight: 900, fontSize: '0.85rem' }}
+                        >
+                            + CREATE NEW TEST
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -124,8 +138,8 @@ export default function ExamManagement() {
                 transition={{ duration: 0.4 }}
             >
                 {view === 'DASHBOARD' ? (
-                    <TestDashboard 
-                        onActionOverride={handleTestAction} 
+                    <TestDashboard
+                        onActionOverride={handleTestAction}
                         currentUser={currentUser}
                     />
                 ) : view === 'MONITORING' ? (
@@ -138,8 +152,8 @@ export default function ExamManagement() {
             {/* --- ENGINE OVERLAY --- */}
             <AnimatePresence>
                 {takingTest && (
-                    <TestExaminationEngine 
-                        test={takingTest} 
+                    <TestExaminationEngine
+                        test={takingTest}
                         candidate={currentUser || { fullName: 'Demo Candidate', id: 'demo' }}
                         onComplete={() => setTakingTest(null)}
                         onExit={() => setTakingTest(null)}

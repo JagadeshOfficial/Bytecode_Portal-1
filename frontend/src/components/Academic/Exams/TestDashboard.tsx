@@ -138,11 +138,10 @@ const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: 
 
             {!isStudent ? (
                 <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '5px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '5px' }}>
                         <button onClick={() => onAction('EDIT', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }} title="Edit"><Edit2 size={16} /></button>
-                        <button onClick={() => onAction('ANALYTICS', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#6366f1', cursor: 'pointer' }} title="Analytics"><BarChart3 size={16} /></button>
-                        <button onClick={() => onAction('PREVIEW', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#10b981', cursor: 'pointer' }} title="Preview"><Eye size={16} /></button>
-                        <button onClick={() => onAction('MENU', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }}><MoreVertical size={16} /></button>
+                        <button onClick={() => onAction('DELETE', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #fff1f2', background: '#fff', color: '#ef4444', cursor: 'pointer' }} title="Delete"><Trash2 size={16} /></button>
+                        <button onClick={() => onAction('MENU', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }} title="More Options"><MoreVertical size={16} /></button>
                     </div>
 
                     <button 

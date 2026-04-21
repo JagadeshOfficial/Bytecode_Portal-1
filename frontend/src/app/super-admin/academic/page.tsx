@@ -1472,7 +1472,13 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                         { id: 'DRIVE', label: 'BATCH DRIVE', icon: <Folder size={16} /> },
                                         { id: 'LIVE', label: 'LIVE CLASSES', icon: <Video size={16} /> },
                                         { id: 'ASSIGNMENTS', label: 'ASSIGNMENTS', icon: <FileText size={16} /> },
-                                        { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> }
+                                        { id: 'TESTS', label: 'TESTS', icon: <Shield size={16} /> },
+                                        { id: 'INTERVIEWS', label: 'INTERVIEWS', icon: <Bot size={16} /> },
+                                        ...(isFullAdmin ? [
+                                             { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> },
+                                             { id: 'LIVE_MONITOR', label: 'MONITOR', icon: <Monitor size={16} /> },
+                                             { id: 'AI_ROOM', label: 'AI ROOM', icon: <Terminal size={16} /> }
+                                        ] : [])
                                     ].map((tab) => (
                                         <button
                                             key={tab.id}

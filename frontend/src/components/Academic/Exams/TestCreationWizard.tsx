@@ -22,10 +22,17 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
         { id: 8, label: 'Publish', icon: <Check size={18} /> }
     ];
 
+    const phases = [
+        { name: 'PHASE 1: CONFIGURATION', steps: [1, 2] },
+        { name: 'PHASE 2: INTELLIGENCE', steps: [3, 4] },
+        { name: 'PHASE 3: GOVERNANCE', steps: [5, 6, 7, 8] }
+    ];
+
     const [testData, setTestData] = useState({
         title: '',
         name: '',
         description: '',
+        difficulty: 'INTERMEDIATE',
         tags: [] as string[],
         courseId: '',
         courseName: '',
@@ -41,8 +48,9 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
         },
         evaluation: {
             negativeMarking: false,
-            timePerQuestion: 0,
-            passPercentage: 60
+            markingValue: 25,
+            passPercentage: 60,
+            allowReview: true
         },
         assignment: {
             mode: 'ALL', 
@@ -68,7 +76,6 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                 if (bRes.ok) {
                     const bData = await bRes.json();
                     setBatches(bData);
-                    // Derive unique courses from batches for selection
                     const uniqueCourses = Array.from(new Set(bData.map((b: any) => b.courseName))).map(name => {
                         const batch = bData.find((b: any) => b.courseName === name);
                         return { id: batch.courseId, name: batch.courseName };
@@ -92,11 +99,12 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
 
     const inputStyle = {
         width: '100%',
-        padding: '16px 20px',
-        borderRadius: '16px',
+        padding: '18px 24px',
+        borderRadius: '20px',
         border: '1px solid #e2e8f0',
         background: '#f8fafc',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
+        fontWeight: 800,
         outline: 'none',
         transition: 'all 0.3s'
     };
@@ -110,7 +118,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                 body: JSON.stringify(finalData)
             });
             if (res.ok) {
-                alert("Test Published Successfully!");
+                alert("Assessment Distributed & Published Successfully!");
                 onClose();
             }
         } catch (err) {
@@ -119,202 +127,251 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
     };
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(20px)' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)' }}>
             <motion.div 
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
                 style={{ 
-                    width: '95%', 
-                    maxWidth: '1000px', 
-                    height: '90vh',
-                    maxHeight: '850px',
+                    width: '98%', 
+                    maxWidth: '1150px', 
+                    height: '92vh',
+                    maxHeight: '900px',
                     background: '#fff', 
-                    borderRadius: '45px', 
+                    borderRadius: '40px', 
+                    boxShadow: '0 40px 100px rgba(0,0,0,0.3)',
                     overflow: 'hidden',
                     display: 'grid',
-                    gridTemplateColumns: '280px 1fr'
+                    gridTemplateColumns: '320px 1fr'
                 }}
             >
-                {/* --- SIDEBAR STEPS --- */}
-                <div style={{ background: '#f8fafc', padding: '3rem 2rem', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                {/* --- QUANTUM SIDEBAR --- */}
+                <div style={{ background: '#fdfdfe', padding: '3.5rem 2.5rem', borderRight: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                     <div>
-                         <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#1a202c', marginBottom: '8px' }}>Create New Test</h3>
-                         <p style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700 }}>EXAM MANAGEMENT TOOL</p>
+                         <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px' }}>Quantum Portal</h3>
+                         <p style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800, letterSpacing: '1px' }}>ASSESSMENT ARCHITECT</p>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        {steps.map(s => (
-                            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '15px', color: step === s.id ? 'var(--primary)' : (step > s.id ? '#10b981' : '#a0aec0'), transition: 'all 0.3s' }}>
-                                <div style={{ 
-                                    width: 35, 
-                                    height: 35, 
-                                    borderRadius: '10px', 
-                                    background: step === s.id ? 'var(--primary)10' : (step > s.id ? '#10b98110' : '#fff'), 
-                                    border: `1px solid ${step === s.id ? 'var(--primary)' : (step > s.id ? '#10b981' : '#e2e8f0')}`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    {step > s.id ? <Check size={18} /> : s.icon}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '35px' }}>
+                        {phases.map((ph, pi) => (
+                            <div key={pi} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#94a3b8', letterSpacing: '2px' }}>{ph.name}</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {steps.filter(s => ph.steps.includes(s.id)).map(s => (
+                                        <div 
+                                            key={s.id} 
+                                            style={{ 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                gap: '12px', 
+                                                color: step === s.id ? 'var(--primary)' : (step > s.id ? '#10b981' : '#94a3b8'), 
+                                                opacity: ph.steps.includes(step) || step > s.id ? 1 : 0.6,
+                                                transition: 'all 0.4s' 
+                                            }}
+                                        >
+                                            <div style={{ 
+                                                width: 32, 
+                                                height: 32, 
+                                                borderRadius: '12px', 
+                                                background: step === s.id ? 'var(--primary)15' : (step > s.id ? '#10b98115' : '#f1f5f9'), 
+                                                border: `2.5px solid ${step === s.id ? 'var(--primary)' : (step > s.id ? '#10b981' : '#e2e8f0')}`,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '0.9rem'
+                                            }}>
+                                                {step > s.id ? <Check size={16} strokeWidth={3} /> : s.icon}
+                                            </div>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 900, fontFamily: 'Outfit, sans-serif' }}>{s.label}</span>
+                                        </div>
+                                    ))}
                                 </div>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 900 }}>{s.label}</span>
                             </div>
                         ))}
                     </div>
 
-                    <div style={{ marginTop: 'auto', padding: '1.5rem', background: '#fff', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                         <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#a0aec0', marginBottom: '10px' }}>SUGGESTIONS</div>
-                         <p style={{ fontSize: '0.75rem', color: '#4a5568', lineHeight: 1.5, fontWeight: 700 }}>Enable "Lock Screen" to prevent students from switching tabs during the test.</p>
+                    <div style={{ marginTop: 'auto', padding: '1.5rem', background: 'linear-gradient(135deg, #f8fafc, #fff)', borderRadius: '24px', border: '1px dotted #cbd5e1' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', marginBottom: '10px' }}>
+                             <Info size={16} />
+                             <span style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '1px' }}>SYSTEM OPTIMIZATION</span>
+                         </div>
+                         <p style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.6, fontWeight: 700 }}>Assessments are auto-synchronized across the curriculum cloud upon distribution.</p>
                     </div>
                 </div>
 
-                {/* --- MAIN CONTENT --- */}
-                <div style={{ display: 'flex', flexDirection: 'column', padding: '3.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                {/* --- MAIN SEQUENTIAL TERMINAL --- */}
+                <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr auto', padding: '2.5rem 4.5rem 2rem 4.5rem', height: '100%', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                          <div>
-                              <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '2px' }}>Step {step} of 8</span>
-                              <h2 style={{ fontSize: '2rem', fontWeight: 900, marginTop: '5px' }}>{steps[step-1].label}</h2>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                  <div style={{ background: '#f1f5f9', padding: '10px 18px', borderRadius: '14px', fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>FLOW STATE: {((step/8)*100).toFixed(0)}%</div>
+                                  <div style={{ width: '200px', height: '6px', background: '#f1f5f9', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
+                                      <motion.div initial={{ width: 0 }} animate={{ width: `${(step/8)*100}%` }} style={{ position: 'absolute', inset: 0, background: 'var(--primary)', borderRadius: '3px' }} />
+                                  </div>
+                              </div>
+                              <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '1rem', color: '#0f172a', letterSpacing: '-1px' }}>{steps[step-1].label}</h2>
                          </div>
-                         <button onClick={onClose} style={{ border: 'none', background: '#f8fafc', padding: '12px', borderRadius: '50%', cursor: 'pointer' }}><X size={24} /></button>
+                         <button onClick={onClose} style={{ border: 'none', background: '#f8fafc', padding: '14px', borderRadius: '18px', cursor: 'pointer', color: '#64748b', transition: 'all 0.3s' }} className="hover-scale"><X size={26} /></button>
                     </div>
 
-                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
+                    <div style={{ overflowY: 'auto', paddingRight: '15px', minHeight: 0 }} className="custom-scroll">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
-                                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                             <label style={{ fontSize: '0.8rem', fontWeight: 900 }}>TEST NAME</label>
-                                             <input style={inputStyle} placeholder="e.g. React Mastery" value={testData.title} onChange={(e) => setTestData({...testData, title: e.target.value})} />
+                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '30px' }}>
+                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>ASSESSMENT TITLE</label>
+                                             <input style={inputStyle} placeholder="e.g., Enterprise Architecture Masterclass" value={testData.title} onChange={(e) => setTestData({...testData, title: e.target.value})} />
                                          </div>
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                             <label style={{ fontSize: '0.8rem', fontWeight: 900 }}>COURSE / CATEGORY</label>
+                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>CURRICULUM CATEGORY</label>
                                              <select style={inputStyle} value={testData.courseId} onChange={(e) => setTestData({...testData, courseId: e.target.value, courseName: e.target.options[e.target.selectedIndex].text})}>
-                                                 <option value="">Select Course...</option>
+                                                 <option value="">Map to Course...</option>
                                                  {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                              </select>
                                          </div>
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <label style={{ fontSize: '0.8rem', fontWeight: 900 }}>DESCRIPTION</label>
-                                        <textarea style={{ ...inputStyle, resize: 'none' }} rows={3} placeholder="Brief test overview..." value={testData.description} onChange={(e) => setTestData({...testData, description: e.target.value})} />
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                             <label style={{ fontSize: '0.8rem', fontWeight: 900 }}>SKILLS (TAGS)</label>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>DIFFICULTY CALIBRATION</label>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(d => (
+                                                    <button 
+                                                        key={d} 
+                                                        onClick={() => setTestData({...testData, difficulty: d})}
+                                                        style={{ 
+                                                            flex: 1, padding: '14px', borderRadius: '15px', 
+                                                            border: `2px solid ${testData.difficulty === d ? 'var(--primary)' : '#f1f5f9'}`,
+                                                            background: testData.difficulty === d ? 'var(--primary)10' : '#fff',
+                                                            color: testData.difficulty === d ? 'var(--primary)' : '#94a3b8',
+                                                            fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {d}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>SKILL MAPPING (TAGS)</label>
                                              <input 
                                                 style={inputStyle} 
-                                                placeholder="e.g. React, JS" 
+                                                placeholder="React, JS, Redux" 
                                                 value={testData.tags.join(', ')} 
                                                 onChange={(e) => setTestData({...testData, tags: e.target.value.split(',').map(s => s.trim()).filter(s => s !== '')})}
                                              />
                                          </div>
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                             <label style={{ fontSize: '0.8rem', fontWeight: 900 }}>DEFAULT BATCH (OPTIONAL)</label>
-                                             <select style={inputStyle} value={testData.batchId} onChange={(e) => setTestData({...testData, batchId: e.target.value, batchName: e.target.options[e.target.selectedIndex].text})}>
-                                                 <option value="">No specific batch...</option>
-                                                 {batches.filter(b => b.courseName === testData.courseName).map(b => <option key={b.id} value={b.id}>{b.batchName || b.batchCode}</option>)}
-                                             </select>
-                                         </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>DESCRIPTION & OVERVIEW</label>
+                                        <textarea style={{ ...inputStyle, height: '120px', resize: 'none' }} placeholder="Provide a detailed overview for the candidates..." value={testData.description} onChange={(e) => setTestData({...testData, description: e.target.value})} />
                                     </div>
                                 </motion.div>
                             )}
 
                             {step === 2 && (
-                                <motion.div initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <motion.div initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                                     {[
-                                        { type: 'MCQ', icon: <FileText size={32} />, label: 'Multiple Choice', desc: 'Questions with multiple options.' },
-                                        { type: 'CODING', icon: <Code size={32} />, label: 'Coding Challenge', desc: 'Write and run code in the browser.' },
-                                        { type: 'VIDEO', icon: <Video size={32} />, label: 'Video Question', desc: 'Record a video response.' },
-                                        { type: 'HYBRID', icon: <Layers size={32} />, label: 'Mixed Test', desc: 'A combination of all types.' }
+                                        { type: 'MCQ', icon: <FileText size={36} />, label: 'Standard MCQ', desc: 'Single or multi-correct options.' },
+                                        { type: 'CODING', icon: <Code size={36} />, label: 'Dev Protocol', desc: 'Secure browser-based IDE challenges.' },
+                                        { type: 'VIDEO', icon: <Video size={36} />, label: 'Audio/Visual', desc: 'Candidate recorded presentations.' },
+                                        { type: 'HYBRID', icon: <Layers size={36} />, label: 'Quantum Hybrid', desc: 'Proprietary multi-module evaluation.' }
                                     ].map((t, i) => (
-                                        <div key={i} onClick={() => setTestData({...testData, type: t.type})} style={{ padding: '2rem', border: `2px solid ${testData.type === t.type ? 'var(--primary)' : '#e2e8f0'}`, borderRadius: '32px', cursor: 'pointer', background: testData.type === t.type ? 'var(--primary)05' : '#fff', transition: 'all 0.3s' }}>
-                                            <div style={{ color: testData.type === t.type ? 'var(--primary)' : '#cbd5e0', marginBottom: '15px' }}>{t.icon}</div>
-                                            <div style={{ fontWeight: 900, color: '#1a202c', fontSize: '1.1rem' }}>{t.label}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#718096', fontWeight: 700 }}>{t.desc}</div>
+                                        <div key={i} onClick={() => setTestData({...testData, type: t.type})} style={{ padding: '2.5rem', border: `3px solid ${testData.type === t.type ? 'var(--primary)' : '#f1f5f9'}`, borderRadius: '35px', cursor: 'pointer', background: testData.type === t.type ? 'var(--primary)05' : '#fff', position: 'relative' }}>
+                                            {testData.type === t.type && (
+                                                <div style={{ position: 'absolute', top: 20, right: 20, width: 24, height: 24, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Check size={14} strokeWidth={4} />
+                                                </div>
+                                            )}
+                                            <div style={{ color: testData.type === t.type ? 'var(--primary)' : '#e2e8f0', marginBottom: '20px' }}>{t.icon}</div>
+                                            <div style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.2rem', marginBottom: '6px' }}>{t.label}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{t.desc}</div>
                                         </div>
                                     ))}
                                 </motion.div>
                             )}
 
                             {step === 3 && (
-                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                    <div style={{ background: 'linear-gradient(135deg, #6366f110, #a855f710)', padding: '2.5rem', borderRadius: '40px', border: '1px solid #6366f120' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1.5rem' }}>
-                                            <div style={{ width: 45, height: 45, borderRadius: '15px', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Sparkles size={24} />
+                                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                                    <div style={{ background: 'linear-gradient(135deg, #0ea5e9, #6366f1)', padding: '4rem', borderRadius: '45px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
+                                        <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
+                                        
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '2rem' }}>
+                                            <div style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Sparkles size={32} />
                                             </div>
                                             <div>
-                                                <h4 style={{ fontWeight: 900, fontSize: '1.2rem' }}>AI Question Assistant</h4>
-                                                <p style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700 }}>Enter your course concepts separated by commas.</p>
+                                                <h4 style={{ fontWeight: 900, fontSize: '1.5rem' }}>Gemini Pro Assistant</h4>
+                                                <p style={{ fontSize: '0.9rem', opacity: 0.8, fontWeight: 700 }}>Intelligent curriculum-aware question fabrication.</p>
                                             </div>
                                         </div>
 
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px', marginBottom: '10px', display: 'block' }}>GENERATION PROMPT</label>
                                         <textarea 
-                                            style={{ ...inputStyle, height: '120px', border: '2px solid #6366f130', background: '#fff' }} 
-                                            placeholder="e.g. React Hooks, Redux Middleware, Virtual DOM, Components Architecture"
+                                            style={{ width: '100%', padding: '24px', borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,1)', color: '#0f172a', fontSize: '1rem', fontWeight: 800, height: '150px', outline: 'none' }} 
+                                            placeholder="Enter core concepts (e.g., React Lifecycle, Props Drilling, State Management)..."
                                             value={aiPrompt}
                                             onChange={(e) => setAiPrompt(e.target.value)}
                                         />
 
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
                                             <button 
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     setIsGenerating(true);
-                                                    setTimeout(() => {
-                                                        const concepts = aiPrompt.split(',').map(c => c.trim());
-                                                        const newQuestions = concepts.map(c => ({
-                                                            id: Math.random().toString(),
-                                                            concept: c.toUpperCase(),
-                                                            text: `AI Generated: Describe the core principles and implementation of ${c} in modern development.`,
-                                                            options: ['Option A', 'Option B', 'Option C', 'Option D'],
-                                                            correctIndex: 0
-                                                        }));
-                                                        setTestData({...testData, questions: [...testData.questions, ...newQuestions]});
+                                                    try {
+                                                        const res = await fetch('http://localhost:8080/api/academic/tests/ai-generate', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ prompt: aiPrompt, courseName: testData.courseName })
+                                                        });
+                                                        if (res.ok) {
+                                                            const newQuestions = await res.json();
+                                                            setTestData({...testData, questions: [...testData.questions, ...newQuestions]});
+                                                            setStep(4);
+                                                        }
+                                                    } catch (e) {
+                                                        console.error(e);
+                                                    } finally {
                                                         setIsGenerating(false);
-                                                        setStep(4);
-                                                    }, 1500);
+                                                    }
                                                 }}
                                                 disabled={!aiPrompt || isGenerating}
-                                                style={{ padding: '14px 30px', borderRadius: '15px', background: 'var(--primary)', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', opacity: isGenerating ? 0.7 : 1 }}
+                                                style={{ padding: '16px 40px', borderRadius: '20px', background: '#fff', color: 'var(--primary)', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
                                             >
-                                                {isGenerating ? 'GENIUSING...' : 'GENERATE QUESTIONS'} <ChevronRight size={18} />
+                                                {isGenerating ? 'ANALYZING CURRICULUM...' : 'FABRICATE QUESTIONS'} <ChevronRight size={22} />
                                             </button>
                                         </div>
-                                    </div>
-                                    
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '1.5rem', background: '#f8fafc', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                                        <div style={{ padding: '10px', background: '#fff', borderRadius: '12px' }}><Info size={20} color="var(--primary)" /></div>
-                                        <p style={{ fontSize: '0.8rem', color: '#4a5568', fontWeight: 700, lineHeight: 1.4 }}>The AI will analyze the concepts provided and create MCQ or descriptive questions based on the course: <span style={{ fontWeight: 900, color: 'var(--primary)' }}>{testData.courseName || 'General'}</span></p>
                                     </div>
                                 </motion.div>
                             )}
 
                             {step === 4 && (
-                                <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                         <h4 style={{ fontWeight: 900, color: '#1a202c' }}>Review & Edit Questions</h4>
-                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                             <button style={{ padding: '10px 18px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.75rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => setTestData({...testData, questions: [...testData.questions, { id: Date.now().toString(), text: 'New Question', concept: 'GENERAL' }]})}><Plus size={16} /> ADD MANUAL</button>
-                                         </div>
+                                         <h4 style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.4rem' }}>Question Review Pipeline</h4>
+                                         <button className="btn-quantum" style={{ padding: '12px 24px', background: 'var(--primary)', color: '#fff', borderRadius: '15px', fontWeight: 900 }} onClick={() => setTestData({...testData, questions: [...testData.questions, { id: Math.random().toString(36).substr(2,8), text: 'New Assessment Item', concept: 'GENERAL', options: ['A', 'B', 'C', 'D'], correctIndex: 0 }]})}><Plus size={18} /> MANUAL ENTRY</button>
                                     </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                         {testData.questions.length === 0 ? (
-                                            <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '32px', border: '2px dashed #e2e8f0' }}>
-                                                <Layers size={48} color="#cbd5e0" style={{ marginBottom: '15px' }} />
-                                                <h5 style={{ fontWeight: 900 }}>Empty Question Bank</h5>
-                                                <p style={{ fontSize: '0.8rem', color: '#718096' }}>Generate with AI or add manually above.</p>
+                                            <div style={{ padding: '4rem', textAlign: 'center', background: '#f8fafc', borderRadius: '40px', border: '3px dashed #e2e8f0' }}>
+                                                <Layers size={64} color="#cbd5e1" style={{ marginBottom: '20px' }} />
+                                                <h5 style={{ fontWeight: 900, fontSize: '1.2rem' }}>Question Bank Empty</h5>
+                                                <p style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 700 }}>Initialize fabrication via AI Assistant or add manually.</p>
                                             </div>
                                         ) : (
                                             testData.questions.map((q, i) => (
-                                                <div key={q.id} style={{ border: '1px solid #e2e8f0', borderRadius: '28px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#fff' }}>
+                                                <motion.div key={q.id} style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: '35px', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', background: 'var(--primary)10', padding: '6px 12px', borderRadius: '10px' }}>{q.concept}</span>
-                                                        <button onClick={() => setTestData({...testData, questions: testData.questions.filter(item => item.id !== q.id)})} style={{ background: 'transparent', border: 'none', color: '#ef4444' }}><Trash2 size={16} /></button>
+                                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                                            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', background: 'var(--primary)08', padding: '8px 16px', borderRadius: '12px', border: '1px solid var(--primary)15' }}>{q.concept}</span>
+                                                            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', background: '#f1f5f9', padding: '8px 16px', borderRadius: '12px' }}>{q.difficulty || 'GENERAL'}</span>
+                                                        </div>
+                                                        <button onClick={() => setTestData({...testData, questions: testData.questions.filter(item => item.id !== q.id)})} style={{ background: 'transparent', border: 'none', color: '#ef4444', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} className="hover-scale"><Trash2 size={20} /></button>
                                                     </div>
                                                     <input 
-                                                        style={{ ...inputStyle, border: 'none', background: 'transparent', padding: 0, fontSize: '1rem', fontWeight: 800 }} 
+                                                        style={{ ...inputStyle, border: 'none', background: '#f8fafc', padding: '20px', fontSize: '1.1rem', fontWeight: 900 }} 
                                                         value={q.text}
                                                         onChange={(e) => {
                                                             const newQs = [...testData.questions];
@@ -322,7 +379,15 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                             setTestData({...testData, questions: newQs});
                                                         }}
                                                     />
-                                                </div>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                                                        {q.options?.map((opt: string, oi: number) => (
+                                                            <div key={oi} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: oi === q.correctIndex ? '#10b98105' : '#fff', border: `1.5px solid ${oi === q.correctIndex ? '#10b981' : '#f1f5f9'}`, padding: '15px 20px', borderRadius: '18px' }}>
+                                                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: oi === q.correctIndex ? '#10b981' : '#f1f5f9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>{oi === q.correctIndex ? <Check size={14} /> : String.fromCharCode(65 + oi)}</div>
+                                                                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: oi === q.correctIndex ? '#059669' : '#475569' }}>{opt}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
                                             ))
                                         )}
                                     </div>
@@ -330,68 +395,68 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             )}
 
                             {step === 5 && (
-                                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                      {[
-                                         { key: 'screenLock', label: 'Lock Screen During Test', desc: 'Prevents students from leaving the test window.' },
-                                         { key: 'faceDetection', label: 'Camera Monitoring', desc: 'Checks if the student is present at the desk.' },
-                                         { key: 'tabTracking', label: 'Tab Activity Tracking', desc: 'Logs if the student switches browser tabs.' },
-                                         { key: 'noiseDetection', label: 'Audio Monitoring', desc: 'Detects talking or suspicious background noise.' }
+                                         { key: 'screenLock', label: 'Quantum Screen Lock', desc: 'Prevents navigation exits via proprietary OS hook simulation.' },
+                                         { key: 'faceDetection', label: 'Visual Biometrics', desc: 'Continuous facial recognition verification during assessment.' },
+                                         { key: 'tabTracking', label: 'Intelligent Tab Audit', desc: 'Analyzes focus shifts and tab switching with detailed logging.' },
+                                         { key: 'noiseDetection', label: 'Audio Signal Analysis', desc: 'Filters frequency for human speech detection in noisy environments.' }
                                      ].map((p, i) => (
-                                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '1.5rem', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                                             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                                                 <div style={{ padding: '10px', background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
-                                                     <Shield size={20} color="var(--primary)" />
+                                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe', padding: '2rem', borderRadius: '28px', border: '1px solid #f1f5f9', transition: 'all 0.3s' }} className="hover-lift">
+                                             <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
+                                                 <div style={{ padding: '14px', background: 'var(--primary)05', borderRadius: '18px', border: '1px solid var(--primary)15' }}>
+                                                     <Shield size={24} color="var(--primary)" />
                                                  </div>
                                                  <div>
-                                                     <div style={{ fontWeight: 900, color: '#1a202c' }}>{p.label}</div>
-                                                     <div style={{ fontSize: '0.75rem', color: '#718096', fontWeight: 700 }}>{p.desc}</div>
+                                                     <div style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>{p.label}</div>
+                                                     <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>{p.desc}</div>
                                                  </div>
                                              </div>
-                                             <input type="checkbox" style={{ width: 24, height: 24, cursor: 'pointer' }} defaultChecked={testData.proctoring[p.key as keyof typeof testData.proctoring]} />
+                                             <div className="toggle-quantum" onClick={() => setTestData({...testData, proctoring: {...testData.proctoring, [p.key]: !testData.proctoring[p.key as keyof typeof testData.proctoring]}})} style={{ width: 60, height: 32, background: testData.proctoring[p.key as keyof typeof testData.proctoring] ? 'var(--primary)' : '#e2e8f0', borderRadius: '16px', position: 'relative', cursor: 'pointer', transition: 'all 0.4s' }}>
+                                                 <div style={{ position: 'absolute', top: 4, left: testData.proctoring[p.key as keyof typeof testData.proctoring] ? 32 : 4, width: 24, height: 24, background: '#fff', borderRadius: '50%', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: 'all 0.4s' }} />
+                                             </div>
                                          </div>
                                      ))}
                                 </motion.div>
                             )}
 
                             {step === 6 && (
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                    <div style={{ padding: '2rem', background: 'linear-gradient(to right, #f8fafc, #fff)', borderRadius: '32px', border: '1px solid #e2e8f0' }}>
-                                         <h4 style={{ fontWeight: 900, marginBottom: '1.5rem' }}>Scoring Rules</h4>
-                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                 <label style={{ fontSize: '0.75rem', fontWeight: 900 }}>PASSING MARK (%)</label>
-                                                 <input type="number" defaultValue={60} style={inputStyle} />
+                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                                    <div style={{ padding: '3rem', background: '#f8fafc', borderRadius: '40px', border: '1px solid #e2e8f0' }}>
+                                         <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '1.4rem' }}>Evaluation Logic</h4>
+                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px' }}>
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                 <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>PASS THRESHOLD (%)</label>
+                                                 <input type="number" style={inputStyle} value={testData.evaluation.passPercentage} onChange={(e) => setTestData({...testData, evaluation: {...testData.evaluation, passPercentage: parseInt(e.target.value)}})} />
                                              </div>
-                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                 <label style={{ fontSize: '0.75rem', fontWeight: 900 }}>NEGATIVE MARKING (%)</label>
-                                                 <input type="number" defaultValue={25} style={inputStyle} />
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                 <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>NEGATIVE PENALTY (%)</label>
+                                                 <input type="number" style={inputStyle} value={testData.evaluation.markingValue} onChange={(e) => setTestData({...testData, evaluation: {...testData.evaluation, markingValue: parseInt(e.target.value)}})} />
+                                             </div>
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                 <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>TIME PER ITEM (SEC)</label>
+                                                 <input type="number" style={inputStyle} placeholder="60" />
                                              </div>
                                          </div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '1.5rem', background: '#fff9c4', borderRadius: '20px', color: '#827717' }}>
-                                         <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>The test will automatically submit when time finishes.</span>
                                     </div>
                                 </motion.div>
                             )}
 
                             {step === 7 && (
-                                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: 900, color: '#4a5568' }}>ASSIGNMENT MODE</label>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            {['ALL', 'INDIVIDUAL'].map(m => (
-                                                <button 
-                                                    key={m}
-                                                    onClick={() => setTestData({...testData, assignment: {...testData.assignment, mode: m as any}})}
-                                                    style={{ 
-                                                        flex: 1, padding: '15px', borderRadius: '15px', 
-                                                        border: `2px solid ${testData.assignment.mode === m ? 'var(--primary)' : '#e2e8f0'}`,
-                                                        background: testData.assignment.mode === m ? 'var(--primary)10' : '#fff',
-                                                        fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    {m} STUDENTS
-                                                </button>
+                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 900, color: '#64748b' }}>SELECT TARGET BATCH</label>
+                                        <select style={inputStyle} value={testData.batchId} onChange={(e) => setTestData({...testData, batchId: e.target.value, batchName: e.target.options[e.target.selectedIndex].text})}>
+                                            <option value="">Map to Batch...</option>
+                                            {batches.filter(b => b.courseName === testData.courseName).map(b => <option key={b.id} value={b.id}>{b.batchName || b.batchCode}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 900, color: '#64748b' }}>ACCESS CONTROL MODE</label>
+                                        <div style={{ display: 'flex', gap: '15px' }}>
+                                            {['ALL CANDIDATES', 'INDIVIDUALS ONLY'].map(m => (
+                                                <button key={m} style={{ flex: 1, padding: '20px', borderRadius: '20px', border: '2px solid #f1f5f9', background: '#fff', fontWeight: 900, color: '#64748b' }}>{m}</button>
                                             ))}
                                         </div>
                                     </div>
@@ -444,7 +509,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                     </div>
 
                     {/* --- FOOTER ACTIONS --- */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3rem', paddingTop: '2.5rem', borderTop: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
                          <button 
                             onClick={prevStep} 
                             disabled={step === 1}

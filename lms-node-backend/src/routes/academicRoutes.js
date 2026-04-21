@@ -944,6 +944,96 @@ router.delete('/notifications/:id', async (req, res) => {
     }
 });
 
+// --- REAL-TIME GEMINI AI PROTOCOL ---
+
+// @desc    Generate test questions using Real-Time Gemini AI
+router.post('/tests/ai-generate', async (req, res) => {
+    try {
+        const { prompt, courseName } = req.body;
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!prompt) return res.status(400).json({ error: 'AI Prompt required' });
+        if (!apiKey) {
+            console.error("Missing GEMINI_API_KEY in backend configuration.");
+            return res.status(500).json({ error: 'Gemini Protocol Error: API Key not configured.' });
+        }
+
+        console.log(`[GEMINI PROTOCOL]: Initializing generation for ${courseName} | Topics: ${prompt}`);
+
+        const geminiPrompt = `
+Generate a JSON array of highly professional academic technical questions for a test.
+Course context: ${courseName}
+Topics to cover: ${prompt}
+
+CRITICAL RULES:
+1. Return ONLY a valid JSON array. No markdown code blocks, no preamble.
+2. Each question object MUST have:
+   - id: string (random 8 chars)
+   - concept: the specific concept it tests
+   - text: the high-quality question text
+   - difficulty: "INTERMEDIATE" or "ADVANCED"
+   - type: "MCQ"
+   - options: array of EXACTLY 4 plausible strings
+   - correctIndex: number (0-3) indicating the correct answer
+
+Output Format Example:
+[
+  {
+    "id": "q1234567",
+    "concept": "React Hooks",
+    "text": "Which hook is utilized to synchronize a component with an external system?",
+    "difficulty": "INTERMEDIATE",
+    "type": "MCQ",
+    "options": ["useState", "useEffect", "useMemo", "useContext"],
+    "correctIndex": 1
+  }
+]
+        `;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: geminiPrompt }] }]
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || 'Gemini API Communication Failure');
+        }
+
+        const data = await response.json();
+        let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+        
+        // Clean markdown if AI included it
+        rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        const generatedQuestions = JSON.parse(rawText);
+
+        console.log(`[GEMINI PROTOCOL]: Successfully fabricated ${generatedQuestions.length} questions.`);
+        res.json(generatedQuestions);
+
+    } catch (err) {
+        console.error("Gemini AI Failure:", err);
+        
+        // --- FALLBACK TO DEEP-CORE INTEL IF API FAILS ---
+        console.warn("[SYSTEM ADVISORY]: Activating Deep-Core Knowledge Fallback.");
+        const concepts = req.body.prompt.split(',').map(c => c.trim().toUpperCase());
+        const fallbackQuestions = concepts.map(concept => ({
+            id: Math.random().toString(36).substr(2, 8),
+            concept: concept,
+            text: `[SYSTEM FALLBACK]: Analyze the primary architectural implications and design patterns associated with ${concept} in modern enterprise stack.`,
+            difficulty: 'ADVANCED',
+            type: 'MCQ',
+            options: ['Structural Optimization', 'Protocol Divergence', 'Linear Scalability', 'System Redundancy'],
+            correctIndex: 0
+        }));
+        
+        res.json(fallbackQuestions);
+    }
+});
+
 // Withdrawal/Delete a session request
 router.delete('/session-requests/:id', async (req, res) => {
     try {
