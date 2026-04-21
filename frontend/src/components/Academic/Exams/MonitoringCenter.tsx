@@ -12,9 +12,9 @@ import {
 
 const CandidateCard = ({ candidate }: { candidate: any }) => {
     const statusMap = {
-        ACTIVE: { color: '#10b981', label: 'Healthy', icon: <ShieldCheck size={14} /> },
-        SUSPICIOUS: { color: '#ef4444', label: 'Critical', icon: <ShieldAlert size={14} /> },
-        IDLE: { color: '#f59e0b', label: 'Idle', icon: <Shield size={14} /> },
+        ACTIVE: { color: '#10b981', label: 'Normal', icon: <ShieldCheck size={14} /> },
+        SUSPICIOUS: { color: '#ef4444', label: 'Suspicious', icon: <ShieldAlert size={14} /> },
+        IDLE: { color: '#f59e0b', label: 'Away', icon: <Shield size={14} /> },
         DISCONNECTED: { color: '#718096', label: 'Offline', icon: <Activity size={14} /> }
     };
 
@@ -65,10 +65,10 @@ const CandidateCard = ({ candidate }: { candidate: any }) => {
                     fontWeight: 900
                 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block', boxShadow: '0 0 10px #ef4444' }}></span>
-                    LIVE FEED
+                    STUDENT VIEW
                 </div>
 
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800 }}>{candidate.name}'s Stream</div>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800 }}>Camera for {candidate.name}</div>
                 
                 {/* AI Overlay for suspicious candidates */}
                 {candidate.status === 'SUSPICIOUS' && (
@@ -88,7 +88,7 @@ const CandidateCard = ({ candidate }: { candidate: any }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '15px' }}>
-                    <div style={{ fontSize: '0.6rem', color: '#a0aec0', fontWeight: 900 }}>AI RISK SCORE</div>
+                    <div style={{ fontSize: '0.6rem', color: '#a0aec0', fontWeight: 900 }}>RISK LEVEL</div>
                     <div style={{ fontSize: '1rem', fontWeight: 900, color: candidate.risk > 70 ? '#ef4444' : '#1a202c' }}>{candidate.risk}%</div>
                 </div>
                 <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '15px' }}>
@@ -99,10 +99,10 @@ const CandidateCard = ({ candidate }: { candidate: any }) => {
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
                 <button style={{ flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid #e2e8f0', background: '#fff', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
-                    <MessageSquare size={16} /> WARN
+                    <MessageSquare size={16} /> WARNING
                 </button>
                 <button style={{ flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid #e2e8f0', background: '#fff', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
-                    <Power size={16} /> BUST
+                    <Power size={16} /> STOP EXAM
                 </button>
                 <button style={{ padding: '12px', borderRadius: '14px', border: '1px solid #e2e8f0', background: '#fff', color: '#a0aec0', cursor: 'pointer' }}><Info size={16} /></button>
             </div>
@@ -148,13 +148,13 @@ export default function MonitoringCenter() {
                     </div>
                     <div>
                         <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{candidates.length}</div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8 }}>Active Candidates</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8 }}>Students Online</div>
                     </div>
                 </div>
 
                 {[
-                    { label: 'Suspicious Activities', value: liveViolations.length, color: '#ef4444', icon: <AlertTriangle size={24} /> },
-                    { label: 'Active Test Sessions', value: candidates.length, color: '#10b981', icon: <Monitor size={24} /> },
+                    { label: 'Suspicious Activity', value: liveViolations.length, color: '#ef4444', icon: <AlertTriangle size={24} /> },
+                    { label: 'Active Sessions', value: candidates.length, color: '#10b981', icon: <Monitor size={24} /> },
                     { label: 'Network Stability', value: '99%', color: '#6366f1', icon: <Activity size={24} /> }
                 ].map((stat, i) => (
                     <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '35px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -178,7 +178,7 @@ export default function MonitoringCenter() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444' }}></div>
-                         <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Critical: {candidates.filter(c => c.status === 'SUSPICIOUS').length}</span>
+                         <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Suspicious: {candidates.filter(c => c.status === 'SUSPICIOUS').length}</span>
                     </div>
                 </div>
 

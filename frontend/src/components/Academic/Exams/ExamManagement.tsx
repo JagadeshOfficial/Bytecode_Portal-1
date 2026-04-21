@@ -58,7 +58,7 @@ export default function ExamManagement() {
                             transition: 'all 0.3s'
                         }}
                     >
-                        <Layout size={18} /> TEST ENGINE
+                        <Layout size={18} /> ALL TESTS
                     </button>
                     {(currentUser?.role !== 'STUDENT' && currentUser?.role !== 'student') && (
                         <>
@@ -78,7 +78,7 @@ export default function ExamManagement() {
                                     transition: 'all 0.3s'
                                 }}
                             >
-                                <Shield size={18} /> MONITORING CENTER
+                                <Shield size={18} /> LIVE MONITORING
                             </button>
                             <button 
                                 onClick={() => setView('ANALYTICS')}
@@ -96,7 +96,7 @@ export default function ExamManagement() {
                                     transition: 'all 0.3s'
                                 }}
                             >
-                                <BarChart3 size={18} /> ANALYTICS
+                                <BarChart3 size={18} /> EXAM REPORTS
                             </button>
                         </>
                     )}
@@ -110,7 +110,7 @@ export default function ExamManagement() {
                              className="btn-quantum" 
                              style={{ padding: '12px 24px', background: '#10b981', color: '#fff', borderRadius: '16px', fontWeight: 900, fontSize: '0.85rem' }}
                           >
-                             + NEW ASSESSMENT
+                             + CREATE NEW TEST
                           </button>
                       )}
                 </div>

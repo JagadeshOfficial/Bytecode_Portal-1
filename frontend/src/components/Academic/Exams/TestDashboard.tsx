@@ -89,7 +89,7 @@ const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: 
                 <div>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1a202c', marginBottom: '4px' }}>{test.name}</h3>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {test.tags.map((tag: string) => (
+                        {Array.isArray(test.tags) && test.tags.map((tag: string) => (
                             <span key={tag} style={{ fontSize: '0.65rem', fontWeight: 800, color: '#718096', background: '#f8fafc', padding: '4px 8px', borderRadius: '6px' }}>#{tag}</span>
                         ))}
                     </div>

@@ -265,15 +265,15 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                     </div>
                     
                     <div>
-                        <h1 style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: '1rem' }}>Quantum Proctoring Shell</h1>
-                        <p style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.6 }}>Secure environment initialization. All visual and cognitive activity will be indexed for integrity auditing. Do not attempt to minimize or switch browsers.</p>
+                        <h1 style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: '1rem' }}>Online Exam System</h1>
+                        <p style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.6 }}>Please stay in full-screen mode during the test. Your camera and browser activity will be monitored for security. Do not switch tabs or minimize the window.</p>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
                         {[
-                            { icon: <Camera />, label: 'BIOMETRIC FEED' },
-                            { icon: <Monitor />, label: 'TAB LOCKER' },
-                            { icon: <Zap />, label: 'AI AUDIT LIVE' }
+                            { icon: <Camera />, label: 'CAMERA FEED' },
+                            { icon: <Monitor />, label: 'BROWSER LOCK' },
+                            { icon: <Zap />, label: 'LIVE MONITOR' }
                         ].map((item, i) => (
                             <div key={i} style={{ padding: '24px', borderRadius: '30px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                                 <div style={{ color: '#8b5cf6', marginBottom: '12px' }}>{item.icon}</div>
@@ -283,13 +283,13 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                     </div>
 
                     <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
-                        <button onClick={onExit} style={{ padding: '20px 40px', borderRadius: '24px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}>ABORT</button>
+                        <button onClick={onExit} style={{ padding: '20px 40px', borderRadius: '24px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}>CANCEL</button>
                         <button 
                             onClick={initiateTest}
                             className="btn-quantum"
                             style={{ padding: '20px 60px', background: '#6d28d9', fontSize: '1.1rem', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}
                         >
-                            <Play size={20} /> INITIATE SECURE LINE
+                            <Play size={20} /> START EXAM NOW
                         </button>
                     </div>
                 </motion.div>
@@ -302,12 +302,12 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
             <div style={{ ...engineLayout.fixed, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff1f2', color: '#991b1b' }}>
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} style={{ maxWidth: '500px', textAlign: 'center', padding: '40px' }}>
                     <AlertTriangle size={80} style={{ margin: '0 auto 30px' }} />
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '20px' }}>ASSESSMENT TERMINATED</h1>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '20px' }}>EXAM STOPPED</h1>
                     <div style={{ padding: '24px', background: '#fff', borderRadius: '24px', border: '1px solid #fecaca', marginBottom: '30px' }}>
-                        <p style={{ fontSize: '0.8rem', fontWeight: 900, color: '#ef4444', marginBottom: '8px', textTransform: 'uppercase' }}>Reason for Termination</p>
-                        <p style={{ fontSize: '1rem', fontWeight: 700, color: '#1a202c' }}>{termReason || "Instructional override by Administrator."}</p>
+                        <p style={{ fontSize: '0.8rem', fontWeight: 900, color: '#ef4444', marginBottom: '8px', textTransform: 'uppercase' }}>Reason</p>
+                        <p style={{ fontSize: '1rem', fontWeight: 700, color: '#1a202c' }}>{termReason || "The administrator has stopped your exam."}</p>
                     </div>
-                    <button onClick={onExit} style={{ width: '100%', padding: '20px', background: '#ef4444', color: '#fff', borderRadius: '20px', border: 'none', fontWeight: 900, cursor: 'pointer' }}>EXIT SHELL</button>
+                    <button onClick={onExit} style={{ width: '100%', padding: '20px', background: '#ef4444', color: '#fff', borderRadius: '20px', border: 'none', fontWeight: 900, cursor: 'pointer' }}>CLOSE WINDOW</button>
                 </motion.div>
             </div>
         );
@@ -320,26 +320,26 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                     <div style={{ width: 100, height: 100, borderRadius: '40px', background: '#dcfce7', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' }}>
                         <Award size={60} />
                     </div>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e1b4b', marginBottom: '10px' }}>Assessment Resolved</h1>
-                    <p style={{ color: '#94a3b8', fontWeight: 700, marginBottom: '40px' }}>Transmission successfully encrypted and stored in personnel cluster.</p>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e1b4b', marginBottom: '10px' }}>Exam Finished</h1>
+                    <p style={{ color: '#94a3b8', fontWeight: 700, marginBottom: '40px' }}>Your answers have been submitted successfully.</p>
                     
                     <div style={{ background: '#fff', borderRadius: '35px', padding: '40px', border: '1px solid rgba(139, 92, 246, 0.1)', boxShadow: '0 20px 50px rgba(109, 40, 217, 0.05)' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '20px' }}>Internal Score Index</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '20px' }}>Your Score</div>
                         <div style={{ fontSize: '4rem', fontWeight: 900, color: '#6d28d9' }}>{results?.score}%</div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '40px' }}>
                             <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '24px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#1e1b4b' }}>{Object.keys(results?.answers || {}).length}</div>
-                                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8' }}>ANSWERS INDEXED</div>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8' }}>ANSWERS GIVEN</div>
                             </div>
                             <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '24px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 900, color: violations.length > 2 ? '#ef4444' : '#10b981' }}>{violations.length}</div>
-                                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8' }}>INTEGRITY FLAGS</div>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8' }}>WARNINGS</div>
                             </div>
                         </div>
                     </div>
                     
                     <button onClick={onExit} style={{ marginTop: '40px', padding: '20px 40px', background: '#1e1b4b', color: '#fff', borderRadius: '20px', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', margin: '40px auto 0' }}>
-                        BACK TO DASHBOARD <LogOut size={18} />
+                        GO TO DASHBOARD <LogOut size={18} />
                     </button>
                 </motion.div>
             </div>
@@ -354,28 +354,28 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                     <Shield size={24} color="#6d28d9" />
                     <div>
                         <h2 style={{ fontSize: '1rem', fontWeight: 900 }}>{test.name}</h2>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#666' }}>SESSION ACTIVE: {candidate.fullName || candidate.name}</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#666' }}>STUDENT: {candidate.fullName || candidate.name}</div>
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#10b981' }}>SECURE FEED LIVE</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#10b981' }}>LIVE MONITORING ACTIVE</span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0' }}>REMAINING DURATION</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0' }}>TIME LEFT</div>
                         <div style={{ fontSize: '1.4rem', fontWeight: 900, color: timeLeft < 300 ? '#ef4444' : '#1a202c' }}>{formatTime(timeLeft)}</div>
                     </div>
-                    <button onClick={submitTest} className="btn-quantum" style={{ padding: '14px 35px', background: '#ef4444', color: '#fff', borderRadius: '16px', fontSize: '0.85rem' }}>TERMINATE & SUBMIT</button>
+                    <button onClick={submitTest} className="btn-quantum" style={{ padding: '14px 35px', background: '#ef4444', color: '#fff', borderRadius: '16px', fontSize: '0.85rem' }}>FINISH & SUBMIT</button>
                 </div>
             </div>
 
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                {/* Simplified Sidebar (No Monitoring Results here yet) */}
+                {/* Simplified Sidebar */}
                 <div style={engineLayout.sidebar}>
                     <div style={{ flex: 1 }}>
-                        <h4 style={{ fontSize: '0.8rem', fontWeight: 900, color: '#a0aec0', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Assessment Flow</h4>
+                        <h4 style={{ fontSize: '0.8rem', fontWeight: 900, color: '#a0aec0', marginBottom: '1.5rem', textTransform: 'uppercase' }}>All Questions</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
                             {questions.map((_, i) => (
                                 <button 
@@ -401,7 +401,7 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                         <div style={{ width: '100%', aspectRatio: '4/3', background: '#000', borderRadius: '24px', overflow: 'hidden', position: 'relative' }}>
                             <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '12px', left: '12px', ...proctoringIndicator(isCameraActive) }}>
-                                <Camera size={12} /> FEED ACTIVE
+                                <Camera size={12} /> CAMERA FEED
                             </div>
                         </div>
                     </div>
@@ -417,8 +417,8 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                             style={{ ...glassCard, flex: 1, display: 'flex', flexDirection: 'column' }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
-                                <span style={{ padding: '8px 16px', background: '#f5f3ff', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 900, color: '#6d28d9' }}>Module {currentQuestionIndex + 1}</span>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>{currentQuestion.type} COMPACTION</span>
+                                <span style={{ padding: '8px 16px', background: '#f5f3ff', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 900, color: '#6d28d9' }}>Question {currentQuestionIndex + 1}</span>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>{currentQuestion.type}</span>
                             </div>
 
                             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1e1b4b', marginBottom: '3rem', lineHeight: 1.5 }}>
@@ -455,7 +455,7 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                                     <textarea 
                                         value={answers[currentQuestion.id] || ''}
                                         onChange={e => handleAnswerSelect(currentQuestion.id, e.target.value)}
-                                        placeholder="Enter textual response core..."
+                                        placeholder="Type your answer here..."
                                         style={{ width: '100%', minHeight: '350px', padding: '2rem', borderRadius: '28px', border: '1px solid #f1f5f9', background: '#fcfaff', fontSize: '1.1rem', outline: 'none', resize: 'none' }}
                                     />
                                 )}
@@ -467,7 +467,7 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                                             onChange={e => handleAnswerSelect(currentQuestion.id, e.target.value)}
                                             spellCheck={false}
                                             style={{ width: '100%', height: '400px', background: 'transparent', border: 'none', color: '#8b5cf6', fontSize: '1.1rem', fontFamily: 'monospace', outline: 'none', resize: 'none' }}
-                                            placeholder="// Logic implementation here..."
+                                            placeholder="// Write your code here..."
                                         />
                                     </div>
                                 )}
@@ -479,14 +479,14 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                                     onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
                                     style={{ padding: '18px 35px', borderRadius: '18px', border: '1px solid #f1f5f9', background: '#fff', fontWeight: 800, cursor: 'pointer', opacity: currentQuestionIndex === 0 ? 0.4 : 1, display: 'flex', alignItems: 'center', gap: '10px' }}
                                 >
-                                    <ChevronLeft size={20} /> BACK
+                                    <ChevronLeft size={20} /> PREVIOUS
                                 </button>
                                 <button 
                                     onClick={() => currentQuestionIndex < questions.length - 1 ? setCurrentQuestionIndex(prev => prev + 1) : submitTest()}
                                     className="btn-quantum"
                                     style={{ padding: '18px 50px', background: currentQuestionIndex === questions.length - 1 ? '#10b981' : '#6d28d9', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '12px' }}
                                 >
-                                    {currentQuestionIndex === questions.length - 1 ? 'REQUISITION SUBMIT' : 'NEXT MODULE'} <ChevronRight size={20} />
+                                    {currentQuestionIndex === questions.length - 1 ? 'SUBMIT TEST' : 'NEXT QUESTION'} <ChevronRight size={20} />
                                 </button>
                             </div>
                         </motion.div>
@@ -503,7 +503,7 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                     >
                         <AlertCircle size={24} />
                         <div>
-                            <div style={{ fontSize: '1rem', fontWeight: 900 }}>INTEGRITY BREACH</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 900 }}>SECURITY WARNING</div>
                             <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{showWarning}</div>
                         </div>
                     </motion.div>
