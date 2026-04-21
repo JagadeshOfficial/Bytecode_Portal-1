@@ -949,7 +949,7 @@ router.delete('/notifications/:id', async (req, res) => {
 // @desc    Generate test questions using Real-Time Gemini AI
 router.post('/tests/ai-generate', async (req, res) => {
     try {
-        const { prompt, courseName } = req.body;
+        const { prompt, courseName, count = 5, formats = ['MCQ'] } = req.body;
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!prompt) return res.status(400).json({ error: 'AI Prompt required' });
@@ -958,37 +958,24 @@ router.post('/tests/ai-generate', async (req, res) => {
             return res.status(500).json({ error: 'Gemini Protocol Error: API Key not configured.' });
         }
 
-        console.log(`[GEMINI PROTOCOL]: Initializing generation for ${courseName} | Topics: ${prompt}`);
+        console.log(`[GEMINI PROTOCOL]: Generating ${count} items for ${courseName} | Formats: ${formats.join(', ')} | Topics: ${prompt}`);
 
         const geminiPrompt = `
-Generate a JSON array of highly professional academic technical questions for a test.
-Course context: ${courseName}
-Topics to cover: ${prompt}
+Generate a JSON array of exactly ${count} highly professional technical assessment items.
+Course: ${courseName}
+Topics: ${prompt}
+Allowed Formats: ${formats.join(', ')}
+
+SCHEMAS:
+1. MCQ: { id, concept, text, difficulty, type: "MCQ", options: [4 strings], correctIndex: 0-3 }
+2. CODING: { id, concept, text, difficulty, type: "CODING", starterCode, solution, testCases: [{input, expected}] }
+3. VIDEO/THEORY: { id, concept, text, difficulty, type: "VIDEO" | "THEORY", focalPoints: [3 evaluation criteria] }
 
 CRITICAL RULES:
-1. Return ONLY a valid JSON array. No markdown code blocks, no preamble.
-2. Each question object MUST have:
-   - id: string (random 8 chars)
-   - concept: the specific concept it tests
-   - text: the high-quality question text
-   - difficulty: "INTERMEDIATE" or "ADVANCED"
-   - type: "MCQ"
-   - options: array of EXACTLY 4 plausible strings
-   - correctIndex: number (0-3) indicating the correct answer
-
-Output Format Example:
-[
-  {
-    "id": "q1234567",
-    "concept": "React Hooks",
-    "text": "Which hook is utilized to synchronize a component with an external system?",
-    "difficulty": "INTERMEDIATE",
-    "type": "MCQ",
-    "options": ["useState", "useEffect", "useMemo", "useContext"],
-    "correctIndex": 1
-  }
-]
-        `;
+- Return ONLY a valid JSON array.
+- No markdown code blocks.
+- difficulty MUST be "INTERMEDIATE" or "ADVANCED".
+`;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
@@ -1011,26 +998,22 @@ Output Format Example:
         
         const generatedQuestions = JSON.parse(rawText);
 
-        console.log(`[GEMINI PROTOCOL]: Successfully fabricated ${generatedQuestions.length} questions.`);
+        console.log(`[GEMINI PROTOCOL]: Successfully fabricated ${generatedQuestions.length} modules.`);
         res.json(generatedQuestions);
 
     } catch (err) {
         console.error("Gemini AI Failure:", err);
-        
-        // --- FALLBACK TO DEEP-CORE INTEL IF API FAILS ---
-        console.warn("[SYSTEM ADVISORY]: Activating Deep-Core Knowledge Fallback.");
-        const concepts = req.body.prompt.split(',').map(c => c.trim().toUpperCase());
-        const fallbackQuestions = concepts.map(concept => ({
+        const concepts = (req.body.prompt || '').split(',').map(c => c.trim().toUpperCase());
+        const fallbackQuestions = concepts.slice(0, req.body.count || 5).map(concept => ({
             id: Math.random().toString(36).substr(2, 8),
             concept: concept,
-            text: `[SYSTEM FALLBACK]: Analyze the primary architectural implications and design patterns associated with ${concept} in modern enterprise stack.`,
+            text: `Critical appraisal of ${concept} in a modern enterprise architecture.`,
             difficulty: 'ADVANCED',
             type: 'MCQ',
-            options: ['Structural Optimization', 'Protocol Divergence', 'Linear Scalability', 'System Redundancy'],
+            options: ['Optimization', 'Redundancy', 'Scalability', 'Fault Tolerance'],
             correctIndex: 0
         }));
-        
-        res.json(fallbackQuestions);
+        res.status(200).json(fallbackQuestions);
     }
 });
 

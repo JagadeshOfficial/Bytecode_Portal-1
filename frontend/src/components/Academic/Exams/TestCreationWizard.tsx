@@ -23,9 +23,9 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
     ];
 
     const phases = [
-        { name: 'PHASE 1: CONFIGURATION', steps: [1, 2] },
-        { name: 'PHASE 2: INTELLIGENCE', steps: [3, 4] },
-        { name: 'PHASE 3: GOVERNANCE', steps: [5, 6, 7, 8] }
+        { name: 'STEP 1: CONFIGURATION', steps: [1, 2] },
+        { name: 'STEP 2: AI & QUESTIONS', steps: [3, 4] },
+        { name: 'STEP 3: EXAM SECURITY', steps: [5, 6, 7, 8] }
     ];
 
     const [testData, setTestData] = useState({
@@ -59,6 +59,8 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
     });
 
     const [aiPrompt, setAiPrompt] = useState('');
+    const [aiCount, setAiCount] = useState(5);
+    const [aiFormats, setAiFormats] = useState(['MCQ']);
     const [isGenerating, setIsGenerating] = useState(false);
 
     const [courses, setCourses] = useState<any[]>([]);
@@ -94,8 +96,8 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
         fetchData();
     }, []);
 
-    const nextStep = () => step < 8 && setStep(step + 1);
-    const prevStep = () => step > 1 && setStep(step - 1);
+    const nextStep = () => step < 8 && setStep(s => s + 1);
+    const prevStep = () => step > 1 && setStep(s => s - 1);
 
     const inputStyle = {
         width: '100%',
@@ -144,11 +146,11 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                     gridTemplateColumns: '320px 1fr'
                 }}
             >
-                {/* --- QUANTUM SIDEBAR --- */}
+                {/* --- SIDEBAR --- */}
                 <div style={{ background: '#fdfdfe', padding: '3.5rem 2.5rem', borderRight: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                     <div>
-                         <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px' }}>Quantum Portal</h3>
-                         <p style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800, letterSpacing: '1px' }}>ASSESSMENT ARCHITECT</p>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>TEST CREATOR</h3>
+                        <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#94a3b8', letterSpacing: '1px', marginTop: '4px' }}>ONLINE TEST BUILDER</p>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '35px' }}>
@@ -189,34 +191,28 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                         ))}
                     </div>
 
-                    <div style={{ marginTop: 'auto', padding: '1.5rem', background: 'linear-gradient(135deg, #f8fafc, #fff)', borderRadius: '24px', border: '1px dotted #cbd5e1' }}>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', marginBottom: '10px' }}>
-                             <Info size={16} />
-                             <span style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '1px' }}>SYSTEM OPTIMIZATION</span>
-                         </div>
-                         <p style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.6, fontWeight: 700 }}>Assessments are auto-synchronized across the curriculum cloud upon distribution.</p>
-                    </div>
+
                 </div>
 
                 {/* --- MAIN SEQUENTIAL TERMINAL --- */}
-                <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr auto', padding: '2.5rem 4.5rem 2rem 4.5rem', height: '100%', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#fff', position: 'relative' }}>
+                    <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '2rem 3rem 1rem 3rem' }}>
                          <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                  <div style={{ background: '#f1f5f9', padding: '10px 18px', borderRadius: '14px', fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>FLOW STATE: {((step/8)*100).toFixed(0)}%</div>
-                                  <div style={{ width: '200px', height: '6px', background: '#f1f5f9', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
+                                  <div style={{ background: '#f1f5f9', padding: '8px 16px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 900, color: '#64748b' }}>FLOW STATE: {((step/8)*100).toFixed(0)}%</div>
+                                  <div style={{ width: '160px', height: '6px', background: '#f1f5f9', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
                                       <motion.div initial={{ width: 0 }} animate={{ width: `${(step/8)*100}%` }} style={{ position: 'absolute', inset: 0, background: 'var(--primary)', borderRadius: '3px' }} />
                                   </div>
                               </div>
-                              <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '1rem', color: '#0f172a', letterSpacing: '-1px' }}>{steps[step-1].label}</h2>
+                              <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginTop: '1rem', color: '#0f172a', letterSpacing: '-0.5px' }}>{steps[step-1].label}</h2>
                          </div>
                          <button onClick={onClose} style={{ border: 'none', background: '#f8fafc', padding: '14px', borderRadius: '18px', cursor: 'pointer', color: '#64748b', transition: 'all 0.3s' }} className="hover-scale"><X size={26} /></button>
                     </div>
 
-                    <div style={{ overflowY: 'auto', paddingRight: '15px', minHeight: 0 }} className="custom-scroll">
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 3rem 2rem 3rem', minHeight: 0 }} className="custom-scroll">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
-                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                <motion.div key={`step-${step}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '30px' }}>
                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                              <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>ASSESSMENT TITLE</label>
@@ -271,7 +267,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             )}
 
                             {step === 2 && (
-                                <motion.div initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                <motion.div key={`step-${step}`} initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                                     {[
                                         { type: 'MCQ', icon: <FileText size={36} />, label: 'Standard MCQ', desc: 'Single or multi-correct options.' },
                                         { type: 'CODING', icon: <Code size={36} />, label: 'Dev Protocol', desc: 'Secure browser-based IDE challenges.' },
@@ -293,24 +289,65 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             )}
 
                             {step === 3 && (
-                                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                                <motion.div key={`step-${step}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                                     <div style={{ background: 'linear-gradient(135deg, #0ea5e9, #6366f1)', padding: '4rem', borderRadius: '45px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
                                         <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
                                         
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '2rem' }}>
+                                        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <div style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Sparkles size={32} />
                                             </div>
                                             <div>
-                                                <h4 style={{ fontWeight: 900, fontSize: '1.5rem' }}>Gemini Pro Assistant</h4>
-                                                <p style={{ fontSize: '0.9rem', opacity: 0.8, fontWeight: 700 }}>Intelligent curriculum-aware question fabrication.</p>
+                                                <h4 style={{ fontWeight: 900, fontSize: '1.5rem' }}>AI INTELLIGENCE SUITE</h4>
+                                                <p style={{ fontSize: '0.9rem', opacity: 0.8, fontWeight: 700 }}>Intelligent multi-modal curriculum fabrication.</p>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr', gap: '2.5rem', marginBottom: '2rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px' }}>ITEM QUANTITY</label>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: '20px' }}>
+                                                    <button onClick={() => setAiCount(Math.max(1, aiCount - 1))} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><ChevronLeft size={20} /></button>
+                                                    <span style={{ fontSize: '1.4rem', fontWeight: 900, minWidth: '40px', textAlign: 'center' }}>{aiCount}</span>
+                                                    <button onClick={() => setAiCount(Math.min(20, aiCount + 1))} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><Plus size={20} /></button>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px' }}>ASSESSMENT FORMATS</label>
+                                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                                    {['MCQ', 'CODING', 'VIDEO', 'THEORY'].map(f => (
+                                                        <button 
+                                                            key={f}
+                                                            onClick={() => {
+                                                                const newFormats = aiFormats.includes(f) 
+                                                                    ? aiFormats.filter(item => item !== f)
+                                                                    : [...aiFormats, f];
+                                                                if (newFormats.length > 0) setAiFormats(newFormats);
+                                                            }}
+                                                            style={{ 
+                                                                padding: '10px 20px', 
+                                                                borderRadius: '15px', 
+                                                                background: aiFormats.includes(f) ? '#fff' : 'rgba(255,255,255,0.1)',
+                                                                color: aiFormats.includes(f) ? 'var(--primary)' : '#fff',
+                                                                border: 'none',
+                                                                fontWeight: 900,
+                                                                fontSize: '0.75rem',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.3s'
+                                                            }}
+                                                        >
+                                                            {f}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
 
                                         <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px', marginBottom: '10px', display: 'block' }}>GENERATION PROMPT</label>
                                         <textarea 
-                                            style={{ width: '100%', padding: '24px', borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,1)', color: '#0f172a', fontSize: '1rem', fontWeight: 800, height: '150px', outline: 'none' }} 
-                                            placeholder="Enter core concepts (e.g., React Lifecycle, Props Drilling, State Management)..."
+                                            style={{ width: '100%', padding: '24px', borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,1)', color: '#0f172a', fontSize: '1rem', fontWeight: 800, height: '100px', outline: 'none' }} 
+                                            placeholder="Specify curriculum focus..."
                                             value={aiPrompt}
                                             onChange={(e) => setAiPrompt(e.target.value)}
                                         />
@@ -323,7 +360,12 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                         const res = await fetch('http://localhost:8080/api/academic/tests/ai-generate', {
                                                             method: 'POST',
                                                             headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ prompt: aiPrompt, courseName: testData.courseName })
+                                                            body: JSON.stringify({ 
+                                                                prompt: aiPrompt, 
+                                                                courseName: testData.courseName,
+                                                                count: aiCount,
+                                                                formats: aiFormats
+                                                            })
                                                         });
                                                         if (res.ok) {
                                                             const newQuestions = await res.json();
@@ -336,10 +378,10 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                         setIsGenerating(false);
                                                     }
                                                 }}
-                                                disabled={!aiPrompt || isGenerating}
+                                                disabled={!aiPrompt || isGenerating || aiFormats.length === 0}
                                                 style={{ padding: '16px 40px', borderRadius: '20px', background: '#fff', color: 'var(--primary)', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
                                             >
-                                                {isGenerating ? 'ANALYZING CURRICULUM...' : 'FABRICATE QUESTIONS'} <ChevronRight size={22} />
+                                                {isGenerating ? 'FABRICATING...' : 'EXECUTE AI GENERATION'} <ChevronRight size={22} />
                                             </button>
                                         </div>
                                     </div>
@@ -347,7 +389,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             )}
 
                             {step === 4 && (
-                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <motion.div key={`step-${step}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                          <h4 style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.4rem' }}>Question Review Pipeline</h4>
                                          <button className="btn-quantum" style={{ padding: '12px 24px', background: 'var(--primary)', color: '#fff', borderRadius: '15px', fontWeight: 900 }} onClick={() => setTestData({...testData, questions: [...testData.questions, { id: Math.random().toString(36).substr(2,8), text: 'New Assessment Item', concept: 'GENERAL', options: ['A', 'B', 'C', 'D'], correctIndex: 0 }]})}><Plus size={18} /> MANUAL ENTRY</button>
@@ -364,29 +406,71 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                             testData.questions.map((q, i) => (
                                                 <motion.div key={q.id} style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: '35px', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                                            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', background: 'var(--primary)08', padding: '8px 16px', borderRadius: '12px', border: '1px solid var(--primary)15' }}>{q.concept}</span>
-                                                            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', background: '#f1f5f9', padding: '8px 16px', borderRadius: '12px' }}>{q.difficulty || 'GENERAL'}</span>
+                                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                            <div style={{ padding: '10px', background: 'var(--primary)10', borderRadius: '12px', color: 'var(--primary)' }}>
+                                                                {q.type === 'CODING' ? <Code size={20} /> : (q.type === 'VIDEO' ? <Video size={20} /> : <FileText size={20} />)}
+                                                            </div>
+                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', background: 'var(--primary)08', padding: '8px 16px', borderRadius: '12px', border: '1px solid var(--primary)15' }}>{q.type || 'MCQ'}</span>
+                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b', background: '#f1f5f9', padding: '8px 16px', borderRadius: '12px' }}>{q.difficulty || 'GENERAL'}</span>
+                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8' }}>{q.concept}</span>
                                                         </div>
                                                         <button onClick={() => setTestData({...testData, questions: testData.questions.filter(item => item.id !== q.id)})} style={{ background: 'transparent', border: 'none', color: '#ef4444', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} className="hover-scale"><Trash2 size={20} /></button>
                                                     </div>
-                                                    <input 
-                                                        style={{ ...inputStyle, border: 'none', background: '#f8fafc', padding: '20px', fontSize: '1.1rem', fontWeight: 900 }} 
-                                                        value={q.text}
-                                                        onChange={(e) => {
-                                                            const newQs = [...testData.questions];
-                                                            newQs[i].text = e.target.value;
-                                                            setTestData({...testData, questions: newQs});
-                                                        }}
-                                                    />
-                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-                                                        {q.options?.map((opt: string, oi: number) => (
-                                                            <div key={oi} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: oi === q.correctIndex ? '#10b98105' : '#fff', border: `1.5px solid ${oi === q.correctIndex ? '#10b981' : '#f1f5f9'}`, padding: '15px 20px', borderRadius: '18px' }}>
-                                                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: oi === q.correctIndex ? '#10b981' : '#f1f5f9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>{oi === q.correctIndex ? <Check size={14} /> : String.fromCharCode(65 + oi)}</div>
-                                                                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: oi === q.correctIndex ? '#059669' : '#475569' }}>{opt}</span>
-                                                            </div>
-                                                        ))}
+
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                        <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#94a3b8', letterSpacing: '1px' }}>CHALLENGE DEFINITION</label>
+                                                        <textarea 
+                                                            style={{ width: '100%', padding: '20px', borderRadius: '20px', border: 'none', background: '#f8fafc', fontSize: '1rem', fontWeight: 800, minHeight: '80px', color: '#0f172a', resize: 'none' }} 
+                                                            value={q.text}
+                                                            onChange={(e) => {
+                                                                const newQs = [...testData.questions];
+                                                                newQs[i].text = e.target.value;
+                                                                setTestData({...testData, questions: newQs});
+                                                            }}
+                                                        />
                                                     </div>
+
+                                                    {/* --- TYPE SPECIFIC UI --- */}
+                                                    {(!q.type || q.type === 'MCQ') && (
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                                                            {q.options?.map((opt: string, oi: number) => (
+                                                                <div key={oi} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: oi === q.correctIndex ? '#10b98105' : '#fff', border: `1.5px solid ${oi === q.correctIndex ? '#10b981' : '#f1f5f9'}`, padding: '15px 20px', borderRadius: '18px' }}>
+                                                                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: oi === q.correctIndex ? '#10b981' : '#f1f5f9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>{oi === q.correctIndex ? <Check size={14} /> : String.fromCharCode(65 + oi)}</div>
+                                                                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: oi === q.correctIndex ? '#059669' : '#475569' }}>{opt}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {q.type === 'CODING' && (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                            <div style={{ background: '#0f172a', borderRadius: '20px', padding: '1.5rem', fontFamily: 'monospace', fontSize: '0.85rem', color: '#38bdf8' }}>
+                                                                <div style={{ color: '#64748b', marginBottom: '10px' }}>// Gemini Fabricated Starter Code</div>
+                                                                <pre style={{ margin: 0 }}>{q.starterCode || '// No starter code provided'}</pre>
+                                                            </div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                                                <div style={{ background: '#f1f5f9', padding: '15px', borderRadius: '15px', fontSize: '0.75rem', fontWeight: 800 }}>
+                                                                    <div style={{ color: '#64748b', marginBottom: '5px' }}>PROTOCOL SOLUTION</div>
+                                                                    <div style={{ color: '#10b981' }}>Available in curriculum cloud</div>
+                                                                </div>
+                                                                <div style={{ background: '#f1f5f9', padding: '15px', borderRadius: '15px', fontSize: '0.75rem', fontWeight: 800 }}>
+                                                                    <div style={{ color: '#64748b', marginBottom: '5px' }}>TEST SCENARIOS</div>
+                                                                    <div>{q.testCases?.length || 0} Scenarios Configured</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {(q.type === 'VIDEO' || q.type === 'THEORY') && (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                            <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#94a3b8', letterSpacing: '1px' }}>EVALUATION FOCAL POINTS</label>
+                                                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                                                {q.focalPoints?.map((p: string, pi: number) => (
+                                                                    <span key={pi} style={{ background: '#f1f5f9', color: '#475569', padding: '8px 16px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800 }}>{p}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </motion.div>
                                             ))
                                         )}
@@ -395,7 +479,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             )}
 
                             {step === 5 && (
-                                <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <motion.div key={`step-${step}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                      {[
                                          { key: 'screenLock', label: 'Quantum Screen Lock', desc: 'Prevents navigation exits via proprietary OS hook simulation.' },
                                          { key: 'faceDetection', label: 'Visual Biometrics', desc: 'Continuous facial recognition verification during assessment.' },
@@ -483,7 +567,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             )}
 
                             {step === 8 && (
-                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', textAlign: 'center', padding: '2rem' }}>
+                                <motion.div key={`step-${step}`} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', textAlign: 'center', padding: '2rem' }}>
                                      <div style={{ width: 100, height: 100, borderRadius: '50%', background: '#10b98110', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
                                          <Check size={48} />
                                      </div>
@@ -509,7 +593,15 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                     </div>
 
                     {/* --- FOOTER ACTIONS --- */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
+                    <div style={{ 
+                        flexShrink: 0,
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        padding: '1rem 3rem 2rem 3rem', 
+                        borderTop: '1px solid #f1f5f9', 
+                        background: '#fff',
+                        zIndex: 10
+                    }}>
                          <button 
                             onClick={prevStep} 
                             disabled={step === 1}
@@ -518,9 +610,13 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                              <ChevronLeft size={18} /> PREVIOUS
                          </button>
                          <button 
-                            onClick={step === 8 ? handlePublish : nextStep}
+                            onClick={() => {
+                                console.log("Next step triggered from", step);
+                                if (step === 8) handlePublish();
+                                else nextStep();
+                            }}
                             className="btn-quantum"
-                            style={{ padding: '14px 40px', background: step === 8 ? '#10b981' : 'var(--primary)', borderRadius: '18px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}
+                            style={{ padding: '14px 40px', background: step === 8 ? '#10b981' : 'var(--primary)', color: '#fff', border: 'none', borderRadius: '18px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
                          >
                              {step === 8 ? 'PUBLISH TEST' : 'SAVE & CONTINUE'} <ChevronRight size={18} />
                          </button>

@@ -1142,3 +1142,39 @@
  GET /icon?d878d31cd40b5385 200 in 266ms (compile: 32ms, render: 235ms)
  GET /login 200 in 594ms (compile: 178ms, render: 416ms)
  GET /login 200 in 1035ms (compile: 198ms, render: 837ms)
+ GET /super-admin/academic 200 in 649ms (compile: 142ms, render: 507ms)
+ GET /sw.js 404 in 721ms (compile: 142ms, render: 578ms)
+✓ Compiled in 929ms
+✓ Compiled in 99ms
+ GET /sw.js 404 in 445ms (compile: 29ms, render: 415ms)
+✓ Finished filesystem cache database compaction in 10.5s
+ GET /sw.js 404 in 164ms (compile: 45ms, render: 118ms)
+✓ Compiled in 828ms
+✓ Compiled in 217ms
+ GET /super-admin/academic 200 in 1607ms (compile: 685ms, render: 922ms)
+✓ Compiled in 212ms
+ GET /sw.js 404 in 185ms (compile: 35ms, render: 150ms)
+✓ Compiled in 240ms
+ GET /sw.js 404 in 171ms (compile: 56ms, render: 115ms)
+✓ Compiled in 212ms
+✓ Compiled in 153ms
+ GET /sw.js 404 in 168ms (compile: 30ms, render: 138ms)
+✓ Compiled in 245ms
+✓ Compiled in 81ms
+ GET /sw.js 404 in 290ms (compile: 41ms, render: 248ms)
+✓ Compiled in 527ms
+ GET /sw.js 404 in 202ms (compile: 46ms, render: 156ms)
+ GET /sw.js 404 in 195ms (compile: 48ms, render: 147ms)
+ GET /sw.js 404 in 181ms (compile: 50ms, render: 131ms)
+✓ Compiled in 567ms
+✓ Compiled in 0ms
+ GET /sw.js 404 in 149ms (compile: 28ms, render: 121ms)
+✓ Compiled in 285ms
+ GET /sw.js 404 in 159ms (compile: 37ms, render: 122ms)
+ GET /sw.js 404 in 125ms (compile: 37ms, render: 87ms)
+ GET /sw.js 404 in 711ms (compile: 358ms, render: 353ms)
+ GET /sw.js 404 in 179ms (compile: 67ms, render: 112ms)
+✓ Compiled in 895ms
+ GET /sw.js 404 in 116ms (compile: 24ms, render: 92ms)
+ GET /sw.js 404 in 133ms (compile: 44ms, render: 89ms)
+✓ Compiled in 257ms
