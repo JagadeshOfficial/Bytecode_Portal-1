@@ -15,6 +15,7 @@ import {
     Activity, CornerDownRight, Camera, Circle, StopCircle, BrainCircuit,
     Briefcase, LogOut, Info, Trash2, Share2, Mail, MicOff, VideoOff, Monitor, ScreenShare, ScreenShareOff, StopCircle as StopIcon
 } from 'lucide-react';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 type DashboardRole = 'super_admin' | 'admin' | 'tutor';
 
@@ -146,11 +147,11 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                 }
             }
 
-            const url = userId ? `${API_BASE}?userId=${userId}` : API_BASE;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to fetch chats');
-            const data = await res.json();
-            const formatted = data.map((c: any) => {
+        const url = userId ? `${API_BASE}?userId=${userId}` : API_BASE;
+        const result = await fetchJsonSafe<any[]>(url);
+        
+        if (result.ok && result.data) {
+            const formatted = result.data.map((c: any) => {
                 let chatName = c.name;
                 let chatImage = c.image;
 
@@ -174,46 +175,40 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                     time: c.lastMessage?.timestamp ? new Date(c.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
                     unread: 0,
                     category: c.type === 'DIRECT' ? 'DIRECT' : (c.category || 'CHANNELS'),
-                    status: 'ONLINE',
+                    status: 'ONLINE' as const,
                     participants: c.participants,
                     admins: c.admins || [],
                     createdBy: c.createdBy,
                     isArchived: !!c.isArchived
-                };
+                } as ChatItem;
             });
             setChats(formatted);
             if (!activeChatRef.current && formatted.length > 0) setActiveChat(formatted[0].id);
-
-            // Sync activeChatRef
             if (activeChat) activeChatRef.current = activeChat;
-
-            // Sync participants if we have an active chat
             if (activeChat) {
                 const found = formatted.find((c: any) => c.id === activeChat);
                 if (found) setParticipants(found.participants || []);
             }
+        } else if (result.error) {
+            console.error('Chat fetch error:', result.error);
+        }
         } catch (err) {
-            console.error('Chat fetch error:', err);
+            console.error('fetchChats failed:', err);
         }
     };
 
     const fetchMessages = async (chatId: string) => {
         if (!chatId) return;
-        try {
-            const res = await fetch(`${API_BASE}/${chatId}/messages`);
-            if (!res.ok) {
-                console.error(`Correspondence Fetch Error [Status: ${res.status}] for Hub: ${chatId}`);
-                throw new Error('Failed to fetch messages');
-            }
-            const data = await res.json();
-            console.log(`Resolved ${data.length} messages for Hub: ${chatId}`);
+        const result = await fetchJsonSafe<any[]>(`${API_BASE}/${chatId}/messages`);
+        
+        if (result.ok && result.data) {
+            const data = result.data;
             const mapped: Message[] = data.map((msg: any) => {
                 const sId = (msg.sender?._id || msg.sender?.id || msg.sender)?.toString();
                 const curId = (currentUser?.id || currentUser?._id)?.toString();
                 const isMe = sId === curId;
                 const foundUser = allUsers.find(u => (u.id?.toString() === sId || u._id?.toString() === sId));
 
-                // Prioritize sender object if it's populated with full user data
                 const senderObj = typeof msg.sender === 'object' && msg.sender?._id ? msg.sender : foundUser;
                 const resolvedSenderImage = isMe ? currentUser.profileImage : (senderObj?.profileImage || '');
 
@@ -235,8 +230,8 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                 };
             });
             setMessages(mapped);
-        } catch (err) {
-            console.error('Fetch messages error:', err);
+        } else if (result.error) {
+            console.error('Fetch messages error:', result.error);
         }
     };
 
@@ -364,11 +359,8 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
         if (!currentUser || isCalling || incomingCall) return;
         
         const checkCalls = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/calls/active/${currentUser.id || currentUser._id}`);
-                const call = await res.json();
-                if (call) setIncomingCall(call);
-            } catch (err) { /* Silent polling */ }
+            const result = await fetchJsonSafe<any>(`${API_BASE}/calls/active/${currentUser.id || currentUser._id}`);
+            if (result.ok && result.data) setIncomingCall(result.data);
         };
 
         const interval = setInterval(checkCalls, 4000);

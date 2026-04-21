@@ -1,0 +1,153 @@
+1046:    if (!isMounted) return <div style={{ background: '#fcfaff', height: '100vh' }} />;
+1049:        <div style={{
+1060:            <div style={{
+1071:                <div style={{
+1106:            <div style={{
+1114:                <div style={{ padding: '24px' }}>
+1115:                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+1126:                    <div style={{ background: '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '14px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+1132:                <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px 24px' }}>
+1134:                        <div key={cat} style={{ marginBottom: '32px' }}>
+1136:                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+1150:                                        <div style={{ width: 40, height: 40, borderRadius: '14px', background: activeChat === chat.id ? '#6d28d9' : '#fff', color: activeChat === chat.id ? '#fff' : '#6d28d9', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 12px rgba(0,0,0,0.02)', border: '1px solid rgba(109, 40, 217, 0.05)', overflow: 'hidden' }}>
+1159:                                        <div style={{ flex: 1, minWidth: 0 }}>
+1160:                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+1173:                        <div style={{ marginTop: '40px', borderTop: '1px solid rgba(109, 40, 217, 0.05)', paddingTop: '20px' }}>
+1175:                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+1177:                                    <div
+1182:                                        <div style={{ width: 32, height: 32, borderRadius: '10px', background: '#f8fafc', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+1195:            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff' }}>
+1197:                <div style={{ padding: '14px 32px', borderBottom: '1px solid rgba(109, 40, 217, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+1198:                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+1199:                        <div style={{ width: 40, height: 40, borderRadius: '14px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(109, 40, 217, 0.1)', overflow: 'hidden' }}>
+1206:                        <div>
+1213:                    <div style={{ display: 'flex', gap: '6px' }}>
+1214:                        <div className="action-circle-soft" onClick={() => initiateCall('AUDIO')} style={{ width: 36, height: 36 }}><Phone size={16} /></div>
+1215:                        <div className="action-circle-soft" onClick={() => initiateCall('VIDEO')} style={{ width: 36, height: 36 }}><Video size={16} /></div>
+1216:                        <div className="action-circle-soft" onClick={openEmailHub} style={{ width: 36, height: 36 }}><Mail size={16} /></div>
+1217:                        <div
+1228:                <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px', background: 'radial-gradient(circle at 50% 50%, #fff, #fcfaff)' }}>
+1242:                            <div style={{ width: 36, height: 36, borderRadius: '12px', background: msg.type === 'AI' ? '#f5f3ff' : '#fff', border: '1px solid rgba(109, 40, 217, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'flex-start', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+1247:                                        <div style={{ width: '100%', height: '100%', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem' }}>
+1253:                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMessageFromCurrentUser(msg.senderId) ? 'flex-end' : 'flex-start' }}>
+1254:                                <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', marginBottom: '4px', padding: '0 4px' }}>
+1260:                                    <div style={{ fontSize: '0.7rem', color: '#6d28d9', background: 'rgba(109, 40, 217, 0.05)', padding: '6px 12px', borderRadius: '10px', marginBottom: '4px', borderLeft: '3px solid #6d28d9', maxWidth: '200px', cursor: 'pointer' }}>
+1272:                                <div
+1288:                                    <div className="message-actions" style={{ position: 'absolute', top: '-10px', right: isMessageFromCurrentUser(msg.senderId) ? 'none' : '-65px', left: isMessageFromCurrentUser(msg.senderId) ? '-65px' : 'none', display: 'flex', gap: '4px', zIndex: 10 }}>
+1294:                                        <div style={{ position: 'relative' }}>
+1301:                                            <div onClick={() => handleDownload(msg.text, msg.fileName || 'image.png')} style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(255,255,255,0.8)', padding: '6px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}><Download size={14} color="#6d28d9" /></div>
+1304:                                        <div style={{ position: 'relative' }}>
+1308:                                            <div onClick={() => handleDownload(msg.text, msg.fileName || 'video.mp4')} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(255,255,255,0.8)', padding: '6px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}><Download size={14} color="#6d28d9" /></div>
+1311:                                        <div style={{ padding: '4px', position: 'relative' }}>
+1315:                                            <div onClick={() => handleDownload(msg.text, msg.fileName || 'audio.mp3')} style={{ position: 'absolute', right: '-10px', top: '10px', background: 'rgba(255,255,255,0.8)', padding: '6px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}><Download size={14} color="#6d28d9" /></div>
+1318:                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '4px' }}>
+1319:                                            <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)' }}><FileText size={18} /></div>
+1320:                                            <div style={{ flex: 1, minWidth: 0 }}>
+1338:                <div style={{ padding: '0 20px 20px', background: '#fff' }}>
+1340:                        <div style={{ padding: '8px 16px', background: '#f5f3ff', borderRadius: '12px 12px 0 0', border: '1px solid rgba(109, 40, 217, 0.1)', borderBottom: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+1341:                            <div style={{ fontSize: '0.75rem' }}>
+1356:                        <div ref={emojiPickerRef} style={{ position: 'absolute', bottom: '80px', left: '25px', background: '#fff', padding: '20px', borderRadius: '24px', boxShadow: '0 20px 50px rgba(30,27,75,0.2)', width: '340px', zIndex: 110, border: '1px solid rgba(109, 40, 217, 0.1)' }}>
+1357:                            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+1367:                            <div style={{ height: '240px', overflowY: 'auto', display: 'grid', gridTemplateColumns: mediaPickerTab === 'EMOJI' ? 'repeat(7, 1fr)' : 'repeat(2, 1fr)', gap: '8px' }}>
+1392:                                        <div key={idx} onClick={() => { handleSendMessage(gif.url, 'IMAGE', { name: `${gif.name}.gif`, size: 'Curated GIF' }); setIsEmojiPickerVisible(false); }} style={{ position: 'relative', overflow: 'hidden', borderRadius: '12px', cursor: 'pointer', aspectRatio: '1.4' }}>
+1405:                                        <div key={idx} onClick={() => { handleSendMessage(sticker.url, 'IMAGE', { name: `${sticker.name}.png`, size: 'Sticker' }); setIsEmojiPickerVisible(false); }} style={{ padding: '8px', background: '#f8fafc', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+1416:                    <div style={{
+1423:                        <div style={{ display: 'flex', gap: '4px' }}>
+1424:                            <div className="input-tool" onClick={() => fileInputRef.current?.click()} style={{ padding: '6px' }}><Paperclip size={16} /></div>
+1425:                            <div className="input-tool" onClick={() => setIsEmojiPickerVisible(!isEmojiPickerVisible)} style={{ padding: '6px' }}><Smile size={16} /></div>
+1426:                            <div className="input-tool" onClick={startCamera} style={{ padding: '6px' }}><Camera size={16} /></div>
+1427:                            <div className="input-tool" onClick={startAudioRecording} style={{ padding: '6px' }}><Mic size={16} /></div>
+1430:                            <div style={{ flex: 1, height: '40px', background: 'rgba(109,40,217,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
+1431:                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+1432:                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'pulse 1s infinite' }} />
+1437:                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+1451:                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+1471:                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+1506:                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #f1f5f9' }}>
+1507:                                <div style={{ display: 'flex', gap: '20px' }}>
+1534:                                    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+1535:                                        <div
+1563:                                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}>
+1571:                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+1572:                                                <div>
+1602:                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+1603:                                        <div style={{ padding: '20px', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '24px', background: '#fcfaff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+1604:                                            <div>
+1611:                                        <div style={{ padding: '20px', border: '1px solid rgba(109, 40, 217, 0.1)', borderRadius: '24px', background: '#fff' }}>
+1613:                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+1615:                                                    <div key={i} style={{ aspectRatio: '1', borderRadius: '12px', background: '#f8fafc', border: '1px solid #f1f5f9' }} />
+1622:                                <div style={{ height: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+1629:                                            <div key={pId} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '16px', background: '#fcfaff' }}>
+1630:                                                <div style={{ width: 36, height: 36, borderRadius: '10px', background: p.profileImage ? 'none' : '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem', overflow: 'hidden' }}>
+1633:                                                <div style={{ flex: 1 }}>
+1634:                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+1641:                                                    <div style={{ display: 'flex', gap: '8px' }}>
+1672:                    <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+1702:                    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+1717:                            <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', borderBottom: '1px solid rgba(109, 40, 217, 0.08)' }}>
+1739:                                    <div style={{ marginBottom: '24px' }}>
+1749:                                    <div style={{ marginBottom: '24px' }}>
+1751:                                        <div style={{ display: 'flex', gap: '8px' }}>
+1774:                            <div style={{ height: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '30px' }}>
+1779:                                        <div
+1795:                                            <div style={{ width: 40, height: 40, borderRadius: '12px', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', overflow: 'hidden', border: '1px solid rgba(109, 40, 217, 0.1)' }}>
+1802:                                            <div style={{ flex: 1 }}>
+1812:                            <div style={{ display: 'flex', gap: '12px' }}>
+1826:                    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+1827:                        <div onClick={() => setIsDeletingMessage(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(4px)' }} />
+1831:                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+1842:                    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+1843:                        <div onClick={() => setIsForwardingMessage(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(30, 27, 75, 0.4)', backdropFilter: 'blur(4px)' }} />
+1845:                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+1850:                            <div style={{ position: 'relative', marginBottom: '20px' }}>
+1861:                            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
+1865:                                        <div
+1871:                                            <div style={{
+1879:                                            <div style={{ flex: 1 }}>
+1895:                    <div style={{ position: 'fixed', inset: 0, zIndex: 6000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+1902:                                <div style={{ position: 'absolute', top: '30px', left: '30px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(239, 68, 68, 0.8)', padding: '8px 16px', borderRadius: '50px', backdropFilter: 'blur(5px)', zIndex: 10 }}>
+1903:                                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fff', animation: 'pulse 1s infinite' }} />
+1910:                            <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', padding: '40px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', display: 'flex', justifyContent: 'center', gap: '30px', zIndex: 10 }}>
+1914:                                    <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
+1918:                                            <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#ef4444' }} />
+1927:                                <div style={{ width: 60, height: 60 }} /> {/* Spacer */}
+1937:                    <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 7000 }}>
+1939:                            <div style={{ width: 56, height: 56, borderRadius: '20px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+1942:                            <div style={{ flex: 1 }}>
+1946:                            <div style={{ display: 'flex', gap: '10px' }}>
+1958:                    <div style={{ position: 'fixed', inset: 0, zIndex: 6500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+1961:                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+1962:                                <div>
+1969:                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+1970:                                <div>
+1971:                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+1974:                                            <div style={{ display: 'flex', gap: '12px' }}>
+1981:                                    <div style={{ background: '#f8fafc', borderRadius: '24px', padding: '16px', maxHeight: '180px', overflowY: 'auto', border: '1px solid rgba(109,40,217,0.05)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+1983:                                            <div 
+1988:                                                <div style={{ width: 18, height: 18, borderRadius: '6px', border: '2px solid #6d28d9', background: r.selected ? '#6d28d9' : 'transparent', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+1989:                                                    {r.selected && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
+1991:                                                <div style={{ flex: 1 }}>
+2001:                                <div>
+2005:                                <div>
+2026:                    <div style={{ position: 'fixed', inset: 0, zIndex: 6600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+2029:                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+2034:                            <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+2043:                            <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+2051:                                        <div 
+2070:                                            <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#6d28d9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem' }}>
+2073:                                            <div style={{ flex: 1 }}>
+2090:                    <div style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto' }}>
+2101:                            <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+2105:                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+2111:                                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(45deg, rgba(109,40,217,0.2), transparent)' }} />
+2114:                                        <div style={{ textAlign: 'center' }}>
+2130:                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+2131:                                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: callStatus === 'CONNECTED' ? '#10b981' : '#f59e0b', boxShadow: '0 0 15px currentColor' }} />
+2142:                            <div style={{ position: 'absolute', bottom: '60px', left: '0', right: '0', display: 'flex', justifyContent: 'center', padding: '0 40px', zIndex: 100 }}>
+2195:                                    <div style={{ maxWidth: '400px', textAlign: 'center' }}>
+2196:                                        <div style={{ width: 80, height: 80, borderRadius: '24px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+2203:                                        <div style={{ display: 'flex', gap: '12px' }}>
+2212:                            <div style={{ position: 'absolute', top: '40px', left: '40px', zIndex: 100 }}>
+2213:                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(0,0,0,0.4)', padding: '12px 24px', borderRadius: '20px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+2214:                                    <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'linear-gradient(135deg, #6d28d9, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+2217:                                    <div>

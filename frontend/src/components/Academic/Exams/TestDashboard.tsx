@@ -152,7 +152,7 @@ const TestCard = ({ test, onAction }: TestCardProps) => {
     );
 };
 
-export default function TestDashboard() {
+export default function TestDashboard({ onActionOverride }: { onActionOverride?: (action: string, test: any) => void }) {
     const [tests, setTests] = useState<any[]>([]);
     const [stats, setStats] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -184,7 +184,11 @@ export default function TestDashboard() {
     }, []);
 
     const handleAction = (action: string, test: any) => {
-        console.log(`Action: ${action} on test:`, test);
+        if (onActionOverride) {
+            onActionOverride(action, test);
+        } else {
+            console.log(`Action: ${action} on test:`, test);
+        }
     };
 
     return (

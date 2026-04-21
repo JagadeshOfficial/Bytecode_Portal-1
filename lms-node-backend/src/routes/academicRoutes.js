@@ -254,13 +254,20 @@ router.post('/sessions/:id/recording', upload.single('recording'), async (req, r
         const db = mongoose.connection.useDb('academic-db');
         const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
         
+        const filename = `${Date.now()}-${req.file.originalname}`;
         // Upload file to GridFS
-        const uploadStream = bucket.openUploadStream(req.file.filename, {
+        const uploadStream = bucket.openUploadStream(filename, {
             contentType: req.file.mimetype,
             metadata: { sessionId: req.params.id }
         });
 
-        fs.createReadStream(req.file.path).pipe(uploadStream);
+        // Use buffer from memory storage
+        const Readable = require('stream').Readable;
+        const s = new Readable();
+        s._read = () => {};
+        s.push(req.file.buffer);
+        s.push(null);
+        s.pipe(uploadStream);
 
         uploadStream.on('error', (err) => {
             console.error("GridFS error:", err);
@@ -268,10 +275,7 @@ router.post('/sessions/:id/recording', upload.single('recording'), async (req, r
         });
 
         uploadStream.on('finish', async () => {
-            // Clean up temporary local file
-            fs.unlinkSync(req.file.path);
-
-            const recordingUrl = `http://localhost:8080/api/academic/recording/${req.file.filename}`;
+            const recordingUrl = `http://localhost:8080/api/academic/recording/${filename}`;
             
             let filter;
             try {
@@ -560,7 +564,34 @@ router.post('/proctoring/logs', async (req, res) => {
     }
 });
 
-// @desc    Get proctoring logs for a test/candidate
+// @desc    Get proctoring logs for a test/candidate (or all)
+router.get('/proctoring/logs', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const { testId, studentId } = req.query;
+        let filter = {};
+        if (testId) filter.testId = testId;
+        if (studentId) filter.studentId = studentId;
+        
+        const logs = await db.collection('proctoring_logs').find(filter).sort({ timestamp: -1 }).toArray();
+        res.json(logs);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// @desc    Get all test submissions
+router.get('/test-submissions', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        const submissions = await db.collection('test_submissions').find().sort({ submittedAt: -1 }).toArray();
+        const mapped = submissions.map(s => ({ ...s, id: s._id.toString() }));
+        res.json(mapped);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.get('/proctoring/logs/:testId', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');

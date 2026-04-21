@@ -119,6 +119,24 @@ export default function MonitoringCenter() {
         { id: '5', name: 'Vikram Singh', testName: 'MERN Assessment', status: 'DISCONNECTED', risk: 0, timeLeft: 85 },
         { id: '6', name: 'Ananya Das', testName: 'Cloud Arch.', status: 'ACTIVE', risk: 18, timeLeft: 22 },
     ]);
+    const [liveViolations, setLiveViolations] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/academic/proctoring/logs');
+                if (res.ok) {
+                    const logs = await res.json();
+                    setLiveViolations(logs);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchData();
+        const interval = setInterval(fetchData, 10000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
@@ -130,13 +148,13 @@ export default function MonitoringCenter() {
                         <div style={{ fontSize: '0.75rem', fontWeight: 900, background: 'rgba(255,255,255,0.2)', padding: '5px 12px', borderRadius: '20px' }}>LIVE NOW</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>42</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{candidates.length + 36}</div>
                         <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8 }}>Active Candidates</div>
                     </div>
                 </div>
 
                 {[
-                    { label: 'Suspicious Activities', value: '14', color: '#ef4444', icon: <AlertTriangle size={24} /> },
+                    { label: 'Suspicious Activities', value: liveViolations.length > 0 ? liveViolations.length : '14', color: '#ef4444', icon: <AlertTriangle size={24} /> },
                     { label: 'Active Test Sessions', value: '08', color: '#10b981', icon: <Monitor size={24} /> },
                     { label: 'Network Stability', value: '98%', color: '#6366f1', icon: <Activity size={24} /> }
                 ].map((stat, i) => (

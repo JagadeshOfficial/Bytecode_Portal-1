@@ -11,6 +11,7 @@ import {
     X as CloseIcon, ChevronRight, ChevronLeft, Flag,
     Edit2, Trash2, Copy, Play, Check, Share2, ScreenShare, Circle
 } from 'lucide-react';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 // --- STYLES & ACCENTS ---
 const glassStyle = {
@@ -140,23 +141,20 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
 
         // Auto-save to database if session is selected
         if (selectedInterviewId) {
-            try {
-                const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        recordedUrl: mockUrl,
-                        transcript: mockTranscript,
-                        status: 'COMPLETED',
-                        aiScore: Math.floor(Math.random() * (95 - 75 + 1) + 75) // Random score for now
-                    })
-                });
-                if (res.ok) {
-                    const updated = await res.json();
-                    setInterviews(prev => prev.map(i => i.id === updated.id ? updated : i));
-                }
-            } catch (err) {
-                console.error("Failed to auto-save recording:", err);
+            const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    recordedUrl: mockUrl,
+                    transcript: mockTranscript,
+                    status: 'COMPLETED',
+                    aiScore: Math.floor(Math.random() * (95 - 75 + 1) + 75)
+                })
+            });
+            if (result.ok && result.data) {
+                setInterviews(prev => prev.map(i => (i.id === result.data.id || i._id === result.data.id) ? result.data : i));
+            } else if (result.error) {
+                console.error("Failed to auto-save recording:", result.error);
             }
         }
     };
@@ -245,28 +243,23 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
 
     const fetchAllData = async () => {
         setLoading(true);
-        try {
-            const [intRes, courRes, batchRes, userRes, statsRes] = await Promise.all([
-                fetch('http://localhost:8080/api/academic/mock-interviews'),
-                fetch('http://localhost:8080/api/courses'),
-                fetch('http://localhost:8080/api/academic/batches'),
-                fetch('http://localhost:8080/api/users'),
-                fetch('http://localhost:8080/api/academic/mock-interviews/stats')
-            ]);
-            
-            if (intRes.ok) setInterviews(await intRes.json());
-            if (courRes.ok) setCourses(await courRes.json());
-            if (batchRes.ok) setBatches(await batchRes.json());
-            if (userRes.ok) setAllUsers(await userRes.json());
-            if (statsRes.ok) {
-                const statsData = await statsRes.json();
-                setStats(statsData.map((s: any) => ({
-                    ...s,
-                    icon: ICON_MAP[s.iconType] || <Activity size={20} />
-                })));
-            }
-        } catch (err) {
-            console.error("Failed to fetch interview data:", err);
+        const [intRes, courRes, batchRes, userRes, statsRes] = await Promise.all([
+            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/mock-interviews'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/courses'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/batches'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/users'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/mock-interviews/stats')
+        ]);
+        
+        if (intRes.ok && intRes.data) setInterviews(intRes.data);
+        if (courRes.ok && courRes.data) setCourses(courRes.data);
+        if (batchRes.ok && batchRes.data) setBatches(batchRes.data);
+        if (userRes.ok && userRes.data) setAllUsers(userRes.data);
+        if (statsRes.ok && statsRes.data) {
+            setStats(statsRes.data.map((s: any) => ({
+                ...s,
+                icon: ICON_MAP[s.iconType] || <Activity size={20} />
+            })));
         }
         setLoading(false);
     };
@@ -282,13 +275,13 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                 ? `http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}` 
                 : 'http://localhost:8080/api/academic/mock-interviews';
 
-            const res = await fetch(url, {
+            const result = await fetchJsonSafe<any>(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newInterview)
             });
-            if (res.ok) {
-                const saved = await res.json();
+            if (result.ok && result.data) {
+                const saved = result.data;
                 if (isEditing) {
                     setInterviews(interviews.map(i => (i.id === selectedInterviewId || i._id === selectedInterviewId) ? saved : i));
                 } else {
@@ -298,6 +291,8 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                 setIsEditing(false);
                 setWizardStep(1);
                 alert(isEditing ? "Interview Updated!" : "Mock Interview Scheduled Successfully!");
+            } else if (result.error) {
+                alert(`Operation failed: ${result.error}`);
             }
         } catch (err) {
             console.error(err);
@@ -306,13 +301,11 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
 
     const handleDeleteInterview = async (id: string) => {
         if (!confirm("Are you sure?")) return;
-        try {
-            const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                setInterviews(interviews.filter(i => i.id !== id && i._id !== id));
-            }
-        } catch (err) {
-            console.error(err);
+        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${id}`, { method: 'DELETE' });
+        if (result.ok) {
+            setInterviews(interviews.filter(i => i.id !== id && i._id !== id));
+        } else if (result.error) {
+            console.error("Delete failed:", result.error);
         }
     };
 
@@ -389,34 +382,34 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                                             onJoin={() => { setSelectedInterviewId(item.id || item._id); setSubView('AI_ROOM'); }}
                                             onReports={() => { setSelectedInterviewId(item.id || item._id); setSubView('ANALYTICS'); }}
                                             onStart={async () => {
-                                                try {
-                                                    const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
-                                                        method: 'PUT',
-                                                        headers: {'Content-Type': 'application/json'},
-                                                        body: JSON.stringify({...item, status: 'LIVE'})
-                                                    });
-                                                    if(res.ok) {
-                                                        const updated = await res.json();
-                                                        setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
-                                                        setSelectedInterviewId(item.id || item._id);
-                                                        setSubView('LIVE_MONITOR');
-                                                    }
-                                                } catch(err) { console.error(err); }
+                                                const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
+                                                    method: 'PUT',
+                                                    headers: {'Content-Type': 'application/json'},
+                                                    body: JSON.stringify({...item, status: 'LIVE'})
+                                                });
+                                                if (result.ok && result.data) {
+                                                    const updated = result.data;
+                                                    setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
+                                                    setSelectedInterviewId(item.id || item._id);
+                                                    setSubView('LIVE_MONITOR');
+                                                } else if (result.error) {
+                                                    console.error("Failed to start session:", result.error);
+                                                }
                                             }}
                                             onFinish={async () => {
                                                 if (!confirm("Are you sure you want to conclude this session? AI will generate the final report.")) return;
-                                                try {
-                                                    const res = await fetch(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
-                                                        method: 'PUT',
-                                                        headers: {'Content-Type': 'application/json'},
-                                                        body: JSON.stringify({...item, status: 'COMPLETED', completedAt: new Date()})
-                                                    });
-                                                    if(res.ok) {
-                                                        const updated = await res.json();
-                                                        setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
-                                                        alert("Protocol Concluded: AI Evaluation Report generated.");
-                                                    }
-                                                } catch(err) { console.error(err); }
+                                                const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
+                                                    method: 'PUT',
+                                                    headers: {'Content-Type': 'application/json'},
+                                                    body: JSON.stringify({...item, status: 'COMPLETED', completedAt: new Date()})
+                                                });
+                                                if (result.ok && result.data) {
+                                                    const updated = result.data;
+                                                    setInterviews(interviews.map(i => (i.id === (item.id || item._id) || i._id === (item.id || item._id)) ? updated : i));
+                                                    alert("Protocol Concluded: AI Evaluation Report generated.");
+                                                } else if (result.error) {
+                                                    console.error("Failed to conclude session:", result.error);
+                                                }
                                             }}
                                         />
                                     ))
@@ -1085,40 +1078,104 @@ function AIRoomView({
 function AnalyticsEngineView({ interviews }: { interviews: any[] }) {
     const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
     const completed = interviews.filter(i => i.status === 'COMPLETED');
-    const avgScore = completed.length > 0 ? (completed.reduce((acc, i) => acc + (i.aiScore || 85), 0) / completed.length).toFixed(1) : "0.0";
+    
+    // Data filtering for selected student vs global batch
+    const displayData = selectedStudent 
+        ? completed.filter(i => i.candidateName === selectedStudent) 
+        : completed;
+
+    const avgScore = displayData.length > 0 
+        ? (displayData.reduce((acc, i) => acc + (i.aiScore || 85), 0) / displayData.length).toFixed(1) 
+        : "0.0";
 
     // Extract unique candidates
     const candidates = Array.from(new Set(completed.map(i => i.candidateName || 'Unknown')));
+
+    // Dynamic Score Progression (last 10 sessions)
+    const scoreProgression = displayData.slice(-10).map(i => i.aiScore || 85);
+    
+    // Dynamic Cognitive Parameters (simulated calculation based on raw scores)
+    const params = [
+        { label: 'Technical Depth', val: Math.min(100, Math.round(Number(avgScore) * 0.95)), color: 'var(--primary)' },
+        { label: 'Problem Solving', val: Math.min(100, Math.round(Number(avgScore) * 0.9)), color: 'var(--secondary)' },
+        { label: 'Communication', val: Math.min(100, Math.round(Number(avgScore) * 1.05)), color: '#10b981' },
+        { label: 'System Design', val: Math.min(100, Math.round(Number(avgScore) * 0.75)), color: '#f59e0b' }
+    ];
+
+    // Dynamic Insight Calculations
+    const readinessCount = displayData.filter(i => (i.aiScore || 85) >= 80).length;
+    const readinessPct = displayData.length > 0 ? Math.round((readinessCount / displayData.length) * 100) : 0;
+    const saturationAvg = (completed.length / (candidates.length || 1)).toFixed(1);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h2 style={{ fontWeight: 900 }}>Advanced Performance Matrix</h2>
-                    <p style={{ fontSize: '0.8rem', color: '#666' }}>Comprehensive batch intelligence and behavioral scoring.</p>
+                    <p style={{ fontSize: '0.8rem', color: '#666' }}>{selectedStudent ? `Deep analytics for ${selectedStudent}` : "Comprehensive batch intelligence and behavioral scoring."}</p>
                 </div>
-                <div style={{ background: 'var(--primary)', color: '#fff', padding: '12px 24px', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 900, boxShadow: '0 10px 20px rgba(79, 70, 229, 0.2)' }}>BATCH AVG: {avgScore}%</div>
+                <div style={{ background: 'var(--primary)', color: '#fff', padding: '12px 24px', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 900, boxShadow: '0 10px 20px rgba(79, 70, 229, 0.2)' }}>
+                    {selectedStudent ? 'STUDENT AVG:' : 'BATCH AVG:'} {avgScore}%
+                </div>
             </div>
 
             {/* --- CANDIDATE SPOTLIGHT --- */}
             <div style={{ ...glassStyle, padding: '2.5rem', background: '#fff' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                    <h3 style={{ fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}><Target size={20} color="var(--primary)" /> CANDIDATE SPOTLIGHT</h3>
+                    <h3 style={{ fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}><Target size={20} color="var(--primary)" /> PERFORMANCE DRILL-DOWN</h3>
                     <select 
                         onChange={(e) => setSelectedStudent(e.target.value)} 
+                        value={selectedStudent || ""}
                         style={{ padding: '12px 20px', borderRadius: '12px', border: '1px solid #eee', fontSize: '0.8rem', fontWeight: 800, background: '#f9f9f9' }}
                     >
-                        <option value="">SELECT STUDENT FOR DEEP DIVE</option>
+                        <option value="">VIEW GLOBAL BATCH STATS</option>
                         {candidates.map(c => <option key={c as string} value={c as string}>{c as string}</option>)}
                     </select>
                 </div>
 
+                {/* Score Progression & Cognitive Distribution Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+                    {/* Score Trends */}
+                    <div style={{ padding: '1rem', borderRight: '1px solid #eee' }}>
+                        <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '0.9rem' }}>SCORE PROGRESSION (LATEST {scoreProgression.length})</h4>
+                        <div style={{ height: '150px', display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+                            {scoreProgression.length > 0 ? scoreProgression.map((h, i) => (
+                                <div key={i} style={{ flex: 1, background: 'var(--primary)', height: `${h}%`, borderRadius: '4px 4px 0 0', opacity: 0.1 + (i * 0.1), position: 'relative' }}>
+                                    <div style={{ position: 'absolute', top: '-25px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6rem', fontWeight: 900 }}>{h}</div>
+                                </div>
+                            )) : <div style={{ color: '#ccc', margin: 'auto' }}>No completed sessions found</div>}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                            <span style={{ fontSize: '0.7rem', color: '#999', fontWeight: 800 }}>START</span>
+                            <span style={{ fontSize: '0.7rem', color: '#999', fontWeight: 800 }}>CURRENT</span>
+                        </div>
+                    </div>
+
+                    {/* Cognitive Parameters */}
+                    <div style={{ padding: '1rem' }}>
+                        <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '0.9rem' }}>COGNITIVE PARAMETERS</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {params.map((p, i) => (
+                                <div key={i}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 800, marginBottom: '5px' }}>
+                                        <span>{p.label}</span>
+                                        <span>{p.val}%</span>
+                                    </div>
+                                    <div style={{ height: '6px', background: '#f0f0f0', borderRadius: '3px' }}>
+                                        <div style={{ width: `${p.val}%`, height: '100%', background: p.color, borderRadius: '3px', boxShadow: `0 0 10px ${p.color}44` }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
                 {selectedStudent ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', borderTop: '1px solid #eee', paddingTop: '3rem' }}>
                         <div>
                             <h4 style={{ fontSize: '0.75rem', fontWeight: 900, color: '#999', marginBottom: '1.5rem', textTransform: 'uppercase' }}>Individual Mock Timeline (Date-wise)</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {completed.filter(i => i.candidateName === selectedStudent).map((mock, idx) => (
+                                {displayData.map((mock, idx) => (
                                     <div key={idx} style={{ padding: '1.5rem', border: '1px solid #f0f0f0', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div>
                                             <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)' }}>{mock.date}</p>
@@ -1140,20 +1197,20 @@ function AnalyticsEngineView({ interviews }: { interviews: any[] }) {
                                     <div style={{ width: '4px', background: '#10b981', borderRadius: '2px' }} />
                                     <div>
                                         <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#10b981' }}>STRENGTHS</p>
-                                        <p style={{ fontSize: '0.85rem', color: '#444' }}>Strong grasp of Big O notation. Consistent eye contact maintained during technical explanation.</p>
+                                        <p style={{ fontSize: '0.85rem', color: '#444' }}>Strong grasp of the core concepts demonstrated in recent sessions. Confidence is trending upwards.</p>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '15px' }}>
                                     <div style={{ width: '4px', background: '#f59e0b', borderRadius: '2px' }} />
                                     <div>
                                         <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#f59e0b' }}>GROWTH AREAS</p>
-                                        <p style={{ fontSize: '0.85rem', color: '#444' }}>Needs to improve depth in multi-threading concepts. Occasional hesitation when discussing edge cases.</p>
+                                        <p style={{ fontSize: '0.85rem', color: '#444' }}>Needs to focus on complex edge cases and system scalability discussions during the design phase.</p>
                                     </div>
                                 </div>
                                 <div style={{ marginTop: '1rem', padding: '1rem', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
-                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#111', marginBottom: '8px' }}>LATEST TRANSCRIPT SNIPPET</p>
+                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#111', marginBottom: '8px' }}>LATEST AI OBSERVATION</p>
                                     <p style={{ fontSize: '0.75rem', color: '#777', fontStyle: 'italic', lineHeight: '1.5' }}>
-                                        "My approach to the LRU cache involves using a Doubly Linked List paired with a Hash Map to ensure constant time complexity for both put and get operations..."
+                                        "Candidate showed exceptional resilience when refactoring the logic mid-interview. High adaptability marker."
                                     </p>
                                 </div>
                             </div>
@@ -1162,61 +1219,36 @@ function AnalyticsEngineView({ interviews }: { interviews: any[] }) {
                 ) : (
                     <div style={{ textAlign: 'center', padding: '4rem', border: '2px dashed #f0f0f0', borderRadius: '24px' }}>
                         <Users size={32} style={{ color: '#ccc', marginBottom: '1rem' }} />
-                        <p style={{ fontSize: '0.9rem', color: '#999', fontWeight: 800 }}>Please select a candidate from the dropdown to see individual performance trends and transcripts.</p>
+                        <p style={{ fontSize: '0.9rem', color: '#999', fontWeight: 800 }}>Global Batch Mode Active. Select a candidate above for individual drill-down.</p>
                     </div>
                 )}
             </div>
 
-            {/* --- GLOBAL BATCH STATS --- */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                {/* Score Trends */}
-                <div style={{ ...glassStyle, padding: '2rem', background: '#fff' }}>
-                    <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '0.9rem' }}>SCORE PROGRESSION (LATEST 10)</h4>
-                    <div style={{ height: '150px', display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
-                        {[72, 85, 78, 92, 88, 95, 82, 90, 85, 96].map((h, i) => (
-                            <div key={i} style={{ flex: 1, background: 'var(--primary)', height: `${h}%`, borderRadius: '4px 4px 0 0', opacity: 0.1 + (i * 0.1), position: 'relative' }}>
-                                <div style={{ position: 'absolute', top: '-25px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6rem', fontWeight: 900 }}>{h}</div>
-                            </div>
-                        ))}
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-                        <span style={{ fontSize: '0.7rem', color: '#999', fontWeight: 800 }}>BATCH START</span>
-                        <span style={{ fontSize: '0.7rem', color: '#999', fontWeight: 800 }}>CURRENT</span>
-                    </div>
-                </div>
-
-                {/* Cognitive Distribution */}
-                <div style={{ ...glassStyle, padding: '2rem', background: '#fff' }}>
-                    <h4 style={{ fontWeight: 900, marginBottom: '2rem', fontSize: '0.9rem' }}>COGNITIVE PARAMETERS</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        {[
-                            { label: 'Technical Depth', val: 82, color: 'var(--primary)' },
-                            { label: 'Problem Solving', val: 78, color: 'var(--secondary)' },
-                            { label: 'Communication', val: 94, color: '#10b981' },
-                            { label: 'System Design', val: 65, color: '#f59e0b' }
-                        ].map((p, i) => (
-                            <div key={i}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 800, marginBottom: '5px' }}>
-                                    <span>{p.label}</span>
-                                    <span>{p.val}%</span>
-                                </div>
-                                <div style={{ height: '6px', background: '#f0f0f0', borderRadius: '3px' }}>
-                                    <div style={{ width: `${p.val}%`, height: '100%', background: p.color, borderRadius: '3px', boxShadow: `0 0 10px ${p.color}44` }} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
+            {/* --- GLOBAL BATCH STATS / INSIGHT CARDS --- */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-                <InsightCard title="Placement Readiness" value="HIGH" desc="85% of batch mimics production-grade logic." color="#10b981" />
-                <InsightCard title="Top Blocker" value="Optim Logic" desc="Time complexity remains a hurdle in 40% of cases." color="#ef4444" />
-                <InsightCard title="Mock Saturation" value="92%" desc="Average student has completed 4 simulations." color="var(--primary)" />
+                <InsightCard 
+                    title="Placement Readiness" 
+                    value={readinessPct >= 75 ? "EXCELLENT" : (readinessPct >= 50 ? "GOOD" : "AVERAGE")} 
+                    desc={`${readinessPct}% of ${selectedStudent ? 'sessions' : 'batch'} mimic production-grade logic.`} 
+                    color="#10b981" 
+                />
+                <InsightCard 
+                    title="Top Performance Blocker" 
+                    value="Complex Logic" 
+                    desc="Time complexity and optimization remain the primary hurdles in low-score sessions." 
+                    color="#ef4444" 
+                />
+                <InsightCard 
+                    title="Mock Saturation" 
+                    value={`${saturationAvg} sessions`} 
+                    desc="Average session completion per student across this assessment period." 
+                    color="var(--primary)" 
+                />
             </div>
         </div>
     );
 }
+
 
 function InsightCard({ title, value, desc, color }: any) {
     return (

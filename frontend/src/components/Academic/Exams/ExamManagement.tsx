@@ -10,10 +10,26 @@ import TestDashboard from './TestDashboard';
 import MonitoringCenter from './MonitoringCenter';
 import TestCreationWizard from './TestCreationWizard';
 import ExamAnalytics from './ExamAnalytics';
+import TestExaminationEngine from './TestExaminationEngine';
 
 export default function ExamManagement() {
     const [view, setView] = useState<'DASHBOARD' | 'MONITORING' | 'ANALYTICS'>('DASHBOARD');
     const [isCreating, setIsCreating] = useState(false);
+    const [takingTest, setTakingTest] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<any>(null);
+
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) setCurrentUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    const handleTestAction = (action: string, test: any) => {
+        if (action === 'PREVIEW' || action === 'TAKE') {
+            setTakingTest(test);
+        }
+    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
@@ -95,8 +111,28 @@ export default function ExamManagement() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
             >
-                {view === 'DASHBOARD' ? <TestDashboard /> : view === 'MONITORING' ? <MonitoringCenter /> : <ExamAnalytics />}
+                {view === 'DASHBOARD' ? (
+                    <TestDashboard 
+                        onActionOverride={handleTestAction} 
+                    />
+                ) : view === 'MONITORING' ? (
+                    <MonitoringCenter />
+                ) : (
+                    <ExamAnalytics />
+                )}
             </motion.div>
+
+            {/* --- ENGINE OVERLAY --- */}
+            <AnimatePresence>
+                {takingTest && (
+                    <TestExaminationEngine 
+                        test={takingTest} 
+                        candidate={currentUser || { fullName: 'Demo Candidate', id: 'demo' }}
+                        onComplete={() => setTakingTest(null)}
+                        onExit={() => setTakingTest(null)}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* --- MODALS --- */}
             <AnimatePresence>

@@ -19,14 +19,30 @@ function extractErrorMessage(payload: unknown) {
 export async function fetchJsonSafe<T>(input: RequestInfo | URL, init?: RequestInit): Promise<JsonFetchResult<T>> {
     try {
         const response = await fetch(input, init);
-        const text = await response.text();
+        
+        // Handle no-content responses or cases where fetch succeeds but response body is missing/bad
+        const text = await response.text().catch(() => '');
 
-        if (!text) {
+        if (!text || !text.trim()) {
             return {
                 ok: response.ok,
                 status: response.status,
                 data: null,
                 error: response.ok ? null : `Request failed with status ${response.status}`,
+            };
+        }
+
+        // Check if response is likely JSON before parsing to avoid "Unexpected token" errors
+        const isJson = response.headers.get('content-type')?.includes('application/json') || 
+                       (text.startsWith('{') && text.endsWith('}')) || 
+                       (text.startsWith('[') && text.endsWith(']'));
+
+        if (!isJson) {
+            return {
+                ok: false,
+                status: response.status,
+                data: null,
+                error: text.length > 100 ? `Unexpected response format (${response.status})` : text.trim(),
             };
         }
 
@@ -38,12 +54,12 @@ export async function fetchJsonSafe<T>(input: RequestInfo | URL, init?: RequestI
                 data,
                 error: response.ok ? null : extractErrorMessage(data) || `Request failed with status ${response.status}`,
             };
-        } catch {
+        } catch (parseError) {
             return {
                 ok: false,
                 status: response.status,
                 data: null,
-                error: text.trim() || `Request failed with status ${response.status}`,
+                error: `JSON Parse Error: ${parseError instanceof Error ? parseError.message : 'Unknown reason'}`,
             };
         }
     } catch (error) {

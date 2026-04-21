@@ -18,6 +18,7 @@ import {
 import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
 import MockInterviewEngine from '@/components/Academic/MockInterviews/MockInterviewEngine';
+import { fetchJsonSafe } from '@/lib/fetchJson';
 
 type DashboardRole = 'super_admin' | 'admin' | 'tutor' | 'student';
 
@@ -116,72 +117,54 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
     const fetchData = async () => {
         setLoading(true);
-        try {
-            const userId = currentUser?.id || currentUser?._id;
-            const safeFetch = async (url: string) => {
-                try {
-                    const res = await fetch(url);
-                    if (res.ok) return await res.json();
-                } catch (e) { }
-                return null;
-            };
-
-            // Dynamic logic: If student, restrict data stream to assigned nodes only
-            const isStudent = currentUserRole === 'STUDENT';
+        const userId = currentUser?.id || currentUser?._id;
+        const isStudent = currentUserRole === 'STUDENT';
+        
+        const batchUrl = isStudent 
+            ? `http://localhost:8080/api/academic/batches/student/${userId}`
+            : 'http://localhost:8080/api/academic/batches';
             
-            const batchUrl = isStudent 
-                ? `http://localhost:8080/api/academic/batches/student/${userId}`
-                : 'http://localhost:8080/api/academic/batches';
-                
-            const [cData, bData, uData, aData, sData, rData] = await Promise.all([
-                safeFetch('http://localhost:8080/api/courses'),
-                safeFetch(batchUrl),
-                safeFetch('http://localhost:8080/api/users'),
-                safeFetch('http://localhost:8080/api/academic/assignments'),
-                safeFetch('http://localhost:8080/api/academic/sessions'),
-                safeFetch('http://localhost:8080/api/academic/session-requests')
-            ]);
+        const [cData, bData, uData, aData, sData, rData] = await Promise.all([
+            fetchJsonSafe<any[]>('http://localhost:8080/api/courses'),
+            fetchJsonSafe<any[]>(batchUrl),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/users'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/assignments'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/sessions'),
+            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/session-requests')
+        ]);
+        
+        if (bData.ok && bData.data) {
+            setBatches(bData.data);
             
-            if (Array.isArray(bData)) {
-                setBatches(bData);
-                
-                if (isStudent) {
-                    // Extract unique course IDs from assigned batches
-                    const assignedCourseIds = new Set(bData.map((b: any) => b.courseId));
-                    if (Array.isArray(cData)) {
-                        setCourses(cData.filter(c => assignedCourseIds.has(c.id) || assignedCourseIds.has(c._id)));
-                    }
-
-                    // Filter sessions to only those in the assigned batches
-                    const assignedBatchIds = new Set(bData.map((b: any) => b.id || b._id));
-                    if (Array.isArray(sData)) {
-                        setLiveSessions(sData.filter(s => assignedBatchIds.has(s.batchId)));
-                    }
-
-                    // Filter assignments to only those in the assigned batches
-                    if (Array.isArray(aData)) {
-                        setAssignments(aData.filter(a => assignedBatchIds.has(a.batchId)));
-                    }
-                } else {
-                    if (Array.isArray(cData)) setCourses(cData);
-                    if (Array.isArray(sData)) setLiveSessions(sData);
-                    if (Array.isArray(aData)) setAssignments(aData);
+            if (isStudent) {
+                const assignedCourseIds = new Set(bData.data.map((b: any) => b.courseId));
+                if (cData.ok && cData.data) {
+                    setCourses(cData.data.filter(c => assignedCourseIds.has(c.id) || assignedCourseIds.has(c._id)));
+                }
+                const assignedBatchIds = new Set(bData.data.map((b: any) => b.id || b._id));
+                if (sData.ok && sData.data) {
+                    setLiveSessions(sData.data.filter(s => assignedBatchIds.has(s.batchId)));
+                }
+                if (aData.ok && aData.data) {
+                    setAssignments(aData.data.filter(a => assignedBatchIds.has(a.batchId)));
                 }
             } else {
-                if (Array.isArray(cData)) setCourses(cData);
+                if (cData.ok && cData.data) setCourses(cData.data);
+                if (sData.ok && sData.data) setLiveSessions(sData.data);
+                if (aData.ok && aData.data) setAssignments(aData.data);
             }
-            
-            if (Array.isArray(uData)) setAllUsers(uData);
+        } else if (cData.ok && cData.data) {
+            setCourses(cData.data);
+        }
+        
+        if (uData.ok && uData.data) setAllUsers(uData.data);
 
-            if (Array.isArray(rData)) {
-                if (isStudent) {
-                    setSessionRequests(rData.filter(r => r.requestedById === userId));
-                } else {
-                    setSessionRequests(rData);
-                }
+        if (rData.ok && rData.data) {
+            if (isStudent) {
+                setSessionRequests(rData.data.filter(r => r.requestedById === userId));
+            } else {
+                setSessionRequests(rData.data);
             }
-        } catch (err) {
-            console.error(err);
         }
         setLoading(false);
     };
@@ -205,19 +188,18 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
             createdAt: new Date().toISOString()
         };
 
-        try {
-            const res = await fetch('http://localhost:8080/api/academic/session-requests', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const saved = await res.json();
-                setSessionRequests([saved, ...sessionRequests]);
-                setIsJoinRequestModalOpen(false);
-                alert("Protocol Initialized: Access request sent to Command Center.");
-            }
-        } catch (e) { console.error(e); }
+        const result = await fetchJsonSafe<any>('http://localhost:8080/api/academic/session-requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (result.ok && result.data) {
+            setSessionRequests([result.data, ...sessionRequests]);
+            setIsJoinRequestModalOpen(false);
+            alert("Protocol Initialized: Access request sent to Command Center.");
+        } else if (result.error) {
+            console.error("Join request failed:", result.error);
+        }
     };
 
     const searchParams = useSearchParams();
