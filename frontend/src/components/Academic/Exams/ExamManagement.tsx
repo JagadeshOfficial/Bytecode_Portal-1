@@ -28,6 +28,12 @@ export default function ExamManagement() {
     const handleTestAction = (action: string, test: any) => {
         if (action === 'PREVIEW' || action === 'TAKE') {
             setTakingTest(test);
+        } else if (action === 'ANALYTICS') {
+            setView('ANALYTICS');
+        } else if (action === 'EDIT') {
+            setIsCreating(true); // Opening wizard for now as edit proxy
+        } else if (action === 'ASSIGN') {
+            alert("Batch assignment registry is being synchronized. Please wait.");
         }
     };
 
@@ -54,53 +60,59 @@ export default function ExamManagement() {
                     >
                         <Layout size={18} /> TEST ENGINE
                     </button>
-                    <button 
-                        onClick={() => setView('MONITORING')}
-                        style={{ 
-                            padding: '12px 28px', 
-                            borderRadius: '16px', 
-                            background: view === 'MONITORING' ? 'var(--primary)' : 'transparent',
-                            color: view === 'MONITORING' ? '#fff' : 'var(--text-dim)',
-                            border: 'none',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            transition: 'all 0.3s'
-                        }}
-                    >
-                        <Shield size={18} /> MONITORING CENTER
-                    </button>
-                    <button 
-                        onClick={() => setView('ANALYTICS')}
-                        style={{ 
-                            padding: '12px 28px', 
-                            borderRadius: '16px', 
-                            background: view === 'ANALYTICS' ? 'var(--primary)' : 'transparent',
-                            color: view === 'ANALYTICS' ? '#fff' : 'var(--text-dim)',
-                            border: 'none',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            transition: 'all 0.3s'
-                        }}
-                    >
-                        <BarChart3 size={18} /> ANALYTICS
-                    </button>
+                    {(currentUser?.role !== 'STUDENT' && currentUser?.role !== 'student') && (
+                        <>
+                            <button 
+                                onClick={() => setView('MONITORING')}
+                                style={{ 
+                                    padding: '12px 28px', 
+                                    borderRadius: '16px', 
+                                    background: view === 'MONITORING' ? 'var(--primary)' : 'transparent',
+                                    color: view === 'MONITORING' ? '#fff' : 'var(--text-dim)',
+                                    border: 'none',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                <Shield size={18} /> MONITORING CENTER
+                            </button>
+                            <button 
+                                onClick={() => setView('ANALYTICS')}
+                                style={{ 
+                                    padding: '12px 28px', 
+                                    borderRadius: '16px', 
+                                    background: view === 'ANALYTICS' ? 'var(--primary)' : 'transparent',
+                                    color: view === 'ANALYTICS' ? '#fff' : 'var(--text-dim)',
+                                    border: 'none',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                <BarChart3 size={18} /> ANALYTICS
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '15px' }}>
-                     <button style={{ padding: '12px 20px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', color: '#718096' }}><Settings size={20} /></button>
-                     <button 
-                        onClick={() => setIsCreating(true)}
-                        className="btn-quantum" 
-                        style={{ padding: '12px 24px', background: '#10b981', color: '#fff', borderRadius: '16px', fontWeight: 900, fontSize: '0.85rem' }}
-                     >
-                        + NEW ASSESSMENT
-                     </button>
+                      <button style={{ padding: '12px 20px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', color: '#718096' }}><Settings size={20} /></button>
+                      {(currentUser?.role !== 'STUDENT' && currentUser?.role !== 'student') && (
+                          <button 
+                             onClick={() => setIsCreating(true)}
+                             className="btn-quantum" 
+                             style={{ padding: '12px 24px', background: '#10b981', color: '#fff', borderRadius: '16px', fontWeight: 900, fontSize: '0.85rem' }}
+                          >
+                             + NEW ASSESSMENT
+                          </button>
+                      )}
                 </div>
             </div>
 
@@ -114,6 +126,7 @@ export default function ExamManagement() {
                 {view === 'DASHBOARD' ? (
                     <TestDashboard 
                         onActionOverride={handleTestAction} 
+                        currentUser={currentUser}
                     />
                 ) : view === 'MONITORING' ? (
                     <MonitoringCenter />

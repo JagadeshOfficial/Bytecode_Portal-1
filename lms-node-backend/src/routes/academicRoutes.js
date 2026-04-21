@@ -580,6 +580,41 @@ router.get('/proctoring/logs', async (req, res) => {
     }
 });
 
+// @desc    Get active candidates (aggregated from recent proctoring activity)
+router.get('/active-candidates', async (req, res) => {
+    try {
+        const db = mongoose.connection.useDb('academic-db');
+        // Get unique candidates who have proctoring logs in the last hour
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const logs = await db.collection('proctoring_logs').find({ timestamp: { $gte: oneHourAgo } }).toArray();
+        
+        const uniqueCandidatesMap = new Map();
+        logs.forEach(log => {
+            if (!uniqueCandidatesMap.has(log.candidateId)) {
+                uniqueCandidatesMap.set(log.candidateId, {
+                    id: log.candidateId,
+                    name: log.candidateName || 'Anonymous',
+                    testName: log.testName || 'Active Test',
+                    status: 'ACTIVE', // Default
+                    risk: 0,
+                    timeLeft: 45 // Placeholder
+                });
+            }
+            
+            const candidate = uniqueCandidatesMap.get(log.candidateId);
+            // If log type is anomalous, mark as suspicious
+            if (['TAB_SWITCH', 'LOSED_FOCUS', 'CAMERA_ERROR'].includes(log.type)) {
+                candidate.status = 'SUSPICIOUS';
+                candidate.risk += 10;
+            }
+        });
+
+        res.json(Array.from(uniqueCandidatesMap.values()));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // @desc    Get all test submissions
 router.get('/test-submissions', async (req, res) => {
     try {

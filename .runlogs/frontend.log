@@ -607,3 +607,47 @@
  GET /sw.js 404 in 102ms (compile: 27ms, render: 75ms)
  GET /sw.js 404 in 163ms (compile: 41ms, render: 122ms)
 ✓ Compiled in 608ms
+✓ Compiled in 295ms
+ GET /student/academic 200 in 714ms (compile: 285ms, render: 429ms)
+ GET /icon?d878d31cd40b5385 200 in 196ms (compile: 45ms, render: 150ms)
+ GET /sw.js 404 in 52ms (compile: 8ms, render: 44ms)
+ GET /sw.js 404 in 111ms (compile: 51ms, render: 60ms)
+✓ Compiled in 132ms
+✓ Compiled in 65ms
+✓ Compiled in 33ms
+ GET /super-admin/academic 200 in 914ms (compile: 418ms, render: 496ms)
+✓ Compiled in 126ms
+✓ Compiled in 59ms
+ GET /sw.js 404 in 118ms (compile: 22ms, render: 96ms)
+✓ Compiled in 105ms
+ GET /sw.js 404 in 120ms (compile: 35ms, render: 85ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 118ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /icon?d878d31cd40b5385 200 in 42ms (compile: 6ms, render: 37ms)
+ GET /student/academic 200 in 1289ms (compile: 233ms, render: 1056ms)
+ GET /icon?d878d31cd40b5385 200 in 44ms (compile: 22ms, render: 22ms)
+ GET /super-admin/academic 200 in 278ms (compile: 84ms, render: 193ms)
+ GET /sw.js 404 in 27ms (compile: 5ms, render: 22ms)
+✓ Compiled in 216ms
+ GET /sw.js 404 in 96ms (compile: 28ms, render: 67ms)
+ GET /sw.js 404 in 99ms (compile: 38ms, render: 61ms)
+✓ Compiled in 670ms
+ GET /student/academic 200 in 424ms (compile: 127ms, render: 297ms)
+ GET /icon?d878d31cd40b5385 200 in 39ms (compile: 15ms, render: 23ms)
+ GET /sw.js 404 in 61ms (compile: 15ms, render: 46ms)
+✓ Compiled in 265ms
+✓ Compiled in 60ms
+✓ Compiled in 201ms
+ GET /sw.js 404 in 370ms (compile: 235ms, render: 135ms)
+ GET /student/academic 200 in 338ms (compile: 159ms, render: 179ms)
+ GET /icon?d878d31cd40b5385 200 in 21ms (compile: 3ms, render: 18ms)
+ GET /sw.js 404 in 81ms (compile: 43ms, render: 38ms)
+✓ Compiled in 133ms
+✓ Compiled in 396ms
+✓ Compiled in 188ms
+✓ Compiled in 59ms
+✓ Compiled in 163ms
+✓ Compiled in 53ms
+✓ Compiled in 83ms
+✓ Compiled in 90ms

@@ -111,23 +111,22 @@ const CandidateCard = ({ candidate }: { candidate: any }) => {
 };
 
 export default function MonitoringCenter() {
-    const [candidates, setCandidates] = useState([
-        { id: '1', name: 'Arjun Sharma', testName: 'Full Stack Java', status: 'ACTIVE', risk: 12, timeLeft: 45 },
-        { id: '2', name: 'Priya Verma', testName: 'Python Backend', status: 'SUSPICIOUS', risk: 88, timeLeft: 12 },
-        { id: '3', name: 'Rahul Gupta', testName: 'Java Full Stack', status: 'IDLE', risk: 45, timeLeft: 60 },
-        { id: '4', name: 'Sneha Reddy', testName: 'React Developer', status: 'ACTIVE', risk: 5, timeLeft: 30 },
-        { id: '5', name: 'Vikram Singh', testName: 'MERN Assessment', status: 'DISCONNECTED', risk: 0, timeLeft: 85 },
-        { id: '6', name: 'Ananya Das', testName: 'Cloud Arch.', status: 'ACTIVE', risk: 18, timeLeft: 22 },
-    ]);
+    const [candidates, setCandidates] = useState<any[]>([]);
     const [liveViolations, setLiveViolations] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/academic/proctoring/logs');
-                if (res.ok) {
-                    const logs = await res.json();
-                    setLiveViolations(logs);
+                const [logsRes, candRes] = await Promise.all([
+                    fetch('http://localhost:8080/api/academic/proctoring/logs'),
+                    fetch('http://localhost:8080/api/academic/active-candidates')
+                ]);
+
+                if (logsRes.ok) {
+                    setLiveViolations(await logsRes.json());
+                }
+                if (candRes.ok) {
+                    setCandidates(await candRes.json());
                 }
             } catch (err) {
                 console.error(err);
@@ -148,15 +147,15 @@ export default function MonitoringCenter() {
                         <div style={{ fontSize: '0.75rem', fontWeight: 900, background: 'rgba(255,255,255,0.2)', padding: '5px 12px', borderRadius: '20px' }}>LIVE NOW</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{candidates.length + 36}</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{candidates.length}</div>
                         <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8 }}>Active Candidates</div>
                     </div>
                 </div>
 
                 {[
-                    { label: 'Suspicious Activities', value: liveViolations.length > 0 ? liveViolations.length : '14', color: '#ef4444', icon: <AlertTriangle size={24} /> },
-                    { label: 'Active Test Sessions', value: '08', color: '#10b981', icon: <Monitor size={24} /> },
-                    { label: 'Network Stability', value: '98%', color: '#6366f1', icon: <Activity size={24} /> }
+                    { label: 'Suspicious Activities', value: liveViolations.length, color: '#ef4444', icon: <AlertTriangle size={24} /> },
+                    { label: 'Active Test Sessions', value: candidates.length, color: '#10b981', icon: <Monitor size={24} /> },
+                    { label: 'Network Stability', value: '99%', color: '#6366f1', icon: <Activity size={24} /> }
                 ].map((stat, i) => (
                     <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '35px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <div style={{ width: 60, height: 60, borderRadius: '20px', background: `${stat.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: stat.color }}>
@@ -175,11 +174,11 @@ export default function MonitoringCenter() {
                 <div style={{ display: 'flex', gap: '30px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#10b981' }}></div>
-                         <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Normal: 38</span>
+                         <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Normal: {candidates.filter(c => c.status !== 'SUSPICIOUS').length}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444' }}></div>
-                         <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Critical: 4</span>
+                         <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Critical: {candidates.filter(c => c.status === 'SUSPICIOUS').length}</span>
                     </div>
                 </div>
 

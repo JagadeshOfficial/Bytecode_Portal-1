@@ -22,7 +22,9 @@ const STATS_ICON_MAP: Record<string, any> = {
     Shield: <Shield color="#8b5cf6" />
 };
 
-const TestCard = ({ test, onAction }: TestCardProps) => {
+const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: string, test: any) => void, userRole?: string }) => {
+    const isStudent = userRole === 'STUDENT' || userRole === 'student';
+
     const statusColors = {
         DEPLOYED: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' },
         STAGING: { bg: 'rgba(245, 158, 11, 0.1)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.2)' },
@@ -134,25 +136,37 @@ const TestCard = ({ test, onAction }: TestCardProps) => {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '5px' }}>
-                <button onClick={() => onAction('EDIT', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }} title="Edit"><Edit2 size={16} /></button>
-                <button onClick={() => onAction('ANALYTICS', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#6366f1', cursor: 'pointer' }} title="Analytics"><BarChart3 size={16} /></button>
-                <button onClick={() => onAction('PREVIEW', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#10b981', cursor: 'pointer' }} title="Preview"><Eye size={16} /></button>
-                <button onClick={() => onAction('MENU', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }}><MoreVertical size={16} /></button>
-            </div>
+            {!isStudent ? (
+                <>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '5px' }}>
+                        <button onClick={() => onAction('EDIT', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }} title="Edit"><Edit2 size={16} /></button>
+                        <button onClick={() => onAction('ANALYTICS', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#6366f1', cursor: 'pointer' }} title="Analytics"><BarChart3 size={16} /></button>
+                        <button onClick={() => onAction('PREVIEW', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#10b981', cursor: 'pointer' }} title="Preview"><Eye size={16} /></button>
+                        <button onClick={() => onAction('MENU', test)} style={{ padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', color: '#718096', cursor: 'pointer' }}><MoreVertical size={16} /></button>
+                    </div>
 
-            <button 
-                onClick={() => onAction('ASSIGN', test)}
-                className="btn-quantum"
-                style={{ width: '100%', padding: '14px', background: 'var(--primary)', fontWeight: 900, borderRadius: '16px', fontSize: '0.85rem' }}
-            >
-                ASSIGN TO BATCH
-            </button>
+                    <button 
+                        onClick={() => onAction('ASSIGN', test)}
+                        className="btn-quantum"
+                        style={{ width: '100%', padding: '14px', background: 'var(--primary)', fontWeight: 900, borderRadius: '16px', fontSize: '0.85rem' }}
+                    >
+                        ASSIGN TO BATCH
+                    </button>
+                </>
+            ) : (
+                <button 
+                    onClick={() => onAction('TAKE', test)}
+                    className="btn-quantum"
+                    style={{ width: '100%', padding: '18px', background: '#6d28d9', color: '#fff', fontWeight: 900, borderRadius: '20px', fontSize: '1rem', marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', boxShadow: '0 10px 20px rgba(109, 40, 217, 0.2)' }}
+                >
+                    <Play size={20} fill="currentColor" /> START SECURE ASSESSMENT
+                </button>
+            )}
         </motion.div>
     );
 };
 
-export default function TestDashboard({ onActionOverride }: { onActionOverride?: (action: string, test: any) => void }) {
+export default function TestDashboard({ onActionOverride, currentUser }: { onActionOverride?: (action: string, test: any) => void, currentUser?: any }) {
     const [tests, setTests] = useState<any[]>([]);
     const [stats, setStats] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -167,10 +181,7 @@ export default function TestDashboard({ onActionOverride }: { onActionOverride?:
 
                 if (testsRes.ok) {
                     const data = await testsRes.json();
-                    setTests(data.length > 0 ? data : [
-                        { id: '1', name: 'Full Stack Java Assessment', status: 'DEPLOYED', type: 'Hybrid', questionCount: 45, duration: 90, difficulty: 'HARD', tags: ['Java', 'Spring', 'MySQL'], aiScore: 98, attempts: 124, passRate: 85, structure: 'MCQ + Coding' },
-                        { id: '2', name: 'Frontend React Engineering', status: 'STAGING', type: 'MCQ', questionCount: 30, duration: 60, difficulty: 'MEDIUM', tags: ['React', 'Redux', 'CSS'], aiScore: 92, attempts: 85, passRate: 78, structure: 'MCQ Only' }
-                    ]);
+                    setTests(data);
                 }
                 if (statsRes.ok) {
                     setStats(await statsRes.json());
@@ -207,12 +218,6 @@ export default function TestDashboard({ onActionOverride }: { onActionOverride?:
                         <Filter size={18} /> FILTER
                     </button>
                 </div>
-                <button 
-                    className="btn-quantum" 
-                    style={{ padding: '16px 32px', background: '#10b981', borderRadius: '20px', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}
-                >
-                    <Plus size={20} /> CREATE NEW TEST
-                </button>
             </div>
 
             {/* --- STATS ROW --- */}
@@ -239,7 +244,7 @@ export default function TestDashboard({ onActionOverride }: { onActionOverride?:
             {/* --- GRID --- */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2.5rem' }}>
                 {tests.map(test => (
-                    <TestCard key={test.id} test={test} onAction={handleAction} />
+                    <TestCard key={test.id} test={test} onAction={handleAction} userRole={currentUser?.role} />
                 ))}
             </div>
         </div>

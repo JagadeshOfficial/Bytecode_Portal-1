@@ -135,15 +135,31 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <label style={{ fontSize: '0.85rem', fontWeight: 900, color: '#4a5568' }}>TEST TITLE</label>
-                                        <input style={inputStyle} placeholder="e.g. Master React & Redux Assessment" />
+                                        <input 
+                                            style={inputStyle} 
+                                            placeholder="e.g. Master React & Redux Assessment" 
+                                            value={testData.title}
+                                            onChange={(e) => setTestData({...testData, title: e.target.value})}
+                                        />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <label style={{ fontSize: '0.85rem', fontWeight: 900, color: '#4a5568' }}>EXECUTIVE SUMMARY</label>
-                                        <textarea style={{ ...inputStyle, resize: 'none' }} rows={4} placeholder="Briefly describe the purpose of this test..." />
+                                        <textarea 
+                                            style={{ ...inputStyle, resize: 'none' }} 
+                                            rows={4} 
+                                            placeholder="Briefly describe the purpose of this test..." 
+                                            value={testData.description}
+                                            onChange={(e) => setTestData({...testData, description: e.target.value})}
+                                        />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <label style={{ fontSize: '0.85rem', fontWeight: 900, color: '#4a5568' }}>SKILL TAGS</label>
-                                        <input style={inputStyle} placeholder="Add tags like React, JS, Logic (comma separated)" />
+                                        <input 
+                                            style={inputStyle} 
+                                            placeholder="Add tags like React, JS, Logic (comma separated)" 
+                                            value={testData.tags}
+                                            onChange={(e) => setTestData({...testData, tags: e.target.value})}
+                                        />
                                     </div>
                                 </motion.div>
                             )}
