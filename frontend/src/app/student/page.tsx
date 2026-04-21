@@ -93,6 +93,8 @@ export default function StudentDashboard() {
         }
     };
 
+    const [stats, setStats] = useState({ proficiency: '0%', points: '0', hours: '0', badges: '0' });
+
     const fetchStudentAssignments = async (studentId: string) => {
         try {
             const bRes = await fetch(`http://localhost:8080/api/academic/batches/student/${studentId}`);
@@ -102,6 +104,23 @@ export default function StudentDashboard() {
             
             const allAss: any[] = [];
             const allLive: any[] = [];
+
+            // Fetch tracking data for stats
+            if (batches.length > 0) {
+                const tRes = await fetch(`http://localhost:8080/api/academic/batches/${batches[0].id || batches[0]._id}/student-tracking`);
+                if (tRes.ok) {
+                    const tracking = await tRes.json();
+                    const myTrack = tracking.find((t: any) => t.id === studentId);
+                    if (myTrack) {
+                        setStats({
+                            proficiency: `${myTrack.overallProgress}%`,
+                            points: (myTrack.testsTaken * 100 + myTrack.interviewsAttended * 500).toLocaleString(),
+                            hours: (myTrack.testsTaken * 2 + myTrack.interviewsAttended * 0.5).toFixed(1),
+                            badges: Math.floor(myTrack.overallProgress / 10).toString()
+                        });
+                    }
+                }
+            }
 
             for (const b of batches) {
                 // Fetch assignments
@@ -181,10 +200,10 @@ export default function StudentDashboard() {
                 
                 {/* --- STATS OVERVIEW --- */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                    <ProgressStatCard icon={<TrendingUp color="#10b981" />} title="Overall Proficiency" value="84.2%" trend="+4.8% vs prev" color="#10b981" />
-                    <ProgressStatCard icon={<Award color="#8b5cf6" />} title="Skill Points Gained" value="12,450" sub="Top 5% Learner" color="#8b5cf6" />
-                    <ProgressStatCard icon={<Clock color="#3b82f6" />} title="Learning Runtime" value="128 hrs" trend="24h this week" color="#3b82f6" />
-                    <ProgressStatCard icon={<Star color="#f59e0b" />} title="Project Badges" value="18" sub="Mastery Achievement" color="#f59e0b" />
+                    <ProgressStatCard icon={<TrendingUp color="#10b981" />} title="Overall Proficiency" value={stats.proficiency} trend="+4.8% vs prev" color="#10b981" />
+                    <ProgressStatCard icon={<Award color="#8b5cf6" />} title="Skill Points Gained" value={stats.points} sub="Experience Points" color="#8b5cf6" />
+                    <ProgressStatCard icon={<Clock color="#3b82f6" />} title="Learning Runtime" value={`${stats.hours} hrs`} trend="Active assessment time" color="#3b82f6" />
+                    <ProgressStatCard icon={<Star color="#f59e0b" />} title="Project Badges" value={stats.badges} sub="Mastery Achievement" color="#f59e0b" />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem' }}>

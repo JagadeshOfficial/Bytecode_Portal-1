@@ -170,7 +170,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
             sidebar.addEventListener('scroll', handleScroll);
             return () => sidebar.removeEventListener('scroll', handleScroll);
         }
-    }, [pathname]); 
+    }, [pathname]);
 
     // Determine the menu items based on the LOGGED IN user's role, not the page's requested role
     const activeUserRole = (loggedUser?.role || role || 'student').toLowerCase().replace(/-/g, '_').replace(/\s+/g, '_');
@@ -221,7 +221,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                 // Specific logic for Platform wide compatibility (Staff & Student)
                                 const authorizedFamily = ['TUTOR', 'TRAINER', 'STAFF', 'HR', 'ADMIN', 'SUPER_ADMIN', 'STUDENT'];
                                 const isFamilyCompat = authorizedFamily.includes(currentRoleStr) && authorizedFamily.includes(actualRoleStr);
-                                
+
                                 // Also allow common dashboard access
                                 const isCommonAuthorized = (actualRoleStr === 'TRAINER' || actualRoleStr === 'TUTOR' || actualRoleStr === 'ADMIN' || actualRoleStr === 'SUPER_ADMIN' || actualRoleStr === 'STUDENT');
 

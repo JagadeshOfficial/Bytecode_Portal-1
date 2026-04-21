@@ -309,25 +309,33 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
         }
     };
 
+    const isStudent = role === 'student';
+
     return (
         <div style={{ padding: '0 0.5rem' }}>
             {/* --- TOP SUB-NAV --- */}
             <div style={{ display: 'flex', gap: '15px', marginBottom: '3rem' }}>
                 {[
                     { id: 'DASHBOARD', label: 'DASHBOARD', icon: <Monitor size={18} /> },
-                    { id: 'LIVE_MONITOR', label: 'LIVE MONITOR', icon: <Activity size={18} /> },
+                    { id: 'LIVE_MONITOR', label: 'LIVE MONITOR', icon: <Activity size={18} />, adminOnly: true },
                     { id: 'AI_ROOM', label: 'AI ROOM', icon: <Bot size={18} /> },
-                    { id: 'ANALYTICS', label: 'ANALYTICS', icon: <BarChart2 size={18} /> },
-                    { id: 'RECORDINGS', label: 'RECORDINGS', icon: <Video size={18} /> }
-                ].map((tab) => (
+                    { id: 'ANALYTICS', label: 'ANALYTICS', icon: <BarChart2 size={18} />, adminOnly: true },
+                    { id: 'RECORDINGS', label: 'RECORDINGS', icon: <Video size={18} />, adminOnly: true }
+                ].filter(tab => {
+                    if (tab.adminOnly && !isAdmin) return false;
+                    if (isStudent && tab.id === 'RECORDINGS') return false;
+                    return true;
+                }).map((tab) => (
                     <button key={tab.id} onClick={() => setSubView(tab.id as any)} style={subView === tab.id ? activeBtnStyle : inactiveBtnStyle}>
                         {tab.icon} {tab.label}
                     </button>
                 ))}
                 <div style={{ flex: 1 }} />
-                <button onClick={() => { setIsEditing(false); setNewInterview({ ...newInterview, title: '', description: '', date: '', startTime: '' }); setIsWizardOpen(true); }} className="btn-quantum" style={{ padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Plus size={18} /> CREATE INTERVIEW
-                </button>
+                {!isStudent && (
+                    <button onClick={() => { setIsEditing(false); setNewInterview({ ...newInterview, title: '', description: '', date: '', startTime: '' }); setIsWizardOpen(true); }} className="btn-quantum" style={{ padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Plus size={18} /> CREATE INTERVIEW
+                    </button>
+                )}
             </div>
 
             {/* --- CONTENT AREA --- */}
@@ -411,6 +419,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                                                     console.error("Failed to conclude session:", result.error);
                                                 }
                                             }}
+                                            isStudent={isStudent}
                                         />
                                     ))
                                 )}
@@ -811,7 +820,7 @@ function ReviewStep({ data }: any) {
 
 // --- SUB-COMPONENTS CORE ---
 
-function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart, onFinish }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any, onStart: any, onFinish: any }) {
+function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart, onFinish, isStudent }: { data: any, onDelete: any, onEdit: any, onJoin: any, onReports: any, onStart: any, onFinish: any, isStudent?: boolean }) {
     const isCompleted = data.status === 'COMPLETED';
     const isLive = data.status === 'LIVE';
 
@@ -832,10 +841,12 @@ function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart, onF
                             {data.status || 'SCHEDULED'}
                         </span>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={onEdit} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={16} /></button>
-                        <button onClick={onDelete} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
-                    </div>
+                    {!isStudent && (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={onEdit} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                            <button onClick={onDelete} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                        </div>
+                    )}
                 </div>
 
                 <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.5rem', minHeight: '3.5rem', color: '#111' }}>{data.title}</h4>
@@ -868,15 +879,21 @@ function InterviewCard({ data, onDelete, onEdit, onJoin, onReports, onStart, onF
                 <div style={{ display: 'flex', gap: '10px' }}>
                     {isLive ? (
                         <>
-                            <button onClick={onJoin} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>MONITOR LIVE</button>
-                            <button onClick={onFinish} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#111', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>FINISH</button>
+                            {isStudent ? (
+                                <button onClick={onJoin} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>JOIN NOW</button>
+                            ) : (
+                                <>
+                                    <button onClick={onJoin} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>MONITOR LIVE</button>
+                                    <button onClick={onFinish} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#111', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>FINISH</button>
+                                </>
+                            )}
                         </>
                     ) : isCompleted ? (
                         <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>VIEW AI REPORT</button>
                     ) : (
-                        <button onClick={onStart} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#10b981', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>START SESSION</button>
+                        !isStudent && <button onClick={onStart} style={{ flex: 1, padding: '11px', borderRadius: '12px', background: '#10b981', color: '#fff', fontSize: '0.75rem', fontWeight: 900, border: 'none', cursor: 'pointer' }}>START SESSION</button>
                     )}
-                    {!isLive && !isCompleted && <button onClick={onReports} style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>HISTORY</button>}
+                    {!isLive && !isCompleted && <button onClick={onReports} style={{ flex: !isStudent ? 1 : 2, padding: '11px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#111', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>HISTORY</button>}
                 </div>
             </div>
         </motion.div>

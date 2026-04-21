@@ -736,16 +736,30 @@ router.get('/mock-interviews/stats', async (req, res) => {
 router.get('/batches/:batchId/student-tracking', async (req, res) => {
     try {
         const db = mongoose.connection.useDb('academic-db');
-        
         const batchId = req.params.batchId;
-        const students = await db.collection('users').find({ role: 'STUDENT', batchId: batchId }).toArray();
+        
+        // 1. Find the batch to get student IDs
+        const batch = await db.collection('batches').findOne({ _id: new mongoose.Types.ObjectId(batchId) });
+        if (!batch) return res.status(404).json({ error: 'Batch not found' });
+        
+        const studentIds = batch.studentIds || [];
+        
+        // 2. Resolve Users from the Main DB using the User model
+        const User = require('../models/User');
+        const students = await User.find({
+            $or: [
+                { _id: { $in: studentIds.filter(id => mongoose.Types.ObjectId.isValid(id)) } },
+                { email: { $in: studentIds } }
+            ]
+        });
         
         const trackingData = await Promise.all(students.map(async (student) => {
-            const interviews = await db.collection('mock_interviews').find({ candidateId: student._id.toString() }).toArray();
-            const tests = await db.collection('test_submissions').find({ studentId: student._id.toString() }).toArray();
+            const sid = student._id.toString();
+            const interviews = await db.collection('mock_interviews').find({ candidateId: sid }).toArray();
+            const tests = await db.collection('test_submissions').find({ studentId: sid }).toArray();
             
             return {
-                id: student._id,
+                id: sid,
                 name: student.fullName,
                 email: student.email,
                 interviewsAttended: interviews.length,

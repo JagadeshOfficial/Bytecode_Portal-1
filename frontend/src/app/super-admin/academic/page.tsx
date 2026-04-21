@@ -119,11 +119,11 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         setLoading(true);
         const userId = currentUser?.id || currentUser?._id;
         const isStudent = currentUserRole === 'STUDENT';
-        
-        const batchUrl = isStudent 
+
+        const batchUrl = isStudent
             ? `http://localhost:8080/api/academic/batches/student/${userId}`
             : 'http://localhost:8080/api/academic/batches';
-            
+
         const [cData, bData, uData, aData, sData, rData] = await Promise.all([
             fetchJsonSafe<any[]>('http://localhost:8080/api/courses'),
             fetchJsonSafe<any[]>(batchUrl),
@@ -132,15 +132,30 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
             fetchJsonSafe<any[]>('http://localhost:8080/api/academic/sessions'),
             fetchJsonSafe<any[]>('http://localhost:8080/api/academic/session-requests')
         ]);
-        
+
         if (bData.ok && bData.data) {
             setBatches(bData.data);
-            
+
             if (isStudent) {
                 const assignedCourseIds = new Set(bData.data.map((b: any) => b.courseId));
                 if (cData.ok && cData.data) {
-                    setCourses(cData.data.filter(c => assignedCourseIds.has(c.id) || assignedCourseIds.has(c._id)));
+                    const filteredCourses = cData.data.filter(c => assignedCourseIds.has(c.id) || assignedCourseIds.has(c._id));
+                    setCourses(filteredCourses);
                 }
+
+                // AUTO-SELECT FIRST BATCH FOR STUDENT
+                if (bData.data.length > 0) {
+                    const firstBatch = bData.data[0];
+                    setSelectedBatch(firstBatch);
+                    setViewMode('DETAILS');
+
+                    // Also select the course for this batch
+                    if (cData.ok && cData.data) {
+                        const course = cData.data.find(c => c.id === firstBatch.courseId || c._id === firstBatch.courseId);
+                        if (course) setSelectedCourse(course);
+                    }
+                }
+
                 const assignedBatchIds = new Set(bData.data.map((b: any) => b.id || b._id));
                 if (sData.ok && sData.data) {
                     setLiveSessions(sData.data.filter(s => assignedBatchIds.has(s.batchId)));
@@ -156,7 +171,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         } else if (cData.ok && cData.data) {
             setCourses(cData.data);
         }
-        
+
         if (uData.ok && uData.data) setAllUsers(uData.data);
 
         if (rData.ok && rData.data) {
@@ -246,7 +261,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     const isDownload = reqData.type === 'DOWNLOAD_RECORDING';
                     const titleText = isDownload ? `Recording Download ${action}` : `Request ${action}`;
                     let msgText = `Your request for "${reqData.data?.title || 'a session/recording'}" has been ${action.toLowerCase()} by ${reviewerName}.`;
-                    
+
                     if (isDownload && action === 'APPROVED') {
                         msgText = `Your download request for "${reqData.data?.title}" has been approved. You can now use this link: ${reqData.data?.recordingUrl}`;
                     }
@@ -273,13 +288,13 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
     const handleDeleteRequest = async (requestId: string) => {
         const req = sessionRequests.find(r => (r.id === requestId || r._id === requestId));
         const isHistorical = req && req.status !== 'PENDING';
-        
-        const confirmMsg = isHistorical 
+
+        const confirmMsg = isHistorical
             ? "Are you sure you want to delete this historical request log? This action is permanent."
             : "Are you sure you want to withdraw this request?";
-            
+
         if (!confirm(confirmMsg)) return;
-        
+
         try {
             const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}`, {
                 method: 'DELETE'
@@ -476,7 +491,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 if (res.ok) {
                     const createdReq = await res.json();
                     setSessionRequests([createdReq, ...sessionRequests]);
-                    
+
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a recording for ${session.batchName}.`;
                     await fetch(`http://localhost:8080/api/academic/notifications`, {
@@ -1011,7 +1026,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 });
                 if (res.ok) {
                     const createdReq = await res.json();
-                    
+
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to schedule a new session for ${selectedBatch?.batchName || 'a batch'}.`;
                     await fetch(`http://localhost:8080/api/academic/notifications`, {
@@ -1248,7 +1263,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 if (res.ok) {
                     const createdReq = await res.json();
                     setSessionRequests([createdReq, ...sessionRequests]);
-                    
+
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete an assignment: "${assignment.title}".`;
                     await fetch(`http://localhost:8080/api/academic/notifications`, {
@@ -1444,12 +1459,12 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                 {/* --- BATCH TABS NAVIGATION --- */}
-                                <div style={{ 
-                                    display: 'flex', 
-                                    gap: '10px', 
-                                    background: 'rgba(255,255,255,0.02)', 
-                                    padding: '8px', 
-                                    borderRadius: '24px', 
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '10px',
+                                    background: 'rgba(255,255,255,0.02)',
+                                    padding: '8px',
+                                    borderRadius: '24px',
                                     border: '1px solid rgba(255,255,255,0.05)',
                                     position: 'relative'
                                 }}>
@@ -1459,18 +1474,18 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                         { id: 'ASSIGNMENTS', label: 'ASSIGNMENTS', icon: <FileText size={16} /> },
                                         { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> }
                                     ].map((tab) => (
-                                        <button 
+                                        <button
                                             key={tab.id}
-                                            onClick={() => setBatchTab(tab.id as any)} 
-                                            style={{ 
-                                                flex: 1, 
-                                                padding: '14px', 
-                                                borderRadius: '16px', 
+                                            onClick={() => setBatchTab(tab.id as any)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '14px',
+                                                borderRadius: '16px',
                                                 background: 'transparent',
-                                                color: batchTab === tab.id ? '#fff' : 'var(--text-dim)', 
-                                                border: 'none', 
-                                                fontWeight: 800, 
-                                                cursor: 'pointer', 
+                                                color: batchTab === tab.id ? '#fff' : 'var(--text-dim)',
+                                                border: 'none',
+                                                fontWeight: 800,
+                                                cursor: 'pointer',
                                                 transition: 'color 0.3s',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -1570,7 +1585,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                 {/* --- LIVE SESSIONS CONTENT --- */}
                                 {batchTab === 'LIVE' && (
                                     <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px' }}>
-                                        
+
                                         {/* SESSION REQUESTS ARE NOW MANAGED VIA THE "Session Requests" BUTTON IN THE SIDEBAR MODAL */}
 
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
@@ -1616,21 +1631,21 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                                 <h4 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
                                                                 <span style={{ fontSize: "0.75rem", fontWeight: 900, color: "var(--primary)", letterSpacing: "2px", textTransform: "uppercase" }}>Live Transmission</span>
                                                             </div>
-                                                                {currentUserRole !== 'STUDENT' && (
-                                                                  <div style={{ display: "flex", gap: "8px" }}>
-                                                                        {sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'PENDING') ? (
-                                                                            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#f59e0b', background: '#fffbeb', padding: '6px 12px', borderRadius: '10px', border: '1px solid #fef3c7', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                                                <Clock size={12} /> PENDING {sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'PENDING')?.type}
-                                                                            </span>
-                                                                        ) : (
-                                                                            <>
-                                                                                <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
-                                                                                <button onClick={(e) => handleDeleteSession(ls.id || ls._id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
-                                                                            </>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                            {currentUserRole !== 'STUDENT' && (
+                                                                <div style={{ display: "flex", gap: "8px" }}>
+                                                                    {sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'PENDING') ? (
+                                                                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#f59e0b', background: '#fffbeb', padding: '6px 12px', borderRadius: '10px', border: '1px solid #fef3c7', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                                            <Clock size={12} /> PENDING {sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'PENDING')?.type}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <>
+                                                                            <button onClick={(e) => handleOpenEditSession(ls, e)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#4a5568", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Edit2 size={18} /></button>
+                                                                            <button onClick={(e) => handleDeleteSession(ls.id || ls._id, e)} style={{ background: "#fef2f2", border: "1px solid #fee2e2", color: "#ef4444", padding: "10px", borderRadius: "12px", cursor: "pointer" }}><Trash2 size={18} /></button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                                                             <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#2d3748" }}>
                                                                 <User size={18} color="var(--primary)" />
@@ -1645,28 +1660,28 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                                 <span style={{ fontSize: "0.85rem" }}>{ls.duration} Minutes • {ls.platform}</span>
                                                             </div>
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             onClick={() => {
-                                                                 if (currentUserRole === 'STUDENT') {
-                                                                     // Check if student has an APPROVED request for this session
-                                                                     const approvedReq = sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'APPROVED');
-                                                                     if (approvedReq) {
-                                                                         router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`);
-                                                                     } else {
-                                                                         setSelectedSessionForRequest(ls);
-                                                                         setJoinRequestForm({
-                                                                             studentName: currentUser?.fullName || currentUser?.email || 'Student',
-                                                                             courseName: ls.courseName || 'Full Stack',
-                                                                             batchName: ls.batchName || 'Default',
-                                                                             message: ''
-                                                                         });
-                                                                         setIsJoinRequestModalOpen(true);
-                                                                     }
-                                                                 } else {
-                                                                     router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`);
-                                                                 }
-                                                            }} 
-                                                            className="btn-quantum" 
+                                                                if (currentUserRole === 'STUDENT') {
+                                                                    // Check if student has an APPROVED request for this session
+                                                                    const approvedReq = sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'APPROVED');
+                                                                    if (approvedReq) {
+                                                                        router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`);
+                                                                    } else {
+                                                                        setSelectedSessionForRequest(ls);
+                                                                        setJoinRequestForm({
+                                                                            studentName: currentUser?.fullName || currentUser?.email || 'Student',
+                                                                            courseName: ls.courseName || 'Full Stack',
+                                                                            batchName: ls.batchName || 'Default',
+                                                                            message: ''
+                                                                        });
+                                                                        setIsJoinRequestModalOpen(true);
+                                                                    }
+                                                                } else {
+                                                                    router.push(`/super-admin/live/room/${encodeURIComponent(ls.meetingLink || ls.title)}`);
+                                                                }
+                                                            }}
+                                                            className="btn-quantum"
                                                             style={{ marginTop: "1rem", padding: "16px", fontSize: "1rem", fontWeight: 900, background: ls.status === "LIVE" ? "#10b981" : "var(--primary)", borderRadius: "20px", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", boxShadow: "0 10px 20px rgba(139, 92, 246, 0.3)" }}>
                                                             🎥 {currentUserRole === 'STUDENT' && !sessionRequests.find(r => (r.sessionId === ls.id || r.sessionId === ls._id) && r.status === 'APPROVED') ? 'REQUEST ACCESS' : 'JOIN WEBRTC ROOM'}
                                                         </button>
@@ -1802,20 +1817,20 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                                                         <div className="input-field shadow-sm" style={{ padding: '20px', borderRadius: '20px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                                                             <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>Student Identity</label>
-                                                            <input value={joinRequestForm.studentName} onChange={e => setJoinRequestForm({...joinRequestForm, studentName: e.target.value})} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1.1rem', fontWeight: 700, color: '#1a202c' }} required />
+                                                            <input value={joinRequestForm.studentName} onChange={e => setJoinRequestForm({ ...joinRequestForm, studentName: e.target.value })} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1.1rem', fontWeight: 700, color: '#1a202c' }} required />
                                                         </div>
                                                         <div className="input-field shadow-sm" style={{ padding: '20px', borderRadius: '20px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                                                             <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>Batch Stream</label>
-                                                            <input value={joinRequestForm.batchName} onChange={e => setJoinRequestForm({...joinRequestForm, batchName: e.target.value})} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1.1rem', fontWeight: 700, color: '#1a202c' }} required />
+                                                            <input value={joinRequestForm.batchName} onChange={e => setJoinRequestForm({ ...joinRequestForm, batchName: e.target.value })} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1.1rem', fontWeight: 700, color: '#1a202c' }} required />
                                                         </div>
                                                     </div>
                                                     <div className="input-field shadow-sm" style={{ padding: '20px', borderRadius: '20px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                                                         <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>Target Course</label>
-                                                        <input value={joinRequestForm.courseName} onChange={e => setJoinRequestForm({...joinRequestForm, courseName: e.target.value})} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1.1rem', fontWeight: 700, color: '#1a202c' }} required />
+                                                        <input value={joinRequestForm.courseName} onChange={e => setJoinRequestForm({ ...joinRequestForm, courseName: e.target.value })} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1.1rem', fontWeight: 700, color: '#1a202c' }} required />
                                                     </div>
                                                     <div className="input-field shadow-sm" style={{ padding: '20px', borderRadius: '20px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                                                         <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>Authorization Message</label>
-                                                        <textarea value={joinRequestForm.message} onChange={e => setJoinRequestForm({...joinRequestForm, message: e.target.value})} rows={3} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1rem', fontWeight: 600, color: '#1a202c', resize: 'none' }} placeholder="Provide purpose for joining..." />
+                                                        <textarea value={joinRequestForm.message} onChange={e => setJoinRequestForm({ ...joinRequestForm, message: e.target.value })} rows={3} style={{ width: '100%', background: 'transparent', border: 'none', fontSize: '1rem', fontWeight: 600, color: '#1a202c', resize: 'none' }} placeholder="Provide purpose for joining..." />
                                                     </div>
                                                     <button type="submit" className="btn-quantum" style={{ padding: '22px', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900, width: '100%', boxShadow: '0 15px 35px rgba(139, 92, 246, 0.4)' }}>SUBMIT ACCESS REQUEST</button>
                                                 </form>
@@ -1978,14 +1993,14 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                         <InfoSnippet icon={<User size={18} />} label="Faculty / Tutors" value={assignedTutors.length > 0 ? assignedTutors.map(t => t.fullName || t.email?.split('@')[0]).join(', ') : 'Pending'} />
                                         <InfoSnippet icon={<Users size={18} />} label="Student Access" value={`${students.length} Active`} />
                                         <InfoSnippet icon={<Calendar size={18} />} label="Drive Created" value={selectedBatch?.createdAt ? new Date(selectedBatch.createdAt).toLocaleDateString() : '09/04/2026'} />
-                                        <div 
+                                        <div
                                             onClick={() => { setIsRequestDetailModalOpen(true); fetchData(); }}
-                                            style={{ 
+                                            style={{
                                                 marginTop: '10px',
-                                                padding: '12px 20px', 
-                                                background: 'rgba(59, 130, 246, 0.05)', 
-                                                border: '1px solid rgba(59, 130, 246, 0.2)', 
-                                                borderRadius: '16px', 
+                                                padding: '12px 20px',
+                                                background: 'rgba(59, 130, 246, 0.05)',
+                                                border: '1px solid rgba(59, 130, 246, 0.2)',
+                                                borderRadius: '16px',
                                                 cursor: 'pointer',
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
@@ -2030,7 +2045,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     {/* --- MOCK INTERVIEW ENGINE --- */}
                     {viewMode === 'ANALYTICS' && (
                         <motion.div key="mock-interviews" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <MockInterviewEngine />
+                            <MockInterviewEngine role={role} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -2950,7 +2965,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                {sessionRequests.filter(r => 
+                                {sessionRequests.filter(r =>
                                     (r.data?.batchId === selectedBatch?.id || r.data?.batchId === selectedBatch?._id) ||
                                     (r.type === 'JOIN_SESSION' && r.data?.batchName === (selectedBatch?.name || selectedBatch?.batchName))
                                 ).length === 0 ? (
@@ -2958,7 +2973,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                         <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>No requests found for this batch.</p>
                                     </div>
                                 ) : (
-                                    sessionRequests.filter(r => 
+                                    sessionRequests.filter(r =>
                                         (r.data?.batchId === selectedBatch?.id || r.data?.batchId === selectedBatch?._id) ||
                                         (r.type === 'JOIN_SESSION' && r.data?.batchName === (selectedBatch?.name || selectedBatch?.batchName))
                                     ).map((req, idx) => (
@@ -2972,11 +2987,11 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 600 }}>Requested on {new Date(req.createdAt).toLocaleString()}</div>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                    <span style={{ 
-                                                        fontSize: '0.8rem', 
-                                                        fontWeight: 900, 
-                                                        padding: '8px 16px', 
-                                                        borderRadius: '12px', 
+                                                    <span style={{
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: 900,
+                                                        padding: '8px 16px',
+                                                        borderRadius: '12px',
                                                         background: req.status === 'APPROVED' ? '#ecfdf5' : (req.status === 'REJECTED' ? '#fef2f2' : (req.status === 'PENDING' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)')),
                                                         color: req.status === 'APPROVED' ? '#10b981' : (req.status === 'REJECTED' ? '#ef4444' : (req.status === 'PENDING' ? '#3b82f6' : '#f59e0b')),
                                                         border: `1px solid ${req.status === 'APPROVED' ? '#10b98130' : (req.status === 'REJECTED' ? '#ef444430' : 'transparent')}`
