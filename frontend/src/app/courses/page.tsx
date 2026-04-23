@@ -300,40 +300,85 @@ export default function Courses() {
 
             {/* HERO */}
             <section className={styles.heroSection}>
-                <div className={styles.heroBg}>
-                    <div className={`${styles.orb} ${styles.orb1}`} />
-                    <div className={`${styles.orb} ${styles.orb2}`} />
-                </div>
-                
-                <div className="container" style={{ position: 'relative', zIndex: 10 }}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={styles.heroBadge}
-                    >
-                        <Zap size={14} fill="currentColor" />
-                        <span>Master the Future</span>
-                    </motion.div>
-                    
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className={styles.heroTitle}
-                    >
-                        Your Career <br />
-                        <span>Transformed</span>
-                    </motion.h1>
-                    
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className={styles.heroSubtitle}
-                    >
-                        Industry-grade curriculum. Expert mentorship. Guaranteed placement support. 
-                        Zero to Job-Ready in months.
-                    </motion.p>
+                <div className={`${styles.heroContainer} container`}>
+                    <div className={styles.heroText}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={styles.heroBadge}
+                        >
+                            <Zap size={14} fill="currentColor" />
+                            <span>Master the Future</span>
+                        </motion.div>
+
+                        <motion.h1
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className={styles.heroTitle}
+                        >
+                            Your Career <br />
+                            <span>Transformed</span>
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className={styles.heroSubtitle}
+                        >
+                            Industry-grade curriculum. Expert mentorship. Guaranteed placement support.
+                            Zero to Job-Ready in months.
+                        </motion.p>
+                    </div>
+
+                    <div className={styles.heroVisual}>
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1 }}
+                            className={styles.mainHeroImgWrapper}
+                        >
+                            <Image 
+                                src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80" 
+                                alt="Coding" 
+                                width={500} 
+                                height={600} 
+                                className={styles.mainHeroImg}
+                            />
+                        </motion.div>
+
+                        {/* Floating Tech Cards */}
+                        <motion.div className={`${styles.floatingCardHero} ${styles.card1}`}>
+                            <div style={{ background: '#f89820', padding: '10px', borderRadius: '12px' }}>
+                                <Code color="white" size={24} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Java Stack</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Enterprise Grade</div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div className={`${styles.floatingCardHero} ${styles.card2}`}>
+                            <div style={{ background: '#3776ab', padding: '10px', borderRadius: '12px' }}>
+                                <Layers color="white" size={24} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Python Expert</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Data & AI Ready</div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div className={`${styles.floatingCardHero} ${styles.card3}`}>
+                            <div style={{ background: '#6366f1', padding: '10px', borderRadius: '12px' }}>
+                                <Rocket color="white" size={24} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Agentic AI</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>The Future</div>
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -590,10 +635,19 @@ function CourseCard({ course, delay, onSelect }: any) {
                     <div className={styles.batchBadge}><Calendar size={14} /> {course.startDate}</div>
                     {course.seatsLeft <= 10 && <div className={styles.seatsBadge}><Rocket size={14} /> {course.seatsLeft} LEFT</div>}
                 </div>
-                <div className={styles.cardMeta} style={{ perspective: 'none' }}>
-                    <div className={styles.metaItem}><Clock size={16} /> {course.duration}</div>
-                    <div className={styles.metaItem}><Users size={16} /> {course.students}</div>
-                    <div className={styles.metaItem} style={{ color: 'var(--accent)' }}><Star size={16} fill="currentColor" /> {course.rating}</div>
+                <div className={styles.cardMeta}>
+                    <div className={styles.metaItem}>
+                        <Clock size={16} />
+                        <span>{course.duration}</span>
+                    </div>
+                    <div className={styles.metaItem}>
+                        <Users size={16} />
+                        <span>{course.students}</span>
+                    </div>
+                    <div className={styles.metaItem} style={{ color: 'var(--accent)' }}>
+                        <Star size={16} fill="currentColor" />
+                        <span>{course.rating}</span>
+                    </div>
                 </div>
                 <div className={styles.cardFooter}>
                     <span className={styles.cardPrice}>{course.price}</span>

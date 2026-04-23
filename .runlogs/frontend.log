@@ -105,3 +105,14 @@
 ✓ Compiled in 87ms
  GET /sw.js 404 in 96ms (compile: 16ms, render: 80ms)
  GET /courses 200 in 554ms (compile: 170ms, render: 385ms)
+✓ Compiled in 131ms
+ GET /sw.js 404 in 124ms (compile: 38ms, render: 86ms)
+ GET /sw.js 404 in 98ms (compile: 32ms, render: 66ms)
+✓ Compiled in 65ms
+ GET /sw.js 404 in 57ms (compile: 13ms, render: 45ms)
+✓ Compiled in 29ms
+✓ Compiled in 91ms
+ GET /sw.js 404 in 156ms (compile: 44ms, render: 112ms)
+✓ Compiled in 261ms
+✓ Compiled in 35ms
+ GET /sw.js 404 in 138ms (compile: 12ms, render: 126ms)
