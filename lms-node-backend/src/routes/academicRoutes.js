@@ -961,20 +961,19 @@ router.post('/tests/ai-generate', async (req, res) => {
         console.log(`[GEMINI PROTOCOL]: Generating ${count} items for ${courseName} | Formats: ${formats.join(', ')} | Topics: ${prompt}`);
 
         const geminiPrompt = `
-Generate a JSON array of exactly ${count} highly professional technical assessment items.
-Course: ${courseName}
-Topics: ${prompt}
-Allowed Formats: ${formats.join(', ')}
+COMMAND: Generate a JSON array of exactly ${count} unique, high-quality technical assessment items.
+CONTEXT: Course "${courseName}", Topics: ${prompt}
+FORMATS TO USE: ${formats.join(', ')}
 
-SCHEMAS:
-1. MCQ: { id, concept, text, difficulty, type: "MCQ", options: [4 strings], correctIndex: 0-3 }
-2. CODING: { id, concept, text, difficulty, type: "CODING", starterCode, solution, testCases: [{input, expected}] }
-3. VIDEO/THEORY: { id, concept, text, difficulty, type: "VIDEO" | "THEORY", focalPoints: [3 evaluation criteria] }
+STRATEGIC RULES:
+1. QUANTITY: You MUST provide EXACTLY ${count} questions. No more, no less.
+2. UNIQUENESS: Every question text and tested concept must be distinct. DO NOT REPEAT ANY CONCEPT.
+3. SCHEMAS:
+   - MCQ: { "id": "uuid", "concept": "string", "text": "string", "difficulty": "EASY"|"MEDIUM"|"HARD", "type": "MCQ", "options": ["4 strings"], "correctIndex": 0-3 }
+   - CODING: { "id": "uuid", "concept": "string", "text": "string", "difficulty": "EASY"|"MEDIUM"|"HARD", "type": "CODING", "starterCode": "string", "solution": "string", "testCases": [{"input": "string", "expected": "string"}] }
+   - VIDEO/THEORY: { "id": "uuid", "concept": "string", "text": "string", "difficulty": "EASY"|"MEDIUM"|"HARD", "type": "VIDEO" | "THEORY", "focalPoints": ["3 strings"] }
 
-CRITICAL RULES:
-- Return ONLY a valid JSON array.
-- No markdown code blocks.
-- difficulty MUST be "INTERMEDIATE" or "ADVANCED".
+IMPORTANT: Return ONLY the raw JSON array. DO NOT include markdown code blocks or explanations.
 `;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {

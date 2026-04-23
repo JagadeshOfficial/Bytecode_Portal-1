@@ -199,7 +199,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                     <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '2rem 3rem 1rem 3rem' }}>
                          <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                  <div style={{ background: '#f1f5f9', padding: '8px 16px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 900, color: '#64748b' }}>FLOW STATE: {((step/8)*100).toFixed(0)}%</div>
+                                  <div style={{ background: '#f1f5f9', padding: '8px 16px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 900, color: '#64748b' }}>PROGRESS: {((step/8)*100).toFixed(0)}%</div>
                                   <div style={{ width: '160px', height: '6px', background: '#f1f5f9', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
                                       <motion.div initial={{ width: 0 }} animate={{ width: `${(step/8)*100}%` }} style={{ position: 'absolute', inset: 0, background: 'var(--primary)', borderRadius: '3px' }} />
                                   </div>
@@ -209,60 +209,60 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                          <button onClick={onClose} style={{ border: 'none', background: '#f8fafc', padding: '14px', borderRadius: '18px', cursor: 'pointer', color: '#64748b', transition: 'all 0.3s' }} className="hover-scale"><X size={26} /></button>
                     </div>
 
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 3rem 2rem 3rem', minHeight: 0 }} className="custom-scroll">
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 3rem 2rem 3rem', minHeight: 0, maxHeight: 'calc(92vh - 200px)' }} className="custom-scroll">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
                                 <motion.div key={`step-${step}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '30px' }}>
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>ASSESSMENT TITLE</label>
-                                             <input style={inputStyle} placeholder="e.g., Enterprise Architecture Masterclass" value={testData.title} onChange={(e) => setTestData({...testData, title: e.target.value})} />
-                                         </div>
-                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>CURRICULUM CATEGORY</label>
-                                             <select style={inputStyle} value={testData.courseId} onChange={(e) => setTestData({...testData, courseId: e.target.value, courseName: e.target.options[e.target.selectedIndex].text})}>
-                                                 <option value="">Map to Course...</option>
-                                                 {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                             </select>
-                                         </div>
-                                    </div>
+                                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '30px' }}>
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                              <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>TEST NAME</label>
+                                              <input style={inputStyle} placeholder="e.g., Python Basics" value={testData.title} onChange={(e) => setTestData({...testData, title: e.target.value})} />
+                                          </div>
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                              <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>CHOOSE COURSE</label>
+                                              <select style={inputStyle} value={testData.courseId} onChange={(e) => setTestData({...testData, courseId: e.target.value, courseName: e.target.options[e.target.selectedIndex].text})}>
+                                                  <option value="">Select a Course...</option>
+                                                  {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                              </select>
+                                          </div>
+                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                            <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>DIFFICULTY CALIBRATION</label>
-                                            <div style={{ display: 'flex', gap: '10px' }}>
-                                                {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(d => (
-                                                    <button 
-                                                        key={d} 
-                                                        onClick={() => setTestData({...testData, difficulty: d})}
-                                                        style={{ 
-                                                            flex: 1, padding: '14px', borderRadius: '15px', 
-                                                            border: `2px solid ${testData.difficulty === d ? 'var(--primary)' : '#f1f5f9'}`,
-                                                            background: testData.difficulty === d ? 'var(--primary)10' : '#fff',
-                                                            color: testData.difficulty === d ? 'var(--primary)' : '#94a3b8',
-                                                            fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        {d}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>SKILL MAPPING (TAGS)</label>
-                                             <input 
-                                                style={inputStyle} 
-                                                placeholder="React, JS, Redux" 
-                                                value={testData.tags.join(', ')} 
-                                                onChange={(e) => setTestData({...testData, tags: e.target.value.split(',').map(s => s.trim()).filter(s => s !== '')})}
-                                             />
+                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                             <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>SET DIFFICULTY</label>
+                                             <div style={{ display: 'flex', gap: '10px' }}>
+                                                 {['EASY', 'MEDIUM', 'HARD'].map(d => (
+                                                     <button 
+                                                         key={d} 
+                                                         onClick={() => setTestData({...testData, difficulty: d})}
+                                                         style={{ 
+                                                             flex: 1, padding: '14px', borderRadius: '15px', 
+                                                             border: `2px solid ${testData.difficulty === d ? 'var(--primary)' : '#f1f5f9'}`,
+                                                             background: testData.difficulty === d ? 'var(--primary)10' : '#fff',
+                                                             color: testData.difficulty === d ? 'var(--primary)' : '#94a3b8',
+                                                             fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer'
+                                                         }}
+                                                     >
+                                                         {d}
+                                                     </button>
+                                                 ))}
+                                             </div>
                                          </div>
-                                    </div>
+                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                              <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>KEYWORDS (TAGS)</label>
+                                              <input 
+                                                 style={inputStyle} 
+                                                 placeholder="React, Frontend, Web" 
+                                                 value={testData.tags.join(', ')} 
+                                                 onChange={(e) => setTestData({...testData, tags: e.target.value.split(',').map(s => s.trim()).filter(s => s !== '')})}
+                                              />
+                                          </div>
+                                     </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                        <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>DESCRIPTION & OVERVIEW</label>
-                                        <textarea style={{ ...inputStyle, height: '120px', resize: 'none' }} placeholder="Provide a detailed overview for the candidates..." value={testData.description} onChange={(e) => setTestData({...testData, description: e.target.value})} />
-                                    </div>
+                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                         <label style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b' }}>ABOUT THIS TEST</label>
+                                         <textarea style={{ ...inputStyle, height: '100px', resize: 'none' }} placeholder="Provide extra details for the students..." value={testData.description} onChange={(e) => setTestData({...testData, description: e.target.value})} />
+                                     </div>
                                 </motion.div>
                             )}
 
@@ -298,14 +298,14 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                 <Sparkles size={32} />
                                             </div>
                                             <div>
-                                                <h4 style={{ fontWeight: 900, fontSize: '1.5rem' }}>AI INTELLIGENCE SUITE</h4>
-                                                <p style={{ fontSize: '0.9rem', opacity: 0.8, fontWeight: 700 }}>Intelligent multi-modal curriculum fabrication.</p>
+                                                <h4 style={{ fontWeight: 900, fontSize: '1.5rem' }}>AUTO AI BUILDER</h4>
+                                                <p style={{ fontSize: '0.9rem', opacity: 0.8, fontWeight: 700 }}>Generate test questions automatically.</p>
                                             </div>
                                         </div>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr', gap: '2.5rem', marginBottom: '2rem' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px' }}>ITEM QUANTITY</label>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px' }}>QUESTIONS TO CREATE</label>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: '20px' }}>
                                                     <button onClick={() => setAiCount(Math.max(1, aiCount - 1))} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><ChevronLeft size={20} /></button>
                                                     <span style={{ fontSize: '1.4rem', fontWeight: 900, minWidth: '40px', textAlign: 'center' }}>{aiCount}</span>
@@ -314,7 +314,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                             </div>
 
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px' }}>ASSESSMENT FORMATS</label>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 900, opacity: 0.9, letterSpacing: '1px' }}>CHOOSE TYPE</label>
                                                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                                     {['MCQ', 'CODING', 'VIDEO', 'THEORY'].map(f => (
                                                         <button 
@@ -369,7 +369,10 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                         });
                                                         if (res.ok) {
                                                             const newQuestions = await res.json();
-                                                            setTestData({...testData, questions: [...testData.questions, ...newQuestions]});
+                                                            // Filter out duplicates by text
+                                                            const existingTexts = new Set(testData.questions.map(q => q.text.toLowerCase().trim()));
+                                                            const filteredNew = newQuestions.filter((q: any) => !existingTexts.has(q.text.toLowerCase().trim()));
+                                                            setTestData({...testData, questions: [...testData.questions, ...filteredNew]});
                                                             setStep(4);
                                                         }
                                                     } catch (e) {
@@ -481,10 +484,10 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                             {step === 5 && (
                                 <motion.div key={`step-${step}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                      {[
-                                         { key: 'screenLock', label: 'Quantum Screen Lock', desc: 'Prevents navigation exits via proprietary OS hook simulation.' },
-                                         { key: 'faceDetection', label: 'Visual Biometrics', desc: 'Continuous facial recognition verification during assessment.' },
-                                         { key: 'tabTracking', label: 'Intelligent Tab Audit', desc: 'Analyzes focus shifts and tab switching with detailed logging.' },
-                                         { key: 'noiseDetection', label: 'Audio Signal Analysis', desc: 'Filters frequency for human speech detection in noisy environments.' }
+                                         { key: 'screenLock', label: 'Lock Exam Screen', desc: 'Prevents students from leaving the test window.' },
+                                         { key: 'faceDetection', label: 'Student Face Tracking', desc: 'Continuous camera check to ensure the student is present.' },
+                                         { key: 'tabTracking', label: 'Track Tab Switching', desc: 'Detects and alerts if the student switches to another tab.' },
+                                         { key: 'noiseDetection', label: 'Background Noise Detection', desc: 'Listens for voices or loud noises during the exam.' }
                                      ].map((p, i) => (
                                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe', padding: '2rem', borderRadius: '28px', border: '1px solid #f1f5f9', transition: 'all 0.3s' }} className="hover-lift">
                                              <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
