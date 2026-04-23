@@ -2,7 +2,6 @@
 > Bytecode-trainings-platform@0.1.0 dev
 > next dev
 
-⚠ Port 3000 is in use by process 1989, using available port 3002 instead.
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -11,7 +10,98 @@
    * /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/frontend/package-lock.json
 
 ▲ Next.js 16.1.4 (Turbopack)
-- Local:         http://localhost:3002
-- Network:       http://192.168.0.172:3002
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.172:3000
 
 ✓ Starting...
+✓ Ready in 2.3s
+ GET / 200 in 2.5s (compile: 2.1s, render: 374ms)
+ GET /sw.js 404 in 118ms (compile: 61ms, render: 57ms)
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=3840&q=75 500 in 657ms (compile: 626ms, render: 32ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=3840&q=75 500 in 658ms (compile: 626ms, render: 32ms)
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=3840&q=75 500 in 24ms (compile: 10ms, render: 14ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=3840&q=75 500 in 24ms (compile: 10ms, render: 14ms)
+ GET / 200 in 269ms (compile: 16ms, render: 253ms)
+ GET /sw.js 404 in 36ms (compile: 5ms, render: 31ms)
+ GET /sw.js 404 in 66ms (compile: 16ms, render: 51ms)
+✓ Compiled in 1316ms
+ GET / 200 in 806ms (compile: 136ms, render: 671ms)
+ GET / 200 in 258ms (compile: 4ms, render: 254ms)
+ GET /sw.js 404 in 34ms (compile: 11ms, render: 22ms)
+ GET /icon?d878d31cd40b5385 200 in 408ms (compile: 284ms, render: 124ms)
+ GET /sw.js 404 in 60ms (compile: 6ms, render: 54ms)
+✓ Compiled in 175ms
+✓ Compiled in 16ms
+ GET /sw.js 404 in 57ms (compile: 16ms, render: 41ms)
+ GET /sw.js 404 in 63ms (compile: 19ms, render: 43ms)
+ GET / 200 in 519ms (compile: 144ms, render: 376ms)
+ GET /sw.js 404 in 55ms (compile: 10ms, render: 45ms)
+✓ Compiled in 152ms
+✓ Compiled in 54ms
+ GET /sw.js 404 in 78ms (compile: 23ms, render: 56ms)
+✓ Compiled in 38ms
+✓ Compiled in 119ms
+ GET /sw.js 404 in 131ms (compile: 30ms, render: 101ms)
+✓ Compiled in 621ms
+✓ Compiled in 0ms
+ GET / 200 in 957ms (compile: 195ms, render: 762ms)
+ GET / 200 in 126ms (compile: 11ms, render: 115ms)
+ GET / 200 in 122ms (compile: 5ms, render: 117ms)
+ GET /sw.js 404 in 127ms (compile: 19ms, render: 108ms)
+ GET / 200 in 669ms (compile: 39ms, render: 630ms)
+ GET / 200 in 212ms (compile: 4ms, render: 208ms)
+ GET /icon?d878d31cd40b5385 200 in 53ms (compile: 6ms, render: 47ms)
+ GET /icon?d878d31cd40b5385 200 in 21ms (compile: 3ms, render: 18ms)
+ GET /sw.js 404 in 70ms (compile: 23ms, render: 47ms)
+✓ Compiled in 45ms
+✓ Compiled in 295ms
+ GET / 200 in 849ms (compile: 307ms, render: 543ms)
+ GET / 200 in 137ms (compile: 19ms, render: 119ms)
+ GET / 200 in 92ms (compile: 3ms, render: 89ms)
+ GET /sw.js 404 in 100ms (compile: 14ms, render: 86ms)
+ GET / 200 in 1010ms (compile: 5ms, render: 1005ms)
+ GET / 200 in 530ms (compile: 7ms, render: 523ms)
+ GET /icon?d878d31cd40b5385 200 in 31ms (compile: 12ms, render: 19ms)
+ GET /icon?d878d31cd40b5385 200 in 26ms (compile: 5ms, render: 21ms)
+ GET /sw.js 404 in 105ms (compile: 35ms, render: 69ms)
+✓ Compiled in 251ms
+ GET /courses 200 in 1720ms (compile: 1517ms, render: 203ms)
+ GET /courses 200 in 102ms (compile: 20ms, render: 81ms)
+✓ Compiled in 17ms
+✓ Finished filesystem cache database compaction in 10.6s
+ GET /courses 200 in 3.0s (compile: 1598ms, render: 1416ms)
+ GET /sw.js 404 in 2.9s (compile: 39ms, render: 2.9s)
+ GET /courses 200 in 6.0s (compile: 1229ms, render: 4.8s)
+ GET /courses 200 in 508ms (compile: 114ms, render: 394ms)
+ GET /courses 200 in 252ms (compile: 9ms, render: 243ms)
+ GET / 200 in 3.7s (compile: 482ms, render: 3.2s)
+ GET /courses 200 in 414ms (compile: 10ms, render: 404ms)
+ GET /icon?d878d31cd40b5385 200 in 165ms (compile: 76ms, render: 89ms)
+ GET /icon?d878d31cd40b5385 200 in 59ms (compile: 8ms, render: 51ms)
+ GET /sw.js 404 in 763ms (compile: 99ms, render: 664ms)
+✓ Finished filesystem cache database compaction in 12.5s
+ GET /sw.js 404 in 213ms (compile: 15ms, render: 198ms)
+ GET /sw.js 404 in 66ms (compile: 9ms, render: 56ms)
+✓ Compiled in 80ms
+✓ Compiled in 561ms
+✓ Compiled in 87ms
+ GET /sw.js 404 in 96ms (compile: 16ms, render: 80ms)
+ GET /courses 200 in 554ms (compile: 170ms, render: 385ms)

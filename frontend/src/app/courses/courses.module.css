@@ -23,15 +23,16 @@
 
 /* 1. HERO SECTION */
 .heroSection {
-    padding: 6rem 0 4rem;
+    padding: 8rem 0 6rem;
     text-align: center;
     position: relative;
     overflow: hidden;
+    background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
 }
 
 @media (max-width: 768px) {
     .heroSection {
-        padding: 3rem 0 2rem;
+        padding: 5rem 0 3rem;
     }
 }
 
@@ -44,66 +45,76 @@
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.15;
+    filter: blur(140px);
+    opacity: 0.12;
 }
 
 .orb1 {
-    width: 600px;
-    height: 600px;
+    width: 700px;
+    height: 700px;
     background: var(--primary);
-    top: -200px;
-    left: -200px;
-    animation: float 20s infinite;
+    top: -250px;
+    left: 10%;
+    animation: float 25s infinite ease-in-out;
 }
 
 .orb2 {
-    width: 500px;
-    height: 500px;
+    width: 600px;
+    height: 600px;
     background: var(--accent);
-    bottom: -100px;
-    right: -100px;
-    animation: float 15s infinite reverse;
+    bottom: -150px;
+    right: 15%;
+    animation: float 20s infinite ease-in-out reverse;
 }
 
 @keyframes float {
-
-    0%,
-    100% {
-        transform: translate(0, 0);
-    }
-
-    50% {
-        transform: translate(30px, -30px);
-    }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(50px, -40px) scale(1.1); }
+    66% { transform: translate(-30px, 20px) scale(0.9); }
 }
 
 .heroTitle {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-size: clamp(3rem, 10vw, 6rem);
     font-weight: 950;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-    letter-spacing: -2px;
-    background: var(--grad-text-main);
+    line-height: 0.95;
+    margin-bottom: 2rem;
+    letter-spacing: -4px;
+    background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.7) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     text-transform: uppercase;
-}
-
-@media (max-width: 768px) {
-    .heroTitle {
-        font-size: 2.5rem;
-        letter-spacing: -1px;
-    }
+    font-family: 'Rajdhani', sans-serif;
+    position: relative;
+    z-index: 5;
 }
 
 .heroSubtitle {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: var(--text-dim);
-    max-width: 600px;
-    margin: 0 auto 3rem;
+    max-width: 750px;
+    margin: 0 auto 4rem;
     line-height: 1.6;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.heroBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 100px;
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 2.5rem;
+    backdrop-filter: blur(10px);
 }
 
 /* 2. PARTNERS MARQUEE */

@@ -300,31 +300,39 @@ export default function Courses() {
 
             {/* HERO */}
             <section className={styles.heroSection}>
-                <div className={styles.floatingIcons}>
-                    <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 5, repeat: Infinity }} style={{ top: '20%', left: '10%' }} className={styles.floatIcon}><Code size={40} /></motion.div>
-                    <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 7, repeat: Infinity }} style={{ top: '60%', left: '15%' }} className={styles.floatIcon}><Database size={32} /></motion.div>
-                    <motion.div animate={{ y: [0, -25, 0] }} transition={{ duration: 6, repeat: Infinity }} style={{ top: '30%', right: '10%' }} className={styles.floatIcon}><Cloud size={48} /></motion.div>
-                    <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 4, repeat: Infinity }} style={{ top: '70%', right: '15%' }} className={styles.floatIcon}><ShieldCheck size={36} /></motion.div>
-                </div>
                 <div className={styles.heroBg}>
                     <div className={`${styles.orb} ${styles.orb1}`} />
                     <div className={`${styles.orb} ${styles.orb2}`} />
                 </div>
+                
                 <div className="container" style={{ position: 'relative', zIndex: 10 }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={styles.heroBadge}
+                    >
+                        <Zap size={14} fill="currentColor" />
+                        <span>Master the Future</span>
+                    </motion.div>
+                    
                     <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
                         className={styles.heroTitle}
                     >
-                        Launch Your IT <br /> Career Today
+                        Your Career <br />
+                        <span>Transformed</span>
                     </motion.h1>
+                    
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                         className={styles.heroSubtitle}
                     >
-                        LEARN WHAT COMPANIES ACTUALLY WANT. ZERO CODING EXPERIENCE REQUIRED.
+                        Industry-grade curriculum. Expert mentorship. Guaranteed placement support. 
+                        Zero to Job-Ready in months.
                     </motion.p>
                 </div>
             </section>
