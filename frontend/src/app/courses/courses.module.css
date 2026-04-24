@@ -101,7 +101,7 @@
     line-height: 1;
     margin-bottom: 2rem;
     letter-spacing: -3px;
-    background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+    background: linear-gradient(180deg, var(--text-bright) 0%, var(--text-dim) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -643,7 +643,7 @@
     margin-bottom: 1.25rem;
     line-height: 1.2;
     font-family: 'Rajdhani', sans-serif;
-    color: #fff;
+    color: var(--text-bright);
     letter-spacing: -0.5px;
 }
 
@@ -722,7 +722,7 @@
 }
 
 .metaItem span {
-    color: #fff;
+    color: var(--text-bright);
     font-size: 0.85rem;
 }
 
@@ -738,7 +738,7 @@
     font-size: 1.75rem;
     font-weight: 950;
     font-family: 'Rajdhani', sans-serif;
-    color: #fff;
+    color: var(--text-bright);
 }
 
 .enrollBtn {

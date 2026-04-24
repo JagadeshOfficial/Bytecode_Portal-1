@@ -3,53 +3,159 @@
     background: var(--bg-void);
     color: var(--text-bright);
     overflow-x: hidden;
-    padding-top: 160px;
+    padding-top: 80px;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* HERO SECTION - Deep Space Vibe */
+/* HERO SECTION */
 .heroSection {
     position: relative;
-    padding: 4rem 0 4rem;
-    text-align: center;
-    background: var(--bg-void);
+    padding: 8rem 0 6rem;
+    background: radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
     overflow: hidden;
 }
 
-.heroTitle {
-    font-size: clamp(3rem, 10vw, 5rem);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 2rem;
-    background: var(--grad-text-main);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-family: 'Rajdhani', sans-serif;
-    letter-spacing: -0.02em;
+.heroContainer {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 5rem;
     position: relative;
     z-index: 10;
-    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    animation: fadeInUp 0.8s ease-out;
+}
+
+@media (max-width: 1024px) {
+    .heroSection {
+        padding: 5rem 0 4rem;
+    }
+    .heroContainer {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 3rem;
+    }
+}
+
+.heroTitle {
+    font-size: clamp(3rem, 6vw, 4.8rem);
+    font-weight: 950;
+    line-height: 0.95;
+    margin-bottom: 2rem;
+    letter-spacing: -3px;
+    background: var(--text-bright);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .heroTitle {
+        text-align: center;
+    }
 }
 
 .heroHighlight {
-    background: linear-gradient(to right, #4ade80, #3b82f6);
+    background: var(--grad-main);
     -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+    color: transparent;
 }
 
 .heroSubtitle {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     color: var(--text-dim);
-    max-width: 800px;
-    margin: 0 auto 3rem;
+    max-width: 600px;
+    margin: 0 0 4rem;
     line-height: 1.6;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .heroSubtitle {
+        text-align: center;
+        margin: 0 auto 3rem;
+    }
+}
+
+.heroVisual {
     position: relative;
-    z-index: 10;
-    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 1024px) {
+    .heroVisual {
+        height: 350px;
+    }
+}
+
+.heroMainImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 40px;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+    border: var(--border-luminous);
+    filter: saturate(1.2);
+}
+
+.achievementCard {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.25rem 2rem;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    z-index: 5;
+    animation: floatCard 8s infinite ease-in-out;
+}
+
+@keyframes floatCard {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(1deg); }
+}
+
+.achieve1 { top: 10%; right: -5%; animation-delay: 0s; }
+.achieve2 { bottom: 15%; left: -10%; animation-delay: 2s; }
+
+.achieveIcon {
+    width: 48px;
+    height: 48px;
+    background: var(--grad-main);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+}
+
+.achieveText h4 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-bright);
+    line-height: 1;
+    margin: 0;
+}
+
+.achieveText p {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 1px;
 }
 
 /* STATS GRID - Floating Glass & Neon Effect */
@@ -798,8 +904,10 @@
 
 /* FAANG SECTION */
 .faangSection {
-    padding: 10rem 0;
-    background: linear-gradient(to bottom, #020617, #0f172a, #020617);
+    padding: 8rem 0;
+    background: var(--bg-void);
+    position: relative;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .faangGrid {
@@ -809,12 +917,20 @@
     align-items: center;
 }
 
+@media (max-width: 1024px) {
+    .faangGrid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
 .faangImageWrap {
-    height: 600px;
+    height: 500px;
     position: relative;
-    border-radius: 32px;
+    border-radius: 40px;
     overflow: hidden;
-    border: var(--border-faint);
+    border: var(--border-luminous);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.2);
 }
 
 .faangGlow {
@@ -827,23 +943,24 @@
 .drillList {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .drillItem {
     display: flex;
     gap: 1.5rem;
-    padding: 1.5rem;
-    background: var(--bg-subtle);
-    border-radius: 20px;
-    border: var(--border-faint);
-    transition: all 0.3s;
+    padding: 2rem;
+    background: var(--bg-panel);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .drillItem:hover {
-    background: var(--bg-subtle);
-    transform: translateX(15px);
-    border-color: #3b82f6;
+    transform: translateX(12px) translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
 
 .drillIcon {
@@ -858,13 +975,13 @@
 }
 
 .drillItem h4 {
-    color: #ffffff;
+    color: var(--text-bright);
     font-size: 1.15rem;
     margin-bottom: 0.25rem;
 }
 
 .drillItem p {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-dim);
     font-size: 0.9rem;
     line-height: 1.5;
 }
@@ -874,40 +991,41 @@
     margin: 8rem 0;
     text-align: center;
     padding: 6rem 2rem;
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.2), rgba(15, 23, 42, 0.3));
-    border: var(--border-faint);
-    border-radius: 40px;
+    background: linear-gradient(145deg, var(--bg-panel) 0%, var(--bg-subtle) 100%);
+    border: var(--border-luminous);
+    border-radius: 48px;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
 }
 
 .demoBtn {
-    background: #10b981;
-    color: #020617;
+    background: var(--grad-main);
+    color: white;
     padding: 1.25rem 3rem;
-    border-radius: 99px;
-    font-weight: 800;
+    border-radius: 100px;
+    font-weight: 850;
     font-size: 1.1rem;
     border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    transition: all 0.3s;
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px -10px rgba(124, 58, 237, 0.5);
     position: relative;
     z-index: 10;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    animation: pulse 2s infinite;
+    letter-spacing: 2px;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 .demoBtn:hover {
-    transform: scale(1.05) translateY(-2px);
-    background: #34d399;
-    box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 30px 60px -10px rgba(124, 58, 237, 0.7);
 }
+
 
 /* ANIMATION KEYFRAMES */
 @keyframes fadeInUp {
@@ -1095,15 +1213,15 @@
 /* ROADMAP SECTION (Placement Process) */
 .roadmapSection {
     padding: 8rem 0;
-    background: #0f172a;
+    background: var(--bg-void);
     position: relative;
     overflow: hidden;
 }
 
 .roadmapContainer {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2.5rem;
     position: relative;
     z-index: 10;
 }
@@ -1112,126 +1230,132 @@
     content: '';
     position: absolute;
     top: 50%;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-    transform: translateY(-50%);
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
     z-index: 0;
-    opacity: 0.3;
+    opacity: 0.2;
+}
+
+@media (max-width: 1024px) {
+    .roadmapContainer::before {
+        display: none;
+    }
 }
 
 .roadmapStep {
-    background: rgba(30, 41, 59, 0.6);
-    border: var(--border-faint);
-    padding: 2rem;
-    border-radius: 20px;
+    background: var(--bg-panel);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 3rem 2rem;
+    border-radius: 32px;
     position: relative;
-    backdrop-filter: blur(10px);
-    transition: transform 0.3s;
+    backdrop-filter: blur(20px);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
 }
 
 .roadmapStep:hover {
-    transform: translateY(-10px);
-    border-color: #3b82f6;
-    box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
+    transform: translateY(-15px);
+    border-color: var(--primary);
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.1);
 }
 
 .stepNumber {
-    width: 50px;
-    height: 50px;
-    background: #0f172a;
-    border: 2px solid #3b82f6;
-    color: #ffffff;
+    width: 60px;
+    height: 60px;
+    background: var(--grad-main);
+    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 1.2rem;
-    margin: 0 auto 1.5rem;
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin: 0 auto 2rem;
     position: relative;
     z-index: 2;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
 }
 
 .stepTitle {
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
+    color: var(--text-bright);
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
     font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
 }
 
 .stepDesc {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-dim);
     font-size: 0.9rem;
     line-height: 1.6;
+    font-weight: 600;
 }
 
 /* RECRUITER VOICES SECTION */
 .recruiterSection {
-    padding: 8rem 0;
-    background: radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.1), transparent 60%);
-}
-
-.recruiterGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2rem;
-}
-
-.recruiterCard {
-    background: rgba(15, 23, 42, 0.6);
-    border: var(--border-faint);
-    padding: 2.5rem;
-    border-radius: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    transition: all 0.3s;
+    padding: 10rem 0;
+    background: var(--bg-void);
     position: relative;
     overflow: hidden;
 }
 
+.recruiterCard {
+    background: var(--bg-panel);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+}
+
 .recruiterCard:hover {
-    background: rgba(30, 41, 59, 0.8);
-    transform: translateY(-5px);
-    border-color: #10b981;
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.1);
 }
 
 .recruiterHeader {
     display: flex;
-    gap: 1.25rem;
+    gap: 1rem;
     align-items: center;
 }
 
 .recruiterImage {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
     object-fit: cover;
-    border: 2px solid #10b981;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .recruiterQuote {
-    color: #cbd5e1;
+    color: var(--text-bright);
     font-style: italic;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    border-left: 2px solid #10b981;
-    padding-left: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    border-left: 3px solid var(--primary);
+    padding-left: 1.25rem;
+    font-weight: 500;
 }
 
 .recruiterTrust {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #10b981;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* LIVE BADGE */

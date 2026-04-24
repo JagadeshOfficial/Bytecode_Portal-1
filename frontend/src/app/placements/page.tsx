@@ -118,27 +118,61 @@ export default function Placements() {
 
             {/* HERO SECTION */}
             <section className={styles.heroSection}>
-                <div className={styles.glowOrb} style={{ top: '-10%', left: '20%' }} />
-                <div className={styles.glowOrb} style={{ bottom: '10%', right: '20%', background: '#8b5cf6' }} />
+                <div className={`${styles.heroContainer} container`}>
+                    <div className={styles.heroText}>
+                        <motion.h1
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={styles.heroTitle}
+                        >
+                            Your First Job <br />
+                            <span className={styles.heroHighlight}>is Waiting.</span>
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className={styles.heroSubtitle}
+                        >
+                            FROM COMPLETE BEGINNERS TO HIGH-PAYING IT PROFESSIONALS. YOUR SUCCESS IS OUR REPUTATION.
+                        </motion.p>
+                    </div>
 
-                <div className="container" style={{ position: 'relative', zIndex: 10 }}>
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={styles.heroTitle}
-                    >
-                        Your First Job <span className={styles.heroHighlight}>is Waiting.</span> <br />
-                        We just help you <span className={styles.heroHighlight}>reach it.</span>
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className={styles.heroSubtitle}
-                    >
-                        FROM COMPLETE BEGINNERS TO HIGH-PAYING IT PROFESSIONALS. YOUR SUCCESS IS OUR REPUTATION.
-                    </motion.p>
+                    <div className={styles.heroVisual}>
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1 }}
+                            style={{ width: '100%', height: '100%' }}
+                        >
+                            <Image 
+                                src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80" 
+                                alt="Placement Success" 
+                                width={600} 
+                                height={500} 
+                                className={styles.heroMainImg}
+                            />
+                        </motion.div>
 
+                        <motion.div className={`${styles.achievementCard} ${styles.achieve1}`}>
+                            <div className={styles.achieveIcon}><Award size={24} /></div>
+                            <div className={styles.achieveText}>
+                                <h4>18 LPA</h4>
+                                <p>Highest Package</p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div className={`${styles.achievementCard} ${styles.achieve2}`}>
+                            <div className={styles.achieveIcon}><Building2 size={24} /></div>
+                            <div className={styles.achieveText}>
+                                <h4>500+</h4>
+                                <p>Hiring Partners</p>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+
+                <div className="container" style={{ position: 'relative', zIndex: 10, marginTop: '4rem' }}>
                     <div className={styles.statsContainer}>
                         {STATS.map((stat, i) => (
                             <div key={i} className={styles.statItem}>
@@ -178,7 +212,7 @@ export default function Placements() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             className={styles.heroTitle}
-                            style={{ fontSize: '3.5rem' }}
+                            style={{ fontSize: '3.5rem', textAlign: 'center' }}
                         >
                             Inspiring <span className={styles.heroHighlight}>Stories</span>
                         </motion.h2>
@@ -188,6 +222,7 @@ export default function Placements() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
                             className={styles.heroSubtitle}
+                            style={{ textAlign: 'center', margin: '0 auto' }}
                         >
                             See how students from non-IT backgrounds transformed their careers and secured high-paying jobs.
                         </motion.p>
@@ -323,8 +358,8 @@ export default function Placements() {
             <section className={styles.salarySection}>
                 <div className="container">
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Check Your Salary <span className={styles.heroHighlight}>Potential</span></h2>
-                        <p className={styles.heroSubtitle}>SEE HOW MUCH YOU CAN EARN AFTER COMPLETING OUR TRAINING.</p>
+                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem', textAlign: 'center' }}>Check Your Salary <span className={styles.heroHighlight}>Potential</span></h2>
+                        <p className={styles.heroSubtitle} style={{ textAlign: 'center', margin: '0 auto' }}>SEE HOW MUCH YOU CAN EARN AFTER COMPLETING OUR TRAINING.</p>
                     </div>
 
                     <div className={styles.calculatorCard}>
@@ -393,8 +428,8 @@ export default function Placements() {
             <section className={styles.roadmapSection}>
                 <div className="container">
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Your Pathway to <span className={styles.heroHighlight}>Placement</span></h2>
-                        <p className={styles.heroSubtitle}>STEP-BY-STEP GUIDANCE TO SECURE YOUR DREAM IT JOB.</p>
+                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem', textAlign: 'center' }}>Your Pathway to <span className={styles.heroHighlight}>Placement</span></h2>
+                        <p className={styles.heroSubtitle} style={{ textAlign: 'center', margin: '0 auto' }}>STEP-BY-STEP GUIDANCE TO SECURE YOUR DREAM IT JOB.</p>
                     </div>
 
                     <div className={styles.roadmapContainer}>
@@ -424,9 +459,11 @@ export default function Placements() {
 
             {/* RECRUITER INTELLIGENCE - HORIZONTAL MARQUEE */}
             <section className={styles.recruiterSection} style={{ overflow: 'hidden' }}>
-                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                    <h2 className={styles.heroTitle} style={{ fontSize: '3rem' }}>Why Companies <span className={styles.heroHighlight}>Hire Us</span></h2>
-                    <p className={styles.heroSubtitle}>WHY TOP IT COMPANIES PREFER HIRING Bytecode TRAINED PROFESSIONALS.</p>
+                <div className="container">
+                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                        <h2 className={styles.heroTitle} style={{ fontSize: '3rem', textAlign: 'center' }}>Why Companies <span className={styles.heroHighlight}>Hire Us</span></h2>
+                        <p className={styles.heroSubtitle} style={{ textAlign: 'center', margin: '0 auto 4rem' }}>WHY TOP IT COMPANIES PREFER HIRING Bytecode TRAINED PROFESSIONALS.</p>
+                    </div>
                 </div>
 
                 <div className={styles.horizontalMarquee}>

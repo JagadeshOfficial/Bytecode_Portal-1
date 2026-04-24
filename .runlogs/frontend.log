@@ -116,3 +116,169 @@
 ✓ Compiled in 261ms
 ✓ Compiled in 35ms
  GET /sw.js 404 in 138ms (compile: 12ms, render: 126ms)
+⨯ upstream image response failed for https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80 404
+✓ Compiled in 94ms
+ GET /sw.js 404 in 129ms (compile: 52ms, render: 77ms)
+ GET /courses 200 in 339ms (compile: 226ms, render: 113ms)
+ GET /icon?d878d31cd40b5385 200 in 33ms (compile: 4ms, render: 29ms)
+○ Compiling /placements ...
+ GET /placements 200 in 6.6s (compile: 6.4s, render: 154ms)
+ GET /placements 200 in 128ms (compile: 24ms, render: 104ms)
+ GET /placements 200 in 44ms (compile: 9ms, render: 34ms)
+ GET /sw.js 404 in 83ms (compile: 28ms, render: 55ms)
+✓ Compiled in 272ms
+✓ Compiled in 153ms
+ GET /sw.js 404 in 74ms (compile: 18ms, render: 56ms)
+✓ Compiled in 51ms
+ GET /sw.js 404 in 78ms (compile: 21ms, render: 57ms)
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 117ms (compile: 63ms, render: 54ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 117ms (compile: 63ms, render: 55ms)
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 31ms (compile: 14ms, render: 17ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 31ms (compile: 14ms, render: 17ms)
+ GET /sw.js 404 in 79ms (compile: 17ms, render: 61ms)
+✓ Compiled in 109ms
+✓ Compiled in 74ms
+ GET /sw.js 404 in 74ms (compile: 17ms, render: 57ms)
+✓ Compiled in 22ms
+ GET /sw.js 404 in 59ms (compile: 16ms, render: 43ms)
+ GET /sw.js 404 in 77ms (compile: 24ms, render: 53ms)
+✓ Compiled in 90ms
+ GET /sw.js 404 in 107ms (compile: 31ms, render: 76ms)
+✓ Compiled in 85ms
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 83ms (compile: 54ms, render: 29ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 83ms (compile: 54ms, render: 29ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 80ms (compile: 68ms, render: 12ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 80ms (compile: 68ms, render: 12ms)
+ GET /sw.js 404 in 62ms (compile: 12ms, render: 50ms)
+✓ Compiled in 23ms
+ GET /sw.js 404 in 82ms (compile: 10ms, render: 73ms)
+✓ Compiled in 157ms
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 138ms (compile: 94ms, render: 44ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 138ms (compile: 94ms, render: 44ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 154ms (compile: 135ms, render: 19ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 154ms (compile: 135ms, render: 19ms)
+ GET /sw.js 404 in 88ms (compile: 32ms, render: 56ms)
+✓ Compiled in 124ms
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 61ms (compile: 37ms, render: 24ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 61ms (compile: 37ms, render: 25ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 50ms (compile: 40ms, render: 10ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 50ms (compile: 40ms, render: 10ms)
+ GET /sw.js 404 in 65ms (compile: 10ms, render: 55ms)
+ GET /contact 200 in 1070ms (compile: 957ms, render: 113ms)
+ GET /icon?d878d31cd40b5385 200 in 74ms (compile: 9ms, render: 65ms)
+ GET /sw.js 404 in 89ms (compile: 27ms, render: 62ms)
+✓ Compiled in 149ms
+✓ Compiled in 18ms
+✓ Compiled in 103ms
+ GET /sw.js 404 in 81ms (compile: 13ms, render: 68ms)
+✓ Compiled in 146ms
+ GET /sw.js 404 in 124ms (compile: 12ms, render: 112ms)
+✓ Compiled in 74ms
+✓ Compiled in 79ms
+✓ Compiled in 16ms
+ GET /sw.js 404 in 93ms (compile: 27ms, render: 66ms)
+ GET /sw.js 404 in 118ms (compile: 34ms, render: 84ms)
+ GET /about 200 in 2.0s (compile: 1944ms, render: 70ms)
+ GET /icon?d878d31cd40b5385 200 in 69ms (compile: 4ms, render: 65ms)
+ GET /courses 200 in 67ms (compile: 22ms, render: 45ms)
+⨯ upstream image response failed for https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?auto=format&fit=crop&q=80 404
+ GET /courses 200 in 27ms (compile: 8ms, render: 19ms)
+ GET /courses 200 in 29ms (compile: 4ms, render: 25ms)
+ GET /placements 200 in 174ms (compile: 128ms, render: 46ms)
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND logo.clearbit.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'logo.clearbit.com'
+  }
+}
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 63ms (compile: 28ms, render: 35ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Ftcs.com&w=256&q=75 500 in 64ms (compile: 28ms, render: 35ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 61ms (compile: 45ms, render: 16ms)
+ GET /_next/image?url=https%3A%2F%2Flogo.clearbit.com%2Friseup.com&w=256&q=75 500 in 61ms (compile: 45ms, render: 16ms)
+ GET /sw.js 404 in 88ms (compile: 29ms, render: 59ms)
+ GET /sw.js 404 in 80ms (compile: 23ms, render: 57ms)
+ GET /sw.js 404 in 51ms (compile: 11ms, render: 40ms)

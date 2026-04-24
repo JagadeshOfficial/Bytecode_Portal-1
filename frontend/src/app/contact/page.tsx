@@ -282,37 +282,69 @@ export default function Contact() {
 
             <div className={styles.heroRow}>
                 <div className={styles.heroContent}>
-                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
+                    <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
                         <LiveOfficeStatus />
                         <section className={styles.landingHeader}>
                             <h1 className={styles.heroTitle}>Step Into Your <br /><span className={styles.heroHighlight}>IT Career.</span></h1>
-                            <p className={styles.heroSubtitle}>Start your journey with us. Master high-demand skills with our 2026 Tech Bootcamps and secure your dream job.</p>
+                            <p className={styles.heroSubtitle}>Start your journey with us. Master high-demand skills with our 2026 Tech Bootcamps and secure your dream job at top MNCs.</p>
                         </section>
 
                         <div className={styles.statusIconsRow}>
-                            <div className={styles.channelTile} onClick={() => setIsChatOpen(true)}>
-                                <MessageSquare size={20} />
-                                <span>AI Chat</span>
-                            </div>
-                            <div className={styles.channelTile} onClick={() => window.location.href = 'tel:+918309879187'}>
-                                <Phone size={20} />
-                                <span>Call Support</span>
-                            </div>
-                            <div className={styles.channelTile} onClick={() => window.location.href = 'mailto:info@Bytecodetrainings.com'}>
-                                <Mail size={20} />
-                                <span>Email Us</span>
-                            </div>
+                            <button className={styles.eliteSubmitBtn} style={{ flex: 1, margin: 0, height: '60px' }} onClick={() => setIsChatOpen(true)}>
+                                <MessageSquare size={20} /> CHAT WITH NOVA AI
+                            </button>
+                            <button className={styles.eliteSubmitBtn} style={{ flex: 1, margin: 0, height: '60px', background: 'var(--bg-panel)', border: 'var(--border-luminous)', color: 'var(--text-bright)' }} onClick={() => window.location.href = 'tel:+918309879187'}>
+                                <Phone size={20} /> CALL COUNSELOR
+                            </button>
                         </div>
                     </motion.div>
                 </div>
 
                 <div className={styles.heroVisual}>
-                    <motion.div className={styles.visualWrapper} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}>
-                        <motion.div className={styles.floatingBox} animate={{ y: [0, -20, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
-                            <Image src="/tech_admission.png" alt="Tech Future" className={styles.mainIllustration} width={600} height={600} />
-                            <div className={styles.visualGlow}></div>
+                    <div className={styles.visualWrapper}>
+                        <div className={styles.visualGlow}></div>
+                        
+                        <motion.div 
+                            className={`${styles.floatingContactCard} ${styles.fCard1}`}
+                            onClick={() => window.location.href = 'mailto:info@Bytecodetrainings.com'}
+                        >
+                            <div className={styles.iconBox} style={{ width: '40px', height: '40px' }}><Mail size={18} /></div>
+                            <div>
+                                <h4 style={{ fontSize: '1rem', margin: 0 }}>Email Us</h4>
+                                <p style={{ fontSize: '0.75rem', margin: 0, opacity: 0.7 }}>24/7 Support</p>
+                            </div>
                         </motion.div>
-                    </motion.div>
+
+                        <motion.div 
+                            className={`${styles.floatingContactCard} ${styles.fCard2}`}
+                            onClick={() => window.open('https://wa.me/918309879187', '_blank')}
+                        >
+                            <div className={styles.iconBox} style={{ width: '40px', height: '40px', color: '#22c55e', borderColor: 'rgba(34, 197, 94, 0.2)' }}><MessageSquare size={18} /></div>
+                            <div>
+                                <h4 style={{ fontSize: '1rem', margin: 0 }}>WhatsApp</h4>
+                                <p style={{ fontSize: '0.75rem', margin: 0, opacity: 0.7 }}>Instant Reply</p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            className={`${styles.floatingContactCard} ${styles.fCard3}`}
+                            onClick={() => window.location.href = 'tel:+918309879187'}
+                        >
+                            <div className={styles.iconBox} style={{ width: '40px', height: '40px' }}><Phone size={18} /></div>
+                            <div>
+                                <h4 style={{ fontSize: '1rem', margin: 0 }}>Call Support</h4>
+                                <p style={{ fontSize: '0.75rem', margin: 0, opacity: 0.7 }}>Direct Line</p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.8 }} 
+                            animate={{ opacity: 1, scale: 1 }} 
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        >
+                            <Image src="/tech_admission.png" alt="Tech Future" className={styles.mainIllustration} width={600} height={600} priority />
+                        </motion.div>
+                    </div>
                 </div>
             </div>
 
@@ -329,28 +361,28 @@ export default function Contact() {
                             <div className={styles.formSection}>
                                 <div className={styles.sectionLabel}>FULL NAME</div>
                                 <div className={styles.advancedInputGroup}>
-                                    <input type="text" required placeholder="John Doe" onChange={e => setFormData({ ...formData, fullName: e.target.value })} />
+                                    <input type="text" required onChange={e => setFormData({ ...formData, fullName: e.target.value })} />
                                     <div className={styles.inputIcon}><Users size={18} /></div>
                                 </div>
                             </div>
                             <div className={styles.formSection}>
                                 <div className={styles.sectionLabel}>EMAIL ADDRESS</div>
                                 <div className={styles.advancedInputGroup}>
-                                    <input type="email" required placeholder="john@example.com" onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                    <input type="email" required onChange={e => setFormData({ ...formData, email: e.target.value })} />
                                     <div className={styles.inputIcon}><Mail size={18} /></div>
                                 </div>
                             </div>
                             <div className={styles.formSection}>
                                 <div className={styles.sectionLabel}>WHATSAPP NUMBER</div>
                                 <div className={styles.advancedInputGroup}>
-                                    <input type="tel" required placeholder="+91 99999 99999" onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                                    <input type="tel" required onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                                     <div className={styles.inputIcon}><Phone size={18} /></div>
                                 </div>
                             </div>
                             <div className={styles.formSection}>
                                 <div className={styles.sectionLabel}>CAREER GOAL</div>
                                 <div className={styles.advancedInputGroup}>
-                                    <input type="text" placeholder="e.g. SDE-1 at Amazon" onChange={e => setFormData({ ...formData, goal: e.target.value })} />
+                                    <input type="text" onChange={e => setFormData({ ...formData, goal: e.target.value })} />
                                     <div className={styles.inputIcon}><Target size={18} /></div>
                                 </div>
                             </div>
