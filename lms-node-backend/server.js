@@ -25,7 +25,8 @@ let SIM_BATCHES = [
 let IS_DB_LIVE = false;
 
 // --- DB CONNECTION WITH FAILOVER ---
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/bytecode_games';
+// Using a dedicated local DB for Games to ensure it works even if Atlas is flaky
+const MONGO_URI = 'mongodb://localhost:27017/bytecode_games';
 
 console.log('📡 Attempting Database Connection...');
 mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
@@ -54,6 +55,22 @@ const Course = mongoose.model('Course', CourseSchema);
 const Batch = mongoose.model('Batch', BatchSchema);
 const Game = mongoose.model('Game', GameSchema);
 
+const ActivitySchema = new mongoose.Schema({
+    user: { type: String, default: 'System' },
+    action: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+
+const ScoreSchema = new mongoose.Schema({
+    user_id: String,
+    game_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Game' },
+    score: Number,
+    timestamp: { type: Date, default: Date.now }
+});
+
+const Activity = mongoose.model('Activity', ActivitySchema);
+const Score = mongoose.model('Score', ScoreSchema);
+
 // --- AUTO-SEED ---
 async function autoSeed() {
     if (await Course.countDocuments() === 0) {
@@ -66,6 +83,12 @@ async function autoSeed() {
             { name: 'DS-01', courseId: liveC[1]._id }
         ]);
         console.log('✅ Live Database Seeded.');
+        
+        // Seed initial activity
+        await Activity.create([
+            { user: 'System', action: 'AI Difficulty Scaled to PRO', timestamp: new Date(Date.now() - 120000) },
+            { user: 'System', action: 'Global Leaderboard Synchronized', timestamp: new Date(Date.now() - 360000) }
+        ]);
     }
 }
 
@@ -98,11 +121,40 @@ app.post('/api/admin/games/create', async (req, res) => {
     if (IS_DB_LIVE) {
         const game = new Game(req.body);
         await game.save();
+        await Activity.create({ user: 'Admin', action: `Created new game: ${game.title}` });
         return res.json(game);
     }
     const simGame = { _id: Date.now(), ...req.body, active: true };
     console.log('💾 Game Created in Memory Buffer:', simGame.title);
     res.json(simGame);
+});
+
+app.get('/api/admin/system-activity', async (req, res) => {
+    try {
+        const logs = await Activity.find().sort({ timestamp: -1 }).limit(10).lean();
+        const scores = await Score.find().sort({ timestamp: -1 }).limit(10).populate('game_id').lean();
+        
+        const combined = [
+            ...logs.map(l => ({ user: l.user, action: l.action, timestamp: l.timestamp })),
+            ...scores.map(s => ({ user: s.user_id, action: `Completed ${s.game_id?.title || 'Game'}`, timestamp: s.timestamp }))
+        ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 10);
+        
+        res.json(combined);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/leaderboard/global', async (req, res) => {
+    if (IS_DB_LIVE) {
+        const lb = await Score.aggregate([
+            { $group: { _id: '$user_id', totalScore: { $sum: '$score' } } },
+            { $sort: { totalScore: -1 } },
+            { $limit: 10 }
+        ]);
+        return res.json(lb);
+    }
+    res.json([]);
 });
 
 app.get('/api/admin/system-stats', async (req, res) => {

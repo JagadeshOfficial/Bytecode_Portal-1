@@ -50,6 +50,7 @@ export default function GamesDashboard() {
     const [batches, setBatches] = useState<any[]>([]);
     const [stats, setStats] = useState<any>({});
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [activityLogs, setActivityLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
     const searchParams = useSearchParams();
@@ -74,10 +75,16 @@ export default function GamesDashboard() {
             const b = await apiCall('http://localhost:8085/api/batches');
             const s = await apiCall('http://localhost:8085/api/admin/system-stats');
             const l = await apiCall('http://localhost:8085/api/leaderboard/global');
+            const a = await apiCall('http://localhost:8085/api/admin/system-activity');
 
             // Apply Data with Fallback Logic
             if (c && c.length > 0) {
-                setGames(g || []); setCourses(c); setBatches(b || []); setStats(s || {}); setLeaderboard(l || []);
+                setGames(g || []); 
+                setCourses(c); 
+                setBatches(b || []); 
+                setStats(s || {}); 
+                setLeaderboard(l || []);
+                setActivityLogs(a || []);
             } else {
                 throw new Error("Local Mode Active");
             }
@@ -96,6 +103,10 @@ export default function GamesDashboard() {
             setCourses(LOCAL_COURSES);
             setBatches(LOCAL_BATCHES);
             setGames([{ _id: 'l1', title: 'Operational Code Sprint', category: 'CODING', course: 'Full Stack Web Development', batch: 'B40', active: true }]);
+            setActivityLogs([
+                { user: 'Rahul (B40)', action: 'Completed Code Puzzle', timestamp: new Date() },
+                { user: 'System', action: 'AI Difficulty Scaled to PRO', timestamp: new Date(Date.now() - 120000) }
+            ]);
         }
         setLoading(false);
     };
@@ -134,7 +145,7 @@ export default function GamesDashboard() {
 
             <AnimatePresence mode="wait">
                 <motion.div key={activeSection} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-                    {activeSection === 'DASHBOARD' && <DashboardModule stats={stats} />}
+                    {activeSection === 'DASHBOARD' && <DashboardModule stats={stats} activityLogs={activityLogs} />}
                     {activeSection === 'GAME_MGMT' && <GameMgmtModule games={games} courses={courses} batches={batches} refresh={fetchData} />}
                     {activeSection === 'TOURNAMENT' && <TournamentModule stats={stats} />}
                     {activeSection === 'LEADERBOARD_MGMT' && <LeaderboardModule leaderboard={leaderboard} />}
@@ -149,7 +160,17 @@ export default function GamesDashboard() {
 }
 
 // 👨💼 [1] DASHBOARD - FULL SYSTEM OVERVIEW
-function DashboardModule({ stats }: any) {
+function DashboardModule({ stats, activityLogs }: any) {
+    const formatTime = (ts: any) => {
+        const diff = Date.now() - new Date(ts).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'Just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return `${hours}h ago`;
+        return new Date(ts).toLocaleDateString();
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
@@ -162,8 +183,13 @@ function DashboardModule({ stats }: any) {
             <div style={{ ...glassStyle, padding: '1.5rem' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 1000, marginBottom: '1rem' }}>Sovereign Pulse Overview</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <ActivityRow user="Rahul (B40)" action="Completed Code Puzzle" time="Just now" />
-                    <ActivityRow user="System" action="AI Difficulty Scaled to PRO" time="2m ago" />
+                    {activityLogs && activityLogs.length > 0 ? (
+                        activityLogs.map((log: any, i: number) => (
+                            <ActivityRow key={i} user={log.user} action={log.action} time={formatTime(log.timestamp)} />
+                        ))
+                    ) : (
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', padding: '1rem' }}>No recent activity detected.</p>
+                    )}
                 </div>
             </div>
         </div>

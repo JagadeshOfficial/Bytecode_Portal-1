@@ -43,10 +43,17 @@ const ScoreSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+const ActivitySchema = new mongoose.Schema({
+    user: { type: String, default: 'System' },
+    action: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+
 const Course = mongoose.model('Course', CourseSchema);
 const Batch = mongoose.model('Batch', BatchSchema);
 const Game = mongoose.model('Game', GameSchema);
 const Score = mongoose.model('Score', ScoreSchema);
+const Activity = mongoose.model('Activity', ActivitySchema);
 
 // --- AUTO-SEED LOGIC ---
 async function autoSeed() {
@@ -65,7 +72,12 @@ async function autoSeed() {
             await Batch.create({ name: 'DO-05', courseId: c3._id });
             await Batch.create({ name: 'CS-09', courseId: c4._id });
             
-            console.log('✅ DATABASE SUCCESSFULLY SEEDED WITH 4 COURSES AND 5 BATCHES');
+            await Activity.create([
+                { user: 'System', action: 'AI Difficulty Scaled to PRO', timestamp: new Date(Date.now() - 120000) },
+                { user: 'System', action: 'Global Leaderboard Synchronized', timestamp: new Date(Date.now() - 360000) }
+            ]);
+
+            console.log('✅ DATABASE SUCCESSFULLY SEEDED WITH 4 COURSES, 5 BATCHES AND INITIAL ACTIVITY');
         } else {
             console.log('📊 Existing Metadata Detected. Academic Dataset: ACTIVE');
         }
@@ -100,6 +112,10 @@ app.post('/api/admin/games/create', async (req, res) => {
     try {
         const game = new Game(req.body);
         await game.save();
+        
+        // Log Activity
+        await Activity.create({ user: 'Admin', action: `Created new game: ${game.title}` });
+        
         console.log(`🆕 Game Created: ${game.title} for ${game.course}`);
         res.status(201).json(game);
     } catch (e) { 
@@ -116,6 +132,30 @@ app.get('/api/admin/system-stats', async (req, res) => {
         total_courses: await Course.countDocuments(),
         total_batches: await Batch.countDocuments()
     });
+});
+
+app.get('/api/admin/system-activity', async (req, res) => {
+    try {
+        const logs = await Activity.find().sort({ timestamp: -1 }).limit(5);
+        const recentScores = await Score.find().sort({ timestamp: -1 }).limit(10).populate('game_id');
+        
+        const combined = [
+            ...logs.map(l => ({ 
+                user: l.user, 
+                action: l.action, 
+                timestamp: l.timestamp 
+            })),
+            ...recentScores.map(s => ({ 
+                user: s.user_id, 
+                action: `Completed ${s.game_id?.title || 'Code Puzzle'}`, 
+                timestamp: s.timestamp 
+            }))
+        ].sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+        
+        res.json(combined);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.get('/api/leaderboard/global', async (req, res) => {

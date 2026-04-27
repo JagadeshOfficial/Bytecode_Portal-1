@@ -348,34 +348,34 @@ export default function Courses() {
                             />
                         </motion.div>
 
-                        {/* Floating Tech Cards */}
+                        {/* Floating AI Tool Cards */}
                         <motion.div className={`${styles.floatingCardHero} ${styles.card1}`}>
-                            <div style={{ background: '#f89820', padding: '10px', borderRadius: '12px' }}>
-                                <Code color="white" size={24} />
+                            <div style={{ background: '#10a37f', padding: '10px', borderRadius: '12px' }}>
+                                <Sparkles color="white" size={24} />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Java Stack</div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Enterprise Grade</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>ChatGPT-4o</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Advanced Reasoning</div>
                             </div>
                         </motion.div>
 
                         <motion.div className={`${styles.floatingCardHero} ${styles.card2}`}>
-                            <div style={{ background: '#3776ab', padding: '10px', borderRadius: '12px' }}>
-                                <Layers color="white" size={24} />
+                            <div style={{ background: '#4285f4', padding: '10px', borderRadius: '12px' }}>
+                                <Zap color="white" size={24} />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Python Expert</div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Data & AI Ready</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Google Gemini</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Multimodal AI</div>
                             </div>
                         </motion.div>
 
                         <motion.div className={`${styles.floatingCardHero} ${styles.card3}`}>
-                            <div style={{ background: '#6366f1', padding: '10px', borderRadius: '12px' }}>
-                                <Rocket color="white" size={24} />
+                            <div style={{ background: '#000', padding: '10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                                <Bot color="white" size={24} />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Agentic AI</div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>The Future</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>OpenAI API</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>Agentic Workflows</div>
                             </div>
                         </motion.div>
                     </div>

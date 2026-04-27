@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
@@ -130,7 +130,7 @@ const MENUS: Record<string, MenuItem[]> = {
     ]
 };
 
-export default function DashboardLayout({ children, role, noPadding }: DashboardLayoutProps) {
+function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -542,7 +542,7 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                                                                 </div>
                                                             </div>
                                                             <p style={{ fontSize: '0.8rem', color: '#718096', lineHeight: 1.4 }}>{n.message}</p>
-                                                            <span style={{ fontSize: '0.65rem', color: '#cbd5e1', fontWeight: 700, marginTop: '8px', display: 'block' }}>{new Date(n.createdAt).toLocaleString()}</span>
+                                                            <span style={{ fontSize: '0.65rem', color: '#cbd5e1', fontWeight: 700, marginTop: '8px', display: 'block' }}>{mounted ? new Date(n.createdAt).toLocaleString() : ''}</span>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -715,5 +715,13 @@ export default function DashboardLayout({ children, role, noPadding }: Dashboard
                 </div>
             )}
         </div>
+    );
+}
+
+export default function DashboardLayout(props: DashboardLayoutProps) {
+    return (
+        <Suspense fallback={null}>
+            <DashboardLayoutContent {...props} />
+        </Suspense>
     );
 }
