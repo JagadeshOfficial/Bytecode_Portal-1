@@ -11,3 +11,9 @@
 ◇ injecting env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
 B-EMS Server running on port 5001
 B-EMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injecting env (4) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+◇ injecting env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+B-EMS Server running on port 5001
+B-EMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net

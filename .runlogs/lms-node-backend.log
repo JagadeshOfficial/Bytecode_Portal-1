@@ -13,3 +13,11 @@ LMS MongoDB Connected: ac-3mufzp1-shard-00-00.4nosy2u.mongodb.net
 [32m[nodemon] starting `node src/server.js`[39m
 LMS Node Server running in development mode on port 8080
 LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-02.4nosy2u.mongodb.net

@@ -176,3 +176,5 @@ app.listen(PORT, () => {
 ⚡ STATUS: SOVEREIGN
     `);
 });
+
+module.exports = app;
