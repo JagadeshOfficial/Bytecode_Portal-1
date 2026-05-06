@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -163,7 +165,7 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
         setShowWarning(message);
         setTimeout(() => setShowWarning(null), 5000);
 
-        await fetchJsonSafe('http://localhost:8080/api/academic/proctoring/logs', {
+        await fetchJsonSafe(`${API_URLS.LMS_BACKEND}/api/academic/proctoring/logs`, {
             method: 'POST',
             body: JSON.stringify(log)
         });
@@ -218,7 +220,7 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
             status: 'COMPLETED'
         };
 
-        const res = await fetchJsonSafe('http://localhost:8080/api/academic/test-submissions', {
+        const res = await fetchJsonSafe(`${API_URLS.LMS_BACKEND}/api/academic/test-submissions`, {
             method: 'POST',
             body: JSON.stringify(submission)
         });

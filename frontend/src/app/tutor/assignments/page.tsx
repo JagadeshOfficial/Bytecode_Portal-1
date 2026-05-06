@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion } from 'framer-motion';
@@ -21,7 +23,7 @@ export default function TutorAssignmentsPage() {
 
     const fetchAssignments = async () => {
         setLoading(true);
-        const result = await fetchJsonSafe<any[]>('http://localhost:8080/api/academic/assignments');
+        const result = await fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/assignments`);
         if (result.ok && Array.isArray(result.data)) {
             setAssignments(result.data);
         }

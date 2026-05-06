@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,7 +48,7 @@ export default function StudentDashboard() {
 
     const fetchStudentRequests = async (studentId: string) => {
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/session-requests`);
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`);
             if (res.ok) {
                 const all = await res.json();
                 setSessionRequests(all.filter((r: any) => r.requestedById === studentId));
@@ -76,7 +78,7 @@ export default function StudentDashboard() {
         };
 
         try {
-            const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -97,7 +99,7 @@ export default function StudentDashboard() {
 
     const fetchStudentAssignments = async (studentId: string) => {
         try {
-            const bRes = await fetch(`http://localhost:8080/api/academic/batches/student/${studentId}`);
+            const bRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/student/${studentId}`);
             if (!bRes.ok) return;
             const batches = await bRes.json();
             setStudentBatches(batches);
@@ -107,7 +109,7 @@ export default function StudentDashboard() {
 
             // Fetch tracking data for stats
             if (batches.length > 0) {
-                const tRes = await fetch(`http://localhost:8080/api/academic/batches/${batches[0].id || batches[0]._id}/student-tracking`);
+                const tRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${batches[0].id || batches[0]._id}/student-tracking`);
                 if (tRes.ok) {
                     const tracking = await tRes.json();
                     const myTrack = tracking.find((t: any) => t.id === studentId);
@@ -124,14 +126,14 @@ export default function StudentDashboard() {
 
             for (const b of batches) {
                 // Fetch assignments
-                const aRes = await fetch(`http://localhost:8080/api/academic/assignments/batch/${b.id}`);
+                const aRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/batch/${b.id}`);
                 if (aRes.ok) {
                     const data = await aRes.json();
                     allAss.push(...data);
                 }
 
                 // Fetch live sessions
-                const sRes = await fetch(`http://localhost:8080/api/academic/sessions/batch/${b.id}`);
+                const sRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/batch/${b.id}`);
                 if (sRes.ok) {
                     const sessions = await sRes.json();
                     allLive.push(...sessions);
@@ -141,7 +143,7 @@ export default function StudentDashboard() {
             setLiveSessions(allLive);
 
             // Fetch mock interviews
-            const miRes = await fetch(`http://localhost:8080/api/academic/mock-interviews/student/${studentId}`);
+            const miRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/student/${studentId}`);
             if (miRes.ok) {
                 const filtered = await miRes.json();
                 setMockInterviews(filtered);
@@ -170,7 +172,7 @@ export default function StudentDashboard() {
         };
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/assignments/${selectedAssignment.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${selectedAssignment.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedAssignment)

@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,7 +36,7 @@ export default function ExamManagement() {
             setIsCreating(true); // Opening wizard for now as edit proxy
         } else if (action === 'DELETE') {
             if (!confirm(`Are you sure you want to permanently delete "${test.name}"? This action cannot be undone.`)) return;
-            fetch(`http://localhost:8080/api/academic/tests/${test.id || test._id}`, { method: 'DELETE' })
+            fetch(`${API_URLS.LMS_BACKEND}/api/academic/tests/${test.id || test._id}`, { method: 'DELETE' })
                 .then(res => {
                     if (res.ok) {
                         alert("Assessment deleted successfully. Curriculum registry updated.");

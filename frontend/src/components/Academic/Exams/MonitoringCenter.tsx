@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -118,8 +120,8 @@ export default function MonitoringCenter() {
         const fetchData = async () => {
             try {
                 const [logsRes, candRes] = await Promise.all([
-                    fetch('http://localhost:8080/api/academic/proctoring/logs'),
-                    fetch('http://localhost:8080/api/academic/active-candidates')
+                    fetch(`${API_URLS.LMS_BACKEND}/api/academic/proctoring/logs`),
+                    fetch(`${API_URLS.LMS_BACKEND}/api/academic/active-candidates`)
                 ]);
 
                 if (logsRes.ok) {

@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion } from 'framer-motion';
@@ -80,7 +82,7 @@ export default function TutorDashboard() {
         // First, fetch the tutor's own profile if we have a user ID
         let profileFetched = false;
         if (userId) {
-            const profileResult = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${userId}`);
+            const profileResult = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/users/${userId}`);
             if (profileResult.ok && profileResult.data) {
                 setTutorProfile(profileResult.data);
                 console.log('Tutor profile by ID:', profileResult.data);
@@ -90,7 +92,7 @@ export default function TutorDashboard() {
         
         // Fallback: if no ID or ID failed, try to find by email
         if (!profileFetched && userEmail) {
-            const allUsers = await fetchJsonSafe<any[]>('http://localhost:8080/api/users');
+            const allUsers = await fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`);
             if (allUsers.ok && Array.isArray(allUsers.data)) {
                 const foundUser = allUsers.data.find((u: any) => u.email === userEmail);
                 if (foundUser) {
@@ -101,9 +103,9 @@ export default function TutorDashboard() {
         }
         
         const [batchesResult, assignmentsResult, usersResult] = await Promise.all([
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/batches'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/assignments'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/users')
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/batches`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/assignments`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`)
         ]);
 
         const batchesData = batchesResult.ok && Array.isArray(batchesResult.data) ? batchesResult.data : [];

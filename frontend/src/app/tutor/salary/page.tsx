@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,7 +37,7 @@ export default function TutorSalaryPage() {
 
     const fetchUserData = async (userId: string) => {
         setLoading(true);
-        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${userId}`);
+        const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/users/${userId}`);
         if (result.ok && result.data) {
             setUser(result.data);
         }
@@ -54,7 +56,7 @@ export default function TutorSalaryPage() {
             const newRequest = `LEAVE REQUEST for ${leaveDate}: ${leaveReason} (Requested on ${new Date().toLocaleDateString()})`;
             const updatedRequests = [...(user.requirementRequests || []), newRequest];
             
-            const res = await fetch(`http://localhost:8080/api/users/${user._id || user.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users/${user._id || user.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ requirementRequests: updatedRequests })

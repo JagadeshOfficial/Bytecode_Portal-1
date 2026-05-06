@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,7 +34,7 @@ export default function Login() {
 
         try {
             // Attempt real authentication via user-service backend
-            const response = await fetchJsonSafe<any>('http://localhost:8080/api/auth/login', {
+            const response = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: userVal, password: passVal })

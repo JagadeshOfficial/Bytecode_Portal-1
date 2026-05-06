@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -141,7 +143,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
 
         // Auto-save to database if session is selected
         if (selectedInterviewId) {
-            const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}`, {
+            const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/${selectedInterviewId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -163,7 +165,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
         if (!session || !recordedUrl) return;
         try {
             // Find the batch
-            const bRes = await fetch(`http://localhost:8080/api/academic/batches/${session.batchId}`);
+            const bRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${session.batchId}`);
             if (!bRes.ok) return;
             const batch = await bRes.json();
             
@@ -184,7 +186,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
             }
             folder.files.push(newFile);
 
-            const upRes = await fetch(`http://localhost:8080/api/academic/batches/${session.batchId}`, {
+            const upRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${session.batchId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(batch)
@@ -244,11 +246,11 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
     const fetchAllData = async () => {
         setLoading(true);
         const [intRes, courRes, batchRes, userRes, statsRes] = await Promise.all([
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/mock-interviews'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/courses'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/batches'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/users'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/mock-interviews/stats')
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/courses`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/batches`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/stats`)
         ]);
         
         if (intRes.ok && intRes.data) setInterviews(intRes.data);
@@ -272,8 +274,8 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
         try {
             const method = isEditing ? 'PUT' : 'POST';
             const url = isEditing 
-                ? `http://localhost:8080/api/academic/mock-interviews/${selectedInterviewId}` 
-                : 'http://localhost:8080/api/academic/mock-interviews';
+                ? `${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/${selectedInterviewId}` 
+                : `${API_URLS.LMS_BACKEND}/api/academic/mock-interviews`;
 
             const result = await fetchJsonSafe<any>(url, {
                 method: method,
@@ -301,7 +303,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
 
     const handleDeleteInterview = async (id: string) => {
         if (!confirm("Are you sure?")) return;
-        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${id}`, { method: 'DELETE' });
+        const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/${id}`, { method: 'DELETE' });
         if (result.ok) {
             setInterviews(interviews.filter(i => i.id !== id && i._id !== id));
         } else if (result.error) {
@@ -390,7 +392,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                                             onJoin={() => { setSelectedInterviewId(item.id || item._id); setSubView('AI_ROOM'); }}
                                             onReports={() => { setSelectedInterviewId(item.id || item._id); setSubView('ANALYTICS'); }}
                                             onStart={async () => {
-                                                const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
+                                                const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/${item.id || item._id}`, {
                                                     method: 'PUT',
                                                     headers: {'Content-Type': 'application/json'},
                                                     body: JSON.stringify({...item, status: 'LIVE'})
@@ -406,7 +408,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                                             }}
                                             onFinish={async () => {
                                                 if (!confirm("Are you sure you want to conclude this session? AI will generate the final report.")) return;
-                                                const result = await fetchJsonSafe<any>(`http://localhost:8080/api/academic/mock-interviews/${item.id || item._id}`, {
+                                                const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/academic/mock-interviews/${item.id || item._id}`, {
                                                     method: 'PUT',
                                                     headers: {'Content-Type': 'application/json'},
                                                     body: JSON.stringify({...item, status: 'COMPLETED', completedAt: new Date()})

@@ -1,6 +1,8 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -36,7 +38,7 @@ const gradientText = (c1 = '#6366f1', c2 = '#a855f7') => ({
 });
 
 // --- MASTER COMPONENT ---
-export default function GamesDashboard() {
+function GamesDashboardContent() {
     const [role, setRole] = useState<string>('STUDENT');
     const [activeSection, setActiveSection] = useState('DASHBOARD');
     const [points, setPoints] = useState(12850);
@@ -70,12 +72,12 @@ export default function GamesDashboard() {
             };
 
             // Attempt Live Sync
-            const g = await apiCall('http://localhost:8085/api/games');
-            const c = await apiCall('http://localhost:8085/api/courses');
-            const b = await apiCall('http://localhost:8085/api/batches');
-            const s = await apiCall('http://localhost:8085/api/admin/system-stats');
-            const l = await apiCall('http://localhost:8085/api/leaderboard/global');
-            const a = await apiCall('http://localhost:8085/api/admin/system-activity');
+            const g = await apiCall(`${API_URLS.MASTER_BACKEND}/api/games`);
+            const c = await apiCall(`${API_URLS.MASTER_BACKEND}/api/courses`);
+            const b = await apiCall(`${API_URLS.MASTER_BACKEND}/api/batches`);
+            const s = await apiCall(`${API_URLS.MASTER_BACKEND}/api/admin/system-stats`);
+            const l = await apiCall(`${API_URLS.MASTER_BACKEND}/api/leaderboard/global`);
+            const a = await apiCall(`${API_URLS.MASTER_BACKEND}/api/admin/system-activity`);
 
             // Apply Data with Fallback Logic
             if (c && c.length > 0) {
@@ -227,7 +229,7 @@ function GameMgmtModule({ games, courses, batches, refresh }: any) {
             batch: selectedBatch ? (selectedBatch.batchName || selectedBatch.name) : form.batch
         };
 
-        const res = await fetch('http://localhost:8085/api/admin/games/create', {
+        const res = await fetch(`${API_URLS.MASTER_BACKEND}/api/admin/games/create`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -473,5 +475,13 @@ function UserRowDetail({ name, role }: any) {
 function ToggleOption({ label, active }: any) {
     return (
         <div style={{ flex: 1, padding: '10px', borderRadius: '12px', background: active ? '#10b98111' : '#eee', color: active ? '#10b981' : '#666', textAlign: 'center', fontWeight: 900, fontSize: '0.7rem' }}>{label}</div>
+    );
+}
+
+export default function GamesDashboard() {
+    return (
+        <Suspense fallback={<div>Loading Arena...</div>}>
+            <GamesDashboardContent />
+        </Suspense>
     );
 }

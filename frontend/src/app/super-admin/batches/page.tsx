@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,9 +38,9 @@ export default function BatchManagement() {
     const fetchAll = () => {
         setLoading(true);
         Promise.all([
-            fetch('http://localhost:8080/api/academic/batches').then(res => res.json()),
-            fetch('http://localhost:8080/api/courses').then(res => res.json()),
-            fetch('http://localhost:8080/api/users').then(res => res.json().then(users => {
+            fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches`).then(res => res.json()),
+            fetch(`${API_URLS.LMS_BACKEND}/api/courses`).then(res => res.json()),
+            fetch(`${API_URLS.LMS_BACKEND}/api/users`).then(res => res.json().then(users => {
                 return Array.isArray(users) ? users.filter((u: any) => u.role === 'TRAINER') : [];
             }))
         ]).then(([batchesData, coursesData, trainersData]) => {
@@ -59,8 +61,8 @@ export default function BatchManagement() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         const url = selectedBatch 
-            ? `http://localhost:8080/api/academic/batches/${selectedBatch.id}` 
-            : 'http://localhost:8080/api/academic/batches';
+            ? `${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}` 
+            : `${API_URLS.LMS_BACKEND}/api/academic/batches`;
         const method = selectedBatch ? 'PUT' : 'POST';
 
         try {

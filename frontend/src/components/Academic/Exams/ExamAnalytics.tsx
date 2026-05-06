@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +12,7 @@ import {
     User, Calendar, BrainCircuit, ExternalLink
 } from 'lucide-react';
 
-const API_BASE = "http://localhost:8080/api/academic";
+const API_BASE = `${API_URLS.LMS_BACKEND}/api/academic`;
 
 const MetricCard = ({ label, value, trend, icon, color }: any) => (
     <div style={{ background: '#fff', border: '1px solid rgba(109, 40, 217, 0.08)', borderRadius: '35px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.02)' }}>

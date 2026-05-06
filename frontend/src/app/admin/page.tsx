@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -59,8 +61,8 @@ export default function AdminDashboard() {
 
         const loadDashboardData = async () => {
             const [statsResult, applicationsResult] = await Promise.all([
-                fetchJsonSafe<any>('http://localhost:8080/api/admin/stats'),
-                fetchJsonSafe<any[]>('http://localhost:8080/api/admin/applications'),
+                fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/admin/stats`),
+                fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/admin/applications`),
             ]);
 
             if (statsResult.ok && statsResult.data) {

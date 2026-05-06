@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,7 +25,7 @@ export default function TutorStudentsPage() {
 
     const fetchUsers = () => {
         setLoading(true);
-        fetchJsonSafe<any[]>('http://localhost:8080/api/users')
+        fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`)
             .then((result) => {
                 if (result.ok && Array.isArray(result.data)) {
                     setUsers(result.data.filter((u: any) => u.role === 'STUDENT'));

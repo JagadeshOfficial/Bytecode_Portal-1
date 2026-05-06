@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -129,7 +131,7 @@ function getDetailEntries(details: ActivityEvent['details']) {
     return Object.entries(details).filter(([, value]) => value !== '' && value !== null && value !== undefined);
 }
 
-function formatDetailValue(value: unknown) {
+function formatDetailValue(value: unknown): string {
     if (Array.isArray(value)) {
         return value.map((entry) => formatDetailValue(entry)).join(', ');
     }
@@ -200,7 +202,7 @@ export default function GlobalLogCenter() {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/admin/system-activity', { cache: 'no-store' });
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/admin/system-activity`, { cache: 'no-store' });
             if (!res.ok) {
                 throw new Error('Failed to load system activity');
             }

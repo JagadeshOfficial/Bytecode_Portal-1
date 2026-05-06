@@ -1,3 +1,4 @@
+import { API_URLS } from '@/lib/api-config';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -6,7 +7,7 @@ import {
     Layout, Filter, Download, MoreHorizontal, Zap
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = `${API_URLS.LMS_BACKEND}/api`;
 
 interface StudentRecord {
     student: string;

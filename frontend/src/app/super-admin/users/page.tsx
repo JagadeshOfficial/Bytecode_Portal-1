@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,7 +48,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
 
     const fetchUsers = () => {
         setLoading(true);
-        fetchJsonSafe<any[]>('http://localhost:8080/api/users')
+        fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`)
             .then((result) => {
                 if (result.ok && Array.isArray(result.data)) {
                     setUsers(result.data);
@@ -87,7 +89,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
 
     const fetchTrainerBatches = async (trainerId: string) => {
         try {
-            const result = await fetchJsonSafe<any[]>(`http://localhost:8080/api/academic/batches/trainer/${trainerId}`);
+            const result = await fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/batches/trainer/${trainerId}`);
             if (result.ok && Array.isArray(result.data)) {
                 setTrainerBatches(result.data);
             }
@@ -140,8 +142,8 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         const url = selectedUser 
-            ? `http://localhost:8080/api/users/${selectedUser.id}` 
-            : 'http://localhost:8080/api/users';
+            ? `${API_URLS.LMS_BACKEND}/api/users/${selectedUser.id}` 
+            : `${API_URLS.LMS_BACKEND}/api/users`;
         const method = selectedUser ? 'PUT' : 'POST';
 
         try {
@@ -177,7 +179,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
 
         if (!confirm('Are you sure you want to delete this user?')) return;
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users/${user.id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -225,7 +227,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         const updatedHistory = [...(user.leaveHistory || []), `APPROVED: ${requestText}`];
         
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users/${user.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -255,7 +257,7 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         const updatedHistory = [...(user.leaveHistory || []), `REJECTED: ${requestText}`];
 
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users/${user.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

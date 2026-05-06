@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -208,7 +210,7 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
                 const userId = parsed.id || parsed._id;
                 if (userId) {
                     try {
-                        const result = await fetchJsonSafe<any>(`http://localhost:8080/api/users/${userId}`);
+                        const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/users/${userId}`);
                         if (result.ok && result.data) {
                             const data = result.data;
                             const apiRole = String(data.role || parsed.role || '').toUpperCase();
@@ -288,7 +290,7 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
         if (!loggedUser) return;
         const userId = loggedUser.id || loggedUser._id;
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/notifications?userId=${userId}&role=${expectedRole}`);
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications?userId=${userId}&role=${expectedRole}`);
             if (res.ok) {
                 const data = await res.json();
 
@@ -310,14 +312,14 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
 
     const markNotifRead = async (id: string) => {
         try {
-            await fetch(`http://localhost:8080/api/academic/notifications/${id}/read`, { method: 'PATCH' });
+            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications/${id}/read`, { method: 'PATCH' });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: 'READ' } : n));
         } catch (e) { console.error(e); }
     };
 
     const deleteNotif = async (id: string) => {
         try {
-            await fetch(`http://localhost:8080/api/academic/notifications/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications/${id}`, { method: 'DELETE' });
             setNotifications(prev => prev.filter(n => n.id !== id));
         } catch (e) { console.error(e); }
     };
@@ -354,7 +356,7 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updateData)

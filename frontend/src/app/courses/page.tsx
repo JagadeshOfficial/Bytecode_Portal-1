@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import styles from './courses.module.css';
-import { Search, Clock, Users, Star, Zap, Code, Database, Cloud, Layers, Calendar, AlertCircle, Quote, X, ArrowRight, Trophy, Rocket, Download, ShieldCheck, Heart } from 'lucide-react';
+import { Search, Clock, Users, Star, Zap, Code, Database, Cloud, Layers, Calendar, AlertCircle, Quote, X, ArrowRight, Trophy, Rocket, Download, ShieldCheck, Heart, Sparkles, Bot } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getCompanyLogo } from '@/utils/logoUtils';

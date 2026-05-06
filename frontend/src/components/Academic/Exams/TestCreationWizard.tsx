@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -71,8 +73,8 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
         const fetchData = async () => {
             try {
                 const [bRes, uRes] = await Promise.all([
-                    fetch('http://localhost:8080/api/academic/batches'),
-                    fetch('http://localhost:8080/api/users')
+                    fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches`),
+                    fetch(`${API_URLS.LMS_BACKEND}/api/users`)
                 ]);
                 
                 if (bRes.ok) {
@@ -114,7 +116,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
     const handlePublish = async () => {
         try {
             const finalData = { ...testData, name: testData.title };
-            const res = await fetch('http://localhost:8080/api/academic/tests', {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/tests`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(finalData)
@@ -357,7 +359,7 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                 onClick={async () => {
                                                     setIsGenerating(true);
                                                     try {
-                                                        const res = await fetch('http://localhost:8080/api/academic/tests/ai-generate', {
+                                                        const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/tests/ai-generate`, {
                                                             method: 'POST',
                                                             headers: { 'Content-Type': 'application/json' },
                                                             body: JSON.stringify({ 

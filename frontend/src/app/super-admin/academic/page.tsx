@@ -1,8 +1,10 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Book, Plus, Search, Edit2, Trash2,
@@ -22,7 +24,15 @@ import { fetchJsonSafe } from '@/lib/fetchJson';
 
 type DashboardRole = 'super_admin' | 'admin' | 'tutor' | 'student';
 
-export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
+export function AcademicHubPage(props: { role?: DashboardRole }) {
+    return (
+        <Suspense fallback={<div>Loading Academic Hub...</div>}>
+            <AcademicHubPageContent {...props} />
+        </Suspense>
+    );
+}
+
+function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS' | 'EXAMS' | 'ANALYTICS'>('COURSES');
     const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'INTERVIEWS' | 'LIVE_MONITOR' | 'AI_ROOM' | 'ANALYTICS' | 'TESTS' | 'TRACKING'>('DRIVE');
@@ -121,16 +131,16 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         const isStudent = currentUserRole === 'STUDENT';
 
         const batchUrl = isStudent
-            ? `http://localhost:8080/api/academic/batches/student/${userId}`
-            : 'http://localhost:8080/api/academic/batches';
+            ? `${API_URLS.LMS_BACKEND}/api/academic/batches/student/${userId}`
+            : `${API_URLS.LMS_BACKEND}/api/academic/batches`;
 
         const [cData, bData, uData, aData, sData, rData] = await Promise.all([
-            fetchJsonSafe<any[]>('http://localhost:8080/api/courses'),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/courses`),
             fetchJsonSafe<any[]>(batchUrl),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/users'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/assignments'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/sessions'),
-            fetchJsonSafe<any[]>('http://localhost:8080/api/academic/session-requests')
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/assignments`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/sessions`),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`)
         ]);
 
         if (bData.ok && bData.data) {
@@ -203,7 +213,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
             createdAt: new Date().toISOString()
         };
 
-        const result = await fetchJsonSafe<any>('http://localhost:8080/api/academic/session-requests', {
+        const result = await fetchJsonSafe<any>(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -249,7 +259,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
             const reviewerId = currentUser?.id || '';
             const reviewerName = currentUser?.fullName || 'Admin';
 
-            const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}/action`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests/${requestId}/action`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action, reviewerId, reviewerName })
@@ -266,7 +276,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                         msgText = `Your download request for "${reqData.data?.title}" has been approved. You can now use this link: ${reqData.data?.recordingUrl}`;
                     }
 
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -296,7 +306,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         if (!confirm(confirmMsg)) return;
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/session-requests/${requestId}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests/${requestId}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -312,7 +322,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         const fetchTracking = async () => {
             if (batchTab === 'TRACKING' && selectedBatch) {
                 try {
-                    const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id || selectedBatch._id}/student-tracking`);
+                    const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}/student-tracking`);
                     if (res.ok) setStudentTracking(await res.json());
                 } catch (err) {
                     console.error(err);
@@ -337,7 +347,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         updatedBatch.folders = [...(updatedBatch.folders || []), newFolder];
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -372,7 +382,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         const updatedBatch = { ...selectedBatch, folders: updatedFolders };
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -407,7 +417,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         };
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -436,7 +446,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         };
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${editBatchData.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${editBatchData.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -457,7 +467,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         e.stopPropagation();
         if (!confirm("Are you sure you want to delete this batch and all its resources?")) return;
         try {
-            await fetch(`http://localhost:8080/api/academic/batches/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${id}`, { method: 'DELETE' });
             setBatches(batches.filter((b: any) => b.id !== id));
             if (selectedBatch?.id === id) setSelectedBatch(null);
         } catch (e) {
@@ -483,7 +493,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     requestedBy: currentUser?.fullName || currentUser?.email,
                     requestedById: currentUser?.id
                 };
-                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reqPayload)
@@ -494,12 +504,12 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a recording for ${session.batchName}.`;
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Recording Delete Request', message: notifMsg, type: 'WARNING' })
                     });
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Recording Delete Request', message: notifMsg, type: 'WARNING' })
@@ -515,7 +525,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         if (!sessionToDelete) return;
         const sessionId = sessionToDelete.id || sessionToDelete._id;
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}/recording`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${sessionId}/recording`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -545,7 +555,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 requestedBy: currentUser?.fullName || currentUser?.email,
                 requestedById: currentUser?.id
             };
-            const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(reqPayload)
@@ -556,7 +566,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                 // NOTIFY ADMINS
                 const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to download a recording for ${ls.batchName}.`;
-                await fetch(`http://localhost:8080/api/academic/notifications`, {
+                await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ role: 'ADMIN', title: 'Recording Download Request', message: notifMsg, type: 'INFO' })
@@ -573,7 +583,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
         try {
             // Priority 1: Get all courses for general sharing
-            const res = await fetch(`http://localhost:8080/api/courses`);
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/courses`);
             const courses = await res.json();
             setAllCourses(courses);
 
@@ -582,7 +592,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                 const course = courses.find((c: any) => c.id === ls.courseId || c._id === ls.courseId);
                 if (course) {
                     setShareSelectedCourse(course);
-                    const bRes = await fetch(`http://localhost:8080/api/academic/batches/course/${course.id || course._id}`);
+                    const bRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/course/${course.id || course._id}`);
                     const batches = await bRes.json();
                     setAllBatchesForCourse(batches);
 
@@ -609,7 +619,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         setShareSelectedCourse(course);
         setShareStep(2);
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/course/${course.id}`);
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/course/${course.id}`);
             if (!res.ok) throw new Error(`Status: ${res.status}`);
             const data = await res.json();
             setAllBatchesForCourse(data);
@@ -644,7 +654,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         folder.files.push(newFile);
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${shareSelectedBatch.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${shareSelectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -686,7 +696,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${batchId}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${batchId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatePayload)
@@ -737,7 +747,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         });
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -758,7 +768,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
     const updateBatchInDb = async (updatedBatch: any, newSelectedFolderName?: string | null) => {
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -842,7 +852,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
         const updatedBatch = { ...selectedBatch, studentIds: currentStudentIds, totalStudents: currentStudentIds.length };
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${batchId}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${batchId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -872,7 +882,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         // Fetch Live Sessions for this batch
         if (batchId) {
             try {
-                const res = await fetch(`http://localhost:8080/api/academic/sessions/batch/${batchId}`);
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/batch/${batchId}`);
                 if (res.ok) {
                     const sessions = await res.json();
                     setLiveSessions(sessions);
@@ -911,7 +921,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -943,7 +953,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedBatch)
@@ -996,7 +1006,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
         try {
             if (isFullAdmin) {
-                const res = await fetch('http://localhost:8080/api/academic/sessions', {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1019,7 +1029,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     requestedBy: currentUser?.fullName || currentUser?.email,
                     requestedById: currentUser?.id
                 };
-                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reqPayload)
@@ -1029,12 +1039,12 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to schedule a new session for ${selectedBatch?.batchName || 'a batch'}.`;
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'ADMIN', title: 'New Session Request', message: notifMsg, type: 'INFO' })
                     });
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'New Session Request', message: notifMsg, type: 'INFO' })
@@ -1057,7 +1067,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         if (!confirm("Are you sure you want to delete this live session?")) return;
         try {
             if (isFullAdmin) {
-                const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}`, { method: 'DELETE' });
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${sessionId}`, { method: 'DELETE' });
                 if (res.ok) {
                     setLiveSessions(liveSessions.filter(s => (s.id !== sessionId && s._id !== sessionId)));
                 }
@@ -1071,7 +1081,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     requestedBy: currentUser?.fullName || currentUser?.email,
                     requestedById: currentUser?.id
                 };
-                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reqPayload)
@@ -1081,12 +1091,12 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a session in ${selectedBatch?.batchName || 'a batch'}.`;
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Session Delete Request', message: notifMsg, type: 'WARNING' })
                     });
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Session Delete Request', message: notifMsg, type: 'WARNING' })
@@ -1112,7 +1122,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         try {
             if (isFullAdmin) {
                 const sessionId = editingSession.id || editingSession._id;
-                const res = await fetch(`http://localhost:8080/api/academic/sessions/${sessionId}`, {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${sessionId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(editingSession)
@@ -1134,7 +1144,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     requestedBy: currentUser?.fullName || currentUser?.email,
                     requestedById: currentUser?.id
                 };
-                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reqPayload)
@@ -1144,12 +1154,12 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to edit a session in ${selectedBatch?.batchName || 'a batch'}.`;
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Session Edit Request', message: notifMsg, type: 'INFO' })
                     });
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Session Edit Request', message: notifMsg, type: 'INFO' })
@@ -1186,7 +1196,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         };
 
         try {
-            const res = await fetch("http://localhost:8080/api/academic/assignments", {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -1217,7 +1227,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         const formData = new FormData();
         formData.append("file", file);
         try {
-            const res = await fetch("http://localhost:8080/api/academic/upload", {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/upload`, {
                 method: "POST",
                 body: formData
             });
@@ -1239,7 +1249,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         if (isFullAdmin) {
             if (!confirm("Remove this assignment? Students will no longer be able to submit.")) return;
             try {
-                const res = await fetch(`http://localhost:8080/api/academic/assignments/${id}`, { method: 'DELETE' });
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     setAssignments(assignments.filter(a => a.id !== id));
                     alert("Assignment deleted successfully.");
@@ -1255,7 +1265,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
                     requestedBy: currentUser?.fullName || currentUser?.email,
                     requestedById: currentUser?.id
                 };
-                const res = await fetch('http://localhost:8080/api/academic/session-requests', {
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reqPayload)
@@ -1266,12 +1276,12 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
 
                     // NOTIFY ADMINS
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete an assignment: "${assignment.title}".`;
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Assignment Delete Request', message: notifMsg, type: 'WARNING' })
                     });
-                    await fetch(`http://localhost:8080/api/academic/notifications`, {
+                    await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Assignment Delete Request', message: notifMsg, type: 'WARNING' })
@@ -1299,7 +1309,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         const updatedAssignment = { ...viewingSubmissionsAssignment, submissions: updatedSubmissions };
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/assignments/${viewingSubmissionsAssignment.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${viewingSubmissionsAssignment.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedAssignment)
@@ -1319,7 +1329,7 @@ export function AcademicHubPage({ role = 'super_admin' }: { role?: DashboardRole
         if (!editingAssignment) return;
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/assignments/${editingAssignment.id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${editingAssignment.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editingAssignment)
@@ -3229,5 +3239,9 @@ const inputStyle = {
 };
 
 export default function AcademicHub() {
-    return <AcademicHubPage />;
+    return (
+        <Suspense fallback={<div>Loading Academic Hub...</div>}>
+            <AcademicHubPage />
+        </Suspense>
+    );
 }

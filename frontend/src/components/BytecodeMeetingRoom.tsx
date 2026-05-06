@@ -1,3 +1,4 @@
+import { API_URLS } from '@/lib/api-config';
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -322,7 +323,7 @@ export default function BytecodeMeetingRoom({ session, roomName, onLeave, onReco
                 
                 if (session && session.id) {
                     try {
-                        const res = await fetch(`http://localhost:8080/api/academic/sessions/${session.id}`, {
+                        const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${session.id}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ...session, recordingUrl: videoUrl })

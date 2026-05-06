@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -123,7 +125,7 @@ export default function BytecodeWebRTCRoom() {
 
         const sendHeartbeat = async () => {
             try {
-                await fetch(`http://localhost:8080/api/academic/rooms/${roomId}/heartbeat`, {
+                await fetch(`${API_URLS.LMS_BACKEND}/api/academic/rooms/${roomId}/heartbeat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -139,13 +141,13 @@ export default function BytecodeWebRTCRoom() {
 
         const fetchOthers = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/academic/rooms/${roomId}/participants`);
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/rooms/${roomId}/participants`);
                 if (res.ok) {
                     const allData = await res.json();
                     
                     // If room is terminated and I am NOT the one who ended it, others will be empty
                     // but better yet, check if the actual session is COMPLETED in the schedule
-                    const sessionRes = await fetch(`http://localhost:8080/api/academic/sessions/${roomId}`);
+                    const sessionRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${roomId}`);
                     if (sessionRes.ok) {
                         const sess = await sessionRes.json();
                         if (sess.status === 'COMPLETED') {
@@ -315,7 +317,7 @@ export default function BytecodeWebRTCRoom() {
         try {
             const formData = new FormData();
             formData.append('recording', blob, `recording-${roomId}-${Date.now()}.webm`);
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${roomId}/recording`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${roomId}/recording`, {
                 method: 'POST',
                 body: formData
             });
@@ -467,10 +469,10 @@ export default function BytecodeWebRTCRoom() {
 
         try {
             // Mark session as completed in DB (assuming we want to reflect this in the schedule)
-            await fetch(`http://localhost:8080/api/academic/sessions/${roomId}/complete`, { method: 'PATCH' });
+            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${roomId}/complete`, { method: 'PATCH' });
             
             // Signal room termination via heartbeat or custom endpoint
-            await fetch(`http://localhost:8080/api/academic/rooms/${roomId}/terminate`, { method: 'POST' });
+            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/rooms/${roomId}/terminate`, { method: 'POST' });
         } catch (e) { console.error("End session error", e); }
 
         if (isRecording) {

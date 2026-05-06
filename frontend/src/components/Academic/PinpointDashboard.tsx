@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -216,7 +218,7 @@ export default function PinpointDashboard() {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/attendance/tracking-center', { cache: 'no-store' });
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/attendance/tracking-center`, { cache: 'no-store' });
             if (!res.ok) {
                 throw new Error('Failed to load tracking data');
             }

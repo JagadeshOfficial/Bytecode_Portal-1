@@ -12,6 +12,7 @@ import {
     FileText, Award, ChevronRight, CheckCircle,
     Activity, Clipboard, Zap
 } from 'lucide-react';
+import { API_URLS } from '@/lib/api-config';
 
 const batchData = [
     { name: 'Morning (J1)', students: 45, attendance: 92 },
@@ -36,7 +37,7 @@ export default function EmployeeDashboard() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const parsed = JSON.parse(storedUser);
-            fetch(`http://localhost:8080/api/users/${parsed.email}`)
+            fetch(`${API_URLS.LMS_BACKEND}/api/users/${parsed.email}`)
                 .then(res => res.json())
                 .then(data => setEmployee(data))
                 .catch(() => setEmployee(parsed));
@@ -46,7 +47,7 @@ export default function EmployeeDashboard() {
     const name = employee?.fullName || employee?.name || 'Faculty';
 
     return (
-        <DashboardLayout role="employee">
+        <DashboardLayout role="tutor">
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
                 
                 {/* --- FACULTY HEADER --- */}

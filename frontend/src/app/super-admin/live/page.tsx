@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,13 +31,13 @@ export default function LiveClassManagement() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const batchRes = await fetch('http://localhost:8080/api/academic/batches');
+                const batchRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches`);
                 if (batchRes.ok) setBatches(await batchRes.json());
                 
-                const sessionRes = await fetch('http://localhost:8080/api/academic/sessions');
+                const sessionRes = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions`);
                 if (sessionRes.ok) setSessions(await sessionRes.json());
 
-                const userRes = await fetch('http://localhost:8080/api/users');
+                const userRes = await fetch(`${API_URLS.LMS_BACKEND}/api/users`);
                 if (userRes.ok) setAllUsers(await userRes.json());
             } catch (err) {
                 console.error("Error fetching live classes data:", err);
@@ -60,7 +62,7 @@ export default function LiveClassManagement() {
         };
 
         try {
-            const res = await fetch('http://localhost:8080/api/academic/sessions', {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -81,7 +83,7 @@ export default function LiveClassManagement() {
         if (!session) return;
 
         try {
-            const res = await fetch(`http://localhost:8080/api/academic/sessions/${id}`, {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...session, status })

@@ -1,4 +1,6 @@
 "use client";
+import { API_URLS } from '@/lib/api-config';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -120,7 +122,7 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
     const scrollRef = useRef<HTMLDivElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
 
-    const API_BASE = 'http://localhost:8080/api/chat';
+    const API_BASE = `${API_URLS.LMS_BACKEND}/api/chat`;
     const currentChat = chats.find(c => c.id === activeChat);
     const curUserId = String(currentUser?.id || currentUser?._id || '');
     const isCurrentUserAdmin = currentChat?.admins?.some(a => String(a) === curUserId) || 
@@ -345,7 +347,7 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
 
     const fetchAllUsers = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/users');
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users`);
             if (!res.ok) throw new Error('Failed to fetch users');
             const data = await res.json();
             setAllUsers(data);
@@ -611,7 +613,7 @@ export default function ByteChat({ role = 'super_admin' }: { role?: DashboardRol
                 // Then fetch full profile from API to get all details (profileImage, etc)
                 if (userId) {
                     try {
-                        const res = await fetch(`http://localhost:8080/api/users/${userId}`);
+                        const res = await fetch(`${API_URLS.LMS_BACKEND}/api/users/${userId}`);
                         if (res.ok) {
                             const fullProfile = await res.json();
                             const apiName = fullProfile.fullName || fullProfile.name || parsed.name || parsed.email || 'You';
