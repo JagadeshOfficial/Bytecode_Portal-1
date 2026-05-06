@@ -25,3 +25,6 @@
 ✓ Compiled in 900ms
 ✓ Compiled in 844ms
 ✓ Compiled in 290ms
+ GET / 200 in 493ms (compile: 89ms, render: 404ms)
+ GET /sw.js 404 in 46ms (compile: 7ms, render: 39ms)
+ GET /login 200 in 128ms (compile: 94ms, render: 34ms)
