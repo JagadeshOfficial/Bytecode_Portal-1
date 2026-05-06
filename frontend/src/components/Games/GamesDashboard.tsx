@@ -201,15 +201,41 @@ function GameMgmtModule({ games, courses, batches, refresh }: any) {
     const [isAdding, setIsAdding] = useState(false);
     const [form, setForm] = useState({ title: '', category: 'CODING', difficulty: 'MED', course: '', batch: '' });
 
+    const inputStyle = {
+        padding: '12px 15px',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+        color: '#0f172a',
+        fontSize: '0.85rem',
+        fontWeight: 600,
+        background: '#fff',
+        outline: 'none',
+        transition: 'all 0.2s',
+        width: '100%'
+    };
+
     const createGame = async (e: any) => {
         e.preventDefault();
-        const res = await fetch('http://localhost:8080/api/admin/games/create', {
+        
+        // Resolve names for storage
+        const selectedCourse = courses.find((c: any) => String(c._id) === String(form.course));
+        const selectedBatch = batches.find((b: any) => String(b._id) === String(form.batch));
+        
+        const payload = {
+            ...form,
+            course: selectedCourse ? (selectedCourse.title || selectedCourse.name) : form.course,
+            batch: selectedBatch ? (selectedBatch.batchName || selectedBatch.name) : form.batch
+        };
+
+        const res = await fetch('http://localhost:8085/api/admin/games/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form)
+            body: JSON.stringify(payload)
         });
         if (res.ok) { setIsAdding(false); refresh(); }
     };
+
+    const filteredBatches = batches.filter((b: any) => !form.course || String(b.courseId) === String(form.course));
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -224,22 +250,26 @@ function GameMgmtModule({ games, courses, batches, refresh }: any) {
             </div>
 
             {isAdding && (
-                <motion.form onSubmit={createGame} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ ...glassStyle, padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-                    <input required placeholder="Game Title" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd' }} />
-                    <select value={form.category} onChange={e=>setForm({...form, category: e.target.value})} style={{ padding: '10px', borderRadius: '10px' }}>
+                <motion.form onSubmit={createGame} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ ...glassStyle, padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                    <input required placeholder="Game Title" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} style={inputStyle} />
+                    <select value={form.category} onChange={e=>setForm({...form, category: e.target.value})} style={inputStyle}>
                         <option>CODING</option><option>MATH</option><option>BRAIN</option>
                     </select>
-                    <select required value={form.course} onChange={e=>setForm({...form, course: e.target.value})} style={{ padding: '10px', borderRadius: '10px' }}>
+                    <select required value={form.course} onChange={e=>setForm({...form, course: e.target.value, batch: ''})} style={inputStyle}>
                         <option value="">Select Course</option>
-                        {courses.map((c: any) => <option key={c._id}>{c.name}</option>)}
+                        {courses.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
                     </select>
-                    <select required value={form.batch} onChange={e=>setForm({...form, batch: e.target.value})} style={{ padding: '10px', borderRadius: '10px' }}>
+                    <select required value={form.batch} onChange={e=>setForm({...form, batch: e.target.value})} style={inputStyle}>
                         <option value="">Select Batch</option>
-                        {batches.map((b: any) => <option key={b._id}>{b.name}</option>)}
+                        {filteredBatches.map((b: any) => (
+                            <option key={b._id} value={b._id}>
+                                {b.batchName || b.name} ({b.batchCode || 'No Code'})
+                            </option>
+                        ))}
                     </select>
                     <div style={{ gridColumn: 'span 2', display: 'flex', gap: '10px' }}>
-                        <button type="submit" style={{ flex: 1, padding: '12px', background: '#10b981', color: '#fff', borderRadius: '10px', border: 'none', fontWeight: 900 }}>ORCHESTRATE MODULE</button>
-                        <button onClick={()=>setIsAdding(false)} style={{ flex: 1, padding: '12px', background: '#eee', borderRadius: '10px', border: 'none' }}>CANCEL</button>
+                        <button type="submit" style={{ flex: 1, padding: '14px', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', borderRadius: '12px', border: 'none', fontWeight: 1000, cursor: 'pointer', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}>ORCHESTRATE MODULE</button>
+                        <button type="button" onClick={()=>setIsAdding(false)} style={{ flex: 1, padding: '14px', background: '#f1f5f9', color: '#64748b', borderRadius: '12px', border: 'none', fontWeight: 1000, cursor: 'pointer' }}>CANCEL</button>
                     </div>
                 </motion.form>
             )}

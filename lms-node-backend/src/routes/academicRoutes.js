@@ -10,7 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // GridFS initialization for BOTH recordings and assignments
 let gridfsAssignments; 
 mongoose.connection.on('connected', () => {
-    const db = mongoose.connection.useDb('academic-db');
+    const db = mongoose.connection.useDb('course-db');
     gridfsAssignments = new mongoose.mongo.GridFSBucket(db, {
         bucketName: 'assignment_files'
     });
@@ -19,7 +19,7 @@ mongoose.connection.on('connected', () => {
 // GridFS initialization for recordings
 let gridfsBucket;
 mongoose.connection.on('connected', () => {
-    const db = mongoose.connection.useDb('academic-db');
+    const db = mongoose.connection.useDb('course-db');
     gridfsBucket = new mongoose.mongo.GridFSBucket(db, {
         bucketName: 'recordings'
     });
@@ -29,16 +29,16 @@ mongoose.connection.on('connected', () => {
 // @route   GET /api/academic/batches
 router.get('/batches', async (req, res) => {
     try {
-        // Query academic-db directly using the same connection if possible, 
+        // Query course-db directly using the same connection if possible, 
         // or just return mock data if cross-db is tricky with mongoose.
         // For now, let's try to access the other DB via the connection.
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const batches = await db.collection('batches').find().toArray();
         const mappedBatches = batches.map(b => ({
             ...b,
             id: b._id.toString()
         }));
-        console.log(`Fetched ${mappedBatches.length} batches from academic-db`);
+        console.log(`Fetched ${mappedBatches.length} batches from course-db`);
         res.json(mappedBatches);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -49,7 +49,7 @@ router.get('/batches', async (req, res) => {
 // @route   POST /api/academic/batches
 router.post('/batches', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const batch = { ...req.body, createdAt: new Date(), updatedAt: new Date() };
         const result = await db.collection('batches').insertOne(batch);
         res.status(201).json({ ...batch, id: result.insertedId.toString() });
@@ -62,7 +62,7 @@ router.post('/batches', async (req, res) => {
 // @route   PUT /api/academic/batches/:id
 router.put('/batches/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { id, _id, ...updateData } = req.body;
         
         // Remove any other potential ID fields from updateData
@@ -89,7 +89,7 @@ router.put('/batches/:id', async (req, res) => {
 // @route   DELETE /api/academic/tests/:id
 router.delete('/tests/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('tests').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -101,7 +101,7 @@ router.delete('/tests/:id', async (req, res) => {
 // @route   GET /api/academic/tests/stats
 router.get('/tests/stats', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const totalTests = await db.collection('tests').countDocuments();
         const submissions = await db.collection('test_submissions').find().toArray();
         const logs = await db.collection('proctoring_logs').countDocuments();
@@ -125,7 +125,7 @@ router.get('/tests/stats', async (req, res) => {
 // @route   DELETE /api/academic/batches/:id
 router.delete('/batches/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('batches').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -137,7 +137,7 @@ router.delete('/batches/:id', async (req, res) => {
 // @route   GET /api/academic/batches/course/:courseId
 router.get('/batches/course/:courseId', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const batches = await db.collection('batches').find({ courseId: req.params.courseId }).toArray();
         const mappedBatches = batches.map(b => ({
             ...b,
@@ -153,7 +153,7 @@ router.get('/batches/course/:courseId', async (req, res) => {
 // @route   GET /api/academic/batches/student/:studentId
 router.get('/batches/student/:studentId', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const studentId = req.params.studentId;
         const batches = await db.collection('batches').find({ 
             $or: [
@@ -173,7 +173,7 @@ router.get('/batches/student/:studentId', async (req, res) => {
 });
 router.get('/curriculum', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const curriculum = await db.collection('curriculum').find().toArray();
         res.json(curriculum);
     } catch (err) {
@@ -184,7 +184,7 @@ router.get('/curriculum', async (req, res) => {
 // @desc    Get all sessions or by batch
 router.get('/sessions', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const filter = req.query.batchId ? { batchId: req.query.batchId } : {};
         const sessions = await db.collection('live_sessions').find(filter).toArray();
         const mapped = sessions.map(s => ({ ...s, id: s._id.toString() }));
@@ -197,7 +197,7 @@ router.get('/sessions', async (req, res) => {
 // @desc    Get sessions by batch (specific route if needed)
 router.get('/sessions/batch/:batchId', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const sessions = await db.collection('live_sessions').find({ batchId: req.params.batchId }).toArray();
         const mapped = sessions.map(s => ({ ...s, id: s._id.toString() }));
         res.json(mapped);
@@ -209,7 +209,7 @@ router.get('/sessions/batch/:batchId', async (req, res) => {
 // @desc    Create live session
 router.post('/sessions', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const session = { ...req.body, createdAt: new Date() };
         const result = await db.collection('live_sessions').insertOne(session);
         res.status(201).json({ ...session, id: result.insertedId.toString() });
@@ -221,7 +221,7 @@ router.post('/sessions', async (req, res) => {
 // @desc    Update live session
 router.put('/sessions/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { id, _id, ...updateData } = req.body;
         await db.collection('live_sessions').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
@@ -236,7 +236,7 @@ router.put('/sessions/:id', async (req, res) => {
 // @desc    Delete live session
 router.delete('/sessions/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('live_sessions').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -251,7 +251,7 @@ router.post('/sessions/:id/recording', upload.single('recording'), async (req, r
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
         
         const filename = `${Date.now()}-${req.file.originalname}`;
@@ -300,7 +300,7 @@ router.post('/sessions/:id/recording', upload.single('recording'), async (req, r
 // @desc    Stream recording from MongoDB GridFS
 router.get('/recording/:filename', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
         
         const files = await bucket.find({ filename: req.params.filename }).toArray();
@@ -321,7 +321,7 @@ router.get('/recording/:filename', async (req, res) => {
 // @desc    Delete recording and cleanup GridFS
 router.delete('/sessions/:id/recording', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'recordings' });
         
         let filter;
@@ -364,7 +364,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
         // Lazy initialization check
         if (!gridfsAssignments) {
-            const db = mongoose.connection.useDb('academic-db');
+            const db = mongoose.connection.useDb('course-db');
             gridfsAssignments = new mongoose.mongo.GridFSBucket(db, {
                 bucketName: 'assignment_files'
             });
@@ -403,7 +403,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 // @desc    Get all assignments
 router.get('/assignments', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const assignments = await db.collection('assignments').find().toArray();
         const mapped = assignments.map(a => ({ ...a, id: a._id.toString() }));
         res.json(mapped);
@@ -416,7 +416,7 @@ router.get('/assignments', async (req, res) => {
 // @route   GET /api/academic/assignments/batch/:batchId
 router.get('/assignments/batch/:batchId', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const assignments = await db.collection('assignments').find({ batchId: req.params.batchId }).toArray();
         const mapped = assignments.map(a => ({ ...a, id: a._id.toString() }));
         res.json(mapped);
@@ -428,7 +428,7 @@ router.get('/assignments/batch/:batchId', async (req, res) => {
 // @desc    Create new assignment
 router.post('/assignments', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const assignment = { ...req.body, createdAt: new Date() };
         const result = await db.collection('assignments').insertOne(assignment);
         res.status(201).json({ ...assignment, id: result.insertedId.toString() });
@@ -440,7 +440,7 @@ router.post('/assignments', async (req, res) => {
 // @desc    Update assignment
 router.put('/assignments/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { id, _id, ...updateData } = req.body;
         await db.collection('assignments').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
@@ -455,7 +455,7 @@ router.put('/assignments/:id', async (req, res) => {
 // @desc    Delete assignment
 router.delete('/assignments/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('assignments').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -467,7 +467,7 @@ router.delete('/assignments/:id', async (req, res) => {
 router.get('/assignment-file/:filename', async (req, res) => {
     try {
         if (!gridfsAssignments) {
-            const db = mongoose.connection.useDb('academic-db');
+            const db = mongoose.connection.useDb('course-db');
             gridfsAssignments = new mongoose.mongo.GridFSBucket(db, {
                 bucketName: 'assignment_files'
             });
@@ -488,7 +488,7 @@ router.get('/assignment-file/:filename', async (req, res) => {
 // @desc    Get all tests
 router.get('/tests', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const tests = await db.collection('tests').find().toArray();
         const mapped = tests.map(t => ({ ...t, id: t._id.toString() }));
         res.json(mapped);
@@ -500,7 +500,7 @@ router.get('/tests', async (req, res) => {
 // @desc    Create new test
 router.post('/tests', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const test = { 
             ...req.body, 
             createdAt: new Date(),
@@ -517,7 +517,7 @@ router.post('/tests', async (req, res) => {
 // @desc    Update test
 router.put('/tests/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { id, _id, ...updateData } = req.body;
         const result = await db.collection('tests').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
@@ -532,7 +532,7 @@ router.put('/tests/:id', async (req, res) => {
 // @desc    Delete test
 router.delete('/tests/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('tests').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -543,7 +543,7 @@ router.delete('/tests/:id', async (req, res) => {
 // @desc    Submit test response
 router.post('/test-submissions', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const submission = { ...req.body, submittedAt: new Date() };
         const result = await db.collection('test_submissions').insertOne(submission);
         res.status(201).json({ ...submission, id: result.insertedId.toString() });
@@ -555,7 +555,7 @@ router.post('/test-submissions', async (req, res) => {
 // @desc    Log proctoring anomaly
 router.post('/proctoring/logs', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const log = { ...req.body, timestamp: new Date() };
         await db.collection('proctoring_logs').insertOne(log);
         res.status(201).json({ success: true });
@@ -567,7 +567,7 @@ router.post('/proctoring/logs', async (req, res) => {
 // @desc    Get proctoring logs for a test/candidate (or all)
 router.get('/proctoring/logs', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { testId, studentId } = req.query;
         let filter = {};
         if (testId) filter.testId = testId;
@@ -583,7 +583,7 @@ router.get('/proctoring/logs', async (req, res) => {
 // @desc    Get active candidates (aggregated from recent proctoring activity)
 router.get('/active-candidates', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         // Get unique candidates who have proctoring logs in the last hour
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
         const logs = await db.collection('proctoring_logs').find({ timestamp: { $gte: oneHourAgo } }).toArray();
@@ -618,7 +618,7 @@ router.get('/active-candidates', async (req, res) => {
 // @desc    Get all test submissions
 router.get('/test-submissions', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const submissions = await db.collection('test_submissions').find().sort({ submittedAt: -1 }).toArray();
         const mapped = submissions.map(s => ({ ...s, id: s._id.toString() }));
         res.json(mapped);
@@ -629,7 +629,7 @@ router.get('/test-submissions', async (req, res) => {
 
 router.get('/proctoring/logs/:testId', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const logs = await db.collection('proctoring_logs').find({ testId: req.params.testId }).toArray();
         res.json(logs);
     } catch (err) {
@@ -642,7 +642,7 @@ router.get('/proctoring/logs/:testId', async (req, res) => {
 // @desc    Get all mock interviews
 router.get('/mock-interviews', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const interviews = await db.collection('mock_interviews').find().toArray();
         const mapped = interviews.map(i => ({ ...i, id: i._id.toString() }));
         res.json(mapped);
@@ -654,7 +654,7 @@ router.get('/mock-interviews', async (req, res) => {
 // @desc    Create new mock interview
 router.post('/mock-interviews', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const interview = { 
             ...req.body, 
             createdAt: new Date(),
@@ -671,7 +671,7 @@ router.post('/mock-interviews', async (req, res) => {
 // @desc    Update mock interview
 router.put('/mock-interviews/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { id, _id, ...updateData } = req.body;
         const result = await db.collection('mock_interviews').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
@@ -686,7 +686,7 @@ router.put('/mock-interviews/:id', async (req, res) => {
 // @desc    Delete mock interview
 router.delete('/mock-interviews/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('mock_interviews').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -697,7 +697,7 @@ router.delete('/mock-interviews/:id', async (req, res) => {
 // @desc    Submit interview feedback
 router.post('/interview-feedback', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const feedback = { ...req.body, submittedAt: new Date() };
         const result = await db.collection('interview_feedback').insertOne(feedback);
         res.status(201).json({ ...feedback, id: result.insertedId.toString() });
@@ -710,7 +710,7 @@ router.post('/interview-feedback', async (req, res) => {
 // @route   GET /api/academic/mock-interviews/stats
 router.get('/mock-interviews/stats', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const totalInterviews = await db.collection('mock_interviews').countDocuments();
         const feedback = await db.collection('interview_feedback').find().toArray();
         
@@ -735,7 +735,7 @@ router.get('/mock-interviews/stats', async (req, res) => {
 // @route   GET /api/academic/batches/:batchId/student-tracking
 router.get('/batches/:batchId/student-tracking', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const batchId = req.params.batchId;
         
         // 1. Find the batch to get student IDs
@@ -781,7 +781,7 @@ router.get('/batches/:batchId/student-tracking', async (req, res) => {
 // @desc    Get all session requests
 router.get('/session-requests', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const requests = await db.collection('session_requests').find().sort({ createdAt: -1 }).toArray();
         const mapped = requests.map(r => ({ ...r, id: r._id.toString() }));
         res.json(mapped);
@@ -793,7 +793,7 @@ router.get('/session-requests', async (req, res) => {
 // @desc    Create a session request
 router.post('/session-requests', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const request = { 
             ...req.body, 
             status: 'PENDING',
@@ -812,13 +812,13 @@ router.put('/session-requests/:id/action', async (req, res) => {
     try {
         const { action, reviewerId, reviewerName } = req.body; // action: 'APPROVED' or 'REJECTED'
         const requestId = req.params.id;
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
 
         const request = await db.collection('session_requests').findOne({ _id: new mongoose.Types.ObjectId(requestId) });
         if (!request) return res.status(404).json({ error: 'Request not found' });
 
         if (action === 'APPROVED') {
-            const academicDb = mongoose.connection.useDb('academic-db');
+            const academicDb = mongoose.connection.useDb('course-db');
             
             // Execute the actual operation based on request type
             if (request.type === 'CREATE') {
@@ -882,7 +882,7 @@ router.get('/notifications', async (req, res) => {
     try {
         const { userId, role } = req.query;
         console.log(`GET /notifications user=${userId} role=${role}`);
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         
         let filter = {};
         if (userId && role) {
@@ -906,7 +906,7 @@ router.get('/notifications', async (req, res) => {
 router.post('/notifications', async (req, res) => {
     try {
         console.log(`POST /notifications:`, req.body);
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const notification = {
             ...req.body,
             status: 'UNREAD',
@@ -922,7 +922,7 @@ router.post('/notifications', async (req, res) => {
 // @desc    Mark notification as read
 router.patch('/notifications/:id/read', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('notifications').updateOne(
             { _id: new mongoose.Types.ObjectId(req.params.id) },
             { $set: { status: 'READ', readAt: new Date() } }
@@ -936,7 +936,7 @@ router.patch('/notifications/:id/read', async (req, res) => {
 // @desc    Delete notification
 router.delete('/notifications/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('notifications').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
@@ -1039,7 +1039,7 @@ router.post('/rooms/:id/heartbeat', async (req, res) => {
     try {
         const { id: roomId } = req.params;
         const { userId, name, role, isMuted, isVideoOff } = req.body;
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
 
         await db.collection('room_participants').updateOne(
             { roomId, userId },
@@ -1065,7 +1065,7 @@ router.post('/rooms/:id/heartbeat', async (req, res) => {
 router.get('/rooms/:id/participants', async (req, res) => {
     try {
         const { id: roomId } = req.params;
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
 
         // Consider a participant active if they checked in within the last 20 seconds
         const cutoff = new Date(Date.now() - 20000);
@@ -1083,7 +1083,7 @@ router.get('/rooms/:id/participants', async (req, res) => {
 router.patch('/sessions/:id/complete', async (req, res) => {
     try {
         const { id } = req.params;
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('live_sessions').updateOne(
             { _id: new mongoose.Types.ObjectId(id) },
             { $set: { status: 'COMPLETED', completedAt: new Date() } }
@@ -1098,7 +1098,7 @@ router.patch('/sessions/:id/complete', async (req, res) => {
 router.post('/rooms/:id/terminate', async (req, res) => {
     try {
         const { id: roomId } = req.params;
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('room_participants').deleteMany({ roomId });
         res.json({ success: true });
     } catch (err) {
@@ -1112,7 +1112,7 @@ module.exports = router;
 // @desc    Get all mock interviews
 router.get('/mock-interviews', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const interviews = await db.collection('mock_interviews').find().sort({ createdAt: -1 }).toArray();
         const mapped = interviews.map(i => ({ ...i, id: i._id.toString() }));
         res.json(mapped);
@@ -1124,7 +1124,7 @@ router.get('/mock-interviews', async (req, res) => {
 // @desc    Get mock interview stats
 router.get('/mock-interviews/stats', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const countTotal = await db.collection('mock_interviews').countDocuments();
         const countLive = await db.collection('mock_interviews').countDocuments({ status: 'LIVE' });
         
@@ -1144,7 +1144,7 @@ router.get('/mock-interviews/stats', async (req, res) => {
 // @desc    Create mock interview
 router.post('/mock-interviews', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const interview = {
             ...req.body,
             status: 'SCHEDULED',
@@ -1161,7 +1161,7 @@ router.post('/mock-interviews', async (req, res) => {
 // @desc    Update mock interview
 router.put('/mock-interviews/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         const { id, _id, ...updateData } = req.body;
         
         await db.collection('mock_interviews').updateOne(
@@ -1180,7 +1180,7 @@ router.put('/mock-interviews/:id', async (req, res) => {
 router.get('/mock-interviews/student/:studentId', async (req, res) => {
     try {
         const { studentId } = req.params;
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         
         // 1. Get batches student belongs to
         const studentBatches = await db.collection('batches').find({ 
@@ -1206,7 +1206,7 @@ router.get('/mock-interviews/student/:studentId', async (req, res) => {
 // @desc    Delete mock interview
 router.delete('/mock-interviews/:id', async (req, res) => {
     try {
-        const db = mongoose.connection.useDb('academic-db');
+        const db = mongoose.connection.useDb('course-db');
         await db.collection('mock_interviews').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         res.json({ success: true });
     } catch (err) {
