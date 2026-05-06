@@ -13,9 +13,9 @@ const seedLMS = async () => {
         await Course.deleteMany();
 
         const admin = await User.create({
-            fullName: 'LMS Admin',
-            email: 'admin@bytecode.com',
-            password: 'password123',
+            fullName: 'Bytecode Trainings Admin',
+            email: 'bytecodetrainings@gmail.com',
+            password: 'Bytecode@1354',
             role: 'SUPER_ADMIN'
         });
 
