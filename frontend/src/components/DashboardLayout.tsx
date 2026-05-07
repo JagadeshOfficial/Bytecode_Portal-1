@@ -48,7 +48,8 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Overview', label: 'Dashboard Home', href: '/super-admin', icon: <LayoutDashboard size={18} /> },
         { section: 'User Management', label: 'Users List', href: '/super-admin/users', icon: <Users size={18} /> },
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/super-admin/academic', icon: <BookOpen size={18} /> },
-        { label: 'Mock Interview Index', href: '/super-admin/academic?tab=INTERVIEWS', icon: <Target size={18} /> },
+        { label: 'Assessment Engine', href: '/super-admin/academic?tab=EXAMS', icon: <CheckCircle size={18} /> },
+        { label: 'Mock Interview Simulator', href: '/super-admin/academic?tab=INTERVIEWS', icon: <Target size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
         { section: 'Tracking', label: 'Tracking Center', href: '/super-admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'System Activity Log', href: '/super-admin/global-tracking', icon: <Terminal size={18} /> },
@@ -57,6 +58,8 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Main', label: 'Admin Home', href: '/admin', icon: <LayoutDashboard size={18} /> },
         { section: 'User Management', label: 'Users List', href: '/admin/users', icon: <Users size={18} /> },
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/admin/academic', icon: <BookOpen size={18} /> },
+        { label: 'Assessment Engine', href: '/admin/academic?tab=EXAMS', icon: <CheckCircle size={18} /> },
+        { label: 'Mock Interview Simulator', href: '/admin/academic?tab=INTERVIEWS', icon: <Target size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/admin/chat', icon: <MessageSquare size={18} /> },
         { section: 'Tracking', label: 'Tracking Center', href: '/admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'System Activity Log', href: '/admin/global-tracking', icon: <Terminal size={18} /> },
@@ -93,12 +96,10 @@ const MENUS: Record<string, MenuItem[]> = {
     ],
     student: [
         { section: 'Overview', label: 'Student Dashboard', href: '/student', icon: <LayoutDashboard size={18} /> },
-        { section: 'Academic', label: 'Curriculum Hub', href: '/student/academic', icon: <BookOpen size={18} /> },
+        { section: 'Academic Hub', label: 'Curriculum Hub', href: '/student/academic', icon: <BookOpen size={18} /> },
+        { label: 'Assessment Engine', href: '/student/academic?tab=EXAMS', icon: <CheckCircle size={18} /> },
+        { label: 'Mock Interview Simulator', href: '/student/academic?tab=INTERVIEWS', icon: <Target size={18} /> },
         { section: 'Communication', label: 'ByteChat Connect', href: '/admin/chat', icon: <MessageSquare size={18} /> },
-        { section: 'Reports', label: 'Analytics Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
-        { section: 'Utilities', label: 'Online Compiler', href: '/student/compiler', icon: <Code size={18} /> },
-        { section: 'Learning', label: 'Exams & Tests', href: '/student/tests', icon: <CheckCircle size={18} /> },
-        { section: 'Career', label: 'Placement Portal', href: '/student/placements', icon: <Briefcase size={18} /> },
         { label: 'Growth Progress', href: '/student/progress', icon: <TrendingUp size={18} /> },
     ]
 };
@@ -180,7 +181,15 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
     const isLinkActive = (href: string) => {
         if (!href) return false;
         const currentFull = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
-        return currentFull === href || pathname === href;
+        
+        // If the menu link has query parameters, require an exact match
+        if (href.includes('?')) {
+            return currentFull === href;
+        }
+        
+        // If the menu link has no query parameters, it is only active if the current pathname matches 
+        // AND the current URL has no query parameters (ensures parent deselects when a specific tab is active)
+        return pathname === href && !searchParams.toString();
     };
 
     const fetchUserProfile = async () => {
@@ -447,7 +456,7 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
                                         <Link
                                             href={item.href}
                                             scroll={false}
-                                            className={`${styles.menuLink} ${pathname === item.href ? styles.activeLink : ''}`}
+                                            className={`${styles.menuLink} ${isLinkActive(item.href) ? styles.activeLink : ''}`}
                                             onClick={() => setIsSidebarOpen(false)}
                                         >
                                             <span style={{ opacity: 0.8 }}>{item.icon}</span>

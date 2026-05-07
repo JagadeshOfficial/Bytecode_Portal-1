@@ -325,7 +325,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                     { id: 'RECORDINGS', label: 'RECORDINGS', icon: <Video size={18} />, adminOnly: true }
                 ].filter(tab => {
                     if (tab.adminOnly && !isAdmin) return false;
-                    if (isStudent && tab.id === 'RECORDINGS') return false;
+                    if (isStudent && (tab.id === 'RECORDINGS' || tab.id === 'AI_ROOM')) return false;
                     return true;
                 }).map((tab) => (
                     <button key={tab.id} onClick={() => setSubView(tab.id as any)} style={subView === tab.id ? activeBtnStyle : inactiveBtnStyle}>

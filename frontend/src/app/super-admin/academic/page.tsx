@@ -15,7 +15,7 @@ import {
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle, MinusCircle,
     ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip, Shield,
-    Zap, Activity, Terminal, BarChart2, Monitor, Bot, MessageSquare
+    Zap, Activity, Terminal, BarChart2, Monitor, Bot, MessageSquare, Home, FolderOpen
 } from 'lucide-react';
 import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
@@ -88,6 +88,7 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const [shareTarget, setShareTarget] = useState<any>(null);
     const [shareStep, setShareStep] = useState(1); // 1: Select Course, 2: Select Batch, 3: Select Folder
     const [shareCurrentPath, setShareCurrentPath] = useState<string[]>([]);
+    const [drivePath, setDrivePath] = useState<string[]>([]);
     const [allCourses, setAllCourses] = useState<any[]>([]);
     const [allBatchesForCourse, setAllBatchesForCourse] = useState<any[]>([]);
     const [shareSelectedCourse, setShareSelectedCourse] = useState<any>(null);
@@ -284,6 +285,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     useEffect(() => {
         if (activeTabParam === 'TRACKING') {
             setBatchTab('TRACKING');
+        } else if (activeTabParam === 'EXAMS') {
+            setViewMode('EXAMS');
+        } else if (activeTabParam === 'INTERVIEWS') {
+            setViewMode('ANALYTICS');
         }
     }, [activeTabParam]);
 
@@ -739,6 +744,7 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
     const initiateShare = async (ls: any) => {
         setShareTarget(ls);
+        setShareCurrentPath([]);
         setIsShareModalOpen(true);
 
         try {
@@ -789,7 +795,40 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         }
     };
 
-    const handleConfirmShare = async (folderName?: string) => {
+    const handleCreateFolderForShare = async (newPath: string) => {
+        if (!shareSelectedBatch) return;
+        const updatedBatch = { ...shareSelectedBatch, updatedAt: new Date() };
+        if (!updatedBatch.folders) updatedBatch.folders = [];
+        
+        // Check if folder already exists
+        if (updatedBatch.folders.find((f: any) => f.name === newPath)) {
+            alert("Folder already exists!");
+            return;
+        }
+
+        updatedBatch.folders.push({ name: newPath, files: [], createdBy: 'Admin', createdAt: new Date() });
+
+        try {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${shareSelectedBatch.id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(updatedBatch)
+            });
+            if (res.ok) {
+                // Refresh local state
+                const freshBatches = batches.map(b => b.id === shareSelectedBatch.id ? updatedBatch : b);
+                setBatches(freshBatches);
+                setShareSelectedBatch(updatedBatch);
+                setShareNewFolderName('');
+                alert(`Folder "${newPath}" created successfully!`);
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleConfirmShare = async (path: string) => {
         if (!shareSelectedBatch || !shareTarget) return;
 
         const trainer = allUsers.find(u => u.id === shareTarget.tutorId);
@@ -806,13 +845,11 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         };
 
         const updatedBatch = { ...shareSelectedBatch, updatedAt: new Date() };
-        const targetFolderName = folderName || 'Shared Recordings';
-
         if (!updatedBatch.folders) updatedBatch.folders = [];
-        let folder = updatedBatch.folders.find((f: any) => f.name === targetFolderName);
-
+        
+        let folder = updatedBatch.folders.find((f: any) => f.name === path);
         if (!folder) {
-            folder = { name: targetFolderName, files: [], createdBy: 'Stream Capture', createdAt: new Date() };
+            folder = { name: path, files: [], createdBy: 'Stream Capture', createdAt: new Date() };
             updatedBatch.folders.push(folder);
         }
         if (!folder.files) folder.files = [];
@@ -828,7 +865,11 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
-                alert(`Recording shared successfully to ${targetFolderName}!`);
+                // Refresh local state
+                const freshBatches = batches.map(b => b.id === shareSelectedBatch.id ? updatedBatch : b);
+                setBatches(freshBatches);
+                setShareSelectedBatch(updatedBatch);
+                alert(`Recording shared successfully to ${path}!`);
                 setIsShareModalOpen(false);
             }
         } catch (e) { console.error(e); }
@@ -978,9 +1019,28 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const handleDeleteFolder = async (folderName: string, e: any) => {
         e.stopPropagation();
         if (!window.confirm(`Are you sure you want to delete folder "${folderName}" and all its contents?`)) return;
+        
         const updatedBatch = { ...selectedBatch };
-        updatedBatch.folders = updatedBatch.folders.filter((f: any) => f.name !== folderName);
-        await updateBatchInDb(updatedBatch, null);
+        if (!updatedBatch.folders) return;
+
+        // Recursive deletion: filter out the target folder and all its subdirectories
+        const originalCount = updatedBatch.folders.length;
+        updatedBatch.folders = updatedBatch.folders.filter((f: any) => 
+            f.name !== folderName && !f.name.startsWith(folderName + '/')
+        );
+
+        if (updatedBatch.folders.length === originalCount) {
+            alert("Folder not found or already deleted.");
+            return;
+        }
+
+        try {
+            await updateBatchInDb(updatedBatch, null);
+            alert(`Folder "${folderName}" and its contents have been removed.`);
+        } catch (err) {
+            alert("Failed to delete folder. Please try again.");
+            console.error(err);
+        }
     };
 
     const handleRenameSubmit = async (e: React.FormEvent) => {
@@ -1013,14 +1073,26 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
     const handleDeleteFile = async (fileName: string) => {
         if (!window.confirm(`Are you sure you want to delete file "${fileName}"?`)) return;
+        
+        const currentPathStr = drivePath.join('/');
         const updatedBatch = { ...selectedBatch };
+        
+        if (!updatedBatch.folders) return;
+
         updatedBatch.folders = updatedBatch.folders.map((f: any) => {
-            if (f.name === selectedFolder.name) {
-                return { ...f, files: f.files.filter((file: any) => file.name !== fileName) };
+            if (f.name === currentPathStr) {
+                return { ...f, files: (f.files || []).filter((file: any) => file.name !== fileName) };
             }
             return f;
         });
-        await updateBatchInDb(updatedBatch, selectedFolder.name);
+
+        try {
+            await updateBatchInDb(updatedBatch, currentPathStr);
+            alert(`File "${fileName}" has been deleted.`);
+        } catch (err) {
+            alert("Failed to delete file.");
+            console.error(err);
+        }
     };
 
     const handleToggleStudent = async (studentId: string) => {
@@ -1639,10 +1711,20 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
-                            {selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Module Drive' : viewMode === 'BATCHES' ? 'Select Batch' : 'Shared Workspace'}
+                            {selectedFolder ? selectedFolder.name : 
+                             viewMode === 'COURSES' ? 'Module Drive' : 
+                             viewMode === 'BATCHES' ? 'Select Batch' : 
+                             viewMode === 'EXAMS' ? 'Online Assessment Engine' :
+                             viewMode === 'ANALYTICS' ? 'Quantum Interview Simulator' :
+                             'Shared Workspace'}
                         </h1>
                         <div style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            {selectedFolder ? `Viewing files in this folder.` : viewMode === 'COURSES' ? 'Access your courses and modules.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
+                            {selectedFolder ? `Viewing files in this folder.` : 
+                             viewMode === 'COURSES' ? 'Access your courses and modules.' : 
+                             viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : 
+                             viewMode === 'EXAMS' ? 'Participate in scheduled tests and evaluate performance.' :
+                             viewMode === 'ANALYTICS' ? 'Master your interview skills with real-time simulations.' :
+                             `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
 
                             {viewMode === 'COURSES' && !selectedFolder && (
                                 <div style={{ display: 'flex', gap: '20px', marginLeft: '10px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '20px' }}>
@@ -1653,7 +1735,30 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                             )}
                         </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                        {(viewMode === 'COURSES' || viewMode === 'EXAMS' || viewMode === 'ANALYTICS') && !selectedCourse && (
+                            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <button 
+                                    onClick={() => setViewMode('COURSES')} 
+                                    style={{ padding: '10px 20px', borderRadius: '14px', background: viewMode === 'COURSES' ? 'var(--primary)' : 'transparent', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.3s' }}
+                                >
+                                    MODULES
+                                </button>
+                                <button 
+                                    onClick={() => setViewMode('EXAMS')} 
+                                    style={{ padding: '10px 20px', borderRadius: '14px', background: viewMode === 'EXAMS' ? 'var(--primary)' : 'transparent', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.3s' }}
+                                >
+                                    TESTS & EXAMS
+                                </button>
+                                <button 
+                                    onClick={() => setViewMode('ANALYTICS')} 
+                                    style={{ padding: '10px 20px', borderRadius: '14px', background: viewMode === 'ANALYTICS' ? 'var(--primary)' : 'transparent', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.3s' }}
+                                >
+                                    MOCK INTERVIEWS
+                                </button>
+                            </div>
+                        )}
+
                         {viewMode === 'COURSES' && isFullAdmin && (
                             <button onClick={() => setIsCreateCourseOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
                                 <Plus size={16} /> NEW COURSE
@@ -1737,9 +1842,8 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                     {[
                                         { id: 'DRIVE', label: 'BATCH DRIVE', icon: <Folder size={16} /> },
                                         { id: 'LIVE', label: 'LIVE CLASSES', icon: <Video size={16} /> },
-                                        { id: 'RECORDINGS', label: 'RECORDINGS', icon: <Play size={16} /> },
                                         { id: 'ASSIGNMENTS', label: 'ASSIGNMENTS', icon: <FileText size={16} /> },
-                                        ...(isFullAdmin ? [
+                                        ...((isFullAdmin || role === 'student') ? [
                                              { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> }
                                         ] : [])
                                     ].map((tab) => (
@@ -1785,69 +1889,183 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                 </div>
                                 {batchTab === 'DRIVE' && (
                                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', flex: 1 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                {selectedFolder ? (
-                                                    <><button onClick={() => setSelectedFolder(null)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><ChevronLeft size={24} /></button> {selectedFolder.name}</>
-                                                ) : (
-                                                    <><HardDrive color="var(--primary)" /> Drive Workspace</>
-                                                )}
-                                            </h3>
-                                            <div style={{ display: 'flex', gap: '10px' }}>
-                                                {!selectedFolder && isFullAdmin && (
-                                                    <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-                                                        <Plus size={16} /> NEW FOLDER
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', marginBottom: '3rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                    <div style={{ width: '45px', height: '45px', background: 'linear-gradient(135deg, var(--primary), #8b5cf6)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(124, 58, 237, 0.2)' }}>
+                                                        <HardDrive color="#fff" size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 style={{ fontSize: '1.6rem', fontWeight: 950, color: '#1e293b', letterSpacing: '-0.5px' }}>Batch Drive</h3>
+                                                        <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Resource Management Hub</p>
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '12px' }}>
+                                                    {isFullAdmin && (
+                                                        <button onClick={() => setIsCreateFolderOpen(true)} className="btn-quantum" style={{ padding: '12px 25px', fontSize: '0.85rem', borderRadius: '18px' }}>
+                                                            <Plus size={18} /> NEW FOLDER
+                                                        </button>
+                                                    )}
+                                                    <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                                    <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '12px 25px', fontSize: '0.85rem', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '18px', boxShadow: 'none' }}>
+                                                        <Upload size={18} /> UPLOAD FILE
                                                     </button>
-                                                )}
-                                                <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                                <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ padding: '10px 20px', fontSize: '0.85rem', background: 'var(--secondary)' }}>
-                                                    <Upload size={16} /> UPLOAD FILE
+                                                </div>
+                                            </div>
+
+                                            {/* PREMIUM PILL BREADCRUMBS */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '8px 25px', borderRadius: '25px', border: '1px solid #f1f5f9', alignSelf: 'flex-start' }}>
+                                                <button onClick={() => setDrivePath([])} style={{ background: 'none', border: 'none', color: drivePath.length === 0 ? 'var(--primary)' : '#94a3b8', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.3s' }}>
+                                                    <Home size={14} /> DRIVE
                                                 </button>
+                                                {drivePath.map((p, idx) => (
+                                                    <React.Fragment key={idx}>
+                                                        <ChevronRight size={12} color="#cbd5e1" />
+                                                        <button onClick={() => setDrivePath(drivePath.slice(0, idx + 1))} style={{ background: 'none', border: 'none', color: idx === drivePath.length - 1 ? 'var(--primary)' : '#64748b', fontWeight: 800, fontSize: '0.7rem', cursor: 'pointer', textTransform: 'uppercase' }}>
+                                                            {p}
+                                                        </button>
+                                                    </React.Fragment>
+                                                ))}
                                             </div>
                                         </div>
 
-                                        {!selectedFolder ? (
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}>
-                                                {selectedBatch?.folders?.map((folder: any, fIdx: number) => (
-                                                    <DriveFolder
-                                                        key={fIdx}
-                                                        folder={folder}
-                                                        onClick={() => setSelectedFolder(folder)}
-                                                        onShare={(e: any) => { e.stopPropagation(); handleOpenAccess(folder); }}
-                                                        onRename={(e: any) => { e.stopPropagation(); setRenameTarget({ type: 'folder', oldName: folder.name }); setRenameValue(folder.name); }}
-                                                        onDelete={(e: any) => handleDeleteFolder(folder.name, e)}
-                                                    />
-                                                ))}
-                                                {(!selectedBatch?.folders || selectedBatch.folders.length === 0) && (
-                                                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
-                                                        <Folder size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.1 }} />
-                                                        <p style={{ color: 'var(--text-dim)', fontWeight: 800 }}>This batch has no resources yet.</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                {selectedFolder.files?.length > 0 ? selectedFolder.files.map((file: any, fIdx: number) => (
-                                                    <FileItem
-                                                        key={fIdx}
-                                                        name={file.name}
-                                                        type={file.type}
-                                                        size={file.size}
-                                                        date={new Date(file.uploadDate).toLocaleDateString()}
-                                                        onRename={() => { setRenameTarget({ type: 'file', oldName: file.name, folderName: selectedFolder.name }); setRenameValue(file.name); }}
-                                                        onDelete={() => handleDeleteFile(file.name)}
-                                                        onView={() => setViewFileTarget(file)}
-                                                        onShare={() => handleOpenAccess(file)}
-                                                    />
-                                                )) : (
-                                                    <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '32px' }}>
-                                                        <File size={40} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>No files found in this folder.</p>
-                                                        <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3.5rem' }}>
+                                            {/* RENDER FOLDERS */}
+                                            {(() => {
+                                                const currentPathStr = drivePath.join('/');
+                                                const folders = selectedBatch?.folders || [];
+                                                
+                                                const visibleSubFolders = new Set<string>();
+                                                folders.forEach((f: any) => {
+                                                    const name = f.name;
+                                                    if (currentPathStr === '') {
+                                                        visibleSubFolders.add(name.split('/')[0]);
+                                                    } else {
+                                                        const prefix = currentPathStr + '/';
+                                                        if (name.startsWith(prefix)) {
+                                                            const relative = name.substring(prefix.length);
+                                                            const firstPart = relative.split('/')[0];
+                                                            if (firstPart) visibleSubFolders.add(firstPart);
+                                                        }
+                                                    }
+                                                });
+
+                                                if (visibleSubFolders.size > 0) {
+                                                    return (
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '2rem' }}>
+                                                            {Array.from(visibleSubFolders).map((folderName) => {
+                                                                const fullPath = currentPathStr ? `${currentPathStr}/${folderName}` : folderName;
+                                                                const actualFolder = folders.find((f: any) => f.name === fullPath);
+                                                                
+                                                                return (
+                                                                    <motion.div
+                                                                        key={fullPath}
+                                                                        initial={{ opacity: 0, scale: 0.95 }}
+                                                                        animate={{ opacity: 1, scale: 1 }}
+                                                                        whileHover={{ y: -8 }}
+                                                                        onClick={() => setDrivePath([...drivePath, folderName])}
+                                                                        style={{ 
+                                                                            background: '#fff', 
+                                                                            padding: '2rem', 
+                                                                            borderRadius: '35px', 
+                                                                            border: '1px solid #f1f5f9', 
+                                                                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)',
+                                                                            cursor: 'pointer',
+                                                                            position: 'relative',
+                                                                            overflow: 'hidden',
+                                                                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                                                                        }}
+                                                                    >
+                                                                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(90deg, #f59e0b, #fbbf24)' }} />
+                                                                        
+                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                                                                            <div style={{ width: '55px', height: '55px', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                <Folder size={28} color="#f59e0b" />
+                                                                            </div>
+                                                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleOpenAccess(actualFolder || { name: fullPath }); }} style={{ padding: '8px', background: '#f8fafc', border: 'none', borderRadius: '10px', color: '#94a3b8', cursor: 'pointer' }}><Share2 size={14} /></button>
+                                                                                <button onClick={(e) => handleDeleteFolder(fullPath, e)} style={{ padding: '8px', background: '#fff5f5', border: 'none', borderRadius: '10px', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={14} /></button>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1e293b', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{folderName}</h4>
+                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{(actualFolder?.files?.length || 0)} RESOURCES</span>
+                                                                    </motion.div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
+                                            {/* RENDER FILES */}
+                                            {(() => {
+                                                const currentPathStr = drivePath.join('/');
+                                                const currentFolder = selectedBatch?.folders?.find((f: any) => f.name === currentPathStr);
+                                                
+                                                if (currentFolder && currentFolder.files?.length > 0) {
+                                                    return (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '0 25px', marginBottom: '5px' }}>
+                                                                <div style={{ height: '1px', flex: 1, background: '#f1f5f9' }} />
+                                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '2px' }}>Directory Content</span>
+                                                                <div style={{ height: '1px', flex: 1, background: '#f1f5f9' }} />
+                                                            </div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                                                {currentFolder.files.map((file: any, fIdx: number) => (
+                                                                    <motion.div
+                                                                        key={fIdx}
+                                                                        whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}
+                                                                        style={{ background: '#fff', padding: '1.5rem', borderRadius: '28px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '18px', transition: 'all 0.3s' }}
+                                                                    >
+                                                                        <div style={{ width: '50px', height: '50px', background: file.type === 'VIDEO' ? 'rgba(59, 130, 246, 0.08)' : 'rgba(16, 185, 129, 0.08)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            {file.type === 'VIDEO' ? <Play size={22} color="#3b82f6" /> : <FileText size={22} color="#10b981" />}
+                                                                        </div>
+                                                                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                                            <h5 style={{ fontSize: '0.9rem', fontWeight: 850, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}>{file.name}</h5>
+                                                                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8' }}>{new Date(file.uploadDate).toLocaleDateString()} • {file.size}</span>
+                                                                        </div>
+                                                                        <div style={{ display: 'flex', gap: '6px' }}>
+                                                                            <button onClick={() => setViewFileTarget(file)} style={{ padding: '8px', background: '#f0f9ff', color: '#0ea5e9', borderRadius: '10px', border: 'none', cursor: 'pointer' }}><Eye size={14} /></button>
+                                                                            <button onClick={() => handleDeleteFile(file.name)} style={{ padding: '8px', background: '#fef2f2', color: '#ef4444', borderRadius: '10px', border: 'none', cursor: 'pointer' }}><Trash2 size={14} /></button>
+                                                                        </div>
+                                                                    </motion.div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
+                                            {/* EMPTY STATE */}
+                                            {(() => {
+                                                const currentPathStr = drivePath.join('/');
+                                                const folders = selectedBatch?.folders || [];
+                                                const hasSubfolders = folders.some((f: any) => currentPathStr === '' ? true : f.name.startsWith(currentPathStr + '/'));
+                                                const currentFolder = folders.find((f: any) => f.name === currentPathStr);
+                                                const hasFiles = currentFolder?.files?.length > 0;
+
+                                                if (!hasSubfolders && !hasFiles) {
+                                                    return (
+                                                        <div style={{ textAlign: 'center', padding: '6rem 2rem', background: 'rgba(248, 250, 252, 0.5)', borderRadius: '40px', border: '2px dashed #e2e8f0' }}>
+                                                            <div style={{ width: '80px', height: '80px', background: '#fff', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
+                                                                <FolderOpen size={35} color="#cbd5e1" />
+                                                            </div>
+                                                            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#475569', marginBottom: '8px' }}>Directory is Empty</h3>
+                                                            <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, maxWidth: '300px', margin: '0 auto 2rem' }}>This subdirectory doesn't contain any folders or resources yet.</p>
+                                                            {currentPathStr !== '' && (
+                                                                <button onClick={() => setDrivePath(drivePath.slice(0, -1))} className="btn-quantum" style={{ padding: '12px 30px', fontSize: '0.85rem' }}>
+                                                                    <ChevronLeft size={16} /> GO BACK
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+                                        </div>
                                     </motion.div>
                                 )}
 
@@ -1899,7 +2117,7 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                                     <h4 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
                                                                 </div>
                                                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                                                    <button onClick={() => { setShareTarget(ls); setIsShareModalOpen(true); setShareStep(1); }} style={{ background: '#f0f9ff', border: '1px solid #e0f2fe', color: '#0ea5e9', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} title="Share to Drive"><Share2 size={16} /></button>
+                                                                    <button onClick={() => { setShareTarget(ls); setShareCurrentPath([]); setIsShareModalOpen(true); setShareStep(1); }} style={{ background: '#f0f9ff', border: '1px solid #e0f2fe', color: '#0ea5e9', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} title="Share to Drive"><Share2 size={16} /></button>
                                                                     <button onClick={(e) => handleDeleteSession(ls.id || ls._id, e)} style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} title="Delete Archive"><Trash2 size={16} /></button>
                                                                 </div>
                                                             </div>
@@ -2199,7 +2417,9 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                 </h3>
                                                 <p style={{ color: '#718096', fontSize: '0.9rem' }}>Project tracking, submissions, and performance auditing.</p>
                                             </div>
-                                            <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '16px 32px', background: '#10b981', borderRadius: '18px', fontSize: '1rem', fontWeight: 900 }}>+ NEW ASSIGNMENT</button>
+                                            {role !== 'student' && (
+                                                <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ padding: '16px 32px', background: '#10b981', borderRadius: '18px', fontSize: '1rem', fontWeight: 900 }}>+ NEW ASSIGNMENT</button>
+                                            )}
                                         </div>
 
                                         {batchAssignments.length === 0 ? (
@@ -2209,7 +2429,9 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                 </div>
                                                 <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#1a202c' }}>Assignment Queue Empty</h2>
                                                 <p style={{ color: '#718096', fontSize: '1rem', textAlign: 'center', maxWidth: '350px', marginTop: '10px' }}>Distribute projects or exams to this batch to start tracking performance and submissions.</p>
-                                                <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ marginTop: '2.5rem', padding: '12px 24px', background: '#10b981' }}>CREATE FIRST ASSIGNMENT</button>
+                                                {role !== 'student' && (
+                                                    <button onClick={() => setIsCreateAssignmentModalOpen(true)} className="btn-quantum" style={{ marginTop: '2.5rem', padding: '12px 24px', background: '#10b981' }}>CREATE FIRST ASSIGNMENT</button>
+                                                )}
                                             </div>
                                         ) : (
                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
@@ -2229,10 +2451,12 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                                     <span style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.05)', color: '#10b981', fontSize: '0.75rem', fontWeight: 900 }}>{a.difficulty}</span>
                                                                     <span style={{ padding: '6px 14px', borderRadius: '10px', background: '#f7fafc', color: '#1a202c', fontSize: '0.75rem', fontWeight: 900 }}>ASSIGNMENT</span>
                                                                 </div>
-                                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                                    <button onClick={() => { setEditingAssignment(a); setIsEditAssignmentModalOpen(true); }} style={{ background: 'none', border: 'none', color: '#718096', cursor: 'pointer' }}><Edit2 size={18} /></button>
-                                                                    <button onClick={(e) => handleDeleteAssignment(a.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
-                                                                </div>
+                                                                {role !== 'student' && (
+                                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                                        <button onClick={() => { setEditingAssignment(a); setIsEditAssignmentModalOpen(true); }} style={{ background: 'none', border: 'none', color: '#718096', cursor: 'pointer' }}><Edit2 size={18} /></button>
+                                                                        <button onClick={(e) => handleDeleteAssignment(a.id, e)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                                                                    </div>
+                                                                )}
                                                             </div>
 
                                                             <div>
@@ -2278,34 +2502,44 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', flex: 1 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <Users color="var(--primary)" /> STUDENT PERFORMANCE TRACKING
+                                                <Users color="var(--primary)" /> {role === 'student' ? 'MY PERFORMANCE TRACKING' : 'STUDENT PERFORMANCE TRACKING'}
                                             </h3>
-                                            <div style={{ position: 'relative', width: '300px' }}>
-                                                <Search style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} size={18} />
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Search student or email..." 
-                                                    value={trackingSearchTerm}
-                                                    onChange={(e) => setTrackingSearchTerm(e.target.value)}
-                                                    style={{ ...inputStyle, paddingLeft: '45px', borderRadius: '15px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }} 
-                                                />
-                                            </div>
+                                            {role !== 'student' && (
+                                                <div style={{ position: 'relative', width: '300px' }}>
+                                                    <Search style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} size={18} />
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Search student or email..." 
+                                                        value={trackingSearchTerm}
+                                                        onChange={(e) => setTrackingSearchTerm(e.target.value)}
+                                                        style={{ ...inputStyle, paddingLeft: '45px', borderRadius: '15px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }} 
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
-                                            {studentTracking.filter(s => 
-                                                s.name?.toLowerCase().includes(trackingSearchTerm.toLowerCase()) || 
-                                                s.email?.toLowerCase().includes(trackingSearchTerm.toLowerCase())
-                                            ).length === 0 ? (
+                                            {studentTracking.filter(s => {
+                                                const matchesSearch = s.name?.toLowerCase().includes(trackingSearchTerm.toLowerCase()) || 
+                                                                    s.email?.toLowerCase().includes(trackingSearchTerm.toLowerCase());
+                                                if (role === 'student') {
+                                                    return matchesSearch && (s.email === currentUser?.email || s.id === (currentUser?.id || currentUser?._id));
+                                                }
+                                                return matchesSearch;
+                                            }).length === 0 ? (
                                                 <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(0,0,0,0.02)', borderRadius: '32px' }}>
                                                     <Users size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-                                                    <p style={{ fontWeight: 800, color: '#666' }}>No students found matching your search.</p>
+                                                    <p style={{ fontWeight: 800, color: '#666' }}>{role === 'student' ? 'Your performance data is being processed...' : 'No students found matching your search.'}</p>
                                                 </div>
                                             ) : (
-                                                studentTracking.filter(s => 
-                                                    s.name?.toLowerCase().includes(trackingSearchTerm.toLowerCase()) || 
-                                                    s.email?.toLowerCase().includes(trackingSearchTerm.toLowerCase())
-                                                ).map((student) => (
+                                                studentTracking.filter(s => {
+                                                    const matchesSearch = s.name?.toLowerCase().includes(trackingSearchTerm.toLowerCase()) || 
+                                                                        s.email?.toLowerCase().includes(trackingSearchTerm.toLowerCase());
+                                                    if (role === 'student') {
+                                                        return matchesSearch && (s.email === currentUser?.email || s.id === (currentUser?.id || currentUser?._id));
+                                                    }
+                                                    return matchesSearch;
+                                                }).map((student) => (
                                                     <motion.div 
                                                         key={student.id} 
                                                         whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(124, 58, 237, 0.1)' }} 
@@ -3216,106 +3450,91 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
                                 {/* STEP 3: FOLDERS */}
                                 {shareStep === 3 && (
-                                    <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                        <button onClick={() => setShareStep(2)} style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <ChevronLeft size={16} /> BACK TO BATCHES
-                                        </button>
+                                    <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <button onClick={() => shareCurrentPath.length > 0 ? setShareCurrentPath(shareCurrentPath.slice(0, -1)) : setShareStep(2)} style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <ChevronLeft size={16} /> {shareCurrentPath.length > 0 ? 'BACK' : 'BACK TO BATCHES'}
+                                            </button>
 
-                                        {/* DESTINATION SECTION - BENTO STYLE */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'linear-gradient(45deg, #10b981, #34d399)', boxShadow: '0 0 15px rgba(16,185,129,0.5)' }} />
-                                                    <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#fff', letterSpacing: '2px', textTransform: 'uppercase' }}>Available Vaults</span>
-                                                </div>
-                                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800 }}>{(shareSelectedBatch.folders?.length || 0) + 1} LOCATIONS</span>
-                                            </div>
-
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.2rem' }}>
-                                                {shareSelectedBatch.folders?.map((f: any) => (
-                                                    <motion.button 
-                                                        key={f.name} 
-                                                        whileHover={{ y: -8, scale: 1.02, background: 'rgba(255,255,255,0.05)' }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                        onClick={() => handleConfirmShare(f.name)} 
-                                                        style={{ padding: '1.8rem', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', color: '#fff', textAlign: 'center', cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
-                                                    >
-                                                        <div style={{ width: '50px', height: '50px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}><Folder size={24} color="#f59e0b" /></div>
-                                                        <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.5px' }}>{f.name}</div>
-                                                    </motion.button>
-                                                ))}
-                                                <motion.button 
-                                                    whileHover={{ y: -8, scale: 1.02, background: 'rgba(139, 92, 246, 0.12)' }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={() => handleConfirmShare('Shared Recordings')} 
-                                                    style={{ padding: '1.8rem', borderRadius: '32px', border: '1px solid rgba(139, 92, 246, 0.3)', background: 'rgba(139, 92, 246, 0.05)', color: '#fff', textAlign: 'center', cursor: 'pointer' }}
+                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                {shareCurrentPath.length > 0 && (
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '5px 12px', borderRadius: '10px', marginRight: '10px' }}>
+                                                        IN: {shareCurrentPath.join(' / ')}
+                                                    </span>
+                                                )}
+                                                <button 
+                                                    onClick={() => handleConfirmShare(shareCurrentPath.join('/'))}
+                                                    disabled={shareCurrentPath.length === 0}
+                                                    style={{ background: shareCurrentPath.length === 0 ? 'rgba(255,255,255,0.05)' : 'var(--primary)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 900, cursor: shareCurrentPath.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                 >
-                                                    <div style={{ width: '50px', height: '50px', background: 'var(--primary)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px', boxShadow: '0 8px 20px rgba(139,92,246,0.4)' }}><Play size={24} color="#fff" /></div>
-                                                    <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.5px' }}>Shared Vault</div>
-                                                </motion.button>
+                                                    <Share2 size={16} /> SHARE HERE
+                                                </button>
                                             </div>
                                         </div>
 
-                                        {/* ACTION DIVIDER */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1))' }} />
-                                            <div style={{ padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px' }}>CREATE NEW CATEGORY</div>
-                                            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(270deg, transparent, rgba(255,255,255,0.1))' }} />
+                                        {/* DESTINATION GRID */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px', minHeight: '100px' }}>
+                                            {(() => {
+                                                const currentPathStr = shareCurrentPath.join('/');
+                                                const folders = shareSelectedBatch.folders || [];
+                                                
+                                                const visibleFolders = new Set<string>();
+                                                folders.forEach((f: any) => {
+                                                    const name = f.name;
+                                                    if (currentPathStr === '') {
+                                                        // At root, show first level only
+                                                        visibleFolders.add(name.split('/')[0]);
+                                                    } else {
+                                                        // Inside a path, show only folders that start with currentPath/
+                                                        const prefix = currentPathStr + '/';
+                                                        if (name.startsWith(prefix)) {
+                                                            const relative = name.substring(prefix.length);
+                                                            const firstPart = relative.split('/')[0];
+                                                            if (firstPart) visibleFolders.add(firstPart);
+                                                        }
+                                                    }
+                                                });
+
+                                                return Array.from(visibleFolders).map(folderName => (
+                                                    <motion.button 
+                                                        key={folderName}
+                                                        whileHover={{ y: -5, background: 'rgba(255,255,255,0.05)' }}
+                                                        onClick={() => setShareCurrentPath([...shareCurrentPath, folderName])}
+                                                        style={{ padding: '20px', borderRadius: '25px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', color: '#fff', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', textAlign: 'left', display: 'flex', gap: '15px', alignItems: 'center' }}
+                                                    >
+                                                        <div style={{ padding: '10px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '15px' }}><Folder size={22} color="#f59e0b" /></div>
+                                                        <span>{folderName}</span>
+                                                    </motion.button>
+                                                ));
+                                            })()}
                                         </div>
 
-                                        {/* QUANTUM CREATION BAR */}
-                                        <motion.div 
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            style={{ 
-                                                background: 'rgba(255,255,255,0.03)', 
-                                                padding: '1.5rem', 
-                                                borderRadius: '35px', 
-                                                border: '1px solid rgba(255,255,255,0.06)',
-                                                display: 'flex',
-                                                gap: '12px',
-                                                alignItems: 'center',
-                                                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
-                                            }}
-                                        >
-                                            <div style={{ flex: 1, position: 'relative' }}>
-                                                <FolderPlus size={24} color="var(--primary)" style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.8 }} />
+                                        {/* EXPLICIT CREATION ZONE */}
+                                        <div style={{ background: 'rgba(139, 92, 246, 0.05)', padding: '2rem', borderRadius: '40px', border: '2px dashed rgba(139, 92, 246, 0.2)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
+                                                <FolderPlus size={22} color="var(--primary)" />
+                                                <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'var(--primary)', letterSpacing: '1px' }}>DEPLOY NEW SUB-FOLDER</span>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '15px' }}>
                                                 <input 
                                                     value={shareNewFolderName} 
                                                     onChange={(e) => setShareNewFolderName(e.target.value)} 
-                                                    placeholder="Define a new distribution category..." 
-                                                    style={{ 
-                                                        width: '100%', 
-                                                        background: 'rgba(0,0,0,0.3)', 
-                                                        border: '1px solid rgba(255,255,255,0.08)', 
-                                                        borderRadius: '24px', 
-                                                        padding: '18px 20px 18px 60px', 
-                                                        color: '#fff', 
-                                                        fontSize: '1rem', 
-                                                        fontWeight: 600,
-                                                        outline: 'none',
-                                                        transition: 'all 0.3s' 
-                                                    }} 
+                                                    placeholder="Enter folder name..." 
+                                                    style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '25px', padding: '20px 25px', color: '#fff', fontSize: '1rem', outline: 'none' }} 
                                                 />
+                                                <button 
+                                                    onClick={() => {
+                                                        const fullPath = shareCurrentPath.length > 0 ? `${shareCurrentPath.join('/')}/${shareNewFolderName}` : shareNewFolderName;
+                                                        handleCreateFolderForShare(fullPath);
+                                                    }} 
+                                                    disabled={!shareNewFolderName} 
+                                                    className="btn-quantum" 
+                                                    style={{ padding: '0 40px', borderRadius: '25px', fontWeight: 900, background: 'rgba(255,255,255,0.05)', color: 'var(--primary)', border: '1px solid var(--primary)' }}
+                                                >
+                                                    CREATE FOLDER
+                                                </button>
                                             </div>
-                                            <button 
-                                                onClick={() => handleConfirmShare(shareNewFolderName)} 
-                                                disabled={!shareNewFolderName} 
-                                                className="btn-quantum" 
-                                                style={{ 
-                                                    height: '60px',
-                                                    padding: '0 40px', 
-                                                    borderRadius: '24px', 
-                                                    fontWeight: 900, 
-                                                    fontSize: '0.9rem', 
-                                                    letterSpacing: '1px',
-                                                    textTransform: 'uppercase',
-                                                    boxShadow: '0 15px 30px rgba(139,92,246,0.3)' 
-                                                }}
-                                            >
-                                                DEPLOY & SHARE
-                                            </button>
-                                        </motion.div>
+                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
