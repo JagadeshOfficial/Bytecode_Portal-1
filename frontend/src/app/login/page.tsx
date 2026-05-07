@@ -43,7 +43,7 @@ export default function Login() {
             if (response.ok && response.data) {
                 const data = response.data;
                 if (data.status === 'SUCCESS') {
-                    // Save user info to localStorage
+                    localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify({
                         id: data.id,
                         _id: data.id,

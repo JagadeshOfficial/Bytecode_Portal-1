@@ -149,7 +149,10 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         try {
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({
                     ...formData,
                     attendanceRate: selectedUser?.attendanceRate || 92.5,

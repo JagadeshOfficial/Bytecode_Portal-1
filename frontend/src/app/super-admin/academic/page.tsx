@@ -123,6 +123,26 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const [isRequestDetailModalOpen, setIsRequestDetailModalOpen] = useState(false);
     const [selectedRequestForDetail, setSelectedRequestForDetail] = useState<any>(null);
 
+    // --- PREMIUM ALERT STATES ---
+    const [alertConfig, setAlertConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'DELETE' | 'INFO' | 'SUCCESS';
+        onConfirm?: () => void;
+    }>({ isOpen: false, title: '', message: '', type: 'INFO' });
+
+    const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
+
+    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 4000);
+    };
+
+    const confirmAction = (title: string, message: string, onConfirm: () => void, type: 'DELETE' | 'INFO' = 'DELETE') => {
+        setAlertConfig({ isOpen: true, title, message, type, onConfirm });
+    };
+
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
@@ -134,14 +154,23 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
             ? `${API_URLS.LMS_BACKEND}/api/academic/batches/student/${userId}`
             : `${API_URLS.LMS_BACKEND}/api/academic/batches`;
 
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
         const [cData, bData, uData, aData, sData, rData] = await Promise.all([
-            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/courses`),
-            fetchJsonSafe<any[]>(batchUrl),
-            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`),
-            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/assignments`),
-            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/sessions`),
-            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`)
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/courses`, { headers }),
+            fetchJsonSafe<any[]>(batchUrl, { headers }),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/users`, { headers }),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/assignments`, { headers }),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/sessions`, { headers }),
+            fetchJsonSafe<any[]>(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, { headers })
         ]);
+
+        // REPORT ERRORS IF ANY
+        const errors = [cData, bData, uData, aData, sData, rData].filter(d => !d.ok && d.error);
+        if (errors.length > 0) {
+            showToast(errors[0].error || "Data link unstable. Authorization required.", "error");
+        }
 
         if (bData.ok && bData.data) {
             setBatches(bData.data);
@@ -261,7 +290,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests/${requestId}/action`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({ action, reviewerId, reviewerName })
             });
 
@@ -278,7 +310,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({
                             userId: reqData.requestedById,
                             title: titleText,
@@ -306,8 +341,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         if (!confirm(confirmMsg)) return;
 
         try {
+            const token = localStorage.getItem('token');
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests/${requestId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 setSessionRequests(sessionRequests.filter(r => (r.id !== requestId && r._id !== requestId)));
@@ -322,7 +359,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         const fetchTracking = async () => {
             if (batchTab === 'TRACKING' && selectedBatch) {
                 try {
-                    const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}/student-tracking`);
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}/student-tracking`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
                     if (res.ok) setStudentTracking(await res.json());
                 } catch (err) {
                     console.error(err);
@@ -349,7 +389,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -384,7 +427,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -419,7 +465,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
@@ -448,7 +497,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${editBatchData.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
@@ -465,14 +517,56 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
     const handleDeleteBatch = async (id: string, e: any) => {
         e.stopPropagation();
+        const token = localStorage.getItem('token');
+        if (!token || token === 'null' || token === 'undefined') {
+            showToast("Session expired or invalid. Please logout and login again to refresh your security token.", "error");
+            return;
+        }
+
         if (!confirm("Are you sure you want to delete this batch and all its resources?")) return;
         try {
-            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             setBatches(batches.filter((b: any) => b.id !== id));
             if (selectedBatch?.id === id) setSelectedBatch(null);
+            showToast("Batch and all associated data purged.", "success");
         } catch (e) {
             console.error("Failed to delete batch", e);
+            showToast("Failed to delete batch. Please try again.", "error");
         }
+    };
+
+    const handleDeleteCourse = async (courseId: string, e: any) => {
+        e.stopPropagation();
+        const token = localStorage.getItem('token');
+        if (!token || token === 'null' || token === 'undefined') {
+            showToast("Session expired or invalid. Please logout and login again to refresh your security token.", "error");
+            return;
+        }
+
+        confirmAction(
+            "Terminate Course?",
+            "This action is irreversible. All modules and data linked to this course will be permanently purged from the Command Center.",
+            async () => {
+                try {
+                    const res = await fetch(`${API_URLS.LMS_BACKEND}/api/courses/${courseId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        setCourses(courses.filter(c => (c.id !== courseId && c._id !== courseId)));
+                        showToast("Course Data Purged Successfully.", "success");
+                    } else {
+                        const err = await res.json();
+                        showToast(err.error || "Failed to purge course.", "error");
+                    }
+                } catch (err) {
+                    showToast("Neural link failed. Network error.", "error");
+                }
+            }
+        );
     };
 
     const handleDeleteRecording = async (sessionId: string, e: any) => {
@@ -495,7 +589,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 };
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(reqPayload)
                 });
                 if (res.ok) {
@@ -506,12 +603,18 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a recording for ${session.batchName}.`;
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Recording Delete Request', message: notifMsg, type: 'WARNING' })
                     });
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Recording Delete Request', message: notifMsg, type: 'WARNING' })
                     });
 
@@ -557,7 +660,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
             };
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(reqPayload)
             });
             if (res.ok) {
@@ -568,7 +674,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to download a recording for ${ls.batchName}.`;
                 await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify({ role: 'ADMIN', title: 'Recording Download Request', message: notifMsg, type: 'INFO' })
                 });
 
@@ -656,7 +765,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${shareSelectedBatch.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -696,9 +808,13 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         }
 
         try {
+            const token = localStorage.getItem('token');
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${batchId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(updatePayload)
             });
             if (res.ok) {
@@ -749,7 +865,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -770,7 +889,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -854,7 +976,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${batchId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -923,7 +1048,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -955,7 +1083,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/batches/${selectedBatch.id || selectedBatch._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedBatch)
             });
             if (res.ok) {
@@ -1008,7 +1139,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
             if (isFullAdmin) {
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
@@ -1031,7 +1165,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 };
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(reqPayload)
                 });
                 if (res.ok) {
@@ -1041,12 +1178,18 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to schedule a new session for ${selectedBatch?.batchName || 'a batch'}.`;
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'ADMIN', title: 'New Session Request', message: notifMsg, type: 'INFO' })
                     });
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'New Session Request', message: notifMsg, type: 'INFO' })
                     });
 
@@ -1067,7 +1210,11 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         if (!confirm("Are you sure you want to delete this live session?")) return;
         try {
             if (isFullAdmin) {
-                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${sessionId}`, { method: 'DELETE' });
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${sessionId}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (res.ok) {
                     setLiveSessions(liveSessions.filter(s => (s.id !== sessionId && s._id !== sessionId)));
                 }
@@ -1083,7 +1230,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 };
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(reqPayload)
                 });
                 if (res.ok) {
@@ -1093,12 +1243,18 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete a session in ${selectedBatch?.batchName || 'a batch'}.`;
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Session Delete Request', message: notifMsg, type: 'WARNING' })
                     });
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Session Delete Request', message: notifMsg, type: 'WARNING' })
                     });
 
@@ -1124,7 +1280,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 const sessionId = editingSession.id || editingSession._id;
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/sessions/${sessionId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(editingSession)
                 });
                 if (res.ok) {
@@ -1146,7 +1305,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 };
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(reqPayload)
                 });
                 if (res.ok) {
@@ -1156,12 +1318,18 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to edit a session in ${selectedBatch?.batchName || 'a batch'}.`;
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Session Edit Request', message: notifMsg, type: 'INFO' })
                     });
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Session Edit Request', message: notifMsg, type: 'INFO' })
                     });
 
@@ -1249,7 +1417,11 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         if (isFullAdmin) {
             if (!confirm("Remove this assignment? Students will no longer be able to submit.")) return;
             try {
-                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${id}`, { method: 'DELETE' });
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (res.ok) {
                     setAssignments(assignments.filter(a => a.id !== id));
                     alert("Assignment deleted successfully.");
@@ -1267,7 +1439,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 };
                 const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/session-requests`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                     body: JSON.stringify(reqPayload)
                 });
                 if (res.ok) {
@@ -1278,12 +1453,18 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     const notifMsg = `${currentUser?.fullName || 'A Tutor'} has requested to delete an assignment: "${assignment.title}".`;
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'ADMIN', title: 'Assignment Delete Request', message: notifMsg, type: 'WARNING' })
                     });
                     await fetch(`${API_URLS.LMS_BACKEND}/api/academic/notifications`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                         body: JSON.stringify({ role: 'SUPER_ADMIN', title: 'Assignment Delete Request', message: notifMsg, type: 'WARNING' })
                     });
 
@@ -1311,7 +1492,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${viewingSubmissionsAssignment.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(updatedAssignment)
             });
             if (res.ok) {
@@ -1331,7 +1515,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         try {
             const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/assignments/${editingAssignment.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(editingAssignment)
             });
             if (res.ok) {
@@ -1428,21 +1615,28 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 <AnimatePresence mode="wait">
                     {/* --- COURSES GRID --- */}
                     {viewMode === 'COURSES' && (
-                        <>
+                        <motion.div key="courses-container" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             {courses.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                <div key="no-courses" style={{ textAlign: 'center', padding: '5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
                                     <Book size={48} color="var(--text-dim)" style={{ marginBottom: '1rem', opacity: 0.2 }} />
                                     <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', fontWeight: 800 }}>No courses available.</p>
                                     <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', opacity: 0.7 }}>Please ensure your Course Service is running, or create courses to begin.</p>
                                 </div>
                             ) : (
-                                <motion.div key="courses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                                     {courses.map((c, i) => (
-                                        <CourseCard key={c.id || i} course={c} onClick={() => handleCourseClick(c)} delay={i * 0.05} />
+                                        <CourseCard 
+                                            key={c.id || c._id || `course-${i}`} 
+                                            course={c} 
+                                            onClick={() => handleCourseClick(c)} 
+                                            onDelete={(e: any) => handleDeleteCourse(c.id || c._id, e)}
+                                            isAdmin={isFullAdmin}
+                                            delay={i * 0.05} 
+                                        />
                                     ))}
-                                </motion.div>
+                                </div>
                             )}
-                        </>
+                        </motion.div>
                     )}
 
                     {/* --- BATCHES GRID --- */}
@@ -2947,10 +3141,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
             </AnimatePresence>
 
             {/* --- DELETE CONFIRMATION MODAL --- */}
-            <AnimatePresence>
+            <AnimatePresence key="delete-recording-confirm-presence">
                 {isDeleteConfirmOpen && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '450px', padding: '3rem', borderRadius: '40px', textAlign: 'center' }}>
+                    <div key="delete-recording-overlay" style={{ position: 'fixed', inset: 0, zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
+                        <motion.div key="delete-recording-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '450px', padding: '3rem', borderRadius: '40px', textAlign: 'center' }}>
                             <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
                                 <AlertTriangle size={40} color="#ef4444" />
                             </div>
@@ -2965,11 +3159,12 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     </div>
                 )}
             </AnimatePresence>
+            
             {/* --- SESSION REQUEST TRACKER MODAL --- */}
-            <AnimatePresence>
+            <AnimatePresence key="request-tracker-modal-presence">
                 {isRequestDetailModalOpen && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}>
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+                    <div key="request-tracker-overlay" style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}>
+                        <motion.div key="request-tracker-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                 <div>
                                     <h2 style={{ fontSize: '2rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -3102,6 +3297,118 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* --- PREMIUM NOTIFICATION TOAST --- */}
+            <AnimatePresence key="toast-presence">
+                {notification && (
+                    <motion.div
+                        key="notification-toast"
+                        initial={{ opacity: 0, y: 50, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: 20, x: '-50%' }}
+                        style={{
+                            position: 'fixed',
+                            bottom: '40px',
+                            left: '50%',
+                            zIndex: 9999,
+                            background: notification.type === 'error' ? 'rgba(220, 38, 38, 0.9)' : 'rgba(16, 185, 129, 0.9)',
+                            color: '#fff',
+                            padding: '16px 32px',
+                            borderRadius: '20px',
+                            fontWeight: 800,
+                            fontSize: '0.9rem',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                            backdropFilter: 'blur(10px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                        }}
+                    >
+                        {notification.type === 'error' ? <AlertTriangle size={20} /> : <CheckCircle size={20} />}
+                        {notification.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* --- PREMIUM QUANTUM DELETE MODAL --- */}
+            <AnimatePresence key="delete-modal-presence">
+                {alertConfig.isOpen && (
+                    <div key="quantum-alert-overlay" style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                        <motion.div
+                            key="alert-backdrop"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+                            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
+                        />
+                        <motion.div
+                            key="alert-modal-content"
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="glass-panel"
+                            style={{
+                                width: '100%',
+                                maxWidth: '450px',
+                                padding: '3rem',
+                                borderRadius: '40px',
+                                position: 'relative',
+                                zIndex: 1,
+                                border: alertConfig.type === 'DELETE' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(124, 58, 237, 0.3)',
+                                textAlign: 'center',
+                                boxShadow: alertConfig.type === 'DELETE' ? '0 0 50px rgba(239, 68, 68, 0.15)' : '0 0 50px rgba(124, 58, 237, 0.15)'
+                            }}
+                        >
+                            <div style={{
+                                width: '80px',
+                                height: '80px',
+                                borderRadius: '24px',
+                                background: alertConfig.type === 'DELETE' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(124, 58, 237, 0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 2rem',
+                                color: alertConfig.type === 'DELETE' ? '#ef4444' : 'var(--primary)'
+                            }}>
+                                {alertConfig.type === 'DELETE' ? <Trash2 size={40} /> : <Shield size={40} />}
+                            </div>
+                            
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>{alertConfig.title}</h2>
+                            <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: '2.5rem', fontSize: '1rem' }}>{alertConfig.message}</p>
+                            
+                            <div style={{ display: 'flex', gap: '15px' }}>
+                                <button 
+                                    onClick={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+                                    style={{ flex: 1, padding: '16px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 800, cursor: 'pointer' }}
+                                >
+                                    CANCEL
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        alertConfig.onConfirm?.();
+                                        setAlertConfig({ ...alertConfig, isOpen: false });
+                                    }}
+                                    style={{ 
+                                        flex: 1, 
+                                        padding: '16px', 
+                                        borderRadius: '20px', 
+                                        background: alertConfig.type === 'DELETE' ? '#ef4444' : 'var(--primary)', 
+                                        color: '#fff', 
+                                        border: 'none', 
+                                        fontWeight: 900, 
+                                        cursor: 'pointer',
+                                        boxShadow: alertConfig.type === 'DELETE' ? '0 10px 20px rgba(239, 68, 68, 0.3)' : '0 10px 20px rgba(124, 58, 237, 0.3)'
+                                    }}
+                                >
+                                    CONFIRM
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </DashboardLayout>
     );
 }
@@ -3187,12 +3494,43 @@ function InfoSnippet({ icon, label, value }: any) {
     );
 }
 
-function CourseCard({ course, onClick, delay }: any) {
+function CourseCard({ course, onClick, onDelete, isAdmin, delay }: any) {
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }} onClick={onClick} className="glass-panel"
             style={{ padding: '2.5rem', borderRadius: '32px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}
             whileHover={{ y: -5, background: 'rgba(255,255,255,0.06)' }}
         >
+            {isAdmin && (
+                <button 
+                    onClick={onDelete}
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        padding: '8px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#ef4444';
+                        e.currentTarget.style.color = '#fff';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        e.currentTarget.style.color = '#ef4444';
+                    }}
+                >
+                    <Trash2 size={16} />
+                </button>
+            )}
             <Book size={32} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.75rem' }}>{course.title}</h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: '2rem' }}>{course.description}</p>

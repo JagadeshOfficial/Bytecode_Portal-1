@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Course = require('../models/Course');
 
 exports.getCourses = async (req, res) => {
     try {
@@ -19,9 +20,10 @@ exports.getCourses = async (req, res) => {
 // @access  Public
 exports.getCourse = async (req, res) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const db = mongoose.connection.useDb('course-db');
+        const course = await db.collection('courses').findOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         if (!course) return res.status(404).json({ success: false, error: 'Course not found' });
-        res.status(200).json({ success: true, data: course });
+        res.status(200).json({ success: true, data: { ...course, id: course._id.toString() } });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -32,8 +34,9 @@ exports.getCourse = async (req, res) => {
 // @access  Private (Admin)
 exports.createCourse = async (req, res) => {
     try {
-        const course = await Course.create(req.body);
-        res.status(201).json({ success: true, data: course });
+        const db = mongoose.connection.useDb('course-db');
+        const result = await db.collection('courses').insertOne(req.body);
+        res.status(201).json({ success: true, data: { ...req.body, id: result.insertedId.toString() } });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -44,12 +47,14 @@ exports.createCourse = async (req, res) => {
 // @access  Private (Admin)
 exports.updateCourse = async (req, res) => {
     try {
-        const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
-        if (!course) return res.status(404).json({ success: false, error: 'Course not found' });
-        res.status(200).json({ success: true, data: course });
+        const db = mongoose.connection.useDb('course-db');
+        const result = await db.collection('courses').findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: req.body },
+            { returnDocument: 'after' }
+        );
+        if (!result) return res.status(404).json({ success: false, error: 'Course not found' });
+        res.status(200).json({ success: true, data: { ...result, id: result._id.toString() } });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -60,8 +65,9 @@ exports.updateCourse = async (req, res) => {
 // @access  Private (Admin)
 exports.deleteCourse = async (req, res) => {
     try {
-        const course = await Course.findByIdAndDelete(req.params.id);
-        if (!course) return res.status(404).json({ success: false, error: 'Course not found' });
+        const db = mongoose.connection.useDb('course-db');
+        const result = await db.collection('courses').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        if (result.deletedCount === 0) return res.status(404).json({ success: false, error: 'Course not found' });
         res.status(200).json({ success: true, data: {} });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });

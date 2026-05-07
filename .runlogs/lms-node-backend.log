@@ -63,3 +63,182 @@ Emitted 'error' event on Server instance at:
 
 Node.js v25.8.0
 [31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/routes/userRoutes.js:114
+        ];
+        ^
+
+SyntaxError: Unexpected token ']'
+    at wrapSafe (node:internal/modules/cjs/loader:1762:18)
+    at Module._compile (node:internal/modules/cjs/loader:1805:20)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1575:12)
+    at require (node:internal/modules/helpers:191:16)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:34:23)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c7 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 35.840 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c7&role=ADMIN [36m304[0m 28.544 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m

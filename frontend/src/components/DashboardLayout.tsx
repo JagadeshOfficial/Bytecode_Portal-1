@@ -43,27 +43,6 @@ interface Notification {
     createdAt: string;
 }
 
-const GAMES_SUB_ITEMS = [
-    { label: 'Platform Dashboard', href: '/games?tab=DASHBOARD', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Game Management 🕹️', href: '/games?tab=GAME_MGMT', roles: ['ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Tournament Control 🏆', href: '/games?tab=TOURNAMENT', roles: ['ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Leaderboard Control 📊', href: '/games?tab=LEADERBOARD_MGMT', roles: ['ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Rewards & Monetization 🎁', href: '/games?tab=REWARDS_ECONOMY', roles: ['SUPER_ADMIN'] },
-    { label: 'Analytics & Reports 📈', href: '/games?tab=ANALYTICS', roles: ['ADMIN', 'SUPER_ADMIN'] },
-    { label: 'User Management 👥', href: '/games?tab=USER_MGMT', roles: ['SUPER_ADMIN'] },
-    { label: 'System Settings ⚙️', href: '/games?tab=SETTINGS_CORE', roles: ['SUPER_ADMIN'] },
-    { label: 'Play Zone 🎮', href: '/games?tab=PLAYZONE', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Coding Arena 💻', href: '/games?tab=CODING', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Math & Aptitude 🧮', href: '/games?tab=MATH', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Brain & IQ 🧠', href: '/games?tab=BRAIN', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Multiplayer Battles ⚔️', href: '/games?tab=BATTLES', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Creative Challenges 🎨', href: '/games?tab=CREATIVE', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'Daily Challenges 🔥', href: '/games?tab=DAILY', roles: ['STUDENT'] },
-    { label: 'Game Store 🛒', href: '/games?tab=STORE', roles: ['STUDENT', 'SUPER_ADMIN'] },
-    { label: 'Community Hub 🌐', href: '/games?tab=COMMUNITY', roles: ['STUDENT', 'TUTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { label: 'My Progress 📈', href: '/games?tab=PROGRESS', roles: ['STUDENT'] },
-];
-
 const MENUS: Record<string, MenuItem[]> = {
     super_admin: [
         { section: 'Overview', label: 'Dashboard Home', href: '/super-admin', icon: <LayoutDashboard size={18} /> },
@@ -73,7 +52,6 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Communication', label: 'ByteChat Section', href: '/super-admin/chat', icon: <MessageSquare size={18} /> },
         { section: 'Tracking', label: 'Tracking Center', href: '/super-admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'System Activity Log', href: '/super-admin/global-tracking', icon: <Terminal size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     admin: [
         { section: 'Main', label: 'Admin Home', href: '/admin', icon: <LayoutDashboard size={18} /> },
@@ -83,13 +61,11 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Tracking', label: 'Tracking Center', href: '/admin/pinpoint-hub', icon: <Activity size={18} /> },
         { label: 'System Activity Log', href: '/admin/global-tracking', icon: <Terminal size={18} /> },
         { section: 'Reports', label: 'Reports', href: '/admin/reports', icon: <BarChart3 size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     counsellor: [
         { section: 'Performance', label: 'My Targets', href: '/counsellor', icon: <LayoutDashboard size={18} /> },
         { label: 'New Leads', href: '/counsellor/leads', icon: <Target size={18} /> },
         { section: 'Action', label: 'Follow-ups', href: '/counsellor/followup', icon: <Phone size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     tutor: [
         { section: 'Main', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
@@ -97,7 +73,6 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     trainer: [
         { section: 'Main', label: 'Tutor Dashboard', href: '/tutor', icon: <LayoutDashboard size={18} /> },
@@ -105,19 +80,16 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Academic Hub', label: 'Curriculum & Live Hub', href: '/tutor/academic', icon: <BookOpen size={18} /> },
         { section: 'Communication', label: 'ByteChat Section', href: '/tutor/chat', icon: <MessageSquare size={18} /> },
         { section: 'Finance', label: 'Attendance & Leaves', href: '/tutor/salary', icon: <Calendar size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     placement: [
         { section: 'Career', label: 'Student Readiness', href: '/placement', icon: <UserCheck size={18} /> },
         { label: 'Interviews', href: '/placement/interviews', icon: <Calendar size={18} /> },
         { label: 'Jobs List', href: '/placement/jobs', icon: <Briefcase size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     social_media: [
         { section: 'Creator', label: 'Content Planner', href: '/social-media', icon: <PenTool size={18} /> },
         { label: 'Campaigns', href: '/social-media/campaigns', icon: <BarChart3 size={18} /> },
         { label: 'Leads Tracking', href: '/social-media/leads', icon: <Target size={18} /> },
-        { label: 'Games', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ],
     student: [
         { section: 'Overview', label: 'Student Dashboard', href: '/student', icon: <LayoutDashboard size={18} /> },
@@ -128,7 +100,6 @@ const MENUS: Record<string, MenuItem[]> = {
         { section: 'Learning', label: 'Exams & Tests', href: '/student/tests', icon: <CheckCircle size={18} /> },
         { section: 'Career', label: 'Placement Portal', href: '/student/placements', icon: <Briefcase size={18} /> },
         { label: 'Growth Progress', href: '/student/progress', icon: <TrendingUp size={18} /> },
-        { label: 'Games Dashboard', href: '/games', icon: <Zap size={18} />, subItems: GAMES_SUB_ITEMS },
     ]
 };
 
@@ -197,15 +168,10 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
 
     const handleLogout = () => {
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         window.location.href = '/login';
     };
 
-    // Auto-expand Games if active
-    useEffect(() => {
-        if (pathname.startsWith('/games')) {
-            setOpenSubmenus(prev => ({ ...prev, Games: true }));
-        }
-    }, [pathname]);
 
     const toggleSubmenu = (label: string) => {
         setOpenSubmenus(prev => ({ ...prev, [label]: !prev[label] }));
@@ -219,6 +185,12 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
 
     const fetchUserProfile = async () => {
         if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            if (!token || token === 'null' || token === 'undefined') {
+                console.error("Session expired or invalid. Please login again.");
+                handleLogout();
+                return;
+            }
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const parsed = JSON.parse(storedUser);

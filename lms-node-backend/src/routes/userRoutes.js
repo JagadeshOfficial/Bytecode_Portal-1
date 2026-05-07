@@ -89,6 +89,7 @@ router.put('/:id', async (req, res) => {
             'fullName',
             'email',
             'password',
+            'role',
             'phoneNumber',
             'branch',
             'department',
