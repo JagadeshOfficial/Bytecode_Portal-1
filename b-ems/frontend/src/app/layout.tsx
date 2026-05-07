@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
@@ -15,9 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ReduxProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

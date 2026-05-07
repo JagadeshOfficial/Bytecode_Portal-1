@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  fullName           String
+  email              String    @unique
+  password           String
+  phoneNumber        String?
+  role               String?   @default("COUNSELLOR")
+  active             Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt @default(now())
+  
+  // Advanced tracking
+  lastLogin          DateTime?
+  status             String    @default("ACTIVE")
+  avatar             String?
+  branchId           String?   @db.ObjectId
+  branch             Branch?   @relation(fields: [branchId], references: [id])
+
+  // Relations (Prisma MongoDB relations work differently)
+  leads              Lead[]    @relation("AssignedTo")
+  tasksAssigned      Task[]    @relation("AssignedBy")
+  tasksReceived      Task[]    @relation("AssignedTo")
+  leaves             LeaveRequest[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  sessions           LoginSession[]
+  blogPosts          BlogPost[]
+}
+
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  permissions Json     // Permissions matrix
+}
+
+model Branch {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  address   String?
+  managerId String?  @db.ObjectId
+  users     User[]
+  leads     Lead[]
+}
+
+model Department {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  headId  String?  @db.ObjectId
+}
+
+model Student {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String    @unique
+  phone       String
+  courseId    String?   @db.ObjectId
+  batchId     String?   @db.ObjectId
+  branchId    String?   @db.ObjectId
+  status      String    @default("ACTIVE")
+  feeTotal    Float     @default(0)
+  feePaid     Float     @default(0)
+}
+
+model Lead {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  phone          String
+  email          String?
+  source         String?
+  status         String    @default("NEW")
+  assignedToId   String?   @db.ObjectId
+  assignedTo     User?     @relation("AssignedTo", fields: [assignedToId], references: [id])
+  courseInterest String?
+  branchId       String?   @db.ObjectId
+  branch         Branch?   @relation(fields: [branchId], references: [id])
+  notes          String?
+  followUpAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt @default(now())
+}
+
+model Task {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String?
+  assignedToId String    @db.ObjectId
+  assignedTo   User      @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignedById String    @db.ObjectId
+  assignedBy   User      @relation("AssignedBy", fields: [assignedById], references: [id])
+  dueAt        DateTime?
+  priority     String    @default("MEDIUM")
+  status       String    @default("TODO")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt @default(now())
+}
+
+model LeaveRequest {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  type        String
+  fromDate    DateTime
+  toDate      DateTime
+  reason      String?
+  status      String    @default("PENDING")
+  approvedById String?  @db.ObjectId
+  createdAt   DateTime  @default(now())
+}
+
+model Notification {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  body      String
+  readAt    DateTime?
+  link      String?
+  createdAt DateTime  @default(now())
+}
+
+model AuditLog {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  actorId  String   @db.ObjectId
+  actor    User     @relation(fields: [actorId], references: [id])
+  action   String
+  entity   String
+  entityId String
+  diff     Json?
+  ip       String?
+  ua       String?
+  at       DateTime @default(now())
+}
+
+model LoginSession {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  ip        String?
+  ua        String?
+  geo       String?
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+}
+
+model BlogPost {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  slug        String    @unique
+  title       String
+  bodyMd      String
+  authorId    String    @db.ObjectId
+  author      User      @relation(fields: [authorId], references: [id])
+  status      String    @default("DRAFT")
+  seoMeta     Json?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt @default(now())
+}
