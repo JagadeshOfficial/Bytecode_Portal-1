@@ -2,6 +2,7 @@
 > Bytecode-trainings-platform@0.1.0 dev
 > next dev
 
+⚠ Port 3000 is in use by process 42473, using available port 3002 instead.
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -10,21 +11,10 @@
    * /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/frontend/package-lock.json
 
 ▲ Next.js 16.1.4 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.0.207:3000
+- Local:         http://localhost:3002
+- Network:       http://192.168.0.207:3002
 
 ✓ Starting...
-✓ Ready in 3s
- GET / 200 in 1503ms (compile: 1120ms, render: 383ms)
- GET /icon?d878d31cd40b5385 200 in 344ms (compile: 126ms, render: 217ms)
- GET /sw.js 404 in 81ms (compile: 45ms, render: 36ms)
- GET / 200 in 313ms (compile: 10ms, render: 303ms)
- GET /sw.js 404 in 50ms (compile: 8ms, render: 42ms)
- GET /login 200 in 111ms (compile: 89ms, render: 21ms)
- GET /icon?d878d31cd40b5385 200 in 21ms (compile: 2ms, render: 18ms)
-✓ Compiled in 900ms
-✓ Compiled in 844ms
-✓ Compiled in 290ms
- GET / 200 in 493ms (compile: 89ms, render: 404ms)
- GET /sw.js 404 in 46ms (compile: 7ms, render: 39ms)
- GET /login 200 in 128ms (compile: 94ms, render: 34ms)
+⨯ Unable to acquire lock at /Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/frontend/.next/dev/lock, is another instance of next dev running?
+  Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
+[?25h

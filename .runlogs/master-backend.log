@@ -1,7 +1,27 @@
 📡 Attempting Database Connection...
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
 
-🚀 BYTECODE MASTER BACKEND V5.5 LIVE
-📍 PORT: 8085
-🛡️ FAILOVER: ACTIVE
-    
-🛡️ Intelligence Arena Sovereign Backend (V5.5) Connected to MongoDB
+Error: listen EADDRINUSE: address already in use :::8085
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/server.js:140:5)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8085
+}
+
+Node.js v25.8.0

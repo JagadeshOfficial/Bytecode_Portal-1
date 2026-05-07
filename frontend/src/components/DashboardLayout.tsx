@@ -157,6 +157,22 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
         setMounted(true);
     }, []);
 
+    // Sync form with loggedUser when modal opens
+    useEffect(() => {
+        if (isProfileModalOpen && loggedUser) {
+            setProfileForm({
+                fullName: loggedUser.fullName || loggedUser.name || '',
+                email: loggedUser.email || '',
+                password: '', // Keep blank for security
+                phoneNumber: loggedUser.phoneNumber || '',
+                branch: loggedUser.branch || '',
+                department: loggedUser.department || '',
+                userStatus: loggedUser.userStatus || '',
+                profileImage: loggedUser.profileImage || ''
+            });
+        }
+    }, [isProfileModalOpen, loggedUser]);
+
     // --- SIDEBAR SCROLL PERSISTENCE ---
     useEffect(() => {
         const sidebar = document.getElementById('sidebar-scroll-container');

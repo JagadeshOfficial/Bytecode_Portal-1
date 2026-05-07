@@ -51,7 +51,20 @@ router.get('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        res.json(user);
+        
+        // Ensure all fields are present even if they are empty strings
+        const userData = user.toObject();
+        res.json({
+            ...userData,
+            id: userData._id.toString(),
+            fullName: userData.fullName || '',
+            email: userData.email || '',
+            phoneNumber: userData.phoneNumber || '',
+            branch: userData.branch || '',
+            department: userData.department || '',
+            userStatus: userData.userStatus || '',
+            profileImage: userData.profileImage || ''
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
