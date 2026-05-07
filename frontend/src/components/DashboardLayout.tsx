@@ -180,16 +180,31 @@ function DashboardLayoutContent({ children, role, noPadding }: DashboardLayoutPr
 
     const isLinkActive = (href: string) => {
         if (!href) return false;
-        const currentFull = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
         
-        // If the menu link has query parameters, require an exact match
+        // Exact match for the full URL (including query params)
+        const currentFull = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+        if (currentFull === href) return true;
+
+        // If href has query parameters, it MUST be an exact match (handled above)
+        // or at least all parameters in href must be present in current searchParams
         if (href.includes('?')) {
-            return currentFull === href;
+            const [base, query] = href.split('?');
+            if (pathname !== base) return false;
+            
+            const hrefParams = new URLSearchParams(query);
+            let allMatch = true;
+            hrefParams.forEach((value, key) => {
+                if (searchParams.get(key) !== value) {
+                    allMatch = false;
+                }
+            });
+            return allMatch;
         }
         
-        // If the menu link has no query parameters, it is only active if the current pathname matches 
-        // AND the current URL has no query parameters (ensures parent deselects when a specific tab is active)
-        return pathname === href && !searchParams.toString();
+        // If href has no query parameters:
+        // It is active if the pathname matches AND there are no "tab" parameters 
+        // (to ensure parent hubs deselect when a specific tab is active)
+        return pathname === href && !searchParams.get('tab');
     };
 
     const fetchUserProfile = async () => {

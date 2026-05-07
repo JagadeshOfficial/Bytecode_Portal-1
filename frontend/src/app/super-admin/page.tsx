@@ -67,7 +67,7 @@ export default function SuperAdminHome() {
             // Calculate revenue (Mocked for now but based on student count for realistic feel)
             const calculatedRevenue = totalStudents * 1500; 
 
-            const activeBatchesList = allBatches.filter(b => b.status === 'ACTIVE' || !b.status); // Default to active if no status
+            const activeBatchesList = allBatches.filter(b => b.status === 'ACTIVE');
 
             setMetrics({
                 totalStudents: totalStudents,
@@ -89,13 +89,13 @@ export default function SuperAdminHome() {
             // Calculate Revenue Trend dynamically based on batches/students
             const base = calculatedRevenue / 7;
             setRevenueTrend([
-                { day: 'Mon', revenue: base * 0.8, enrollments: Math.floor(totalStudents / 10) },
-                { day: 'Tue', revenue: base * 0.9, enrollments: Math.floor(totalStudents / 8) },
-                { day: 'Wed', revenue: base * 1.1, enrollments: Math.floor(totalStudents / 7) },
-                { day: 'Thu', revenue: base * 1.3, enrollments: Math.floor(totalStudents / 6) },
-                { day: 'Fri', revenue: base * 1.0, enrollments: Math.floor(totalStudents / 9) },
-                { day: 'Sat', revenue: base * 0.7, enrollments: Math.floor(totalStudents / 12) },
-                { day: 'Sun', revenue: base * 1.2, enrollments: Math.floor(totalStudents / 5) },
+                { day: 'Mon', activeBatches: 1, enrollments: Math.floor(totalStudents / 10) },
+                { day: 'Tue', activeBatches: 1, enrollments: Math.floor(totalStudents / 8) },
+                { day: 'Wed', activeBatches: 1, enrollments: Math.floor(totalStudents / 7) },
+                { day: 'Thu', activeBatches: 1, enrollments: Math.floor(totalStudents / 6) },
+                { day: 'Fri', activeBatches: 1, enrollments: Math.floor(totalStudents / 9) },
+                { day: 'Sat', activeBatches: 1, enrollments: Math.floor(totalStudents / 12) },
+                { day: 'Sun', activeBatches: 1, enrollments: Math.floor(totalStudents / 5) },
             ]);
         };
 
@@ -119,8 +119,8 @@ export default function SuperAdminHome() {
                     <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Income & Enrollment Growth</h3>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginTop: '4px' }}>Predictive tracking of revenue and scale.</p>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Enrollment & Batch Scaling</h3>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginTop: '4px' }}>Predictive tracking of institutional growth and scale.</p>
                             </div>
                             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 14px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, color: '#10b981' }}>
@@ -147,8 +147,8 @@ export default function SuperAdminHome() {
                                             contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '15px' }} 
                                             itemStyle={{ fontWeight: 800 }}
                                         />
-                                        <Area yAxisId="left" type="monotone" dataKey="revenue" fill="url(#colorRev)" stroke="#8b5cf6" strokeWidth={4} />
-                                        <Line yAxisId="right" type="monotone" dataKey="enrollments" stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 4, stroke: '#0f172a' }} />
+                                        <Area yAxisId="left" type="monotone" dataKey="enrollments" fill="url(#colorRev)" stroke="#8b5cf6" strokeWidth={4} />
+                                        <Line yAxisId="right" type="monotone" dataKey="activeBatches" stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 4, stroke: '#0f172a' }} />
                                     </ComposedChart>
                                 </ResponsiveContainer>
                             )}

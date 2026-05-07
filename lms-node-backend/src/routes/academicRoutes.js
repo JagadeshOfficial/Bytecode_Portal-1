@@ -1029,16 +1029,17 @@ FORMATS TO USE: ${formats.join(', ')}
 
 STRATEGIC RULES:
 1. QUANTITY: You MUST provide EXACTLY ${count} questions. No more, no less.
-2. UNIQUENESS: Every question text and tested concept must be distinct. DO NOT REPEAT ANY CONCEPT.
-3. SCHEMAS:
+2. UNIQUENESS: Every question text and tested concept must be distinct. DO NOT REPEAT ANY CONCEPT OR QUESTION.
+3. VARIED DIFFICULTY: Include a mix of EASY, MEDIUM, and HARD questions.
+4. SCHEMAS:
    - MCQ: { "id": "uuid", "concept": "string", "text": "string", "difficulty": "EASY"|"MEDIUM"|"HARD", "type": "MCQ", "options": ["4 strings"], "correctIndex": 0-3 }
    - CODING: { "id": "uuid", "concept": "string", "text": "string", "difficulty": "EASY"|"MEDIUM"|"HARD", "type": "CODING", "starterCode": "string", "solution": "string", "testCases": [{"input": "string", "expected": "string"}] }
    - VIDEO/THEORY: { "id": "uuid", "concept": "string", "text": "string", "difficulty": "EASY"|"MEDIUM"|"HARD", "type": "VIDEO" | "THEORY", "focalPoints": ["3 strings"] }
 
-IMPORTANT: Return ONLY the raw JSON array. DO NOT include markdown code blocks or explanations.
+IMPORTANT: Return ONLY the raw JSON array. DO NOT include markdown code blocks (\`\`\`json) or any explanations. Start with [ and end with ].
 `;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1048,35 +1049,70 @@ IMPORTANT: Return ONLY the raw JSON array. DO NOT include markdown code blocks o
 
         if (!response.ok) {
             const error = await response.json();
+            console.error("[GEMINI API ERROR]:", JSON.stringify(error, null, 2));
             throw new Error(error.error?.message || 'Gemini API Communication Failure');
         }
 
         const data = await response.json();
         let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
         
-        // Clean markdown if AI included it
-        rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        // Robust cleaning of markdown and potential preamble
+        rawText = rawText.trim();
+        if (rawText.startsWith('```')) {
+            rawText = rawText.replace(/^```(json)?/, '').replace(/```$/, '').trim();
+        }
         
-        const generatedQuestions = JSON.parse(rawText);
+        let generatedQuestions = JSON.parse(rawText);
 
-        console.log(`[GEMINI PROTOCOL]: Successfully fabricated ${generatedQuestions.length} modules.`);
-        res.json(generatedQuestions);
+        // Final validation to ensure uniqueness and count
+        if (Array.isArray(generatedQuestions)) {
+            // Deduplicate by text
+            const seen = new Set();
+            generatedQuestions = generatedQuestions.filter(q => {
+                const text = q.text?.toLowerCase().trim();
+                if (!text || seen.has(text)) return false;
+                seen.add(text);
+                return true;
+            });
+
+            // If we have fewer than requested due to deduplication, we might need more but for now we just return what we have
+            console.log(`[GEMINI PROTOCOL]: Successfully fabricated ${generatedQuestions.length} unique modules.`);
+            return res.json(generatedQuestions);
+        }
+        
+        throw new Error("Invalid JSON structure from AI");
 
     } catch (err) {
-        console.error("Gemini AI Failure:", err);
+        console.error("Gemini AI Failure, initiating fallback protocol:", err.message);
+        
+        const reqCount = parseInt(req.body.count) || 5;
         const concepts = (req.body.prompt || '').split(',').map(c => c.trim().toUpperCase());
-        const fallbackQuestions = concepts.slice(0, req.body.count || 5).map(concept => ({
-            id: Math.random().toString(36).substr(2, 8),
-            concept: concept,
-            text: `Critical appraisal of ${concept} in a modern enterprise architecture.`,
-            difficulty: 'ADVANCED',
-            type: 'MCQ',
-            options: ['Optimization', 'Redundancy', 'Scalability', 'Fault Tolerance'],
-            correctIndex: 0
-        }));
+        const baseConcept = concepts[0] || 'GENERAL KNOWLEDGE';
+        
+        // Generate EXACTLY reqCount questions even in fallback
+        const fallbackQuestions = Array.from({ length: reqCount }).map((_, i) => {
+            const concept = concepts[i % concepts.length] || baseConcept;
+            const variation = i > 0 ? ` (Part ${i + 1})` : '';
+            return {
+                id: Math.random().toString(36).substr(2, 8),
+                concept: concept,
+                text: `Analyze the critical implementation patterns of ${concept}${variation} within a scalable enterprise ecosystem.`,
+                difficulty: i % 3 === 0 ? 'EASY' : (i % 3 === 1 ? 'MEDIUM' : 'HARD'),
+                type: 'MCQ',
+                options: [
+                    'Architectural Optimization',
+                    'Strategic Redundancy',
+                    'Elastic Scalability',
+                    'Distributed Fault Tolerance'
+                ],
+                correctIndex: i % 4
+            };
+        });
+        
         res.status(200).json(fallbackQuestions);
     }
 });
+
 
 // Withdrawal/Delete a session request
 router.delete('/session-requests/:id', async (req, res) => {

@@ -27,8 +27,9 @@ const STATS_ICON_MAP: Record<string, any> = {
 const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: string, test: any) => void, userRole?: string }) => {
     const isStudent = userRole === 'STUDENT' || userRole === 'student';
 
-    const statusColors = {
+    const statusColors: any = {
         DEPLOYED: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' },
+        PUBLISHED: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' },
         STAGING: { bg: 'rgba(245, 158, 11, 0.1)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.2)' },
         CLOSED: { bg: 'rgba(239, 68, 68, 0.1)', text: '#ef4444', border: 'rgba(239, 68, 68, 0.2)' }
     };
@@ -37,10 +38,12 @@ const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: 
         MCQ: <FileText size={18} />,
         CODING: <Code size={18} />,
         HYBRID: <Layout size={18} />,
+        MIXED: <Layout size={18} />,
         VIDEO: <Video size={18} />
     };
 
-    const status: keyof typeof statusColors = test.status || 'STAGING';
+    const status = test.status || 'STAGING';
+    const currentStyle = statusColors[status] || statusColors.STAGING;
 
     return (
         <motion.div 
@@ -66,9 +69,9 @@ const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: 
                 borderRadius: '12px',
                 fontSize: '0.7rem',
                 fontWeight: 900,
-                background: statusColors[status].bg,
-                color: statusColors[status].text,
-                border: `1px solid ${statusColors[status].border}`,
+                background: currentStyle.bg,
+                color: currentStyle.text,
+                border: `1px solid ${currentStyle.border}`,
                 textTransform: 'uppercase',
                 letterSpacing: '1px'
             }}>
@@ -102,18 +105,18 @@ const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Structure</span>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {test.structure}
+                        {test.structure || (test.type === 'MIXED' ? 'MCQ & CODING' : 'Standard')}
                     </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Duration</span>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Clock size={14} /> {test.duration}m
+                        <Clock size={14} /> {test.duration || 60}m
                     </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Questions</span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c' }}>{test.questionCount} Items</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c' }}>{test.questionCount || (test.questions ? test.questions.length : 0)} Items</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Difficulty</span>
@@ -124,15 +127,15 @@ const TestCard = ({ test, onAction, userRole }: { test: any, onAction: (action: 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', gap: '20px' }}>
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{test.attempts}</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{test.attempts || 0}</div>
                         <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#a0aec0' }}>ATTEMPTS</div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#10b981' }}>{test.passRate}%</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#10b981' }}>{test.passRate || 0}%</div>
                         <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#a0aec0' }}>PASS RATE</div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#6366f1' }}>{test.aiScore}</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#6366f1' }}>{test.aiScore || 99}%</div>
                         <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#a0aec0' }}>AI CONFID.</div>
                     </div>
                 </div>

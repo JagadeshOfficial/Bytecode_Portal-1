@@ -17,6 +17,7 @@ import TestExaminationEngine from './TestExaminationEngine';
 export default function ExamManagement() {
     const [view, setView] = useState<'DASHBOARD' | 'MONITORING' | 'ANALYTICS'>('DASHBOARD');
     const [isCreating, setIsCreating] = useState(false);
+    const [assigningTest, setAssigningTest] = useState<any>(null);
     const [takingTest, setTakingTest] = useState<any>(null);
     const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -49,7 +50,7 @@ export default function ExamManagement() {
         } else if (action === 'MENU') {
             alert("Accessing Advanced Protocol Registry... This module is currently undergoing system maintenance.");
         } else if (action === 'ASSIGN') {
-            alert("Batch assignment registry is being synchronized. Please wait.");
+            setAssigningTest(test);
         }
     };
 
@@ -166,7 +167,42 @@ export default function ExamManagement() {
             {/* --- MODALS --- */}
             <AnimatePresence>
                 {isCreating && <TestCreationWizard onClose={() => setIsCreating(false)} />}
+                {assigningTest && <AssignTestModal test={assigningTest} onClose={() => setAssigningTest(null)} />}
             </AnimatePresence>
+        </div>
+    );
+}
+
+function AssignTestModal({ test, onClose }: { test: any, onClose: () => void }) {
+    const handleAssign = async () => {
+        try {
+            const updated = { ...test, status: 'DEPLOYED' };
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/academic/tests/${test.id || test._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updated)
+            });
+            if (res.ok) {
+                alert("Assessment successfully assigned to Batch and deployed.");
+                window.location.reload();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    return (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)' }}>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ background: '#fff', borderRadius: '24px', padding: '2rem', width: '400px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+                <h3 style={{ fontWeight: 900, marginBottom: '1rem', color: '#111', fontSize: '1.2rem' }}>Assign Assessment</h3>
+                <p style={{ color: '#64748b', marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                    You are about to assign <b>{test.name}</b>. This will change its status to <b>DEPLOYED</b> and make it available for execution.
+                </p>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button onClick={onClose} style={{ flex: 1, padding: '12px', background: '#f1f5f9', color: '#64748b', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', border: 'none' }}>Cancel</button>
+                    <button onClick={handleAssign} style={{ flex: 1, padding: '12px', background: 'var(--primary)', color: '#fff', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', border: 'none' }}>Deploy Now</button>
+                </div>
+            </motion.div>
         </div>
     );
 }

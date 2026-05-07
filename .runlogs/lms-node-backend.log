@@ -300,3 +300,493 @@ Emitted 'error' event on Server instance at:
 
 Node.js v25.8.0
 [31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+LMS Node Server running in development mode on port 8080
+LMS MongoDB Connected: ac-3mufzp1-shard-00-01.4nosy2u.mongodb.net
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 31.806 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 32.777 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 32.585 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 42.103 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 20.827 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 20.173 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 26.066 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 21.259 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 27.194 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 24.268 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 22.673 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 21.300 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 26.414 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 22.981 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 26.754 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 27.004 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 29.487 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 29.341 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 24.919 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.505 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 24.370 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 26.158 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 23.980 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.307 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 23.885 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 21.819 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 22.265 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 994.451 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 988.648 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 972.805 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 39.450 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 20.857 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 21.962 ms - -[0m
+[0mGET /api/courses [36m304[0m 82.047 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+[0mGET /api/courses [36m304[0m 21.301 ms - -[0m
+Fetched 11 batches from course-db
+[0mGET /api/academic/batches [36m304[0m 24.293 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 21.969 ms - -[0m
+Fetched 11 batches from course-db
+[0mGET /api/academic/batches [36m304[0m 23.291 ms - -[0m
+[0mGET /api/users/69be8bcb70549fb680bafafe [36m304[0m 147.445 ms - -[0m
+[0mGET /api/users/69be8bcb70549fb680bafafe [36m304[0m 42.172 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 26.864 ms - -[0m
+[0mGET /api/users [32m200[0m 501.881 ms - 2481707[0m
+[0mGET /api/users [32m200[0m 203.080 ms - 2481707[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+[0mGET /api/users/69be8bcb70549fb680bafafe [36m304[0m 27.844 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 25.628 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 19.705 ms - -[0m
+[0mGET /api/users/69be8bcb70549fb680bafafe [36m304[0m 73.627 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.076 ms - -[0m
+[0mGET /api/users [32m200[0m 166.681 ms - 2481707[0m
+[0mGET /api/users [32m200[0m 212.187 ms - 2481707[0m
+[0mOPTIONS /api/courses [32m204[0m 0.983 ms - 0[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+[0mOPTIONS /api/academic/batches [32m204[0m 0.100 ms - 0[0m
+[0mOPTIONS /api/users [32m204[0m 0.108 ms - 0[0m
+[0mOPTIONS /api/academic/session-requests [32m204[0m 0.055 ms - 0[0m
+[0mOPTIONS /api/academic/sessions [32m204[0m 0.036 ms - 0[0m
+[0mOPTIONS /api/academic/assignments [32m204[0m 0.038 ms - 0[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 19.496 ms - -[0m
+Fetched 11 batches from course-db
+[0mGET /api/academic/batches [36m304[0m 19.862 ms - -[0m
+[0mGET /api/courses [36m304[0m 19.143 ms - -[0m
+[0mGET /api/users/69be8bcb70549fb680bafafe [36m304[0m 64.299 ms - -[0m
+[0mGET /api/academic/sessions [36m304[0m 21.052 ms - -[0m
+[0mGET /api/academic/assignments [36m304[0m 22.575 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+[0mGET /api/users/69be8bcb70549fb680bafafe [36m304[0m 24.902 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 20.743 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 32.863 ms - -[0m
+[0mGET /api/users [32m200[0m 237.077 ms - 2481707[0m
+[0mGET /api/academic/session-requests [36m304[0m 465.709 ms - -[0m
+[0mGET /api/academic/tests [36m304[0m 31.077 ms - -[0m
+[0mGET /api/academic/tests [36m304[0m 43.196 ms - -[0m
+[0mGET /api/academic/tests/stats [36m304[0m 96.000 ms - -[0m
+[0mGET /api/academic/tests/stats [36m304[0m 66.911 ms - -[0m
+Fetched 11 batches from course-db
+[0mGET /api/academic/batches [36m304[0m 45.823 ms - -[0m
+Fetched 11 batches from course-db
+[0mGET /api/academic/batches [36m304[0m 27.689 ms - -[0m
+[0mGET /api/users [32m200[0m 2171.533 ms - 2481707[0m
+[0mGET /api/users [32m200[0m 695.866 ms - 2481707[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 31.588 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 30.174 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.624 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 30.642 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 28.824 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 26.186 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 25.147 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.342 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.086 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.970 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 32.530 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.057 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 51.110 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 33.300 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 26.819 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 40.943 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 28.893 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 30.943 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 34.695 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.501 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.734 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 21.897 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 21.650 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.375 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.738 ms - -[0m
+[0mOPTIONS /api/academic/tests/ai-generate [32m204[0m 0.168 ms - 0[0m
+[GEMINI PROTOCOL]: Generating 10 items for Python with Data Analytics | Formats: MCQ | Topics: create a mcqs on Core Python 
+[GEMINI API ERROR]: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+Gemini AI Failure, initiating fallback protocol: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+[0mPOST /api/academic/tests/ai-generate [32m200[0m 327.212 ms - 3599[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 24.412 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 30.657 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.442 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 25.993 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 21.825 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 22.138 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 21.465 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 30.038 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.278 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 29.204 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 21.075 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 21.769 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 22.264 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.402 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 22.820 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 27.800 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 20.949 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 21.066 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 29.179 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 19.879 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 25.423 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 24.324 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.497 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 22.553 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 25.221 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 29.847 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 37.040 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 20.613 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 26.953 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 20.788 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 31.699 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 27.767 ms - -[0m
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 30.494 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 22.249 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 25.075 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 31.603 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 23.207 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 27.708 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 20.892 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 25.768 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 31.261 ms - -[0m
+GET /notifications user=69be8bcb70549fb680bafafe role=SUPER_ADMIN
+GET /notifications user=69fc23dd831b0611b60fbfb3 role=STUDENT
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be8bcb70549fb680bafafe&role=SUPER_ADMIN [36m304[0m 22.180 ms - -[0m
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69fc23dd831b0611b60fbfb3&role=STUDENT [36m304[0m 21.623 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 31.620 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 32.402 ms - -[0m
+GET /notifications user=69be85af4b0af40fadb0e3c8 role=ADMIN
+Found 0 notifications
+[0mGET /api/academic/notifications?userId=69be85af4b0af40fadb0e3c8&role=ADMIN [36m304[0m 31.537 ms - -[0m
+[GEMINI PROTOCOL]: Generating 3 items for Full Stack Java | Formats: MCQ | Topics: Basic Java Syntax
+[GEMINI API ERROR]: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+Gemini AI Failure, initiating fallback protocol: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+[0mPOST /api/academic/tests/ai-generate [32m200[0m 434.385 ms - 1008[0m
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/server.js`[39m
+(node:54196) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 exit listeners added to [Bus]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/bytecode/.gemini/antigravity/scratch/Bytecode-Trainings/lms-node-backend/src/server.js:49:20)
+    at Module._compile (node:internal/modules/cjs/loader:1831:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1971:10)
+    at Module.load (node:internal/modules/cjs/loader:1552:32)
+    at Module._load (node:internal/modules/cjs/loader:1354:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:2044:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+
+Node.js v25.8.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m

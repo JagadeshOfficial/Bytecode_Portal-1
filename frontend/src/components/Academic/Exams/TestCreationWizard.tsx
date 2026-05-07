@@ -370,10 +370,25 @@ export default function TestCreationWizard({ onClose }: { onClose: () => void })
                                                             })
                                                         });
                                                         if (res.ok) {
-                                                            const newQuestions = await res.json();
-                                                            // Filter out duplicates by text
+                                                            const resData = await res.json();
+                                                            // resData might be an array of questions
+                                                            const newQuestions = Array.isArray(resData) ? resData : [];
+                                                            
+                                                            // Filter out duplicates WITHIN the new batch first
+                                                            const uniqueInBatch: any[] = [];
+                                                            const batchTexts = new Set();
+                                                            newQuestions.forEach((q: any) => {
+                                                                const text = q.text.toLowerCase().trim();
+                                                                if (!batchTexts.has(text)) {
+                                                                    batchTexts.add(text);
+                                                                    uniqueInBatch.push(q);
+                                                                }
+                                                            });
+
+                                                            // Now filter against EXISTING questions
                                                             const existingTexts = new Set(testData.questions.map(q => q.text.toLowerCase().trim()));
-                                                            const filteredNew = newQuestions.filter((q: any) => !existingTexts.has(q.text.toLowerCase().trim()));
+                                                            const filteredNew = uniqueInBatch.filter((q: any) => !existingTexts.has(q.text.toLowerCase().trim()));
+                                                            
                                                             setTestData({...testData, questions: [...testData.questions, ...filteredNew]});
                                                             setStep(4);
                                                         }

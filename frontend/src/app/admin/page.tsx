@@ -65,18 +65,26 @@ export default function AdminDashboard() {
 
             const totalStudents = allUsers.filter(u => u.role === 'STUDENT').length;
             const totalTrainers = allUsers.filter(u => u.role === 'TRAINER' || u.role === 'TUTOR').length;
+            
+            // Dynamic placement calculation
+            const placedCount = allApps.filter(a => a.status === 'PLACED').length;
+            const inProcessCount = allApps.filter(a => a.status === 'APPLIED' || a.status === 'INTERVIEW').length;
+            const rejectedCount = allApps.filter(a => a.status === 'REJECTED').length;
+            const totalPlacementTracked = placedCount + inProcessCount + rejectedCount;
+            const placementRate = totalPlacementTracked > 0 ? ((placedCount / totalPlacementTracked) * 100).toFixed(1) : "0";
+
             const calculatedRevenue = totalStudents * 1500;
 
             setStats({
                 totalUsers: totalStudents,
                 activeCourses: allCourses.length,
-                placements: 92.8,
+                placements: Number(placementRate),
                 revenue: calculatedRevenue,
                 trainers: totalTrainers,
-                jobListings: 14,
+                jobListings: allCourses.length * 2, // Mock dynamic job calculation
             });
 
-            setApplications(allApps);
+            setApplications(allApps.slice(0, 5));
 
             const base = calculatedRevenue / 6;
             setRevenueTrend([
@@ -89,9 +97,9 @@ export default function AdminDashboard() {
             ]);
 
             setPlacementStats([
-                { name: 'Placed', value: 92, color: '#10b981' },
-                { name: 'In-Process', value: 6, color: '#f59e0b' },
-                { name: 'Not Placed', value: 2, color: '#ef4444' },
+                { name: 'Placed', value: placedCount || 1, color: '#10b981' },
+                { name: 'In-Process', value: inProcessCount || 1, color: '#f59e0b' },
+                { name: 'Not Placed', value: rejectedCount || 1, color: '#ef4444' },
             ]);
         };
 

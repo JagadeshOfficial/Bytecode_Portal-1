@@ -454,6 +454,7 @@ export default function MockInterviewEngine({ activeView, role = 'super_admin' }
                             stopRecording={stopRecording}
                             shareToBatchDrive={shareToBatchDrive}
                             onEndSession={() => setSubView('DASHBOARD')}
+                            isStudent={isStudent}
                         />
                     </motion.div>
                 )}
@@ -952,10 +953,10 @@ function LiveMonitoringView({ interviews, onJoin }: { interviews: any[], onJoin:
 
 function AIRoomView({ 
     session, isAdmin, videoRef, isMuted, isVideoOff, isScreenSharing, isRecording, recordedUrl, 
-    toggleMute, toggleVideo, toggleScreenShare, startRecording, stopRecording, shareToBatchDrive, onEndSession
+    toggleMute, toggleVideo, toggleScreenShare, startRecording, stopRecording, shareToBatchDrive, onEndSession, isStudent
 }: { 
     session: any, isAdmin: boolean, videoRef: any, isMuted: boolean, isVideoOff: boolean, isScreenSharing: boolean, isRecording: boolean, recordedUrl: string | null,
-    toggleMute: any, toggleVideo: any, toggleScreenShare: any, startRecording: any, stopRecording: any, shareToBatchDrive: any, onEndSession: any
+    toggleMute: any, toggleVideo: any, toggleScreenShare: any, startRecording: any, stopRecording: any, shareToBatchDrive: any, onEndSession: any, isStudent?: boolean
 }) {
     if (!session) {
         return (
@@ -1023,44 +1024,48 @@ function AIRoomView({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
-                    <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>EMOTION RADAR</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#666' }}>Confidence</span>
-                            <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '85%', height: '100%', background: '#10b981', borderRadius: '3px' }}/></div>
-                            <span style={{ fontWeight: 800 }}>85%</span>
+                {!isStudent && (
+                    <>
+                        <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
+                            <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>EMOTION RADAR</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666' }}>Confidence</span>
+                                    <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '85%', height: '100%', background: '#10b981', borderRadius: '3px' }}/></div>
+                                    <span style={{ fontWeight: 800 }}>85%</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666' }}>Anxiety</span>
+                                    <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '15%', height: '100%', background: '#ef4444', borderRadius: '3px' }}/></div>
+                                    <span style={{ fontWeight: 800 }}>15%</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666' }}>Engagement</span>
+                                    <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '92%', height: '100%', background: 'var(--primary)', borderRadius: '3px' }}/></div>
+                                    <span style={{ fontWeight: 800 }}>92%</span>
+                                </div>
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#666' }}>Anxiety</span>
-                            <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '15%', height: '100%', background: '#ef4444', borderRadius: '3px' }}/></div>
-                            <span style={{ fontWeight: 800 }}>15%</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#666' }}>Engagement</span>
-                            <div style={{ flex: 1, height: 6, background: '#eee', margin: '0 10px', borderRadius: '3px', alignSelf: 'center' }}><div style={{ width: '92%', height: '100%', background: 'var(--primary)', borderRadius: '3px' }}/></div>
-                            <span style={{ fontWeight: 800 }}>92%</span>
-                        </div>
-                    </div>
-                </div>
 
-                <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
-                    <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>AI ANALYSIS</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#666' }}>Confidence Score</span>
-                            <span style={{ fontWeight: 800 }}>88%</span>
+                        <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff' }}>
+                            <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>AI ANALYSIS</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666' }}>Confidence Score</span>
+                                    <span style={{ fontWeight: 800 }}>88%</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666' }}>Sentiment Index</span>
+                                    <span style={{ fontWeight: 800 }}>Positive</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666' }}>Speech Clarity</span>
+                                    <span style={{ fontWeight: 800 }}>Excellent</span>
+                                </div>
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#666' }}>Sentiment Index</span>
-                            <span style={{ fontWeight: 800 }}>Positive</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#666' }}>Speech Clarity</span>
-                            <span style={{ fontWeight: 800 }}>Excellent</span>
-                        </div>
-                    </div>
-                </div>
+                    </>
+                )}
 
                 <div style={{ ...glassStyle, padding: '1.5rem', background: '#fff', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ fontWeight: 900, marginBottom: '1rem' }}>LIVE TRANSCRIPT (HYBRID)</h4>
