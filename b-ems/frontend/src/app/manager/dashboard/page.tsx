@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
-import LeadTable from '@/components/leads/LeadTable';
+import SectionHeader from '@/components/dashboard/SectionHeader';
 import { 
   Users, 
   UserCheck, 
@@ -13,245 +13,222 @@ import {
   TrendingUp, 
   Plus, 
   Upload, 
-  ArrowRightCircle, 
-  Filter,
-  Search,
-  PieChart as PieChartIcon,
   RefreshCw,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  Calendar,
+  Layers,
+  ArrowRightCircle,
+  Search,
+  Filter,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRef } from 'react';
-
 
 const ManagerDashboard = () => {
-  const [leads, setLeads] = useState([]);
-  const [stats, setStats] = useState({
-    total: 0,
-    assigned: 0,
-    pending: 0,
-    converted: 0
-  });
-  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { token } = useAuth();
-
-  const fetchLeads = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/leads`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (res.data.success) {
-        const fetchedLeads = res.data.data;
-        setLeads(fetchedLeads);
-        
-        // Calculate stats
-        const assigned = fetchedLeads.filter((l: any) => l.assignedTo).length;
-        const pending = fetchedLeads.filter((l: any) => l.status === 'NEW').length;
-        const converted = fetchedLeads.filter((l: any) => l.status === 'CONVERTED').length;
-        
-        setStats({
-          total: fetchedLeads.length,
-          assigned,
-          pending,
-          converted
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching leads:', err);
-      showNotification('error', 'Failed to fetch leads');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const { token, user } = useAuth();
 
   useEffect(() => {
-    if (token) fetchLeads();
-  }, [token]);
-
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 5000);
-  };
-
-  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    setIsUpdating(true);
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/leads/bulk`, formData, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      if (res.data.success) {
-        showNotification('success', `Successfully uploaded ${res.data.count} leads`);
-        fetchLeads();
-      }
-    } catch (err: any) {
-      showNotification('error', err.response?.data?.error || 'Bulk upload failed');
-    } finally {
-      setIsUpdating(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const handleRoundRobin = async () => {
-    const unassignedLeads = leads.filter((l: any) => !l.assignedTo).map((l: any) => l._id);
-    if (unassignedLeads.length === 0) {
-        showNotification('error', 'No unassigned leads to distribute');
-        return;
-    }
-
-    setIsUpdating(true);
-    try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/leads/assign-round-robin`, 
-        { leadIds: unassignedLeads },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (res.data.success) {
-        showNotification('success', res.data.message);
-        fetchLeads();
-      }
-    } catch (err: any) {
-      showNotification('error', err.response?.data?.error || 'Round robin failed');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-8">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Manager Dashboard</h1>
-            <p className="text-slate-500 font-medium">Lead monitoring and team operational center</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleBulkUpload} 
-              className="hidden" 
-              accept=".csv"
-            />
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUpdating}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all text-sm disabled:opacity-50"
-            >
-              {isUpdating ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-              Bulk Upload
-            </button>
-            <button 
-              onClick={handleRoundRobin}
-              disabled={isUpdating}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl font-bold transition-all text-sm disabled:opacity-50 border border-indigo-100"
-            >
-              <RefreshCw className={isUpdating ? "animate-spin" : ""} size={18} />
-              Round Robin
-            </button>
-            <button className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all text-sm">
-              <Plus size={18} />
-              Add Lead
-            </button>
-          </div>
-        </div>
+      <div className="space-y-12 pb-20">
+        
+        {/* --- HEADER SECTION --- */}
+        <SectionHeader 
+          title="Administrative Command"
+          subtitle="Daily institute operations and team resource management."
+          icon={Briefcase}
+          badge="BRANCH MANAGER ACCESS"
+          actionLabel="Quick Batch Add"
+          onAction={() => console.log('Adding batch...')}
+        />
 
-        {/* Notification Toast */}
-        <AnimatePresence>
-          {notification && (
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`fixed top-24 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${
-                notification.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'
-              }`}
-            >
-              {notification.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-              <span className="font-bold tracking-tight">{notification.message}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* --- OPERATIONAL STATS --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <StatsCard 
-            title="Total Leads" 
-            value={stats.total} 
+            title="Total Students" 
+            value="1,240" 
             icon={Users} 
             color="indigo" 
-            trend="+12% from last week" 
+            trend="+12% this week"
+            delay={0.1}
           />
           <StatsCard 
-            title="Assigned Leads" 
-            value={stats.assigned} 
-            icon={ArrowRightCircle} 
+            title="Attendance Rate" 
+            value="94.2%" 
+            icon={CheckCircle2} 
+            color="emerald" 
+            trend="Above Target"
+            delay={0.2}
+          />
+          <StatsCard 
+            title="Active Batches" 
+            value="42" 
+            icon={Layers} 
             color="purple" 
+            trend="+3 vs last mo"
+            delay={0.3}
           />
           <StatsCard 
-            title="Pending Leads" 
-            value={stats.pending} 
+            title="Pending Inquiries" 
+            value="156" 
             icon={Clock} 
             color="amber" 
-          />
-          <StatsCard 
-            title="Converted" 
-            value={stats.converted} 
-            icon={UserCheck} 
-            color="emerald" 
+            trend="Needs Attention"
+            trendUp={false}
+            delay={0.4}
           />
         </div>
 
-        {/* Lead Management Section */}
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="text-indigo-600" size={24} />
-              <h2 className="text-xl font-black text-slate-900">Live Traffic Control</h2>
+        {/* --- TEAM & TASK MONITORING --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Active Teams Panel */}
+          <div className="lg:col-span-2 bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-10">
+               <div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Lead Distribution Control</h3>
+                  <p className="text-slate-500 font-medium text-sm">Real-time traffic flow across counsellor nodes</p>
+               </div>
+               <button className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all border border-indigo-100">
+                  <RefreshCw size={14} /> Run Round Robin
+               </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl">
-                <Search size={16} className="text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Filter by name, phone..." 
-                  className="bg-transparent border-none outline-none text-xs font-medium w-48"
-                />
-              </div>
-              <button className="p-2.5 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-slate-50 transition-all">
-                <Filter size={18} />
-              </button>
+            <div className="space-y-6">
+               {[
+                 { name: 'Counselling Team A', assigned: 45, load: 85, color: 'bg-indigo-600' },
+                 { name: 'Counselling Team B', assigned: 38, load: 70, color: 'bg-purple-500' },
+                 { name: 'Direct Admissions', assigned: 72, load: 95, color: 'bg-emerald-500' },
+                 { name: 'Scholarship Intake', assigned: 24, load: 40, color: 'bg-cyan-500' },
+               ].map((team, i) => (
+                 <div key={i} className="flex items-center gap-6 p-4 hover:bg-slate-50 rounded-2xl transition-all border border-transparent hover:border-slate-100">
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-500">
+                       {team.name[0]}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                       <div className="flex justify-between items-end">
+                          <span className="text-sm font-bold text-slate-900">{team.name}</span>
+                          <span className="text-xs font-black text-slate-500">{team.assigned} Leads</span>
+                       </div>
+                       <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <motion.div 
+                             initial={{ width: 0 }}
+                             animate={{ width: `${team.load}%` }}
+                             className={`h-full ${team.color} rounded-full`}
+                          />
+                       </div>
+                    </div>
+                    <div className="text-right">
+                       <span className={`text-[10px] font-black px-2 py-1 rounded-md ${team.load > 90 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                          {team.load > 90 ? 'OVERLOAD' : 'STABLE'}
+                       </span>
+                    </div>
+                 </div>
+               ))}
             </div>
           </div>
 
-          {loading ? (
-             <div className="p-20 flex justify-center">
-               <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          {/* Timetable / Calendar Highlights */}
+          <div className="lg:col-span-1 bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm flex flex-col">
+             <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Operational Alerts</h3>
+             <p className="text-slate-500 font-medium text-sm mb-10">Critical events for today</p>
+
+             <div className="space-y-6 flex-1">
+                {[
+                  { time: '10:00 AM', event: 'Java Fullstack Batch A Starts', type: 'batch' },
+                  { time: '01:30 PM', event: 'Team Sync: Admissions Target', type: 'meeting' },
+                  { time: '04:00 PM', event: 'Infrastructure Audit: Labs', type: 'task' },
+                  { time: '06:00 PM', event: 'Demo Session: Cloud Ops', type: 'demo' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 group">
+                     <div className="flex flex-col items-center">
+                        <div className="w-2 h-2 rounded-full bg-indigo-600 group-hover:scale-150 transition-transform shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                        <div className="w-[1px] flex-1 bg-slate-100 my-1" />
+                     </div>
+                     <div className="pb-6">
+                        <p className="text-[10px] font-black text-indigo-500 tracking-widest leading-none mb-2">{item.time}</p>
+                        <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">{item.event}</p>
+                     </div>
+                  </div>
+                ))}
              </div>
-          ) : (
-            <LeadTable leads={leads} />
-          )}
+
+             <button className="w-full mt-8 py-4 bg-slate-50 rounded-2xl text-slate-600 font-black text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2 border border-slate-100">
+                <Calendar size={18} /> Full Operations Calendar
+             </button>
+          </div>
         </div>
+
+        {/* --- STUDENT TABLE --- */}
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm">
+           <div className="p-10 border-b border-slate-50 flex items-center justify-between">
+              <div>
+                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Admission & Batch Roster</h3>
+                 <p className="text-slate-500 font-medium text-sm">Managing active students across all technological domains</p>
+              </div>
+              <div className="flex gap-4">
+                 <div className="flex items-center gap-3 bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100">
+                    <Search size={18} className="text-slate-400" />
+                    <input type="text" placeholder="Quick find student..." className="bg-transparent border-none outline-none text-sm font-bold w-48" />
+                 </div>
+                 <button className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-100">
+                    <Plus size={18} /> New Admission
+                 </button>
+              </div>
+           </div>
+
+           <div className="overflow-x-auto">
+              <table className="w-full">
+                 <thead className="bg-slate-50">
+                    <tr>
+                       {['Student ID', 'Full Name', 'Domain', 'Batch Code', 'Attendance', 'Status'].map(h => (
+                         <th key={h} className="px-10 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{h}</th>
+                       ))}
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-slate-50">
+                    {[
+                      { id: 'BT-101', name: 'Rahul Sharma', domain: 'Fullstack Dev', batch: 'FS-JULY-A', att: '98%', status: 'Active' },
+                      { id: 'BT-102', name: 'Priya Singh', domain: 'Data Science', batch: 'DS-JUNE-B', att: '85%', status: 'Active' },
+                      { id: 'BT-103', name: 'Amit Verma', domain: 'Cloud Ops', batch: 'CL-MAY-C', att: '92%', status: 'Leave' },
+                      { id: 'BT-104', name: 'Sneha Reddy', domain: 'Cyber Security', batch: 'CY-JULY-A', att: '100%', status: 'Active' },
+                      { id: 'BT-105', name: 'Vikram Das', domain: 'UI/UX Design', batch: 'UX-AUG-A', att: '76%', status: 'Warning' },
+                    ].map((row, i) => (
+                      <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                         <td className="px-10 py-6 text-sm font-mono font-bold text-slate-400">{row.id}</td>
+                         <td className="px-10 py-6 text-sm font-bold text-slate-900">{row.name}</td>
+                         <td className="px-10 py-6 text-sm font-bold text-indigo-600">{row.domain}</td>
+                         <td className="px-10 py-6 text-sm font-medium text-slate-500">{row.batch}</td>
+                         <td className="px-10 py-6">
+                            <div className="flex items-center gap-3">
+                               <div className="flex-1 w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: row.att }} />
+                               </div>
+                               <span className="text-[10px] font-black text-slate-900">{row.att}</span>
+                            </div>
+                         </td>
+                         <td className="px-10 py-6">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                               row.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 
+                               row.status === 'Leave' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'
+                            }`}>
+                               {row.status}
+                            </span>
+                         </td>
+                      </tr>
+                    ))}
+                 </tbody>
+              </table>
+           </div>
+        </div>
+
       </div>
     </DashboardLayout>
   );
