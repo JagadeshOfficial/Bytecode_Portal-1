@@ -12,6 +12,7 @@ import {
     LogOut, Award, AlertTriangle, Play
 } from 'lucide-react';
 import { fetchJsonSafe } from '@/lib/fetchJson';
+import Editor from '@monaco-editor/react';
 
 // --- STYLES ---
 const engineLayout = {
@@ -93,6 +94,21 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
     
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Auto-load drafts for coding questions
+    useEffect(() => {
+        const qs = test.questions || [];
+        const loaded: Record<string, any> = {};
+        qs.forEach((q: any) => {
+            if (q.type === 'CODE' || q.type === 'CODING') {
+                const draft = localStorage.getItem(`draft_${test.id || test._id}_${q.id}`);
+                if (draft) loaded[q.id] = draft;
+            }
+        });
+        if (Object.keys(loaded).length > 0) {
+            setAnswers(prev => ({ ...prev, ...loaded }));
+        }
+    }, [test]);
 
     // --- PROCTORING LOGIC ---
     useEffect(() => {
@@ -196,6 +212,12 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
 
     const handleAnswerSelect = (qId: string, value: any) => {
         setAnswers(prev => ({ ...prev, [qId]: value }));
+        
+        // Auto-save coding drafts
+        const q = (test.questions || questions).find((x: any) => x.id === qId);
+        if (q && (q.type === 'CODE' || q.type === 'CODING')) {
+            localStorage.setItem(`draft_${test.id || test._id}_${qId}`, value);
+        }
     };
 
     const submitTest = async () => {
@@ -462,15 +484,35 @@ export default function TestExaminationEngine({ test, candidate, onComplete, onE
                                     />
                                 )}
 
-                                {currentQuestion.type === 'CODE' && (
-                                    <div style={{ background: '#030617', borderRadius: '30px', padding: '2rem', color: '#fff', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                                        <textarea 
-                                            value={answers[currentQuestion.id] || ''}
-                                            onChange={e => handleAnswerSelect(currentQuestion.id, e.target.value)}
-                                            spellCheck={false}
-                                            style={{ width: '100%', height: '400px', background: 'transparent', border: 'none', color: '#8b5cf6', fontSize: '1.1rem', fontFamily: 'monospace', outline: 'none', resize: 'none' }}
-                                            placeholder="// Write your code here..."
-                                        />
+                                {(currentQuestion.type === 'CODE' || currentQuestion.type === 'CODING') && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', flex: 1 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#6d28d9', background: '#f5f3ff', padding: '6px 12px', borderRadius: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <Activity size={14} /> JS / TS Editor (Auto-saved)
+                                            </span>
+                                        </div>
+                                        <div style={{ background: '#1e1e1e', borderRadius: '24px', overflow: 'hidden', border: '1px solid #333', flex: 1, minHeight: '400px' }}>
+                                            <Editor
+                                                height="100%"
+                                                theme="vs-dark"
+                                                defaultLanguage="javascript"
+                                                value={answers[currentQuestion.id] || '// Write your code here...\n\n'}
+                                                onChange={(val) => handleAnswerSelect(currentQuestion.id, val)}
+                                                options={{
+                                                    minimap: { enabled: false },
+                                                    fontSize: 15,
+                                                    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                                                    lineHeight: 24,
+                                                    padding: { top: 20 },
+                                                    scrollBeyondLastLine: false,
+                                                    smoothScrolling: true,
+                                                    cursorBlinking: "smooth",
+                                                    cursorSmoothCaretAnimation: "on",
+                                                    formatOnPaste: true,
+                                                    roundedSelection: true
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </div>
