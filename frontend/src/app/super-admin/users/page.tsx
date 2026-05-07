@@ -283,7 +283,24 @@ export function UserManagementPage({ role = 'super_admin' }: { role?: DashboardR
         }
     };
 
+    const getRolePriority = (role: string) => {
+        const r = String(role || '').toUpperCase();
+        if (r === 'SUPER_ADMIN') return 1;
+        if (r === 'ADMIN') return 2;
+        if (r === 'HR') return 3;
+        if (r === 'COUNSELOR') return 4;
+        return 5;
+    };
+
     const sortedUsers = [...filteredUsers].sort((a, b) => {
+        const priorityA = getRolePriority(a.role);
+        const priorityB = getRolePriority(b.role);
+
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
+        // Secondary sort by name
         const nameA = (a.fullName || a.name || a.email || '').toLowerCase();
         const nameB = (b.fullName || b.name || b.email || '').toLowerCase();
         return nameA.localeCompare(nameB);

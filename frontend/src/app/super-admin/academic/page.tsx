@@ -15,7 +15,7 @@ import {
     ExternalLink, Share2, Lock, Globe, AlertTriangle,
     Settings, HardDrive, Filter, XCircle, MinusCircle,
     ShieldCheck, UserPlus, Send, Video, LayoutTemplate, FolderPlus, X, Paperclip, Shield,
-    Zap, Activity, Terminal, BarChart2, Monitor, Bot
+    Zap, Activity, Terminal, BarChart2, Monitor, Bot, MessageSquare
 } from 'lucide-react';
 import ExamManagement from '@/components/Academic/Exams/ExamManagement';
 import AcademicAnalytics from '@/components/Academic/AcademicAnalytics';
@@ -35,7 +35,7 @@ export function AcademicHubPage(props: { role?: DashboardRole }) {
 function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole } = {}) {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'COURSES' | 'BATCHES' | 'DETAILS' | 'EXAMS' | 'ANALYTICS'>('COURSES');
-    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'INTERVIEWS' | 'LIVE_MONITOR' | 'AI_ROOM' | 'ANALYTICS' | 'TESTS' | 'TRACKING'>('DRIVE');
+    const [batchTab, setBatchTab] = useState<'DRIVE' | 'LIVE' | 'RECORDINGS' | 'ASSIGNMENTS' | 'TRACKING'>('DRIVE');
     const [courses, setCourses] = useState<any[]>([]);
     const [batches, setBatches] = useState<any[]>([]);
     const [studentTracking, setStudentTracking] = useState<any[]>([]);
@@ -51,6 +51,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const [selectedFolder, setSelectedFolder] = useState<any>(null);
 
     // Modals
+    const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+    const [newCourse, setNewCourse] = useState({
+        title: '', duration: '', price: 0, createdAt: new Date().toISOString().split('T')[0]
+    });
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [isCreateBatchOpen, setIsCreateBatchOpen] = useState(false);
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -66,7 +70,15 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     });
 
     const [newLiveSession, setNewLiveSession] = useState({
-        title: '', startTime: '', endDate: '', durationHours: 1, durationMinutes: 0, tutorId: '', platform: 'Bytecode Meetings', meetingLink: ''
+        title: '',
+        startTime: '',
+        endDate: '',
+        durationHours: 1,
+        durationMinutes: 0,
+        tutorId: '',
+        platform: 'Bytecode Meetings',
+        meetingLink: '',
+        recordingUrl: ''
     });
     const [isEditBatchOpen, setIsEditBatchOpen] = useState(false);
     const [editBatchData, setEditBatchData] = useState<any>(null);
@@ -75,6 +87,7 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [shareTarget, setShareTarget] = useState<any>(null);
     const [shareStep, setShareStep] = useState(1); // 1: Select Course, 2: Select Batch, 3: Select Folder
+    const [shareCurrentPath, setShareCurrentPath] = useState<string[]>([]);
     const [allCourses, setAllCourses] = useState<any[]>([]);
     const [allBatchesForCourse, setAllBatchesForCourse] = useState<any[]>([]);
     const [shareSelectedCourse, setShareSelectedCourse] = useState<any>(null);
@@ -107,6 +120,11 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
     const [tutorSearchTerm, setTutorSearchTerm] = useState('');
     const [studentSearchTerm, setStudentSearchTerm] = useState('');
+    const [trackingSearchTerm, setTrackingSearchTerm] = useState('');
+    const [isStudentHistoryModalOpen, setIsStudentHistoryModalOpen] = useState(false);
+    const [selectedStudentForHistory, setSelectedStudentForHistory] = useState<any>(null);
+    const [isShareRecordingModalOpen, setIsShareRecordingModalOpen] = useState(false);
+    const [sharingRecording, setSharingRecording] = useState<any>(null);
     const [renameTarget, setRenameTarget] = useState<{ type: 'folder' | 'file', oldName: string, folderName?: string } | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [viewFileTarget, setViewFileTarget] = useState<any>(null);
@@ -448,6 +466,39 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
         }
     };
 
+    const handleCreateCourse = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        if (!token || token === 'null' || token === 'undefined') {
+            showToast("Session expired. Please login again.", "error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URLS.LMS_BACKEND}/api/courses`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newCourse)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                const courseData = saved.data || saved;
+                setCourses([...courses, { ...courseData, id: courseData.id || courseData._id }]);
+                setIsCreateCourseOpen(false);
+                setNewCourse({ title: '', duration: '', price: 0, createdAt: new Date().toISOString().split('T')[0] });
+                showToast("Course deployed to Module Drive.", "success");
+            } else {
+                const err = await res.json();
+                showToast(err.error || "Failed to create course.", "error");
+            }
+        } catch (err) {
+            showToast("Neural link failed. Network error.", "error");
+        }
+    };
+
     const handleCreateBatch = async (e: React.FormEvent) => {
         e.preventDefault();
         const selectedMentor = allUsers.find(u => u.id === newBatch.trainerId);
@@ -741,8 +792,13 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
     const handleConfirmShare = async (folderName?: string) => {
         if (!shareSelectedBatch || !shareTarget) return;
 
+        const trainer = allUsers.find(u => u.id === shareTarget.tutorId);
+        const trainerName = trainer ? (trainer.fullName || trainer.name) : 'Trainer';
+        const sessionTime = new Date(shareTarget.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(/:/g, '-');
+        const sessionDate = new Date(shareTarget.startTime).toLocaleDateString().replace(/\//g, '-');
+
         const newFile = {
-            name: `${shareTarget.batchName}_${shareTarget.title}.webm`,
+            name: `${selectedCourse?.title || 'Course'}_${selectedBatch?.batchName || 'Batch'}_${sessionDate}_${sessionTime}_${trainerName}.webm`,
             type: 'VIDEO',
             size: 'Captured Stream',
             uploadDate: new Date().toISOString(),
@@ -789,7 +845,9 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
     useEffect(() => {
         if (isStudentModalOpen && selectedBatch) {
-            setTempStudentIds(selectedBatch.studentIds || []);
+            const ids = selectedBatch.studentIds || [];
+            // Normalize IDs to strings just in case
+            setTempStudentIds(ids.map((id: any) => String(id.id || id._id || id)));
         }
     }, [isStudentModalOpen, selectedBatch]);
 
@@ -818,9 +876,13 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 body: JSON.stringify(updatePayload)
             });
             if (res.ok) {
+                const savedBatch = await res.json();
+                const normalizedBatch = { ...savedBatch, id: savedBatch.id || savedBatch._id };
+                setSelectedBatch(normalizedBatch);
                 await fetchData();
                 if (type === 'FACULTY') setIsTutorModalOpen(false);
                 else setIsStudentModalOpen(false);
+                showToast(`Batch ${type.toLowerCase()} updated successfully.`, "success");
             }
         } catch (err) { console.error("Save failed:", err); }
     };
@@ -1152,7 +1214,8 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                     setNewLiveSession({
                         title: '', startTime: '', endDate: '',
                         durationHours: 1, durationMinutes: 0,
-                        tutorId: '', platform: 'Bytecode Meetings', meetingLink: ''
+                        tutorId: '', platform: 'Bytecode Meetings', meetingLink: '',
+                        recordingUrl: ''
                     });
                 }
             } else {
@@ -1550,14 +1613,6 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 {/* --- NAVIGATION BREADCRUMBS --- */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem', fontSize: '0.9rem', fontWeight: 600 }}>
                     <span onClick={() => { setViewMode('COURSES'); setSelectedCourse(null); setSelectedBatch(null); }} style={{ cursor: 'pointer', color: viewMode === 'COURSES' ? 'var(--primary)' : 'var(--text-dim)' }}>Academic Portal</span>
-                    <ChevronRight size={14} color="var(--text-dim)" />
-                    <span onClick={() => setViewMode('ANALYTICS')} style={{ cursor: 'pointer', color: viewMode === 'ANALYTICS' ? 'var(--primary)' : 'var(--text-dim)', background: 'rgba(59, 130, 246, 0.05)', padding: '5px 12px', borderRadius: '10px' }}>
-                        <Users size={14} style={{ display: 'inline', marginRight: '5px' }} /> Mock Interviews
-                    </span>
-                    <ChevronRight size={14} color="var(--text-dim)" />
-                    <span onClick={() => setViewMode('EXAMS')} style={{ cursor: 'pointer', color: viewMode === 'EXAMS' ? 'var(--primary)' : 'var(--text-dim)', background: 'rgba(139, 92, 246, 0.05)', padding: '5px 12px', borderRadius: '10px' }}>
-                        <Zap size={14} style={{ display: 'inline', marginRight: '5px' }} /> Test Engine & AI Proctoring
-                    </span>
                     {viewMode === 'BATCHES' && (
                         <>
                             <ChevronRight size={14} color="var(--text-dim)" />
@@ -1584,10 +1639,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
-                            {viewMode === 'ANALYTICS' ? 'Mock Interviews' : viewMode === 'EXAMS' ? 'Universal Test Engine' : selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Module Drive' : viewMode === 'BATCHES' ? 'Select Batch' : 'Shared Workspace'}
+                            {selectedFolder ? selectedFolder.name : viewMode === 'COURSES' ? 'Module Drive' : viewMode === 'BATCHES' ? 'Select Batch' : 'Shared Workspace'}
                         </h1>
                         <div style={{ color: 'var(--text-dim)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            {viewMode === 'ANALYTICS' ? 'Practice and master real-world interview scenarios.' : viewMode === 'EXAMS' ? 'AI-powered proctoring and assessment platform.' : selectedFolder ? `Viewing files in this folder.` : viewMode === 'COURSES' ? 'Access your courses and modules.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
+                            {selectedFolder ? `Viewing files in this folder.` : viewMode === 'COURSES' ? 'Access your courses and modules.' : viewMode === 'BATCHES' ? `Managing batches for ${selectedCourse?.title}.` : `Manage folders and sharing for ${selectedBatch?.name || selectedBatch?.batchName}.`}
 
                             {viewMode === 'COURSES' && !selectedFolder && (
                                 <div style={{ display: 'flex', gap: '20px', marginLeft: '10px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '20px' }}>
@@ -1598,18 +1653,25 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                             )}
                         </div>
                     </div>
-                    {viewMode !== 'COURSES' && (
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            {viewMode === 'BATCHES' && isFullAdmin && (
-                                <button onClick={() => setIsCreateBatchOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
-                                    <Plus size={16} /> NEW BATCH
-                                </button>
-                            )}
-                            <button onClick={goBack} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 900, cursor: 'pointer' }}>
-                                <ChevronLeft size={18} /> GO BACK
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {viewMode === 'COURSES' && isFullAdmin && (
+                            <button onClick={() => setIsCreateCourseOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
+                                <Plus size={16} /> NEW COURSE
                             </button>
-                        </div>
-                    )}
+                        )}
+                        {viewMode !== 'COURSES' && (
+                            <>
+                                {viewMode === 'BATCHES' && isFullAdmin && (
+                                    <button onClick={() => setIsCreateBatchOpen(true)} className="btn-quantum" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
+                                        <Plus size={16} /> NEW BATCH
+                                    </button>
+                                )}
+                                <button onClick={goBack} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 900, cursor: 'pointer' }}>
+                                    <ChevronLeft size={18} /> GO BACK
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 <AnimatePresence mode="wait">
@@ -1675,13 +1737,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                     {[
                                         { id: 'DRIVE', label: 'BATCH DRIVE', icon: <Folder size={16} /> },
                                         { id: 'LIVE', label: 'LIVE CLASSES', icon: <Video size={16} /> },
+                                        { id: 'RECORDINGS', label: 'RECORDINGS', icon: <Play size={16} /> },
                                         { id: 'ASSIGNMENTS', label: 'ASSIGNMENTS', icon: <FileText size={16} /> },
-                                        { id: 'TESTS', label: 'TESTS', icon: <Shield size={16} /> },
-                                        { id: 'INTERVIEWS', label: 'INTERVIEWS', icon: <Bot size={16} /> },
                                         ...(isFullAdmin ? [
-                                             { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> },
-                                             { id: 'LIVE_MONITOR', label: 'MONITOR', icon: <Monitor size={16} /> },
-                                             { id: 'AI_ROOM', label: 'AI ROOM', icon: <Terminal size={16} /> }
+                                             { id: 'TRACKING', label: 'STUDENT TRACKING', icon: <Users size={16} /> }
                                         ] : [])
                                     ].map((tab) => (
                                         <button
@@ -1787,6 +1846,85 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                         <button onClick={() => document.getElementById('file-upload')?.click()} className="btn-quantum" style={{ marginTop: '1.5rem', padding: '10px 20px', fontSize: '0.8rem' }}><Upload size={16} /> UPLOAD FIRST FILE</button>
                                                     </div>
                                                 )}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {/* --- RECORDINGS CONTENT --- */}
+                                {batchTab === 'RECORDINGS' && (
+                                    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel" style={{ padding: '2.5rem', borderRadius: '40px', minHeight: '600px', flex: 1 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <Play color="var(--primary)" /> Session Recordings Vault
+                                            </h3>
+                                        </div>
+
+                                        {liveSessions.filter(ls => ls.status === 'COMPLETED' || ls.recordingUrl).length === 0 ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
+                                                <HardDrive size={64} style={{ marginBottom: '1.5rem', opacity: 0.1 }} />
+                                                <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', color: 'rgba(0,0,0,0.1)' }}>Vault is Empty</h2>
+                                                <p style={{ color: 'var(--text-dim)', fontSize: '1rem', textAlign: 'center', maxWidth: '400px' }}>Once live sessions are concluded and recorded, they will be archived here.</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "2rem" }}>
+                                                {liveSessions.filter(ls => ls.status === 'COMPLETED' || ls.recordingUrl).map((ls, idx) => {
+                                                    const trainer = allUsers.find(u => String(u.id || u._id) === String(ls.tutorId));
+                                                    const batchTrainer = allUsers.find(u => String(u.id || u._id) === String(selectedBatch?.trainerId));
+                                                    const trainerName = (trainer?.fullName || trainer?.name) || (batchTrainer?.fullName || batchTrainer?.name) || 'Lead Instructor';
+                                                    const sessionTime = new Date(ls.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                                    
+                                                    return (
+                                                        <motion.div
+                                                            key={idx}
+                                                            whileHover={{ y: -5, boxShadow: "0 15px 40px rgba(0,0,0,0.08)" }}
+                                                            style={{
+                                                                background: "#ffffff",
+                                                                border: "1px solid #e2e8f0",
+                                                                borderRadius: "35px",
+                                                                padding: "2.2rem",
+                                                                display: "flex",
+                                                                flexDirection: "column",
+                                                                gap: "1.2rem",
+                                                                position: "relative",
+                                                                overflow: "hidden"
+                                                            }}
+                                                        >
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                <div>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                                                                        <span style={{ padding: '6px 12px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.05)', color: 'var(--primary)', fontSize: '0.65rem', fontWeight: 900, letterSpacing: '1px' }}>{selectedCourse?.title || 'COURSE'}</span>
+                                                                        <span style={{ padding: '6px 12px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.05)', color: '#10b981', fontSize: '0.65rem', fontWeight: 900 }}>{selectedBatch?.batchName || 'BATCH'}</span>
+                                                                    </div>
+                                                                    <h4 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#1a202c" }}>{ls.title}</h4>
+                                                                </div>
+                                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                                    <button onClick={() => { setShareTarget(ls); setIsShareModalOpen(true); setShareStep(1); }} style={{ background: '#f0f9ff', border: '1px solid #e0f2fe', color: '#0ea5e9', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} title="Share to Drive"><Share2 size={16} /></button>
+                                                                    <button onClick={(e) => handleDeleteSession(ls.id || ls._id, e)} style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '10px', borderRadius: '12px', cursor: 'pointer' }} title="Delete Archive"><Trash2 size={16} /></button>
+                                                                </div>
+                                                            </div>
+
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: '#f8fafc', padding: '15px', borderRadius: '20px' }}>
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                    <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Session Time</span>
+                                                                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {sessionTime}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                    <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Instructor</span>
+                                                                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> {trainerName}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <button 
+                                                                onClick={() => window.open(ls.recordingUrl || ls.meetingLink, '_blank')}
+                                                                className="btn-quantum" 
+                                                                style={{ width: '100%', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontWeight: 900, borderRadius: '18px' }}
+                                                            >
+                                                                <Play size={18} fill="currentColor" /> WATCH RECORDING
+                                                            </button>
+                                                        </motion.div>
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </motion.div>
@@ -1903,33 +2041,35 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                 )}
 
 
-                                {/* --- ACCESS MANAGEMENT MODAL --- */}
                                 <AnimatePresence>
                                     {isAccessModalOpen && (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 110000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(20px)' }}>
-                                            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} style={{ width: '95%', maxWidth: '550px', padding: '3rem', borderRadius: '45px', background: '#ffffff', boxShadow: '0 25px 80px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                                    <div>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '3px', textTransform: 'uppercase' }}>Access Control</span>
-                                                        <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '8px', color: '#1a202c', letterSpacing: '-1px' }}>Manage Access</h2>
-                                                        <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '5px' }}>
-                                                            {accessTarget?.batchName ? "Target Batch: " : "Target Folder: "}
-                                                            <span style={{ color: 'var(--primary)', fontWeight: 800 }}>{accessTarget?.batchName || accessTarget?.name}</span>
-                                                        </p>
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 110000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}>
+                                            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} className="glass-panel" style={{ width: '95%', maxWidth: '750px', padding: 0, borderRadius: '40px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                {/* MODAL HEADER */}
+                                                <div style={{ background: 'var(--primary)', padding: '2.5rem', color: '#fff', position: 'relative' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <div>
+                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'rgba(255,255,255,0.6)', letterSpacing: '3px', textTransform: 'uppercase' }}>Access Control</span>
+                                                            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginTop: '5px', letterSpacing: '-1px' }}>Manage Access</h2>
+                                                            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', marginTop: '5px' }}>
+                                                                {accessTarget?.batchName ? "Target Batch: " : "Target Folder: "}
+                                                                <span style={{ color: '#fff', fontWeight: 800 }}>{accessTarget?.batchName || accessTarget?.name}</span>
+                                                            </p>
+                                                        </div>
+                                                        <button onClick={() => setIsAccessModalOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '12px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={24} /></button>
                                                     </div>
-                                                    <button onClick={() => setIsAccessModalOpen(false)} style={{ background: '#f7fafc', border: '1px solid #e2e8f0', color: '#1a202c', padding: '10px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={28} /></button>
                                                 </div>
 
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                                <div style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', maxHeight: '65vh', overflowY: 'auto' }}>
                                                     {/* ADD USER SECTION */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#4a5568', letterSpacing: '1px' }}>ADD STUDENT OR FACULTY</label>
+                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-dim)', letterSpacing: '1px' }}>ADD STUDENT OR FACULTY</label>
                                                         <div style={{ display: 'flex', gap: '12px' }}>
                                                             <div style={{ position: 'relative', flex: 1 }}>
-                                                                <Search size={18} style={{ position: 'absolute', left: '15px', top: '15px', color: 'var(--primary)' }} />
-                                                                <input value={accessSearchTerm} onChange={(e) => setAccessSearchTerm(e.target.value)} placeholder="Search by Email or Name..." style={{ ...inputStyle, paddingLeft: '45px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#1a202c' }} />
+                                                                <Search size={18} style={{ position: 'absolute', left: '18px', top: '15px', color: 'var(--primary)' }} />
+                                                                <input value={accessSearchTerm} onChange={(e) => setAccessSearchTerm(e.target.value)} placeholder="Search by Email or Name..." style={{ ...inputStyle, paddingLeft: '50px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px' }} />
                                                             </div>
-                                                            <select value={accessRole} onChange={(e) => setAccessRole(e.target.value)} style={{ ...inputStyle, width: '130px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1a202c', fontWeight: 700 }}>
+                                                            <select value={accessRole} onChange={(e) => setAccessRole(e.target.value)} style={{ ...inputStyle, width: '130px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: '#fff', fontWeight: 700, borderRadius: '16px' }}>
                                                                 <option value="VIEWER">VIEWER</option>
                                                                 <option value="EDITOR">EDITOR</option>
                                                                 <option value="OWNER">OWNER</option>
@@ -1937,15 +2077,15 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                         </div>
 
                                                         {accessSearchTerm && (
-                                                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid #e2e8f0', maxHeight: '180px', overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                                                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ background: 'rgba(30, 41, 59, 0.95)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '180px', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
                                                                 {allUsers.filter(u => u.email?.toLowerCase().includes(accessSearchTerm.toLowerCase()) || u.fullName?.toLowerCase().includes(accessSearchTerm.toLowerCase())).map((u: any) => (
-                                                                    <button key={u.id} onClick={() => { handleUpdateAccess(u, accessRole); setAccessSearchTerm(''); }} style={{ width: '100%', padding: '15px 20px', border: 'none', background: 'none', color: '#1a202c', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}>
+                                                                    <button key={u.id} onClick={() => { handleUpdateAccess(u, accessRole); setAccessSearchTerm(''); }} style={{ width: '100%', padding: '15px 25px', border: 'none', background: 'none', color: '#fff', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                                         <div>
                                                                             <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{u.fullName}</div>
-                                                                            <div style={{ color: '#718096', fontSize: '0.75rem' }}>{u.email}</div>
+                                                                            <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{u.email}</div>
                                                                         </div>
-                                                                        <div style={{ padding: '8px', background: 'rgba(124, 58, 237, 0.05)', borderRadius: '10px' }}>
-                                                                            <Plus size={16} color="var(--primary)" />
+                                                                        <div style={{ padding: '8px', background: 'rgba(124, 58, 237, 0.2)', borderRadius: '12px' }}>
+                                                                            <Plus size={18} color="#fff" />
                                                                         </div>
                                                                     </button>
                                                                 ))}
@@ -1955,8 +2095,8 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
                                                     {/* CURRENT MEMBERS LIST */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#4a5568', letterSpacing: '1px' }}>STUDENTS & STAFF</label>
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                        <label style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-dim)', letterSpacing: '1px' }}>STUDENTS & STAFF</label>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                                             {(() => {
                                                                 const combined = [...(accessTarget?.sharedWith || [])];
 
@@ -1977,27 +2117,27 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                                 });
 
                                                                 return combined.length > 0 ? combined.map((member: any) => (
-                                                                    <div key={member.email} style={{ background: '#f8fafc', padding: '15px 20px', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0' }}>
+                                                                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={member.email} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
                                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                                            <div style={{ width: 45, height: 45, borderRadius: '14px', background: member.isCore ? '#e2e8f0' : 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: member.isCore ? '#4a5568' : '#fff' }}>{member.name?.[0] || 'U'}</div>
+                                                                            <div style={{ width: 42, height: 42, borderRadius: '12px', background: member.isCore ? 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))' : 'linear-gradient(135deg, var(--primary), #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: '0.9rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>{member.name?.[0] || 'U'}</div>
                                                                             <div>
-                                                                                <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1a202c' }}>{member.name}</div>
-                                                                                <div style={{ fontSize: '0.8rem', color: '#718096' }}>{member.email}</div>
+                                                                                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>{member.name}</div>
+                                                                                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{member.email}</div>
                                                                             </div>
                                                                         </div>
-                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: member.role.includes('OWNER') ? '#d97706' : (member.role.includes('EDITOR') ? 'var(--primary)' : '#4a5568'), background: '#fff', padding: '6px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>{member.role}</span>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                                            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.05)', padding: '5px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', letterSpacing: '1px', textTransform: 'uppercase' }}>{member.role}</span>
                                                                             {!member.isCore ? (
-                                                                                <button onClick={() => handleRemoveAccess(member.email)} style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', padding: '8px', borderRadius: '10px' }}><Trash2 size={18} /></button>
+                                                                                <button onClick={() => handleRemoveAccess(member.email)} style={{ background: 'rgba(239, 68, 68, 0.15)', border: 'none', color: '#f87171', cursor: 'pointer', padding: '10px', borderRadius: '12px', transition: 'all 0.2s' }}><Trash2 size={16} /></button>
                                                                             ) : (
-                                                                                <button onClick={() => { setAccessSearchTerm(member.email); setAccessRole('EDITOR'); }} style={{ background: '#f0f9ff', border: '1px solid #e0f2fe', color: 'var(--primary)', cursor: 'pointer', padding: '8px', borderRadius: '10px' }} title="Promote to Editor"><Plus size={18} /></button>
+                                                                                <button onClick={() => { setAccessSearchTerm(member.email); setAccessRole('EDITOR'); }} style={{ background: 'rgba(59, 130, 246, 0.15)', border: 'none', color: '#60a5fa', cursor: 'pointer', padding: '10px', borderRadius: '12px', transition: 'all 0.2s' }} title="Promote to Editor"><Plus size={16} /></button>
                                                                             )}
                                                                         </div>
-                                                                    </div>
+                                                                    </motion.div>
                                                                 )) : (
-                                                                    <div style={{ textAlign: 'center', padding: '3rem 2rem', border: '2px dashed #e2e8f0', borderRadius: '35px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-                                                                        <Users size={40} style={{ color: '#cbd5e1' }} />
-                                                                        <p style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.9rem' }}>No individual access members added yet.</p>
+                                                                    <div style={{ textAlign: 'center', padding: '4rem 2rem', border: '2px dashed rgba(255,255,255,0.05)', borderRadius: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.01)' }}>
+                                                                        <Users size={40} style={{ color: 'rgba(255,255,255,0.1)' }} />
+                                                                        <p style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 700, fontSize: '0.9rem' }}>No individual access members added yet.</p>
                                                                     </div>
                                                                 );
                                                             })()}
@@ -2127,16 +2267,10 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                         )}
                                     </motion.div>
                                 )}
-                                {/* --- MOCK INTERVIEWS CONTENT --- */}
-                                {['INTERVIEWS', 'LIVE_MONITOR', 'AI_ROOM', 'ANALYTICS'].includes(batchTab) && (
+                                {/* --- ANALYTICS CONTENT --- */}
+                                {['ANALYTICS'].includes(batchTab) && (
                                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
-                                        <MockInterviewEngine activeView={batchTab === 'AI_ROOM' ? 'AI_ROOM' : (batchTab === 'INTERVIEWS' ? 'DASHBOARD' : batchTab)} role={currentUserRole} />
-                                    </motion.div>
-                                )}
-
-                                {batchTab === 'TESTS' && (
-                                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ flex: 1 }}>
-                                        <ExamManagement />
+                                        <MockInterviewEngine activeView="ANALYTICS" role={currentUserRole} />
                                     </motion.div>
                                 )}
 
@@ -2146,20 +2280,48 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <Users color="var(--primary)" /> STUDENT PERFORMANCE TRACKING
                                             </h3>
+                                            <div style={{ position: 'relative', width: '300px' }}>
+                                                <Search style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Search student or email..." 
+                                                    value={trackingSearchTerm}
+                                                    onChange={(e) => setTrackingSearchTerm(e.target.value)}
+                                                    style={{ ...inputStyle, paddingLeft: '45px', borderRadius: '15px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }} 
+                                                />
+                                            </div>
                                         </div>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
-                                            {studentTracking.length === 0 ? (
+                                            {studentTracking.filter(s => 
+                                                s.name?.toLowerCase().includes(trackingSearchTerm.toLowerCase()) || 
+                                                s.email?.toLowerCase().includes(trackingSearchTerm.toLowerCase())
+                                            ).length === 0 ? (
                                                 <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: 'rgba(0,0,0,0.02)', borderRadius: '32px' }}>
                                                     <Users size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-                                                    <p style={{ fontWeight: 800, color: '#666' }}>No student tracking data available yet for this batch.</p>
+                                                    <p style={{ fontWeight: 800, color: '#666' }}>No students found matching your search.</p>
                                                 </div>
                                             ) : (
-                                                studentTracking.map((student) => (
-                                                    <motion.div key={student.id} whileHover={{ y: -5 }} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '32px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+                                                studentTracking.filter(s => 
+                                                    s.name?.toLowerCase().includes(trackingSearchTerm.toLowerCase()) || 
+                                                    s.email?.toLowerCase().includes(trackingSearchTerm.toLowerCase())
+                                                ).map((student) => (
+                                                    <motion.div 
+                                                        key={student.id} 
+                                                        whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(124, 58, 237, 0.1)' }} 
+                                                        onClick={() => {
+                                                            setSelectedStudentForHistory(student);
+                                                            setIsStudentHistoryModalOpen(true);
+                                                        }}
+                                                        style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '32px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', cursor: 'pointer', transition: 'all 0.3s' }}
+                                                    >
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                            <div style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(124, 58, 237, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                <User size={30} color="var(--primary)" />
+                                                            <div style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(124, 58, 237, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                                                {student.profileImage ? (
+                                                                    <img src={student.profileImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                                                                ) : (
+                                                                    <User size={30} color="var(--primary)" />
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1a202c' }}>{student.name}</h4>
@@ -2167,12 +2329,16 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                             </div>
                                                         </div>
 
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', background: '#f8fafc', padding: '1.5rem', borderRadius: '24px' }}>
-                                                            <div>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                                            <div style={{ background: '#f8fafc', padding: '1.2rem', borderRadius: '24px' }}>
                                                                 <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Interviews</p>
                                                                 <p style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{student.interviewsAttended} <span style={{ fontSize: '0.7rem', color: '#10b981' }}>({student.avgInterviewScore}%)</span></p>
                                                             </div>
-                                                            <div>
+                                                            <div style={{ background: '#f8fafc', padding: '1.2rem', borderRadius: '24px' }}>
+                                                                <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Attendance</p>
+                                                                <p style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{student.attendanceRate}% <span style={{ fontSize: '0.7rem', color: Number(student.attendanceRate) > 75 ? '#10b981' : '#f59e0b' }}>Rate</span></p>
+                                                            </div>
+                                                            <div style={{ background: '#f8fafc', padding: '1.2rem', borderRadius: '24px', gridColumn: 'span 2' }}>
                                                                 <p style={{ fontSize: '0.65rem', fontWeight: 900, color: '#a0aec0', textTransform: 'uppercase' }}>Tests Taken</p>
                                                                 <p style={{ fontSize: '1rem', fontWeight: 900, color: '#1a202c' }}>{student.testsTaken} <span style={{ fontSize: '0.7rem', color: '#6366f1' }}>({student.avgTestScore}%)</span></p>
                                                             </div>
@@ -2180,13 +2346,14 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
                                                         <div>
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 900 }}>
-                                                                <span>Overall Mastery</span>
+                                                                <span>Overall Performance</span>
                                                                 <span style={{ color: 'var(--primary)' }}>{student.overallProgress}%</span>
                                                             </div>
                                                             <div style={{ height: '10px', background: '#edf2f7', borderRadius: '20px', overflow: 'hidden' }}>
                                                                 <motion.div initial={{ width: 0 }} animate={{ width: `${student.overallProgress}%` }} style={{ height: '100%', background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)' }} />
                                                             </div>
                                                         </div>
+                                                        <div style={{ textAlign: 'center', fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', opacity: 0.8 }}>VIEW FULL HISTORY →</div>
                                                     </motion.div>
                                                 ))
                                             )}
@@ -2281,6 +2448,209 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
 
             {/* --- CREATE BATCH MODAL --- */}
             <AnimatePresence>
+                {/* --- CREATE COURSE MODAL --- */}
+                {isCreateCourseOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '600px', padding: '3rem', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+                            <button onClick={() => setIsCreateCourseOpen(false)} style={{ position: 'absolute', top: '30px', right: '30px', background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}><X size={24} /></button>
+                            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <BookOpen size={32} color="var(--primary)" /> DEPLOY NEW COURSE
+                            </h2>
+                            <form onSubmit={handleCreateCourse} style={{ display: 'grid', gap: '20px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', marginBottom: '8px' }}>NAME OF THE COURSE</label>
+                                    <input type="text" required placeholder="e.g. Master React & Next.js" style={inputStyle} value={newCourse.title} onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })} />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', marginBottom: '8px' }}>DATE OF CREATING</label>
+                                        <input type="date" required style={inputStyle} value={newCourse.createdAt} onChange={(e) => setNewCourse({ ...newCourse, createdAt: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', marginBottom: '8px' }}>DURATION (MONTHS)</label>
+                                        <input type="text" required placeholder="e.g. 6 Months" style={inputStyle} value={newCourse.duration} onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dim)', marginBottom: '8px' }}>FEE OF THE COURSE (INR)</label>
+                                    <input type="number" required placeholder="0.00" style={inputStyle} value={newCourse.price} onChange={(e) => setNewCourse({ ...newCourse, price: Number(e.target.value) })} />
+                                </div>
+                                <button type="submit" className="btn-quantum" style={{ padding: '16px', fontWeight: 900, marginTop: '10px' }}>
+                                    INITIALIZE COURSE DEPLOYMENT
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* --- STUDENT HISTORY MODAL --- */}
+            <AnimatePresence>
+                {isStudentHistoryModalOpen && selectedStudentForHistory && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 120000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(15px)' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 50 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="glass-panel" style={{ width: '95%', maxWidth: '900px', height: '85vh', borderRadius: '40px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                            {/* MODAL HEADER */}
+                            <div style={{ background: 'var(--primary)', padding: '2.5rem', color: '#fff', position: 'relative' }}>
+                                <button onClick={() => setIsStudentHistoryModalOpen(false)} style={{ position: 'absolute', top: '30px', right: '30px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '12px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
+                                <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
+                                    <div style={{ width: 80, height: 80, borderRadius: '25px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '4px solid rgba(255,255,255,0.1)' }}>
+                                        {selectedStudentForHistory.profileImage ? (
+                                            <img src={selectedStudentForHistory.profileImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                                        ) : (
+                                            <User size={40} color="#fff" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h2 style={{ fontSize: '2.2rem', fontWeight: 900, letterSpacing: '-1px' }}>{selectedStudentForHistory.name}</h2>
+                                        <p style={{ fontSize: '1rem', opacity: 0.8, fontWeight: 700 }}>{selectedStudentForHistory.email}</p>
+                                        <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                                            <span style={{ background: 'rgba(255,255,255,0.15)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900 }}>BATCH STUDENT</span>
+                                            <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900 }}>{selectedStudentForHistory.overallProgress}% MASTERY</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* MODAL BODY */}
+                            <div style={{ flex: 1, padding: '2.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                                
+                                {/* QUICK STATS DASHBOARD */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
+                                    {[
+                                        { label: 'PRESENT', value: selectedStudentForHistory.statusSummary?.PRESENT || 0, color: '#10b981', icon: <CheckCircle size={20} /> },
+                                        { label: 'LATE', value: selectedStudentForHistory.statusSummary?.LATE || 0, color: '#f59e0b', icon: <Clock size={20} /> },
+                                        { label: 'ABSENT', value: selectedStudentForHistory.statusSummary?.ABSENT || 0, color: '#ef4444', icon: <XCircle size={20} /> },
+                                        { label: 'AVG TEST', value: `${selectedStudentForHistory.avgTestScore}%`, color: '#6366f1', icon: <Activity size={20} /> },
+                                        { label: 'AVG INTERVIEW', value: `${selectedStudentForHistory.avgInterviewScore}%`, color: '#8b5cf6', icon: <MessageSquare size={20} /> }
+                                    ].map((stat, i) => (
+                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                                            <div style={{ color: stat.color, marginBottom: '10px', display: 'flex', justifyContent: 'center' }}>{stat.icon}</div>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>{stat.value}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-dim)', marginTop: '5px', letterSpacing: '1px' }}>{stat.label}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* ATTENDANCE HISTORY */}
+                                <div>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <Calendar size={20} color="var(--primary)" /> ATTENDANCE LOG ({selectedStudentForHistory.attendanceRate}%)
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                                        {(selectedStudentForHistory.attendanceHistory || []).map((log: any, i: number) => (
+                                            <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '5px' }}>{new Date(log.date).toLocaleDateString()}</div>
+                                                <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff', marginBottom: '10px' }}>{log.topic}</div>
+                                                <span style={{ 
+                                                    fontSize: '0.65rem', 
+                                                    fontWeight: 900, 
+                                                    padding: '4px 10px', 
+                                                    borderRadius: '8px', 
+                                                    background: log.status === 'PRESENT' ? 'rgba(16, 185, 129, 0.1)' : (log.status === 'LATE' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
+                                                    color: log.status === 'PRESENT' ? '#10b981' : (log.status === 'LATE' ? '#f59e0b' : '#ef4444')
+                                                }}>
+                                                    {log.status}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* MOCK INTERVIEW LOGS */}
+                                <div>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <MessageSquare size={20} color="var(--primary)" /> MOCK INTERVIEW RECORDS
+                                    </h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {(selectedStudentForHistory.interviewHistory || []).length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                                No interview records found.
+                                            </div>
+                                        ) : (
+                                            selectedStudentForHistory.interviewHistory.map((interview: any) => (
+                                                <div key={interview.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                                        <div>
+                                                            <div style={{ fontWeight: 900, color: '#fff', fontSize: '1.1rem' }}>{interview.topic}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Interacted on {new Date(interview.date).toLocaleDateString()}</div>
+                                                        </div>
+                                                        <div style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa', padding: '8px 15px', borderRadius: '12px', fontSize: '1.2rem', fontWeight: 900 }}>
+                                                            {interview.score}%
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.03)', fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                                                        <strong style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>AI Feedback:</strong>
+                                                        {interview.feedback}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* TEST PERFORMANCE LOGS */}
+                                <div>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <Activity size={20} color="var(--primary)" /> TEST PERFORMANCE HISTORY
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '15px' }}>
+                                        {(selectedStudentForHistory.testHistory || []).length === 0 ? (
+                                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                                No test submissions recorded.
+                                            </div>
+                                        ) : (
+                                            selectedStudentForHistory.testHistory.map((test: any) => (
+                                                <div key={test.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <div style={{ fontWeight: 800, color: '#fff', fontSize: '0.95rem' }}>{test.title}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px' }}>Completed {new Date(test.date).toLocaleDateString()}</div>
+                                                    </div>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#6366f1' }}>{test.score} / {test.totalMarks}</div>
+                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 800 }}>RESULT CAPTURED</div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* ASSIGNMENT HISTORY */}
+                                <div>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <FileText size={20} color="var(--primary)" /> ASSIGNMENT SUBMISSIONS
+                                    </h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {(selectedStudentForHistory.assignmentHistory || []).length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                                No assignments submitted yet.
+                                            </div>
+                                        ) : (
+                                            selectedStudentForHistory.assignmentHistory.map((a: any) => (
+                                                <div key={a.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                                        <div style={{ padding: '12px', background: 'rgba(124, 58, 237, 0.1)', borderRadius: '14px' }}>
+                                                            <FileText size={20} color="var(--primary)" />
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: 800, color: '#fff', fontSize: '1rem' }}>{a.title}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Submitted on {new Date(a.submittedAt).toLocaleDateString()}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)' }}>{a.marks}<span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>/{a.totalMarks}</span></div>
+                                                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 10px', borderRadius: '8px' }}>{a.status}</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+
                 {isCreateBatchOpen && selectedCourse && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}>
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ width: '90%', maxWidth: '600px', padding: '3rem', borderRadius: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -2550,7 +2920,8 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                     (u.email || '').toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
                                     (u.phone || '').toLowerCase().includes(studentSearchTerm.toLowerCase())
                                 )).map((student: any, idx: number) => {
-                                    const hasAccess = tempStudentIds.includes(student.id || student._id);
+                                    const studentId = String(student.id || student._id || '');
+                                    const hasAccess = tempStudentIds.some(tid => String(tid) === studentId);
                                     return (
                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: hasAccess ? '1px solid var(--secondary)' : '1px solid transparent' }}>
                                             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -2560,7 +2931,7 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{student.email} • {student.phone || 'No phone'}</div>
                                                 </div>
                                             </div>
-                                            <button onClick={() => toggleTempStudent(student.id || student._id)} style={{ background: hasAccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', color: hasAccess ? '#10b981' : '#fff', border: hasAccess ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', padding: '8px 18px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
+                                            <button onClick={() => toggleTempStudent(studentId)} style={{ background: hasAccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)', color: hasAccess ? '#10b981' : '#fff', border: hasAccess ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', padding: '8px 18px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}>
                                                 {hasAccess ? 'UNSELECT' : 'SELECT'}
                                             </button>
                                         </div>
@@ -2695,6 +3066,11 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                 </div>
                             )}
 
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>RECORDING URL (FOR COMPLETED SESSIONS)</label>
+                                <input value={newLiveSession.recordingUrl} onChange={e => setNewLiveSession({ ...newLiveSession, recordingUrl: e.target.value })} placeholder="https://..." style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                            </div>
+
                             <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '0.5rem' }}>
                                 <strong style={{ color: 'var(--primary)' }}>Note:</strong> Using Bytecode Meetings automatically provisions a secure, 1-click launch room for this class.
                             </div>
@@ -2757,8 +3133,8 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>MEETING LINK URL</label>
-                                    <input value={editingSession.meetingLink} onChange={e => setEditingSession({ ...editingSession, meetingLink: e.target.value })} placeholder="https://..." style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
+                                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dim)' }}>RECORDING URL</label>
+                                    <input value={editingSession.recordingUrl || ''} onChange={e => setEditingSession({ ...editingSession, recordingUrl: e.target.value })} placeholder="https://..." style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none' }} />
                                 </div>
 
                                 <button type="submit" className="btn-quantum" style={{ padding: '15px', borderRadius: '12px', fontWeight: 900, marginTop: '1rem' }}>
@@ -2804,73 +3180,145 @@ function AcademicHubPageContent({ role = 'super_admin' }: { role?: DashboardRole
                                 </div>
                             )}
 
-                            {/* STEP 1: COURSES */}
-                            {shareStep === 1 && (
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxHeight: '420px', overflowY: 'auto', padding: '5px' }}>
-                                    {allCourses.length > 0 ? allCourses.map((c: any) => (
-                                        <motion.button key={c.id} whileHover={{ y: -5, background: 'rgba(139, 92, 246, 0.1)' }} onClick={() => handleSelectCourseForShare(c)} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', display: 'flex', gap: '15px', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s' }}>
-                                            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '14px' }}><BookOpen size={22} color="var(--primary)" /></div>
-                                            <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>{c.title}</span>
-                                        </motion.button>
-                                    )) : <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', opacity: 0.5 }}>Syncing courses from engine...</div>}
-                                </div>
-                            )}
+                            <AnimatePresence mode="wait">
+                                {/* STEP 1: COURSES */}
+                                {shareStep === 1 && (
+                                    <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxHeight: '420px', overflowY: 'auto', padding: '5px' }}>
+                                        {courses.length > 0 ? courses.map((c: any) => (
+                                            <motion.button key={c.id} whileHover={{ y: -5, background: 'rgba(139, 92, 246, 0.1)' }} onClick={() => handleSelectCourseForShare(c)} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', display: 'flex', gap: '15px', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s' }}>
+                                                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '14px' }}><BookOpen size={22} color="var(--primary)" /></div>
+                                                <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>{c.title}</span>
+                                            </motion.button>
+                                        )) : <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No courses available to share...</div>}
+                                    </motion.div>
+                                )}
 
-                            {/* STEP 2: BATCHES */}
-                            {shareStep === 2 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '420px', overflowY: 'auto' }}>
-                                    <button onClick={() => setShareStep(1)} style={{ marginBottom: '10px', fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <ChevronLeft size={16} /> CHANGE COURSE
-                                    </button>
-                                    {allBatchesForCourse.length > 0 ? allBatchesForCourse.map((b: any) => (
-                                        <motion.button key={b.id} whileHover={{ x: 5, background: 'rgba(16, 185, 129, 0.1)' }} onClick={() => { setShareSelectedBatch(b); setShareStep(3); }} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', cursor: 'pointer' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                                                <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '15px' }}><Layers size={22} color="#10b981" /></div>
-                                                <div>
-                                                    <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{b.batchName}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>{b.batchCode} • {b.mode}</div>
+                                {/* STEP 2: BATCHES */}
+                                {shareStep === 2 && (
+                                    <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '420px', overflowY: 'auto' }}>
+                                        <button onClick={() => setShareStep(1)} style={{ marginBottom: '10px', fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <ChevronLeft size={16} /> CHANGE COURSE
+                                        </button>
+                                        {batches.filter(b => b.courseId === shareSelectedCourse?.id).length > 0 ? batches.filter(b => b.courseId === shareSelectedCourse?.id).map((b: any) => (
+                                            <motion.button key={b.id} whileHover={{ x: 5, background: 'rgba(16, 185, 129, 0.1)' }} onClick={() => { setShareSelectedBatch(b); setShareStep(3); }} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', cursor: 'pointer' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                                                    <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '15px' }}><Layers size={22} color="#10b981" /></div>
+                                                    <div>
+                                                        <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{b.batchName}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>{b.batchCode} • {b.mode}</div>
+                                                    </div>
                                                 </div>
+                                                <ChevronRight size={20} color="rgba(255,255,255,0.2)" />
+                                            </motion.button>
+                                        )) : <p style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No active batches found for this course.</p>}
+                                    </motion.div>
+                                )}
+
+                                {/* STEP 3: FOLDERS */}
+                                {shareStep === 3 && (
+                                    <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                        <button onClick={() => setShareStep(2)} style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <ChevronLeft size={16} /> BACK TO BATCHES
+                                        </button>
+
+                                        {/* DESTINATION SECTION - BENTO STYLE */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'linear-gradient(45deg, #10b981, #34d399)', boxShadow: '0 0 15px rgba(16,185,129,0.5)' }} />
+                                                    <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#fff', letterSpacing: '2px', textTransform: 'uppercase' }}>Available Vaults</span>
+                                                </div>
+                                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800 }}>{(shareSelectedBatch.folders?.length || 0) + 1} LOCATIONS</span>
                                             </div>
-                                            <ChevronRight size={20} color="rgba(255,255,255,0.2)" />
-                                        </motion.button>
-                                    )) : <p style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No active batches found for this course.</p>}
-                                </div>
-                            )}
 
-                            {/* STEP 3: FOLDERS */}
-                            {shareStep === 3 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    <button onClick={() => setShareStep(2)} style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <ChevronLeft size={16} /> BACK TO BATCHES
-                                    </button>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.2rem' }}>
+                                                {shareSelectedBatch.folders?.map((f: any) => (
+                                                    <motion.button 
+                                                        key={f.name} 
+                                                        whileHover={{ y: -8, scale: 1.02, background: 'rgba(255,255,255,0.05)' }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        onClick={() => handleConfirmShare(f.name)} 
+                                                        style={{ padding: '1.8rem', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', color: '#fff', textAlign: 'center', cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                                                    >
+                                                        <div style={{ width: '50px', height: '50px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}><Folder size={24} color="#f59e0b" /></div>
+                                                        <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.5px' }}>{f.name}</div>
+                                                    </motion.button>
+                                                ))}
+                                                <motion.button 
+                                                    whileHover={{ y: -8, scale: 1.02, background: 'rgba(139, 92, 246, 0.12)' }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={() => handleConfirmShare('Shared Recordings')} 
+                                                    style={{ padding: '1.8rem', borderRadius: '32px', border: '1px solid rgba(139, 92, 246, 0.3)', background: 'rgba(139, 92, 246, 0.05)', color: '#fff', textAlign: 'center', cursor: 'pointer' }}
+                                                >
+                                                    <div style={{ width: '50px', height: '50px', background: 'var(--primary)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px', boxShadow: '0 8px 20px rgba(139,92,246,0.4)' }}><Play size={24} color="#fff" /></div>
+                                                    <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.5px' }}>Shared Vault</div>
+                                                </motion.button>
+                                            </div>
+                                        </div>
 
-                                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
-                                            {shareSelectedBatch.folders?.map((f: any) => (
-                                                <button key={f.name} onClick={() => handleConfirmShare(f.name)} style={{ padding: '14px', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: '#fff', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                    <Folder size={16} color="#f59e0b" /> {f.name}
-                                                </button>
-                                            ))}
-                                            <button onClick={() => handleConfirmShare('Shared Recordings')} style={{ padding: '14px', borderRadius: '18px', border: '1px solid var(--primary)', background: 'rgba(139, 92, 246, 0.1)', color: '#fff', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                <Play size={16} color="var(--primary)" /> Shared Recordings
+                                        {/* ACTION DIVIDER */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1))' }} />
+                                            <div style={{ padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px' }}>CREATE NEW CATEGORY</div>
+                                            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(270deg, transparent, rgba(255,255,255,0.1))' }} />
+                                        </div>
+
+                                        {/* QUANTUM CREATION BAR */}
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            style={{ 
+                                                background: 'rgba(255,255,255,0.03)', 
+                                                padding: '1.5rem', 
+                                                borderRadius: '35px', 
+                                                border: '1px solid rgba(255,255,255,0.06)',
+                                                display: 'flex',
+                                                gap: '12px',
+                                                alignItems: 'center',
+                                                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+                                            }}
+                                        >
+                                            <div style={{ flex: 1, position: 'relative' }}>
+                                                <FolderPlus size={24} color="var(--primary)" style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.8 }} />
+                                                <input 
+                                                    value={shareNewFolderName} 
+                                                    onChange={(e) => setShareNewFolderName(e.target.value)} 
+                                                    placeholder="Define a new distribution category..." 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        background: 'rgba(0,0,0,0.3)', 
+                                                        border: '1px solid rgba(255,255,255,0.08)', 
+                                                        borderRadius: '24px', 
+                                                        padding: '18px 20px 18px 60px', 
+                                                        color: '#fff', 
+                                                        fontSize: '1rem', 
+                                                        fontWeight: 600,
+                                                        outline: 'none',
+                                                        transition: 'all 0.3s' 
+                                                    }} 
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={() => handleConfirmShare(shareNewFolderName)} 
+                                                disabled={!shareNewFolderName} 
+                                                className="btn-quantum" 
+                                                style={{ 
+                                                    height: '60px',
+                                                    padding: '0 40px', 
+                                                    borderRadius: '24px', 
+                                                    fontWeight: 900, 
+                                                    fontSize: '0.9rem', 
+                                                    letterSpacing: '1px',
+                                                    textTransform: 'uppercase',
+                                                    boxShadow: '0 15px 30px rgba(139,92,246,0.3)' 
+                                                }}
+                                            >
+                                                DEPLOY & SHARE
                                             </button>
-                                        </div>
-
-                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', marginBottom: '1.5rem' }} />
-
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                            <label style={{ fontSize: '0.7rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>Create & Share to New Folder</label>
-                                            <div style={{ display: 'flex', gap: '12px' }}>
-                                                <input value={shareNewFolderName} onChange={(e) => setShareNewFolderName(e.target.value)} placeholder="New Folder Name..." style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '14px', color: '#fff', fontSize: '0.9rem' }} />
-                                                <button onClick={() => handleConfirmShare(shareNewFolderName)} disabled={!shareNewFolderName} className="btn-quantum" style={{ padding: '0 25px', borderRadius: '16px' }}>
-                                                    <FolderPlus size={22} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
+                                        </motion.div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     </motion.div>
                 )}
@@ -3421,9 +3869,9 @@ function DriveFolder({ folder, onClick, onShare, onRename, onDelete }: any) {
             style={{ padding: '1.5rem', borderRadius: '24px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', cursor: 'pointer', position: 'relative' }}
         >
             <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '5px' }}>
-                <button onClick={(e) => { e.stopPropagation(); onShare(folder); }} title="Share" style={{ background: 'none', border: 'none', color: 'var(--primary)', opacity: 0.9, cursor: 'pointer' }}><Share2 size={16} /></button>
-                <button onClick={(e) => { e.stopPropagation(); onRename(); }} title="Rename" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Edit2 size={16} /></button>
-                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', opacity: 0.9, cursor: 'pointer' }}><Trash2 size={16} /></button>
+                <button onClick={(e) => onShare(e)} title="Share" style={{ background: 'none', border: 'none', color: 'var(--primary)', opacity: 0.9, cursor: 'pointer' }}><Share2 size={16} /></button>
+                <button onClick={(e) => onRename(e)} title="Rename" style={{ background: 'none', border: 'none', color: 'var(--text-dim)', opacity: 0.7, cursor: 'pointer' }}><Edit2 size={16} /></button>
+                <button onClick={(e) => onDelete(e)} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', opacity: 0.9, cursor: 'pointer' }}><Trash2 size={16} /></button>
             </div>
             <div onClick={onClick}>
                 <Folder size={64} fill="rgba(124, 58, 237, 0.2)" color="var(--primary)" />

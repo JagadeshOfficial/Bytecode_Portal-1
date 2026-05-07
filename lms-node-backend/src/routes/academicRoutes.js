@@ -755,18 +755,80 @@ router.get('/batches/:batchId/student-tracking', async (req, res) => {
         
         const trackingData = await Promise.all(students.map(async (student) => {
             const sid = student._id.toString();
-            const interviews = await db.collection('mock_interviews').find({ candidateId: sid }).toArray();
-            const tests = await db.collection('test_submissions').find({ studentId: sid }).toArray();
             
+            // Get detailed interview history
+            const interviews = await db.collection('mock_interviews').find({ candidateId: sid }).sort({ createdAt: -1 }).toArray();
+            const interviewHistory = interviews.map(i => ({
+                id: i._id.toString(),
+                topic: i.topic || 'General Interview',
+                date: i.createdAt || i.date,
+                score: i.aiScore || i.score || 0,
+                feedback: i.feedback || 'No feedback provided'
+            }));
+
+            // Get detailed test history
+            const tests = await db.collection('test_submissions').find({ studentId: sid }).sort({ createdAt: -1 }).toArray();
+            const testHistory = tests.map(t => ({
+                id: t._id.toString(),
+                title: t.testTitle || 'Untitled Test',
+                date: t.submittedAt || t.createdAt,
+                score: t.score || t.marks || 0,
+                totalMarks: t.totalMarks || 100
+            }));
+            
+            // Get attendance history for this batch
+            const Attendance = require('../models/Attendance');
+            const attendanceDocs = await Attendance.find({ 
+                batch: batchId,
+                'records.student': student._id
+            }).sort({ date: -1 }).lean();
+            
+            const attendanceHistory = attendanceDocs.map(doc => {
+                const record = doc.records.find(r => String(r.student) === sid);
+                return {
+                    date: doc.date,
+                    status: record ? record.status : 'ABSENT',
+                    topic: doc.sessionTopic || 'Regular Session'
+                };
+            });
+
+            const statusSummary = {
+                PRESENT: attendanceHistory.filter(h => h.status === 'PRESENT').length,
+                LATE: attendanceHistory.filter(h => h.status === 'LATE').length,
+                ABSENT: attendanceHistory.filter(h => h.status === 'ABSENT').length
+            };
+
+            // Get assignment submissions
+            const assignments = await db.collection('assignment_submissions').find({ studentId: sid }).toArray();
+            const assignmentHistory = assignments.map(a => ({
+                id: a._id.toString(),
+                title: a.assignmentTitle || 'Untitled Assignment',
+                submittedAt: a.submittedAt || a.createdAt,
+                status: a.status || 'SUBMITTED',
+                marks: a.marks || 0,
+                totalMarks: a.totalMarks || 100
+            }));
+            
+            const attendanceRate = attendanceHistory.length > 0 
+                ? (((statusSummary.PRESENT + statusSummary.LATE) / attendanceHistory.length) * 100).toFixed(0)
+                : 0;
+
             return {
                 id: sid,
                 name: student.fullName,
                 email: student.email,
+                profileImage: student.profileImage,
                 interviewsAttended: interviews.length,
-                avgInterviewScore: interviews.length > 0 ? (interviews.reduce((acc, i) => acc + (i.aiScore || 0), 0) / interviews.length).toFixed(0) : 0,
+                avgInterviewScore: interviews.length > 0 ? (interviews.reduce((acc, i) => acc + (Number(i.aiScore) || 0), 0) / interviews.length).toFixed(0) : 0,
                 testsTaken: tests.length,
-                avgTestScore: tests.length > 0 ? (tests.reduce((acc, t) => acc + (t.score || 0), 0) / tests.length).toFixed(0) : 0,
-                overallProgress: Math.min(100, (interviews.length * 10 + tests.length * 5))
+                avgTestScore: tests.length > 0 ? (tests.reduce((acc, t) => acc + (Number(t.score) || 0), 0) / tests.length).toFixed(0) : 0,
+                attendanceRate,
+                attendanceHistory,
+                statusSummary,
+                assignmentHistory,
+                interviewHistory,
+                testHistory,
+                overallProgress: Math.min(100, (Number(attendanceRate) * 0.4 + Number(interviews.length * 5) + Number(tests.length * 5)))
             };
         }));
 
