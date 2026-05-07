@@ -1,186 +1,216 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import StatsCard from '@/components/dashboard/StatsCard';
 import SectionHeader from '@/components/dashboard/SectionHeader';
+import StatsCard from '@/components/dashboard/StatsCard';
 import { 
   Users, 
-  PhoneCall, 
+  Target, 
   Calendar, 
-  UserPlus, 
-  ArrowRight,
-  MoreHorizontal,
-  Clock,
-  Sparkles,
-  CheckCircle2,
-  Phone,
-  MessageSquare
+  PhoneCall, 
+  ArrowRight, 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle,
+  Plus,
+  Search,
+  ChevronRight,
+  MessageSquare,
+  TrendingUp,
+  Award
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const CounsellorDashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <DashboardLayout>
-      <div className="space-y-10">
+      <div className="space-y-10 pb-20">
         
         <SectionHeader 
-          title="Admissions Terminal"
-          subtitle="Manage your lead pipeline, schedule follow-ups, and track conversions."
+          title="Admissions Intelligence"
+          subtitle="Transform inquiries into enrollments with high-velocity lead management."
           icon={PhoneCall}
-          badge="SENIOR COUNSELLOR"
-          actionLabel="Add Lead"
+          badge="ADMISSIONS NODE"
+          actionLabel="New Inquiry"
         />
 
+        {/* --- PERFORMANCE SNAPSHOT --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard 
-            title="Assigned Leads" 
-            value="42" 
+            title="Total Leads" 
+            value="312" 
             icon={Users} 
             color="indigo" 
-            trend="+5 today"
-            delay={0.1}
+            trend="+18 this week"
           />
           <StatsCard 
-            title="Follow-ups" 
-            value="12" 
+            title="Conversions" 
+            value="24" 
+            icon={Award} 
+            color="emerald" 
+            trend="₹4.2L revenue"
+          />
+          <StatsCard 
+            title="Due Follow-ups" 
+            value="14" 
             icon={Calendar} 
             color="amber" 
-            trend="Due today"
-            delay={0.2}
+            trend="Needs priority"
           />
           <StatsCard 
-            title="Admissions" 
-            value="8" 
-            icon={UserPlus} 
-            color="emerald" 
-            trend="₹1.8L value"
-            delay={0.3}
-          />
-          <StatsCard 
-            title="Avg. Call Time" 
-            value="4.5m" 
-            icon={PhoneCall} 
+            title="Efficiency Score" 
+            value="94%" 
+            icon={CheckCircle2} 
             color="purple" 
-            trend="Stable"
-            delay={0.4}
+            trend="Top percentile"
           />
         </div>
 
-        {/* --- ADMISSIONS HUD --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* --- PIPELINE VISUALIZATION --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            
-           {/* Lead Pipeline */}
-           <div className="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 p-8 shadow-sm">
-              <div className="flex items-center justify-between mb-10">
-                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Active Lead Pipeline</h3>
-                 <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Live Conversion
+           {/* Active Pipeline Grid */}
+           <div className="lg:col-span-8 space-y-8">
+              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm relative overflow-hidden group">
+                 <div className="flex items-center justify-between mb-12">
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Lead Distribution</h3>
+                    <button className="text-indigo-600 font-bold text-xs flex items-center gap-1 hover:gap-2 transition-all">
+                       Full Pipeline <ChevronRight size={14} />
+                    </button>
+                 </div>
+
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {[
+                      { label: 'New Nodes', count: 124, color: 'bg-indigo-600', icon: Zap },
+                      { label: 'Follow-ups', count: 86, color: 'bg-amber-500', icon: Clock },
+                      { label: 'Demos Held', count: 42, color: 'bg-purple-600', icon: Activity },
+                      { label: 'Closed/Won', count: 60, color: 'bg-emerald-600', icon: CheckCircle2 },
+                    ].map((step, i) => (
+                      <div key={i} className="bg-slate-50/50 border border-slate-100 p-6 rounded-[2rem] hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all group/card cursor-pointer">
+                         <div className={`w-10 h-10 ${step.color} text-white rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-black/5`}>
+                            <step.icon size={20} />
+                         </div>
+                         <h4 className="text-3xl font-black text-slate-900 mb-1">{step.count}</h4>
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{step.label}</p>
+                      </div>
+                    ))}
                  </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 mb-10">
-                 {[
-                   { label: 'NEW', count: 18, color: 'bg-indigo-500' },
-                   { label: 'CONTACTED', count: 12, color: 'bg-cyan-500' },
-                   { label: 'DEMO', count: 8, color: 'bg-amber-500' },
-                   { label: 'HOT', count: 4, color: 'bg-rose-500' },
-                 ].map((step, i) => (
-                   <div key={i} className="bg-slate-50/50 rounded-2xl p-4 text-center border border-slate-100 hover:bg-white hover:shadow-xl transition-all group cursor-pointer">
-                      <p className="text-[10px] font-black text-slate-400 mb-2">{step.label}</p>
-                      <h4 className="text-2xl font-black text-slate-900">{step.count}</h4>
-                      <div className={`h-1 w-6 ${step.color} mx-auto mt-3 rounded-full opacity-30 group-hover:opacity-100 transition-opacity`} />
-                   </div>
-                 ))}
-              </div>
-
-              <div className="space-y-4">
-                 {[
-                   { name: 'Arjun Mehra', status: 'HOT', course: 'Java Fullstack', time: '10m ago' },
-                   { name: 'Sneha Kapur', status: 'DEMO', course: 'Data Science', time: '2h ago' },
-                   { name: 'Rohan Gupta', status: 'NEW', course: 'Cloud Ops', time: '4h ago' },
-                 ].map((lead, i) => (
-                   <div key={i} className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-2xl group hover:border-indigo-200 hover:shadow-lg transition-all cursor-pointer">
-                      <div className="flex items-center gap-4">
-                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                            {lead.name[0]}
-                         </div>
-                         <div>
-                            <p className="font-bold text-slate-900 text-sm">{lead.name}</p>
-                            <p className="text-[10px] text-slate-500 font-medium">{lead.course}</p>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                         <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                            lead.status === 'HOT' ? 'bg-rose-50 text-rose-600' : lead.status === 'DEMO' ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'
-                         }`}>
-                            {lead.status}
-                         </span>
-                         <button className="p-2 text-slate-300 hover:text-indigo-600 transition-colors">
-                            <ArrowRight size={18} />
-                         </button>
-                      </div>
-                   </div>
-                 ))}
-              </div>
-           </div>
-
-           {/* Follow-up Scheduler */}
-           <div className="space-y-6">
-              <div className="bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-[60px]" />
-                 <h3 className="text-xl font-black mb-2 flex items-center gap-2">
-                    <Clock size={20} className="text-indigo-400" />
-                    Due Today
-                 </h3>
-                 <p className="text-slate-400 text-xs font-medium mb-10">High priority follow-ups required</p>
-                 
-                 <div className="space-y-6">
+              {/* Recent Inquiries List */}
+              <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm">
+                 <div className="p-10 border-b border-slate-50 flex items-center justify-between">
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Active Inquiries</h3>
+                    <div className="flex gap-4">
+                       <div className="relative group">
+                          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                          <input 
+                            type="text" 
+                            placeholder="Find leads..." 
+                            className="pl-11 pr-6 py-2.5 bg-slate-50 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-100 border border-transparent focus:border-indigo-100" 
+                          />
+                       </div>
+                    </div>
+                 </div>
+                 <div className="divide-y divide-slate-50">
                     {[
-                      { name: 'Kunal Verma', time: '11:30 AM', action: 'Call' },
-                      { name: 'Riya Das', time: '02:00 PM', action: 'Demo' },
-                    ].map((task, i) => (
-                      <div key={i} className="flex items-center justify-between group/task">
-                         <div>
-                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">{task.time}</p>
-                            <p className="text-sm font-bold text-white group-hover/task:text-indigo-300 transition-colors">{task.name}</p>
+                      { name: 'Arjun Mehra', course: 'Java Fullstack', source: 'Google Ads', status: 'HOT', time: '12m ago' },
+                      { name: 'Sana Khan', course: 'Data Science', source: 'Website', status: 'NEW', time: '1h ago' },
+                      { name: 'Vikram Singh', course: 'Cloud Computing', source: 'Referral', status: 'FOLLOW_UP', time: '3h ago' },
+                      { name: 'Ananya Rao', course: 'UI/UX Design', source: 'Instagram', status: 'DEMO', time: '5h ago' },
+                    ].map((lead, i) => (
+                      <div key={i} className="px-10 py-6 flex items-center justify-between hover:bg-slate-50/50 transition-all group cursor-pointer">
+                         <div className="flex items-center gap-5">
+                            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center font-black text-indigo-600 shadow-sm border border-indigo-100/50 group-hover:scale-110 transition-transform">
+                               {lead.name[0]}
+                            </div>
+                            <div>
+                               <p className="text-sm font-black text-slate-900">{lead.name}</p>
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{lead.course} • {lead.source}</p>
+                            </div>
                          </div>
-                         <div className="flex gap-2">
-                            <button className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-indigo-500 transition-all">
-                               <Phone size={14} />
-                            </button>
+                         <div className="flex items-center gap-8">
+                            <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                               lead.status === 'HOT' ? 'bg-rose-50 text-rose-600' : 
+                               lead.status === 'NEW' ? 'bg-indigo-50 text-indigo-600' : 
+                               lead.status === 'DEMO' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600'
+                            }`}>
+                               {lead.status}
+                            </span>
+                            <div className="text-right">
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{lead.time}</p>
+                               <button className="p-2 text-slate-300 hover:text-indigo-600 transition-colors">
+                                  <ArrowRight size={18} />
+                               </button>
+                            </div>
                          </div>
                       </div>
                     ))}
                  </div>
+              </div>
+           </div>
 
-                 <button className="w-full mt-12 py-3 bg-white text-slate-900 rounded-xl font-black text-xs hover:scale-105 transition-transform shadow-xl">
-                    Launch Call Queue
+           {/* Personal Sidepanel */}
+           <div className="lg:col-span-4 space-y-8">
+              <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-125 transition-transform duration-1000">
+                    <TrendingUp size={120} />
+                 </div>
+                 <h3 className="text-xl font-black mb-8 flex items-center gap-3">
+                    <Target className="text-indigo-400" size={24} />
+                    Daily Targets
+                 </h3>
+                 <div className="space-y-8 relative z-10">
+                    {[
+                      { label: 'Follow-ups', val: '12/15', color: 'bg-indigo-500' },
+                      { label: 'Demos Booked', val: '4/5', color: 'bg-purple-500' },
+                      { label: 'Conversions', val: '2/3', color: 'bg-emerald-500' },
+                    ].map((target, i) => (
+                      <div key={i}>
+                         <div className="flex justify-between text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-3">
+                            <span>{target.label}</span>
+                            <span className="text-white">{target.val}</span>
+                         </div>
+                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                            <motion.div 
+                               initial={{ width: 0 }}
+                               animate={{ width: `${(parseInt(target.val.split('/')[0]) / parseInt(target.val.split('/')[1])) * 100}%` }}
+                               transition={{ duration: 1.5, delay: i * 0.2 }}
+                               className={`h-full ${target.color} shadow-[0_0_12px_rgba(255,255,255,0.1)]`}
+                            />
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+                 <button className="w-full mt-10 py-4 bg-white text-slate-900 rounded-2xl font-black text-xs hover:scale-[1.02] transition-transform">
+                    Unlock Performance Bonus
                  </button>
               </div>
 
-              <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm text-center">
-                 <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 relative">
-                    <Sparkles className="text-indigo-600" size={24} />
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center font-black text-[9px]">#1</div>
+              <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden group">
+                 <div className="absolute -bottom-4 -right-4 p-8 opacity-20">
+                    <MessageSquare size={100} />
                  </div>
-                 <h4 className="text-lg font-black text-slate-900 tracking-tight">Performance Streak</h4>
-                 <p className="text-slate-500 font-medium text-xs mt-2 mb-8">You are 124% above the monthly counseling average.</p>
-                 <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div 
-                       initial={{ width: 0 }}
-                       animate={{ width: '85%' }}
-                       className="h-full bg-indigo-600"
-                    />
+                 <h3 className="text-xl font-black mb-6">Upcoming Meetings</h3>
+                 <div className="space-y-6">
+                    {[
+                      { name: 'Kunal Verma', time: '11:30 AM', task: 'Fee Negotiation' },
+                      { name: 'Riya Das', time: '04:00 PM', task: 'Python Demo #4' },
+                    ].map((meeting, i) => (
+                      <div key={i} className="flex gap-4 items-start">
+                         <div className="w-1.5 h-12 bg-white/20 rounded-full" />
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">{meeting.time}</p>
+                            <p className="text-sm font-bold">{meeting.name}</p>
+                            <p className="text-[10px] font-black uppercase tracking-tighter opacity-70">{meeting.task}</p>
+                         </div>
+                      </div>
+                    ))}
                  </div>
+                 <button className="w-full mt-10 py-3.5 bg-black/20 hover:bg-black/30 border border-white/10 rounded-xl text-white font-black text-xs transition-all">
+                    Launch Scheduler
+                 </button>
               </div>
            </div>
         </div>

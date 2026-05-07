@@ -7,25 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- CORE IDENTITY & ACCESS ---
+
 model User {
   id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   fullName           String
   email              String    @unique
   password           String
   phoneNumber        String?
-  role               String?   @default("COUNSELLOR")
+  role               String?   @default("COUNSELLOR") // CEO, ADMIN, COUNSELLOR, SEO, MARKETING
   active             Boolean   @default(true)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt @default(now())
   
-  // Advanced tracking
-  lastLogin          DateTime?
-  status             String    @default("ACTIVE")
+  // Profile Details
   avatar             String?
+  designation        String?
+  departmentId       String?   @db.ObjectId
   branchId           String?   @db.ObjectId
-  branch             Branch?   @relation(fields: [branchId], references: [id])
+  salary             Float?
+  lastLogin          DateTime?
+  status             String    @default("ACTIVE") // ACTIVE, ON_LEAVE, TERMINATED
 
-  // Relations (Prisma MongoDB relations work differently)
+  // Relations
+  branch             Branch?   @relation(fields: [branchId], references: [id])
+  department         Department? @relation(fields: [departmentId], references: [id])
   leads              Lead[]    @relation("AssignedTo")
   tasksAssigned      Task[]    @relation("AssignedBy")
   tasksReceived      Task[]    @relation("AssignedTo")
@@ -34,59 +40,210 @@ model User {
   auditLogs          AuditLog[]
   sessions           LoginSession[]
   blogPosts          BlogPost[]
+  campaigns          Campaign[]
+  salaries           SalaryRecord[]
+  attendance         Attendance[]
 }
 
 model Role {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String   @unique
-  permissions Json     // Permissions matrix
+  permissions Json     // Detailed permission matrix
 }
 
 model Branch {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
+  name      String   @unique
+  location  String?
   address   String?
-  managerId String?  @db.ObjectId
   users     User[]
   leads     Lead[]
+  students  Student[]
+  batches   Batch[]
+  revenue   RevenueRecord[]
 }
 
 model Department {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  headId  String?  @db.ObjectId
+  name    String   @unique
+  users   User[]
 }
 
+// --- STUDENT & ACADEMIC MANAGEMENT ---
+
 model Student {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String    @unique
+  phone           String
+  dob             DateTime?
+  address         String?
+  qualification   String?
+  courseId        String?   @db.ObjectId
+  course          Course?   @relation(fields: [courseId], references: [id])
+  batchId         String?   @db.ObjectId
+  batch           Batch?    @relation(fields: [batchId], references: [id])
+  branchId        String?   @db.ObjectId
+  branch          Branch?   @relation(fields: [branchId], references: [id])
+  admissionDate   DateTime  @default(now())
+  status          String    @default("ACTIVE") // ACTIVE, COMPLETED, DROPPED
+  feeTotal        Float     @default(0)
+  feePaid         Float     @default(0)
+  payments        Payment[]
+  attendance      AttendanceRecord[]
+}
+
+model Course {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String    @unique
+  code        String?   @unique
+  description String?
+  duration    String?
+  fee         Float
+  syllabus    String?
+  students    Student[]
+  batches     Batch[]
+  leads       Lead[]
+}
+
+model Batch {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
-  email       String    @unique
-  phone       String
-  courseId    String?   @db.ObjectId
-  batchId     String?   @db.ObjectId
+  courseId    String    @db.ObjectId
+  course      Course    @relation(fields: [courseId], references: [id])
+  trainerId   String?   @db.ObjectId
   branchId    String?   @db.ObjectId
-  status      String    @default("ACTIVE")
-  feeTotal    Float     @default(0)
-  feePaid     Float     @default(0)
+  branch      Branch?   @relation(fields: [branchId], references: [id])
+  startTime   String?
+  endTime     String?
+  startDate   DateTime?
+  status      String    @default("ONGOING") // UPCOMING, ONGOING, COMPLETED
+  students    Student[]
 }
+
+// --- CRM & LEAD MANAGEMENT ---
 
 model Lead {
   id             String    @id @default(auto()) @map("_id") @db.ObjectId
   name           String
   phone          String
   email          String?
-  source         String?
-  status         String    @default("NEW")
+  source         String?   // Google, FB, Website, Walk-in
+  status         String    @default("NEW") // NEW, INTERESTED, FOLLOW_UP, DEMO, ADMISSION, NOT_INTERESTED
   assignedToId   String?   @db.ObjectId
   assignedTo     User?     @relation("AssignedTo", fields: [assignedToId], references: [id])
-  courseInterest String?
+  courseInterest String?   @db.ObjectId
+  course         Course?   @relation(fields: [courseInterest], references: [id])
   branchId       String?   @db.ObjectId
   branch         Branch?   @relation(fields: [branchId], references: [id])
-  notes          String?
+  notes          LeadNote[]
   followUpAt     DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt @default(now())
 }
+
+model LeadNote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  leadId    String   @db.ObjectId
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+// --- OPERATIONS & FINANCE ---
+
+model Attendance {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime @default(now())
+  checkIn   DateTime?
+  checkOut  DateTime?
+  status    String   @default("PRESENT") // PRESENT, ABSENT, LEAVE, LATE
+  ip        String?
+  location  Json?    // Lat/Long
+}
+
+model AttendanceRecord {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String   @db.ObjectId
+  student   Student  @relation(fields: [studentId], references: [id])
+  date      DateTime @default(now())
+  status    String   @default("PRESENT")
+}
+
+model Payment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId     String   @db.ObjectId
+  student       Student  @relation(fields: [studentId], references: [id])
+  amount        Float
+  method        String?  // UPI, Cash, Card, Bank
+  transactionId String?  @unique
+  date          DateTime @default(now())
+  status        String   @default("COMPLETED")
+}
+
+model RevenueRecord {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  branchId  String?  @db.ObjectId
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+  amount    Float
+  source    String   // ADMISSIONS, COURSES, OTHER
+  date      DateTime @default(now())
+}
+
+model SalaryRecord {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  month     Int
+  year      Int
+  status    String   @default("PAID") // PENDING, PAID
+  paidAt    DateTime?
+}
+
+// --- SEO & MARKETING ---
+
+model Campaign {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  source      String   // Google, Meta, Email, WhatsApp
+  budget      Float
+  spend       Float    @default(0)
+  leadsCount  Int      @default(0)
+  status      String   @default("ACTIVE")
+  startDate   DateTime
+  endDate     DateTime?
+  creatorId   String   @db.ObjectId
+  creator     User     @relation(fields: [creatorId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Keyword {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  term      String   @unique
+  ranking   Int?
+  difficulty Int?
+  volume    Int?
+  lastSync  DateTime @default(now())
+}
+
+model BlogPost {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  slug        String    @unique
+  title       String
+  bodyMd      String
+  authorId    String    @db.ObjectId
+  author      User      @relation(fields: [authorId], references: [id])
+  status      String    @default("DRAFT")
+  seoMeta     Json?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt @default(now())
+}
+
+// --- SYSTEM & UTILITIES ---
 
 model Task {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
@@ -98,7 +255,7 @@ model Task {
   assignedBy   User      @relation("AssignedBy", fields: [assignedById], references: [id])
   dueAt        DateTime?
   priority     String    @default("MEDIUM")
-  status       String    @default("TODO")
+  status       String    @default("TODO") // TODO, IN_PROGRESS, REVIEW, COMPLETED
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt @default(now())
 }
@@ -107,11 +264,11 @@ model LeaveRequest {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   userId      String    @db.ObjectId
   user        User      @relation(fields: [userId], references: [id])
-  type        String
+  type        String    // CASUAL, SICK, PL
   fromDate    DateTime
   toDate      DateTime
   reason      String?
-  status      String    @default("PENDING")
+  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED
   approvedById String?  @db.ObjectId
   createdAt   DateTime  @default(now())
 }
@@ -120,7 +277,7 @@ model Notification {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   userId    String    @db.ObjectId
   user      User      @relation(fields: [userId], references: [id])
-  type      String
+  type      String    // TASK, LEAVE, SYSTEM, ANNOUNCEMENT
   title     String
   body      String
   readAt    DateTime?
@@ -130,8 +287,8 @@ model Notification {
 
 model AuditLog {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  actorId  String   @db.ObjectId
-  actor    User     @relation(fields: [actorId], references: [id])
+  actorId  String?  @db.ObjectId
+  actor    User?    @relation(fields: [actorId], references: [id])
   action   String
   entity   String
   entityId String
@@ -150,18 +307,4 @@ model LoginSession {
   geo       String?
   startedAt DateTime @default(now())
   endedAt   DateTime?
-}
-
-model BlogPost {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  slug        String    @unique
-  title       String
-  bodyMd      String
-  authorId    String    @db.ObjectId
-  author      User      @relation(fields: [authorId], references: [id])
-  status      String    @default("DRAFT")
-  seoMeta     Json?
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt @default(now())
 }

@@ -1,127 +1,136 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import StatsCard from '@/components/dashboard/StatsCard';
 import SectionHeader from '@/components/dashboard/SectionHeader';
+import StatsCard from '@/components/dashboard/StatsCard';
 import { 
-  Users, 
   Layers, 
-  Calendar, 
-  BarChart3, 
-  Search, 
-  Plus, 
-  MoreHorizontal,
-  Clock,
-  CheckCircle2,
-  AlertCircle
+  Users, 
+  GraduationCap, 
+  CreditCard, 
+  Clock, 
+  CheckCircle2, 
+  AlertCircle,
+  MoreVertical,
+  ArrowRight,
+  Plus,
+  Calendar,
+  Activity,
+  ChevronRight,
+  TrendingUp,
+  Target
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ManagerDashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <DashboardLayout>
-      <div className="space-y-10">
+      <div className="space-y-10 pb-20">
         
         <SectionHeader 
-          title="Operations Management"
-          subtitle="Oversee branch activities, batch schedules, and team performance."
+          title="Operational Command"
+          subtitle="Real-time branch management, academic tracking, and team orchestration."
           icon={Layers}
           badge="BRANCH MANAGER"
-          actionLabel="New Batch"
+          actionLabel="Add Enrollment"
         />
 
+        {/* --- PERFORMANCE HUB --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard 
             title="Total Students" 
-            value="412" 
-            icon={Users} 
+            value="1,412" 
+            icon={GraduationCap} 
             color="indigo" 
-            trend="+12 this month"
-            delay={0.1}
+            trend="+12% growth"
           />
           <StatsCard 
             title="Active Batches" 
-            value="18" 
+            value="38" 
             icon={Layers} 
             color="purple" 
-            trend="4 ending soon"
-            delay={0.2}
+            trend="4 finishing"
           />
           <StatsCard 
-            title="Daily Attendance" 
-            value="94%" 
+            title="Attendance Avg" 
+            value="92.4%" 
             icon={CheckCircle2} 
             color="emerald" 
-            trend="Peak performance"
-            delay={0.3}
+            trend="Peak hours"
           />
           <StatsCard 
-            title="Pending Fees" 
-            value="₹2.4L" 
-            icon={BarChart3} 
-            color="rose" 
-            trend="Requires attention"
-            delay={0.4}
+            title="Revenue Goal" 
+            value="78%" 
+            icon={Target} 
+            color="amber" 
+            trend="₹2.4L to go"
           />
         </div>
 
-        {/* --- OPERATIONAL HUD --- */}
+        {/* --- OPERATIONAL GRID --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            
-           {/* Batch Status Table */}
-           <div className="lg:col-span-8 bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm">
-              <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Live Batch Monitoring</h3>
-                 <div className="flex gap-2">
-                    <button className="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors">
-                       <Search size={16} />
-                    </button>
-                    <button className="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors">
-                       <Plus size={16} />
-                    </button>
+           {/* Batch Live Monitoring */}
+           <div className="lg:col-span-8 bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm">
+              <div className="p-10 border-b border-slate-50 flex items-center justify-between">
+                 <div>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Active Batch Roadmap</h3>
+                    <p className="text-slate-500 font-medium text-sm">Real-time status of ongoing technical modules</p>
                  </div>
+                 <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-lg shadow-indigo-100 hover:scale-105 transition-all">
+                    <Plus size={16} /> New Batch Node
+                 </button>
               </div>
 
               <div className="overflow-x-auto">
                  <table className="w-full">
                     <thead className="bg-slate-50/50">
                        <tr>
-                          {['Batch Name', 'Trainer', 'Students', 'Status', 'Actions'].map((h) => (
-                            <th key={h} className="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">{h}</th>
+                          {['Batch Entity', 'Lead Trainer', 'Student Load', 'Schedule', 'Health', 'Actions'].map((h) => (
+                            <th key={h} className="px-10 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{h}</th>
                           ))}
                        </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                        {[
-                         { name: 'Java Fullstack #12', trainer: 'P. Sharma', count: 24, status: 'Active' },
-                         { name: 'Python DS #4', trainer: 'R. Verma', count: 18, status: 'Active' },
-                         { name: 'React Advanced', trainer: 'S. Gupta', count: 22, status: 'Pending' },
-                         { name: 'Cloud Ops #1', trainer: 'K. Mehra', count: 12, status: 'Closing' },
+                         { name: 'Java FS #24', trainer: 'P. Sharma', load: '24/30', schedule: '10 AM - 12 PM', health: 92, status: 'Active' },
+                         { name: 'Python AI #09', trainer: 'R. Verma', load: '18/20', schedule: '02 PM - 04 PM', health: 88, status: 'Active' },
+                         { name: 'React Node #11', trainer: 'S. Gupta', load: '12/25', schedule: '05 PM - 07 PM', health: 74, status: 'Delayed' },
+                         { name: 'Cloud Ops #04', trainer: 'K. Mehra', load: '15/15', schedule: 'Weekend Only', health: 100, status: 'Closing' },
                        ].map((batch, i) => (
-                         <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
-                            <td className="px-8 py-5 text-sm font-bold text-slate-900">{batch.name}</td>
-                            <td className="px-8 py-5 text-sm font-medium text-slate-500">{batch.trainer}</td>
-                            <td className="px-8 py-5 text-sm font-black text-slate-900">{batch.count}</td>
-                            <td className="px-8 py-5">
-                               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                 batch.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 
-                                 batch.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'
-                               }`}>
-                                  {batch.status}
-                               </span>
+                         <tr key={i} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
+                            <td className="px-10 py-6">
+                               <div className="flex flex-col">
+                                  <span className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{batch.name}</span>
+                                  <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase">ID: BTC-{100+i}</span>
+                               </div>
                             </td>
-                            <td className="px-8 py-5">
+                            <td className="px-10 py-6 text-sm font-bold text-slate-600">{batch.trainer}</td>
+                            <td className="px-10 py-6">
+                               <div className="flex flex-col gap-1.5">
+                                  <span className="text-xs font-black text-slate-900">{batch.load}</span>
+                                  <div className="h-1 w-20 bg-slate-100 rounded-full overflow-hidden">
+                                     <div className="h-full bg-indigo-500" style={{ width: `${(parseInt(batch.load)/30)*100}%` }} />
+                                  </div>
+                               </div>
+                            </td>
+                            <td className="px-10 py-6">
+                               <div className="flex items-center gap-2 text-slate-500">
+                                  <Clock size={14} />
+                                  <span className="text-[10px] font-black uppercase tracking-tight">{batch.schedule}</span>
+                               </div>
+                            </td>
+                            <td className="px-10 py-6">
+                               <div className="flex items-center gap-3">
+                                  <span className={`w-2 h-2 rounded-full ${batch.health > 80 ? 'bg-emerald-500' : batch.health > 70 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                                  <span className="text-xs font-black text-slate-900">{batch.health}%</span>
+                               </div>
+                            </td>
+                            <td className="px-10 py-6">
                                <button className="p-2 text-slate-300 hover:text-indigo-600 transition-colors">
-                                  <MoreHorizontal size={18} />
-                                </button>
+                                  <ArrowRight size={18} />
+                               </button>
                             </td>
                          </tr>
                        ))}
@@ -130,48 +139,65 @@ const ManagerDashboard = () => {
               </div>
            </div>
 
-           {/* Daily Schedule Sidepanel */}
-           <div className="lg:col-span-4 space-y-6">
-              <div className="bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <Clock size={80} />
+           {/* Branch Vital Panel */}
+           <div className="lg:col-span-4 space-y-8">
+              <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:rotate-12 transition-transform duration-700">
+                    <Activity size={100} />
                  </div>
-                 <h3 className="text-xl font-black mb-6 flex items-center gap-2">
-                    <Clock size={20} className="text-indigo-400" />
-                    Today's Roadmap
+                 <h3 className="text-xl font-black mb-8 flex items-center gap-3">
+                    <TrendingUp className="text-indigo-400" size={24} />
+                    Conversion Vitals
                  </h3>
-                 <div className="space-y-6 relative z-10">
+                 <div className="space-y-8 relative z-10">
                     {[
-                      { time: '10:00 AM', title: 'Trainer Meetup', type: 'internal' },
-                      { time: '12:30 PM', title: 'Fee Review', type: 'finance' },
-                      { time: '04:00 PM', title: 'Batch Allotment', type: 'ops' },
-                    ].map((task, i) => (
-                      <div key={i} className="flex gap-4 group/task cursor-pointer">
-                         <div className="flex flex-col items-center">
-                            <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
-                            {i < 2 && <div className="w-[1px] flex-1 bg-slate-700 my-1" />}
+                      { label: 'Lead Velocity', val: '84%', color: 'bg-indigo-500' },
+                      { label: 'Demo Success', val: '62%', color: 'bg-purple-500' },
+                      { label: 'Fee Collection', val: '91%', color: 'bg-emerald-500' },
+                    ].map((vital, i) => (
+                      <div key={i}>
+                         <div className="flex justify-between text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-3">
+                            <span>{vital.label}</span>
+                            <span className="text-white">{vital.val}</span>
                          </div>
-                         <div>
-                            <p className="text-[10px] font-black text-indigo-400 tracking-widest uppercase">{task.time}</p>
-                            <p className="text-sm font-bold text-white group-hover/task:text-indigo-300 transition-colors">{task.title}</p>
+                         <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                            <motion.div 
+                               initial={{ width: 0 }}
+                               animate={{ width: vital.val }}
+                               transition={{ duration: 1.5, delay: i * 0.2 }}
+                               className={`h-full ${vital.color} shadow-[0_0_12px_rgba(255,255,255,0.1)]`}
+                            />
                          </div>
                       </div>
                     ))}
                  </div>
-                 <button className="w-full mt-10 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-white font-black text-xs transition-all">
-                    Full Timetable
+                 <button className="w-full mt-10 py-4 bg-white text-slate-900 rounded-2xl font-black text-xs hover:scale-[1.02] transition-transform">
+                    View CRM Depth
                  </button>
               </div>
 
-              <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl">
-                 <div className="flex items-center justify-between mb-4">
-                    <AlertCircle size={24} />
-                    <span className="text-[10px] font-black bg-white/20 px-2 py-1 rounded">PRIORITY</span>
+              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm relative overflow-hidden">
+                 <h3 className="text-xl font-black text-slate-900 mb-8 tracking-tight">Today's Schedule</h3>
+                 <div className="space-y-6">
+                    {[
+                      { time: '10:00 AM', title: 'Trainer Sync-up', type: 'internal' },
+                      { time: '12:30 PM', title: 'Fee Review Call', type: 'finance' },
+                      { time: '03:00 PM', title: 'Demo: Java #24', type: 'academic' },
+                    ].map((task, i) => (
+                      <div key={i} className="flex gap-4 group cursor-pointer">
+                         <div className="flex flex-col items-center">
+                            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.3)]" />
+                            {i < 2 && <div className="w-[1.5px] flex-1 bg-slate-100 my-1" />}
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none mb-1">{task.time}</p>
+                            <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{task.title}</p>
+                         </div>
+                      </div>
+                    ))}
                  </div>
-                 <h4 className="text-lg font-black mb-2">4 Fee Dues Today</h4>
-                 <p className="text-indigo-100 text-xs font-medium mb-6">Automated reminders have been sent to students.</p>
-                 <button className="w-full py-3 bg-white text-indigo-600 rounded-xl font-black text-xs hover:bg-indigo-50 transition-colors">
-                    Manage Collection
+                 <button className="w-full mt-8 py-3 border-2 border-dashed border-slate-100 rounded-2xl text-slate-400 font-bold text-xs hover:text-indigo-600 hover:border-indigo-100 transition-all">
+                    Full Calendar Node
                  </button>
               </div>
            </div>
