@@ -22,7 +22,7 @@ export const createLead = async (req: Request, res: Response) => {
       data: {
         ...data,
         followUpAt: data.followUpAt ? new Date(data.followUpAt) : null,
-      },
+      } as any,
       include: { assignedTo: true },
     });
 
@@ -37,7 +37,7 @@ export const createLead = async (req: Request, res: Response) => {
 
 export const updateLead = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const data = leadSchema.partial().parse(req.body);
     
     const lead = await prisma.lead.update({
@@ -45,7 +45,7 @@ export const updateLead = async (req: Request, res: Response) => {
       data: {
         ...data,
         followUpAt: data.followUpAt ? new Date(data.followUpAt) : undefined,
-      },
+      } as any,
     });
 
     res.json({ success: true, data: lead });
@@ -56,7 +56,7 @@ export const updateLead = async (req: Request, res: Response) => {
 
 export const deleteLead = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     await prisma.lead.delete({ where: { id } });
     res.json({ success: true, message: 'Lead deleted' });
   } catch (error: any) {

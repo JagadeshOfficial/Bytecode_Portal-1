@@ -13,7 +13,10 @@ import {
   Filter,
   PieChart,
   Calendar,
-  ChevronRight
+  ChevronRight,
+  Target,
+  Clock,
+  Search
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 

@@ -18,7 +18,9 @@ import {
   ChevronRight,
   MessageSquare,
   TrendingUp,
-  Award
+  Award,
+  Zap,
+  Activity
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
