@@ -56,6 +56,9 @@ app.use((err, req, res, next) => {
     });
 });
 const PORT = process_1.default.env.PORT || 5001;
-server.listen(PORT, () => {
-    console.log(`Server running in ${process_1.default.env.NODE_ENV} mode on port ${PORT}`);
-});
+if (process_1.default.env.NODE_ENV !== 'production') {
+    server.listen(PORT, () => {
+        console.log(`Server running in ${process_1.default.env.NODE_ENV} mode on port ${PORT}`);
+    });
+}
+exports.default = app;
